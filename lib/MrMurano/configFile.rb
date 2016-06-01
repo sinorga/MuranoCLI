@@ -108,19 +108,27 @@ command :config do |c|
 
   c.action do |args, options|
 
-
     if args.count == 1 then
-      # TODO: For read, if no scopes, than all. Otherwise just those specified
+      options.defaults :system=>false, :user=>false, :project=>false, :specified=>false
 
-      say $cfg.get(args[0])
+      # For read, if no scopes, than all. Otherwise just those specified
+      scopes = []
+      scopes << :system if options.system
+      scopes << :user if options.user
+      scopes << :project if options.project
+      scopes << :specified if options.specified
+      scopes = [:internal, :specified, :project, :user, :system] if scopes.empty?
+
+      say $cfg.get(args[0], scopes)
     else
 
+      options.defaults :system=>false, :user=>false, :project=>true, :specified=>false
       # For write, if scope is specified, only write to that scope.
       scope = :project
-      scope = :system if options['system']
-      scope = :user if options['user']
-      scope = :project if options['project']
-      scope = :specified if options['specified']
+      scope = :system if options.system
+      scope = :user if options.user
+      scope = :project if options.project
+      scope = :specified if options.specified
 
       $cfg.set(args[0], args[1], scope)
     end
