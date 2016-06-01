@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'pathname'
 require 'inifile'
 require 'pp'
@@ -30,7 +31,7 @@ module MrMurano
       # TODO --config FILE goes here.
       @paths << ConfigFile.new(:project, findProjectFile())
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
-      @paths << ConfigFile.new(:system, Pathname.new('/etc/mrmuranorc')) # FIXME system should be located in the INSTALL location, not /etc.
+      @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,'')))
     end
 
     # Look at parent directories until HOME
@@ -94,6 +95,11 @@ module MrMurano
       get(key)
     end
 
+    # For setting internal, this-run-only values
+    def []=(key, value)
+      set(key, value, :internal)
+    end
+
   end
 end
 
@@ -108,6 +114,7 @@ command :config do |c|
 
   c.action do |args, options|
 
+    # Get and Set.
     if args.count == 1 then
       options.defaults :system=>false, :user=>false, :project=>false, :specified=>false
 
