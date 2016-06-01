@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'pathname'
 require 'inifile'
 require 'pp'
@@ -31,7 +30,7 @@ module MrMurano
       # TODO --config FILE goes here.
       @paths << ConfigFile.new(:project, findProjectFile())
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
-      @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,'')))
+      @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,''))
     end
 
     # Look at parent directories until HOME
@@ -85,7 +84,8 @@ module MrMurano
       raise "Unknown scope" if paths.empty?
       data = paths.first.data
       tomod = data[section]
-      tomod[ikey] = value
+      tomod[ikey] = value unless value.nil?
+      tomod.delete(ikey) if value.nil?
       data[section] = tomod
       data.save
     end
@@ -110,12 +110,13 @@ command :config do |c|
   c.option '--user', 'Use only the config file in $HOME'
   c.option '--project', 'Use only the config file in the project'
   c.option '--specified', 'Use only the config file from the --config option.'
+  c.option '--unset', 'Remove key from config file.'
 
 
   c.action do |args, options|
 
     # Get and Set.
-    if args.count == 1 then
+    if args.count == 1 and not options.unset then
       options.defaults :system=>false, :user=>false, :project=>false, :specified=>false
 
       # For read, if no scopes, than all. Otherwise just those specified
@@ -137,6 +138,7 @@ command :config do |c|
       scope = :project if options.project
       scope = :specified if options.specified
 
+      args[1] = nil if options.unset
       $cfg.set(args[0], args[1], scope)
     end
   end
