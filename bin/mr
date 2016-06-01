@@ -19,7 +19,6 @@ global_option '--skip-plugins', %{Don't load plugins. Good for when one goes bad
 
 $cfg = MrMurano::Config.new
 $cfg.load
-pp $cfg
 
 # Basic command support is:
 # - read/write config file in [Project, User, System] (all are optional)

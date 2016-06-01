@@ -26,6 +26,8 @@ module MrMurano
 
     def initialize
       @paths = []
+      @paths << ConfigFile.new(:internal, nil, IniFile.new())
+      # TODO --config FILE goes here.
       @paths << ConfigFile.new(:project, findProjectFile())
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       @paths << ConfigFile.new(:system, Pathname.new('/etc/mrmuranorc')) # FIXME system should be located in the INSTALL location, not /etc.
@@ -56,9 +58,40 @@ module MrMurano
     end
 
     # key is <section>.<key>
-    def [](key)
+    def get(key, scope=[:internal, :specified, :project, :user, :system])
+      scope = [scope] unless scope.kind_of? Array
+      paths = @paths.select{|p| scope.include? p.kind}
+
       section, ikey = key.split('.')
-      # TODO search each cfg file in turn to find value
+      paths.each do |path|
+        if path.data.has_section?(section) then
+          sec = path.data[section]
+          return sec if ikey.nil?
+          if sec.has_key?(ikey) then
+            return sec[ikey]
+          end
+        end
+      end
+      return nil
+    end
+
+    def set(key, value, scope=:project)
+      section, ikey = key.split('.')
+      raise "Missing section" if section.nil?
+      raise "Missing key" if ikey.nil?
+
+      paths = @paths.select{|p| scope == p.kind}
+      raise "Unknown scope" if paths.empty?
+      data = paths.first.data
+      tomod = data[section]
+      tomod[ikey] = value
+      data[section] = tomod
+      data.save
+    end
+
+    # key is <section>.<key>
+    def [](key)
+      get(key)
     end
 
   end
@@ -67,14 +100,30 @@ end
 command :config do |c|
   c.syntax = %{mr config [options] <key> [<new value>]}
   c.summary = %{}
-  c.option '--user', 'Use the config file in $HOME'
-  c.option '--system', 'Use the config file in ...'
-  c.option '--project', 'Use the config file in ...'
-  c.option '--specified', 'Use the config file from the --config option.'
+  c.option '--system', 'Use only the system config file'
+  c.option '--user', 'Use only the config file in $HOME'
+  c.option '--project', 'Use only the config file in the project'
+  c.option '--specified', 'Use only the config file from the --config option.'
 
 
   c.action do |args, options|
-    
+
+
+    if args.count == 1 then
+      # TODO: For read, if no scopes, than all. Otherwise just those specified
+
+      say $cfg.get(args[0])
+    else
+
+      # For write, if scope is specified, only write to that scope.
+      scope = :project
+      scope = :system if options['system']
+      scope = :user if options['user']
+      scope = :project if options['project']
+      scope = :specified if options['specified']
+
+      $cfg.set(args[0], args[1], scope)
+    end
   end
 
 end
