@@ -35,9 +35,12 @@ pgds = [
 pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.has_key? 'MR_MURANO_PLUGIN_DIR'
 pgds.each do |path|
   next unless path.exist?
-  path.each_child(false) do |plugin|
+  path.each_child do |plugin|
+    next if plugin.directory?
+    next unless plugin.readable?
+    next if plugin.basename.fnmatch('.*') # don't read anything starting with .
     begin
-      require plugin
+      require plugin.to_s
     rescue Exception => e
       $stderr.puts "Failed to load plugin at #{plugin} because #{e}"
     end
