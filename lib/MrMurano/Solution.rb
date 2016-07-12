@@ -129,12 +129,14 @@ module MrMurano
     ##
     # Delete a file
     def remove(path)
+      # TODO test
       delete('/'+path)
     end
 
     ##
     # Upload a file
     def upload(path, localfile)
+      # TODO finish and test this
       # mime=`file -I -b #{file}`
       # mime='application/octect' if mime.nil?
       uri = endPoint('upload/' + path)
@@ -178,7 +180,6 @@ module MrMurano
 
   end
 
-
   # …/endpoint
   class Endpoint < SolutionBase
     def initialize
@@ -205,8 +206,28 @@ module MrMurano
     end
   end
 
+  # …/library
+  # …/eventhandler
+
+  # How do we enable product.id to flow into the eventhandler?
 end
 
+#
+# I think what I want for top level commands is a 
+# - sync --up   : Make servers like my working dir
+# - sync --down : Make working dir like servers
+#   --no-delete : Don't delete things at destination
+#   --no-create : Don't create things at destination
+#   --no-update : Don't update things at destination
+# 
+# And then various specific commands.
+# fe: mr file here there to upload a single file
+#     mr file --pull there here
+#
+# or
+#   mr pull --file here there
+#   mr push --file here there
+#   mr pull --[file,user,role,endpoint,…]
 command :solution do |c|
   c.syntax = %{mr solution ...}
 
