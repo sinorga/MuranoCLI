@@ -9,7 +9,6 @@ require 'pp'
 program :version, MrMurano::VERSION
 program :description, %{nop}
 
-
 global_option '--verbose', 'Be chatty'
 global_option '-n', '--dry', %{Don't run actions that make changes}
 global_option '--skip-plugins', %{Don't load plugins. Good for when one goes bad.}
@@ -33,6 +32,7 @@ global_option('--solutionid ID', %{The solution ID to use}) {|val|
 
 $cfg = MrMurano::Config.new
 $cfg.load
+say "Loaded"
 
 # Basic command support is:
 # - read/write config file in [Project, User, System] (all are optional)
@@ -46,6 +46,7 @@ pgds = [
   Pathname.new(Dir.home) + '.mrmurano' + 'plugins'
 ]
 # TODO: add plugin dirs from configs
+# XXX this is run before the command line options are paresed.
 pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.has_key? 'MR_MURANO_PLUGIN_DIR'
 pgds.each do |path|
   next unless path.exist?

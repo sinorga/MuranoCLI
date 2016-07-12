@@ -212,9 +212,25 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::File.new
-    say sol.fetch('')
+    sol = MrMurano::User.new
+    say sol.fetch('1')
 
+  end
+end
+
+command :file do |c|
+  c.syntax = %{mr file ……}
+  c.option '--pullall DIR', 'Download all static content to directory'
+
+  c.action do |args, options|
+
+
+    if options.pullall then
+      sol = MrMurano::File.new
+      all = sol.list
+      
+
+    end
   end
 end
 
