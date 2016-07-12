@@ -80,6 +80,15 @@ module MrMurano
       return nil
     end
 
+    def dump()
+      # have a fake, merge all into it, then dump it.
+      base = IniFile.new()
+      @paths.reverse.each do |ini|
+        base.merge! ini.data
+      end
+      base.to_s
+    end
+
     def set(key, value, scope=:project)
       section, ikey = key.split('.')
       raise "Missing section" if section.nil?
@@ -87,12 +96,13 @@ module MrMurano
 
       paths = @paths.select{|p| scope == p.kind}
       raise "Unknown scope" if paths.empty?
-      data = paths.first.data
+      cfg = paths.first
+      data = cfg.data
       tomod = data[section]
       tomod[ikey] = value unless value.nil?
       tomod.delete(ikey) if value.nil?
       data[section] = tomod
-      data.save
+      cfg.write
     end
 
     # key is <section>.<key>
@@ -116,12 +126,15 @@ command :config do |c|
   c.option '--project', 'Use only the config file in the project'
   c.option '--specified', 'Use only the config file from the --config option.'
   c.option '--unset', 'Remove key from config file.'
-
+  c.option '--dump', 'Dump the current combined view of the config'
 
   c.action do |args, options|
 
-    # Get and Set.
-    if args.count == 1 and not options.unset then
+    if options.dump then
+      say $cfg.dump()
+    elsif args.count == 0 then
+      say_error "Need a config key"
+    elsif args.count == 1 and not options.unset then
       options.defaults :system=>false, :user=>false, :project=>false, :specified=>false
 
       # For read, if no scopes, than all. Otherwise just those specified
@@ -133,7 +146,7 @@ command :config do |c|
       scopes = [:internal, :specified, :project, :user, :system] if scopes.empty?
 
       say $cfg.get(args[0], scopes)
-    else
+    else 
 
       options.defaults :system=>false, :user=>false, :project=>true, :specified=>false
       # For write, if scope is specified, only write to that scope.
