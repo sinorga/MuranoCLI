@@ -11,9 +11,12 @@ program :description, %{nop}
 
 global_option '--verbose', 'Be chatty'
 global_option '-n', '--dry', %{Don't run actions that make changes}
-global_option '-c', '--config FILE', %{Load additional configuration file}
 global_option '--skip-plugins', %{Don't load plugins. Good for when one goes bad.}
 
+global_option('-c', '--config FILE', %{Load additional configuration file}) {|file|
+  # this is called after all of the top level code in this file.
+  $cfg.load_specific(file)
+}
 # TODO: changing.
 #default_command :help
 

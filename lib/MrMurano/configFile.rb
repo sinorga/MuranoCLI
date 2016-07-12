@@ -27,7 +27,7 @@ module MrMurano
     def initialize
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
-      # TODO --config FILE goes here.
+      # :specified --config FILE goes here. (see load_specific)
       @paths << ConfigFile.new(:project, findProjectFile())
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,''))
@@ -55,6 +55,11 @@ module MrMurano
     def load()
       # - read/write config file in [Project, User, System] (all are optional)
       @paths.each { |cfg| cfg.load }
+    end
+
+    def load_specific(file)
+      spc = ConfigFile.new(:specified, Pathname.new(file))
+      @paths.insert(1, spc)
     end
 
     # key is <section>.<key>
