@@ -129,16 +129,7 @@ module MrMurano
     ##
     # Delete a file
     def remove(path)
-      delete('/'+path) do |request, http|
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-          busy = JSON.parse(response.body)
-          return busy
-        else
-          raise response
-        end
-      end
+      delete('/'+path)
     end
 
     ##
@@ -155,7 +146,38 @@ module MrMurano
   end
 
   # …/role
+  class Role < SolutionBase
+    def initialize
+      super
+      @uriparts << 'role'
+    end
+
+    def list()
+      get()
+    end
+
+    def fetch(id)
+      get('/' + id.to_s)
+    end
+  end
+
   # …/user
+  class User < SolutionBase
+    def initialize
+      super
+      @uriparts << 'user'
+    end
+
+    def list()
+      get()
+    end
+
+    def fetch(id)
+      get('/' + id.to_s)
+    end
+
+  end
+
 
   # …/endpoint
   class Endpoint < SolutionBase
@@ -179,7 +201,7 @@ module MrMurano
     ##
     # Delete an endpoint
     def remove(id)
-      delete('/'+id)
+      delete('/' + id.to_s)
     end
   end
 
