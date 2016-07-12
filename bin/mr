@@ -9,6 +9,7 @@ require 'pp'
 program :version, MrMurano::VERSION
 program :description, %{nop}
 
+
 global_option '--verbose', 'Be chatty'
 global_option '-n', '--dry', %{Don't run actions that make changes}
 global_option '--skip-plugins', %{Don't load plugins. Good for when one goes bad.}
@@ -17,6 +18,16 @@ global_option('-c', '--config FILE', %{Load additional configuration file}) {|fi
   # this is called after all of the top level code in this file.
   $cfg.load_specific(file)
 }
+global_option('--host HOST', %{Use a different host. (for switching to -dev or -staging)}) {|val|
+  $cfg['net.host'] = val
+}
+global_option('--productid ID', %{The product ID to use}) {|val|
+  $cfg['product.id'] = val
+}
+global_option('--solutionid ID', %{The solution ID to use}) {|val|
+  $cfg['solution.id'] = val
+}
+
 # TODO: changing.
 #default_command :help
 
