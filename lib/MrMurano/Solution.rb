@@ -55,9 +55,11 @@ module MrMurano
       workit(Net::HTTP::Get.new(uri), &block) 
     end
 
-    def post(path='', &block)
+    def post(path='', body={}, &block)
       uri = endPoint(path)
-      workit(Net::HTTP::Post.new(uri), &block)
+      req = Net::HTTP::Post.new(uri)
+      req.body = JSON.generate(body)
+      workit(req, &block)
     end
 
     def put(path='', &block)
