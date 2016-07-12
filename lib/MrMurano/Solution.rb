@@ -105,20 +105,21 @@ module MrMurano
     # Get one item of the static content.
     def fetch(path, &block)
       get('/'+path) do |request, http|
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-          #if block_given? then
-          #  response.read_body &block
-          #else
-            say_error "Kl"
-            response.read_body do |chunk|
-              $stdout.write chunk
+        http.request(request) do |resp|
+          case resp
+          when Net::HTTPSuccess
+            if block_given? then
+              resp.read_body &block
+            else
+              resp.read_body do |chunk|
+                $stdout.write chunk
+              end
             end
-          #end
-        else
-          raise response
+          else
+            raise resp
+          end
         end
+        nil
       end
     end
 
