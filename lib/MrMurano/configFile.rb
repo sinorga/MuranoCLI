@@ -7,6 +7,7 @@ module MrMurano
     ConfigFile = Struct.new(:kind, :path, :data) do
       def load()
         return if kind == :internal
+        return if kind == :defaults
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
         self[:data].restore
@@ -14,6 +15,7 @@ module MrMurano
 
       def write()
         return if kind == :internal
+        return if kind == :defaults
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
         self[:data].save
@@ -31,6 +33,11 @@ module MrMurano
       @paths << ConfigFile.new(:project, findProjectFile())
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,''))
+      @paths << ConfigFile.new(:defaults, nil, IniFile.new())
+
+
+      self.set('net.host', 'bizapi.hosted.exosite.io', :defaults)
+      # TODO: other defaults?
     end
 
     # Look at parent directories until HOME
@@ -63,7 +70,7 @@ module MrMurano
     end
 
     # key is <section>.<key>
-    def get(key, scope=[:internal, :specified, :project, :user, :system])
+    def get(key, scope=[:internal, :specified, :project, :user, :system, :defaults])
       scope = [scope] unless scope.kind_of? Array
       paths = @paths.select{|p| scope.include? p.kind}
 
@@ -143,7 +150,7 @@ command :config do |c|
       scopes << :user if options.user
       scopes << :project if options.project
       scopes << :specified if options.specified
-      scopes = [:internal, :specified, :project, :user, :system] if scopes.empty?
+      scopes = [:internal, :specified, :project, :user, :system, :defaults] if scopes.empty?
 
       say $cfg.get(args[0], scopes)
     else 
