@@ -170,9 +170,17 @@ module MrMurano
       get()
     end
 
-    # create
-    # delete
-    #
+    ##
+    # Create endpoint
+    def create(method, path, script)
+      post('', {:method=>method, :path=>path, :script=>script})
+    end
+
+    ##
+    # Delete an endpoint
+    def remove(id)
+      delete('/'+id)
+    end
   end
 
 end
