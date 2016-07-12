@@ -1,5 +1,6 @@
 require 'uri'
 require 'net/http'
+require 'net/http/post/multipart'
 require 'json'
 require 'date'
 require 'pp'
@@ -136,6 +137,17 @@ module MrMurano
           raise response
         end
       end
+    end
+
+    ##
+    # Upload a file
+    def upload(path, localfile)
+      # mime=`file -I -b #{file}`
+      # mime='application/octect' if mime.nil?
+      uri = endPoint('upload/' + path)
+      upper = UploadIO.new(File.new(localfile), type, name)
+			req = Net::HTTP::Post::Multipart.new(uri, 'file'=> upper )
+      workit(req)
     end
 
   end
