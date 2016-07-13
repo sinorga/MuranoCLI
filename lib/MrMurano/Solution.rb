@@ -293,6 +293,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'library'
+      @itemkey = :alias
     end
 
     def mkalias(name)
@@ -300,11 +301,12 @@ module MrMurano
     end
 
     def list
-      get()
+      ret = get()
+      ret['items']
     end
 
     def fetch(name)
-      get(mkalias(name))
+      get('/'+name)
     end
 
     # ??? remove
@@ -330,6 +332,10 @@ module MrMurano
         :script => script
       }
       put(mkalias(name), pst)
+    end
+
+    def tolocalname(item, key)
+      "#{item['name']}.lua"
     end
   end
 
@@ -373,6 +379,7 @@ command :pull do |c|
 
   c.option '--files', 'Pull static files down'
   c.option '--endpoints', 'Pull endpoints down'
+  c.option '--modules', 'Pull modules down'
 
   c.action do |args, options|
 
@@ -385,6 +392,11 @@ command :pull do |c|
     if options.endpoints then
       sol = MrMurano::Endpoint.new
       sol.pull( $cfg['location.base'] + $cfg['location.endpoints'], options.overwrite )
+    end
+
+    if options.modules then
+      sol = MrMurano::Library.new
+      sol.pull( $cfg['location.base'] + $cfg['location.modules'], options.overwrite )
     end
 
   end
