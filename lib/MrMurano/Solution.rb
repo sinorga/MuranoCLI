@@ -259,6 +259,26 @@ module MrMurano
     # delete
     # create
     # update?
+
+    def pull(into, overwrite=false)
+      into = Pathname.new(into) unless into.kind_of? Pathname
+      #into.mkdir unless into.exist?
+      raise "Not a file: #{into.to_s}" if into.exist? and not into.file?
+      key = @itemkey.to_s
+
+      there = list()
+
+      if not into.exist? or overwrite then
+        verbose "Pulling users into #{into.to_s}"
+        if not $cfg['tool.dry'] then
+          into.open('wb') do |outio|
+            outio.write there.to_yaml
+          end
+        end
+      else
+          verbose "Skipping users because #{into.to_s} exists"
+      end
+    end
   end
 
   # …/endpoint
@@ -403,6 +423,7 @@ command :pull do |c|
   c.option '--endpoints', 'Pull endpoints down'
   c.option '--modules', 'Pull modules down'
   c.option '--roles', 'Pull roles down'
+  c.option '--users', 'Pull users down'
 
   c.action do |args, options|
 
@@ -425,6 +446,11 @@ command :pull do |c|
     if options.roles then
       sol = MrMurano::Role.new
       sol.pull( $cfg['location.base'] + $cfg['location.roles'], options.overwrite )
+    end
+
+    if options.users then
+      sol = MrMurano::User.new
+      sol.pull( $cfg['location.base'] + $cfg['location.users'], options.overwrite )
     end
 
   end
