@@ -45,6 +45,7 @@ module MrMurano
         when Net::HTTPSuccess
           return JSON.parse(response.body)
         else
+          say_error "got #{response} from #{request} #{request.uri.to_s}"
           raise response
         end
       end
