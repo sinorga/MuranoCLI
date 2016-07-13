@@ -220,6 +220,46 @@ module MrMurano
   end
 
   # …/library
+  class Library < SolutionBase
+    def initialize
+      super
+      @uriparts << 'library'
+    end
+
+    def mkalias(name)
+      "/#{$cfg['solution.id']}_#{name}"
+    end
+
+    def list
+      get()
+    end
+
+    def fetch(name)
+      get(mkalias(name))
+    end
+
+    # ??? remove
+
+    def create(name, script)
+      pst = {
+        :name => name,
+        :solution_id => $cfg['solution.id'],
+        :script => script
+      }
+      post(mkalias(name), pst)
+    end
+    # XXX Or should create & update be merged into a single action?
+    # Will think more on it when the sync methods get written.
+    def update(name, script)
+      pst = {
+        :name => name,
+        :solution_id => $cfg['solution.id'],
+        :script => script
+      }
+      put(mkalias(name), pst)
+    end
+  end
+
   # …/eventhandler
 
   # How do we enable product.id to flow into the eventhandler?
