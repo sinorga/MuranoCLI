@@ -195,7 +195,7 @@ module MrMurano
 
     def tolocalname(item, key)
       name = item[key]
-      name = 'index.html' if name == '/' # FIXME make configable
+      name = $cfg['files.default_page'] if name == '/'
       name
     end
   end

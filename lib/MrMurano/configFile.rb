@@ -49,7 +49,8 @@ module MrMurano
       set('location.eventhandlers', 'eventhandlers', :defaults)
       set('location.roles', 'roles.yaml', :defaults)
       set('location.users', 'users.yaml', :defaults)
-      # TODO: other defaults?
+
+      set('files.default_page', 'index.html', :defaults)
     end
 
     # Look at parent directories until HOME
