@@ -37,7 +37,11 @@ module MrMurano
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
-      self.set('net.host', 'bizapi.hosted.exosite.io', :defaults)
+      set('tool.verbose', false, :defaults)
+      set('tool.dry', false, :defaults)
+
+      set('net.host', 'bizapi.hosted.exosite.io', :defaults)
+
       set('location.base', prjfile.dirname, :defaults)
       set('location.files', 'files', :defaults)
       set('location.endpoints', 'endpoints', :defaults)
