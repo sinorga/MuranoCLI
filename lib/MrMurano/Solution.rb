@@ -235,87 +235,6 @@ module MrMurano
     end
   end
 
-  # …/role
-  class Role < SolutionBase
-    def initialize
-      super
-      @uriparts << 'role'
-      @itemkey = :role_id
-    end
-
-    def list()
-      get()
-    end
-
-    def fetch(id)
-      get('/' + id.to_s)
-    end
-
-    # delete
-    # create
-    # update?
-
-    def pull(into, overwrite=false)
-      into = Pathname.new(into) unless into.kind_of? Pathname
-      #into.mkdir unless into.exist?
-      raise "Not a file: #{into.to_s}" if into.exist? and not into.file?
-      key = @itemkey.to_s
-
-      there = list()
-
-      if not into.exist? or overwrite then
-        verbose "Pulling roles into #{into.to_s}"
-        if not $cfg['tool.dry'] then
-          into.open('wb') do |outio|
-            outio.write there.to_yaml
-          end
-        end
-      else
-          verbose "Skipping roles because #{into.to_s} exists"
-      end
-    end
-  end
-
-  # …/user
-  class User < SolutionBase
-    def initialize
-      super
-      @uriparts << 'user'
-    end
-
-    def list()
-      get()
-    end
-
-    def fetch(id)
-      get('/' + id.to_s)
-    end
-
-    # delete
-    # create
-    # update?
-
-    def pull(into, overwrite=false)
-      into = Pathname.new(into) unless into.kind_of? Pathname
-      #into.mkdir unless into.exist?
-      raise "Not a file: #{into.to_s}" if into.exist? and not into.file?
-      key = @itemkey.to_s
-
-      there = list()
-
-      if not into.exist? or overwrite then
-        verbose "Pulling users into #{into.to_s}"
-        if not $cfg['tool.dry'] then
-          into.open('wb') do |outio|
-            outio.write there.to_yaml
-          end
-        end
-      else
-          verbose "Skipping users because #{into.to_s} exists"
-      end
-    end
-  end
-
   # …/endpoint
   class Endpoint < SolutionBase
     def initialize
@@ -471,6 +390,88 @@ module MrMurano
   end
 
   # How do we enable product.id to flow into the eventhandler?
+
+  # …/role
+  class Role < SolutionBase
+    def initialize
+      super
+      @uriparts << 'role'
+      @itemkey = :role_id
+    end
+
+    def list()
+      get()
+    end
+
+    def fetch(id)
+      get('/' + id.to_s)
+    end
+
+    # delete
+    # create
+    # update?
+
+    def pull(into, overwrite=false)
+      into = Pathname.new(into) unless into.kind_of? Pathname
+      #into.mkdir unless into.exist?
+      raise "Not a file: #{into.to_s}" if into.exist? and not into.file?
+      key = @itemkey.to_s
+
+      there = list()
+
+      if not into.exist? or overwrite then
+        verbose "Pulling roles into #{into.to_s}"
+        if not $cfg['tool.dry'] then
+          into.open('wb') do |outio|
+            outio.write there.to_yaml
+          end
+        end
+      else
+          verbose "Skipping roles because #{into.to_s} exists"
+      end
+    end
+  end
+
+  # …/user
+  class User < SolutionBase
+    def initialize
+      super
+      @uriparts << 'user'
+    end
+
+    def list()
+      get()
+    end
+
+    def fetch(id)
+      get('/' + id.to_s)
+    end
+
+    # delete
+    # create
+    # update?
+
+    def pull(into, overwrite=false)
+      into = Pathname.new(into) unless into.kind_of? Pathname
+      #into.mkdir unless into.exist?
+      raise "Not a file: #{into.to_s}" if into.exist? and not into.file?
+      key = @itemkey.to_s
+
+      there = list()
+
+      if not into.exist? or overwrite then
+        verbose "Pulling users into #{into.to_s}"
+        if not $cfg['tool.dry'] then
+          into.open('wb') do |outio|
+            outio.write there.to_yaml
+          end
+        end
+      else
+          verbose "Skipping users because #{into.to_s} exists"
+      end
+    end
+  end
+
 end
 
 #
