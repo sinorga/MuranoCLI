@@ -55,6 +55,7 @@ module MrMurano
           return JSON.parse(response.body)
         else
           say_error "got #{response} from #{request} #{request.uri.to_s}"
+          say_error ":: #{response.body}"
           raise response
         end
       end
@@ -116,6 +117,9 @@ module MrMurano
     end
 
     def toremotename(root, path)
+      path = Pathname.new(path) unless path.kind_of? Pathname
+      root = Pathname.new(root) unless root.kind_of? Pathname
+      path.relative_path_from(root).to_s
     end
 
     def push(from, overwrite=false)
@@ -129,10 +133,13 @@ module MrMurano
 
       # for all files in from
       #  upload or create.
-      Pathname.glob(from.to_s, '**/*') do |path|
+      Pathname.glob(from.to_s + '**/*') do |path|
         name = toremotename(from, path)
 
-        upload(path, name)
+        verbose "Pushing #{path.to_s} to #{name}"
+        if not $cfg['tool.dry'] then
+          upload(path, name)
+        end
       end
 
     end
@@ -170,7 +177,7 @@ module MrMurano
     ##
     # Get one item of the static content.
     def fetch(path, &block)
-      get('/'+path) do |request, http|
+      get(path) do |request, http|
         http.request(request) do |resp|
           case resp
           when Net::HTTPSuccess
@@ -182,7 +189,7 @@ module MrMurano
               end
             end
           else
-            say_error resp.to_s
+            say_error "got #{resp.to_s} from #{request} #{request.uri.to_s}"
             raise resp
           end
         end
@@ -209,15 +216,21 @@ module MrMurano
       mime=`file -I -b #{local.to_s}`
       mime='application/octect' if mime.nil?
 
-      uri = endPoint('upload/' + remote)
-      upper = UploadIO.new(File.new(localfile), mime, local.basename)
-			req = Net::HTTP::Post::Multipart.new(uri, 'file'=> upper )
+      uri = endPoint('upload' + remote)
+      upper = UploadIO.new(local.open, mime, local.basename)
+			req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
       workit(req)
     end
 
     def tolocalname(item, key)
       name = item[key]
       name = $cfg['files.default_page'] if name == '/'
+      name
+    end
+
+    def toremotename(from, path)
+      name = super(from, path)
+      name = '/' if name == $cfg['files.default_page']
       name
     end
   end
@@ -332,10 +345,18 @@ module MrMurano
     end
 
     ##
-    # Create endpoint
-    # This also acts as update.
-    def create(method, path, script)
-      post('', {:method=>method, :path=>path, :script=>script})
+    # Upload endpoint 
+    # :local path to file to push
+    # :remote hash of method and endpoint path
+    def upload(local, remote)
+      local = Pathname.new(local) unless local.kind_of? Pathname
+      raise "no file" unless local.exist?
+
+      # we assume these are small enough to slurp.
+      script = local.read
+      remote = remote.dup
+      remote[:script] = script
+      post('', remote)
     end
 
     ##
@@ -349,6 +370,14 @@ module MrMurano
       name << '_'
       name << item['path'].gsub(/\//, '-')
       name << '.lua'
+    end
+
+    def toremotename(from, path)
+      # read first line of file and get method/path from it?
+      path = Pathname.new(path) unless path.kind_of? Pathname
+      aheader = path.readlines().first
+      md = /--#ENDPOINT (\S+) (.*)/.match(aheader)
+      {:method=>md[1], :path=>md[2]}
     end
   end
 
@@ -465,9 +494,9 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::Role.new
+    sol = MrMurano::File.new
     say sol.list
-    say sol.fetch('debug')
+    say sol.fetch('/')
 
   end
 end
@@ -478,12 +507,18 @@ command :push do |c|
   c.description = %{Push eveything or some of it up.}
 
   c.option '--files', 'Push static files up'
+  c.option '--endpoints', 'Push endpoints up'
 
   c.action do |args, options|
 
     if options.files then
       sol = MrMurano::File.new
       sol.push( $cfg['location.base'] + $cfg['location.files'], options.overwrite )
+    end
+
+    if options.endpoints then
+      sol = MrMurano::Endpoint.new
+      sol.push( $cfg['location.base'] + $cfg['location.endpoints'], options.overwrite )
     end
 
   end
