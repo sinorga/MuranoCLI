@@ -12,6 +12,12 @@ tags
 xcuserdata
 Pods/
 
+files/
+endpoints/
+modules/
+roles.yaml
+users.yaml
+
 # Thumbnails
 ._*
 
