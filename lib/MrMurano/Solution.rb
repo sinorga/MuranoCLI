@@ -449,6 +449,7 @@ command :pull do |c|
   c.description = %{For a project, pull a copy of everything down.}
   c.option '--overwrite', 'Replace local files.'
 
+  c.option '--all', 'Pull everything'
   c.option '--files', 'Pull static files down'
   c.option '--endpoints', 'Pull endpoints down'
   c.option '--modules', 'Pull modules down'
@@ -457,6 +458,15 @@ command :pull do |c|
   c.option '--eventhandlers', 'Pull users down'
 
   c.action do |args, options|
+
+    if options.all then
+      options.files = true
+      options.endpoints = true
+      options.modules = true
+      options.roles = true
+      options.users = true
+      options.eventhandlers = true
+    end
 
     if options.files then
       sol = MrMurano::File.new
