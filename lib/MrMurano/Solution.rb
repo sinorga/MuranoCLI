@@ -52,6 +52,7 @@ module MrMurano
         response = http().request(request)
         case response
         when Net::HTTPSuccess
+          return {} if response.body.nil?
           return JSON.parse(response.body)
         else
           say_error "got #{response} from #{request} #{request.uri.to_s}"
@@ -73,9 +74,11 @@ module MrMurano
       workit(req, &block)
     end
 
-    def put(path='', &block)
+    def put(path='', body={}, &block)
       uri = endPoint(path)
-      workit(Net::HTTP::Put.new(uri))
+      req = Net::HTTP::Put.new(uri)
+      req.body = JSON.generate(body)
+      workit(req, &block)
     end
 
     def delete(path='', &block)
@@ -296,6 +299,7 @@ module MrMurano
       path = Pathname.new(path) unless path.kind_of? Pathname
       aheader = path.readlines().first
       md = /--#ENDPOINT (\S+) (.*)/.match(aheader)
+      raise "Not an Endpoint: #{path.to_s}" if md.nil?
       {:method=>md[1], :path=>md[2]}
     end
   end
@@ -308,6 +312,7 @@ module MrMurano
       @itemkey = :alias
     end
 
+    # not quite sure why this is needed, but…
     def mkalias(name)
       "/#{$cfg['solution.id']}_#{name}"
     end
@@ -332,23 +337,33 @@ module MrMurano
       delete(mkalias(name))
     end
 
-    def create(name, script)
+    def upload(local, remote)
+      local = Pathname.new(local) unless local.kind_of? Pathname
+      raise "no file" unless local.exist?
+
+      # we assume these are small enough to slurp.
+      script = local.read
+
       pst = {
-        :name => name,
+        :name => remote,
         :solution_id => $cfg['solution.id'],
         :script => script
       }
-      post(mkalias(name), pst)
-    end
-    # XXX Or should create & update be merged into a single action?
-    # Will think more on it when the sync methods get written.
-    def update(name, script)
-      pst = {
-        :name => name,
-        :solution_id => $cfg['solution.id'],
-        :script => script
-      }
-      put(mkalias(name), pst)
+
+      # try put, if 404, then post.
+      put(mkalias(remote), pst) do |request, http|
+        response = http.request(request)
+        case response
+        when Net::HTTPSuccess
+          #return JSON.parse(response.body)
+        when Net::HTTPNotFound
+          verbose "Doesn't exist, creating"
+          post('/', pst)
+        else
+          say_error "got #{response} from #{request} #{request.uri.to_s}"
+          say_error ":: #{response.body}"
+        end
+      end
     end
 
     def tolocalname(item, key)
@@ -359,6 +374,10 @@ module MrMurano
 #      else
         "#{name}.lua"
 #      end
+    end
+
+    def toremotename(from, path)
+      path.basename.to_s.sub(/\..*/, '')
     end
   end
 
@@ -495,9 +514,9 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::File.new
+    sol = MrMurano::Library.new
     say sol.list
-    say sol.fetch('/')
+    #say sol.fetch('/')
 
   end
 end
@@ -509,6 +528,7 @@ command :push do |c|
 
   c.option '--files', 'Push static files up'
   c.option '--endpoints', 'Push endpoints up'
+  c.option '--modules', 'Push modules up'
 
   c.action do |args, options|
 
@@ -520,6 +540,11 @@ command :push do |c|
     if options.endpoints then
       sol = MrMurano::Endpoint.new
       sol.push( $cfg['location.base'] + $cfg['location.endpoints'], options.overwrite )
+    end
+
+    if options.modules then
+      sol = MrMurano::Library.new
+      sol.push( $cfg['location.base'] + $cfg['location.modules'], options.overwrite )
     end
 
   end
