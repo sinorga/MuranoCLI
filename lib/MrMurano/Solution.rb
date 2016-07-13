@@ -13,6 +13,13 @@ module MrMurano
       @sid = $cfg['solution.id']
       raise "No solution!" if @sid.nil?
       @uriparts = [:solution, @sid]
+      @itemkey = 'id'
+    end
+
+    def verbose(msg)
+      if $cfg['tool.verbose'] then
+        say msg
+      end
     end
 
     def endPoint(path='')
@@ -76,6 +83,37 @@ module MrMurano
 
     # …
 
+    def tolocalname(item, key)
+      item[key]
+    end
+
+    def pull(into, overwrite=false)
+      into = Pathname.new(into) unless into.kind_of? Pathname
+      into.mkdir unless into.exist?
+      raise "Not a directory: #{into.to_s}" unless into.directory?
+      key = @itemkey.to_s
+
+      there = list()
+      there.each do |item|
+        name = tolocalname(item, key)
+        raise "Bad key(#{key}) for #{item}" if name.nil?
+        dest = into + name
+
+        if not dest.exist? or overwrite then
+          verbose "Pulling #{item[key]} into #{dest.to_s}"
+          if not $cfg['tool.dry'] then
+            dest.open('wb') do |outio|
+              fetch(item[key]) do |chunk|
+                outio.write chunk
+              end
+            end
+          end
+        else
+          verbose "Skipping #{item[key]} because it exists"
+        end
+      end
+    end
+
   end
   class Solution < SolutionBase
     def version
@@ -97,6 +135,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'file'
+      @itemkey = :path
     end
 
     ##
@@ -120,6 +159,7 @@ module MrMurano
               end
             end
           else
+            say_error resp.to_s
             raise resp
           end
         end
@@ -152,29 +192,11 @@ module MrMurano
       workit(req)
     end
 
-    def pull(into, overwrite=false)
-      into = Pathname.new(into) unless into.kind_of? Pathname
-      into.mkdir unless into.exist?
-      raise "Not a directory: #{into.to_s}" unless into.directory?
-      key = :path
-
-      there = list()
-      there.each do |item|
-        name = item[key.to_s]
-        raise "Bad key(#{key}) for #{item}" if name.nil?
-        name = 'index.html' if name == '/' # FIXME make generic and configable
-
-        if not (into + name).exist? or overwrite then
-          (into+name).open('wb') do |outio|
-            fetch(item[key.to_s]) do |chunk|
-              outio.write chunk
-            end
-          end
-        end
-      end
-
+    def tolocalname(item, key)
+      name = item[key]
+      name = 'index.html' if name == '/' # FIXME make configable
+      name
     end
-
   end
 
   # …/role
@@ -231,7 +253,18 @@ module MrMurano
     end
 
     def fetch(id)
-      get('/' + id.to_s)
+      ret = get('/' + id.to_s)
+      aheader = ret['script'].lines.first
+      dheader = "--#ENDPOINT #{ret['method']} #{ret['path']}"
+      if block_given? then
+        yield dheader + "\n" if aheader != dheader
+        yield ret['script']
+      else
+        res = ''
+        res << dheader + "\n" if aheader != dheader
+        res << ret['script']
+        res
+      end
     end
 
     ##
@@ -245,6 +278,13 @@ module MrMurano
     # Delete an endpoint
     def remove(id)
       delete('/' + id.to_s)
+    end
+
+    def tolocalname(item, key)
+      name = item['method'].downcase
+      name << '_'
+      name << item['path'].gsub(/\//, '-')
+      name << '.lua'
     end
   end
 
@@ -319,9 +359,9 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::File.new
+    sol = MrMurano::Endpoint.new
     say sol.list
-    #say sol.fetch('1')
+    #say sol.fetch('OOTyFHLVq4')
 
   end
 end
@@ -332,14 +372,19 @@ command :pull do |c|
   c.option '--overwrite', 'Replace local files.'
 
   c.option '--files', 'Pull static files down'
+  c.option '--endpoints', 'Pull endpoints down'
 
   c.action do |args, options|
 
 
     if options.files then
       sol = MrMurano::File.new
-      sol.pull( $cfg['location.base'] + $cfg['location.files'] )
+      sol.pull( $cfg['location.base'] + $cfg['location.files'], options.overwrite )
+    end
 
+    if options.endpoints then
+      sol = MrMurano::Endpoint.new
+      sol.pull( $cfg['location.base'] + $cfg['location.endpoints'], options.overwrite )
     end
 
   end
