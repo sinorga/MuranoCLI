@@ -12,9 +12,11 @@ tags
 xcuserdata
 Pods/
 
+.mrmuranorc
 files/
 endpoints/
 modules/
+eventhandlers/
 roles.yaml
 users.yaml
 
