@@ -3,6 +3,7 @@ require 'net/http'
 require 'net/http/post/multipart'
 require 'json'
 require 'date'
+require 'digest/sha1'
 require 'pp'
 
 module MrMurano
@@ -86,10 +87,9 @@ module MrMurano
     end
 
     # …/serviceconfig
-    def sc
+    def sc # TODO understand this. (i think it has to do with getting data to flow)
       get('/serviceconfig/')
     end
-    #
   end
 
   # …/file 
@@ -127,6 +127,10 @@ module MrMurano
       end
     end
 
+#    def push(local, remote, force=false)
+#        sha1 = Digest::SHA1.file(local.to_s).hexdigest
+#    end
+
     ##
     # Delete a file
     def remove(path)
@@ -136,14 +140,39 @@ module MrMurano
 
     ##
     # Upload a file
-    def upload(path, localfile)
-      # TODO finish and test this
-      # mime=`file -I -b #{file}`
-      # mime='application/octect' if mime.nil?
-      uri = endPoint('upload/' + path)
-      upper = UploadIO.new(File.new(localfile), type, name)
+    def upload(local, remote)
+      local = Pathname.new(local) unless local.kind_of? Pathname
+
+      mime=`file -I -b #{local.to_s}`
+      mime='application/octect' if mime.nil?
+
+      uri = endPoint('upload/' + remote)
+      upper = UploadIO.new(File.new(localfile), mime, local.basename)
 			req = Net::HTTP::Post::Multipart.new(uri, 'file'=> upper )
       workit(req)
+    end
+
+    def pull(into, overwrite=false)
+      into = Pathname.new(into) unless into.kind_of? Pathname
+      into.mkdir unless into.exist?
+      raise "Not a directory: #{into.to_s}" unless into.directory?
+      key = :path
+
+      there = list()
+      there.each do |item|
+        name = item[key.to_s]
+        raise "Bad key(#{key}) for #{item}" if name.nil?
+        name = 'index.html' if name == '/' # FIXME make generic and configable
+
+        if not (into + name).exist? or overwrite then
+          (into+name).open('wb') do |outio|
+            fetch(item[key.to_s]) do |chunk|
+              outio.write chunk
+            end
+          end
+        end
+      end
+
     end
 
   end
@@ -239,6 +268,10 @@ module MrMurano
     end
 
     # ??? remove
+    def remove(name)
+      # TODO Test this, I'm guesing.
+      delete(mkalias(name))
+    end
 
     def create(name, script)
       pst = {
@@ -286,25 +319,29 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::User.new
-    say sol.fetch('1')
+    sol = MrMurano::File.new
+    say sol.list
+    #say sol.fetch('1')
 
   end
 end
 
-command :file do |c|
-  c.syntax = %{mr file ……}
-  c.option '--pullall DIR', 'Download all static content to directory'
+command :pull do |c|
+  c.syntax = %{mr pull}
+  c.description = %{For a project, pull a copy of everything down.}
+  c.option '--overwrite', 'Replace local files.'
+
+  c.option '--files', 'Pull static files down'
 
   c.action do |args, options|
 
 
-    if options.pullall then
+    if options.files then
       sol = MrMurano::File.new
-      all = sol.list
-      
+      sol.pull( $cfg['location.base'] + $cfg['location.files'] )
 
     end
+
   end
 end
 
