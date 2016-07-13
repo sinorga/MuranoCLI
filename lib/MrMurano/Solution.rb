@@ -162,6 +162,10 @@ module MrMurano
     def fetch(id)
       get('/' + id.to_s)
     end
+
+    # delete
+    # create
+    # update?
   end
 
   # …/user
@@ -179,6 +183,9 @@ module MrMurano
       get('/' + id.to_s)
     end
 
+    # delete
+    # create
+    # update?
   end
 
   # …/endpoint
@@ -194,8 +201,13 @@ module MrMurano
       get()
     end
 
+    def fetch(id)
+      get('/' + id.to_s)
+    end
+
     ##
     # Create endpoint
+    # This also acts as update.
     def create(method, path, script)
       post('', {:method=>method, :path=>path, :script=>script})
     end
