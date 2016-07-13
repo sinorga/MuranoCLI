@@ -115,6 +115,28 @@ module MrMurano
       end
     end
 
+    def toremotename(root, path)
+    end
+
+    def push(from, overwrite=false)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      unless from.exist? then
+        say "Skipping non-existing #{from.to_s}"
+        return
+      end
+      raise "Not a directory: #{from.to_s}" unless from.directory?
+      key = @itemkey.to_s
+
+      # for all files in from
+      #  upload or create.
+      Pathname.glob(from.to_s, '**/*') do |path|
+        name = toremotename(from, path)
+
+        upload(path, name)
+      end
+
+    end
+
   end
   class Solution < SolutionBase
     def version
@@ -382,7 +404,13 @@ module MrMurano
     end
 
     def tolocalname(item, key)
-      "#{item['name']}.lua"
+      name = item['name']
+#      altpath = $cfg["modules.pathfor_#{name}"]
+#      if not altpath.nil? then
+#        return altpath
+#      else
+        "#{name}.lua"
+#      end
     end
   end
 
@@ -440,6 +468,23 @@ command :solution do |c|
     sol = MrMurano::Role.new
     say sol.list
     say sol.fetch('debug')
+
+  end
+end
+
+command :push do |c|
+  c.syntax = %{mr push}
+  #c.syntax = %{mr push [<files>]}
+  c.description = %{Push eveything or some of it up.}
+
+  c.option '--files', 'Push static files up'
+
+  c.action do |args, options|
+
+    if options.files then
+      sol = MrMurano::File.new
+      sol.push( $cfg['location.base'] + $cfg['location.files'], options.overwrite )
+    end
 
   end
 end
