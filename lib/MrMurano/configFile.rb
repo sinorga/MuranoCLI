@@ -30,13 +30,21 @@ module MrMurano
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --config FILE goes here. (see load_specific)
-      @paths << ConfigFile.new(:project, findProjectFile())
+      prjfile = findProjectFile()
+      @paths << ConfigFile.new(:project, prjfile)
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,''))
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
       self.set('net.host', 'bizapi.hosted.exosite.io', :defaults)
+      set('location.base', prjfile.dirname, :defaults)
+      set('location.files', 'files', :defaults)
+      set('location.endpoints', 'endpoints', :defaults)
+      set('location.modules', 'modules', :defaults)
+      set('location.eventhandlers', 'eventhandlers', :defaults)
+      set('location.roles', 'roles.yaml', :defaults)
+      set('location.uesrs', 'uesrs.yaml', :defaults)
       # TODO: other defaults?
     end
 
