@@ -348,7 +348,12 @@ module MrMurano
     end
 
     def fetch(name)
-      get('/'+name)
+      ret = get('/'+name)
+      if block_given? then
+        yield ret['script']
+      else
+        ret['script']
+      end
     end
 
     # ??? remove
@@ -382,6 +387,31 @@ module MrMurano
   end
 
   # …/eventhandler
+  class EventHandler < SolutionBase
+    def initialize
+      super
+      @uriparts << 'eventhandler'
+      @itemkey = :alias
+    end
+
+    def list
+      ret = get()
+      ret['items']
+    end
+
+    def fetch(name)
+      ret = get('/'+name)
+      if block_given? then
+        yield ret['script']
+      else
+        ret['script']
+      end
+    end
+
+    def tolocalname(item, key)
+      "#{item['name']}.lua"
+    end
+  end
 
   # How do we enable product.id to flow into the eventhandler?
 end
@@ -424,9 +454,9 @@ command :pull do |c|
   c.option '--modules', 'Pull modules down'
   c.option '--roles', 'Pull roles down'
   c.option '--users', 'Pull users down'
+  c.option '--eventhandlers', 'Pull users down'
 
   c.action do |args, options|
-
 
     if options.files then
       sol = MrMurano::File.new
@@ -451,6 +481,11 @@ command :pull do |c|
     if options.users then
       sol = MrMurano::User.new
       sol.pull( $cfg['location.base'] + $cfg['location.users'], options.overwrite )
+    end
+
+    if options.eventhandlers then
+      sol = MrMurano::EventHandler.new
+      sol.pull( $cfg['location.base'] + $cfg['location.eventhandlers'], options.overwrite )
     end
 
   end
