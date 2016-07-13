@@ -2,6 +2,7 @@ require 'uri'
 require 'net/http'
 require 'net/http/post/multipart'
 require 'json'
+require 'yaml'
 require 'date'
 require 'digest/sha1'
 require 'pp'
@@ -204,6 +205,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'role'
+      @itemkey = :role_id
     end
 
     def list()
@@ -217,6 +219,26 @@ module MrMurano
     # delete
     # create
     # update?
+
+    def pull(into, overwrite=false)
+      into = Pathname.new(into) unless into.kind_of? Pathname
+      #into.mkdir unless into.exist?
+      raise "Not a file: #{into.to_s}" if into.exist? and not into.file?
+      key = @itemkey.to_s
+
+      there = list()
+
+      if not into.exist? or overwrite then
+        verbose "Pulling roles into #{into.to_s}"
+        if not $cfg['tool.dry'] then
+          into.open('wb') do |outio|
+            outio.write there.to_yaml
+          end
+        end
+      else
+          verbose "Skipping roles because #{into.to_s} exists"
+      end
+    end
   end
 
   # …/user
@@ -365,9 +387,9 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::Endpoint.new
+    sol = MrMurano::Role.new
     say sol.list
-    #say sol.fetch('OOTyFHLVq4')
+    say sol.fetch('debug')
 
   end
 end
@@ -380,6 +402,7 @@ command :pull do |c|
   c.option '--files', 'Pull static files down'
   c.option '--endpoints', 'Pull endpoints down'
   c.option '--modules', 'Pull modules down'
+  c.option '--roles', 'Pull roles down'
 
   c.action do |args, options|
 
@@ -397,6 +420,11 @@ command :pull do |c|
     if options.modules then
       sol = MrMurano::Library.new
       sol.pull( $cfg['location.base'] + $cfg['location.modules'], options.overwrite )
+    end
+
+    if options.roles then
+      sol = MrMurano::Role.new
+      sol.pull( $cfg['location.base'] + $cfg['location.roles'], options.overwrite )
     end
 
   end
