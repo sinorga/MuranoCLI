@@ -222,6 +222,7 @@ module MrMurano
       uri = endPoint('upload' + remote)
       upper = UploadIO.new(local.open, mime, local.basename)
 			req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
+      # FIXME: bad request?
       workit(req)
     end
 
@@ -304,17 +305,25 @@ module MrMurano
     end
   end
 
-  # …/library
-  class Library < SolutionBase
-    def initialize
-      super
-      @uriparts << 'library'
-      @itemkey = :alias
-    end
-
+  ##
+  # Things that servers do that is common.
+  class ServiceBase < SolutionBase
     # not quite sure why this is needed, but…
     def mkalias(name)
-      "/#{$cfg['solution.id']}_#{name}"
+      case name
+      when String
+        "/#{$cfg['solution.id']}_#{name}"
+      when Hash
+        if name.has_key? :name then
+          "/#{$cfg['solution.id']}_#{name[:name]}"
+        elsif name.has_key? :service and name.has_key? :event then
+          "/#{$cfg['solution.id']}_#{name[:service]}_#{name[:event]}"
+        else
+          raise "unknown keys. #{name}"
+        end
+      else
+        raise "unknown type. #{name}"
+      end
     end
 
     def list
@@ -344,11 +353,10 @@ module MrMurano
       # we assume these are small enough to slurp.
       script = local.read
 
-      pst = {
-        :name => remote,
+      pst = remote.merge ({
         :solution_id => $cfg['solution.id'],
         :script => script
-      }
+      })
 
       # try put, if 404, then post.
       put(mkalias(remote), pst) do |request, http|
@@ -366,6 +374,16 @@ module MrMurano
       end
     end
 
+  end
+
+  # …/library
+  class Library < ServiceBase
+    def initialize
+      super
+      @uriparts << 'library'
+      @itemkey = :alias
+    end
+
     def tolocalname(item, key)
       name = item['name']
 #      altpath = $cfg["modules.pathfor_#{name}"]
@@ -377,7 +395,8 @@ module MrMurano
     end
 
     def toremotename(from, path)
-      path.basename.to_s.sub(/\..*/, '')
+      name = path.basename.to_s.sub(/\..*/, '')
+      {:name => name}
     end
   end
 
@@ -389,22 +408,14 @@ module MrMurano
       @itemkey = :alias
     end
 
-    def list
-      ret = get()
-      ret['items']
-    end
-
-    def fetch(name)
-      ret = get('/'+name)
-      if block_given? then
-        yield ret['script']
-      else
-        ret['script']
-      end
-    end
-
     def tolocalname(item, key)
       "#{item['name']}.lua"
+    end
+
+    def toremotename(from, path)
+      path.basename.to_s.sub(/\..*/, '')
+      # FIXME: how do we get the service and event for these?
+      {:service=>'', :event=>''}
     end
   end
 
