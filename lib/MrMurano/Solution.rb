@@ -134,8 +134,6 @@ module MrMurano
       raise "Not a directory: #{from.to_s}" unless from.directory?
       key = @itemkey.to_s
 
-      # for all files in from
-      #  upload or create.
       Pathname.glob(from.to_s + '**/*') do |path|
         name = toremotename(from, path)
 
@@ -144,8 +142,10 @@ module MrMurano
           upload(path, name)
         end
       end
-
     end
+
+    # TODO sync up: like push, but deletes remote things not local
+    # TODO sync down: like pull, but deletes local things not remote
 
   end
   class Solution < SolutionBase
@@ -436,6 +436,7 @@ module MrMurano
     # create
     # update?
 
+    # Since this works form a single file, needs different code.
     def pull(into, overwrite=false)
       into = Pathname.new(into) unless into.kind_of? Pathname
       #into.mkdir unless into.exist?
@@ -455,6 +456,10 @@ module MrMurano
           verbose "Skipping #{self.class.to_s} because #{into.to_s} exists"
       end
     end
+
+    def push(from, overwrite=false)
+    end
+
   end
 
   # …/role
@@ -512,6 +517,7 @@ command :push do |c|
   c.option '--files', 'Push static files up'
   c.option '--endpoints', 'Push endpoints up'
   c.option '--modules', 'Push modules up'
+  c.option '--eventhandlers', 'Push eventhandlers up'
 
   c.action do |args, options|
 
@@ -530,6 +536,11 @@ command :push do |c|
       sol.push( $cfg['location.base'] + $cfg['location.modules'], options.overwrite )
     end
 
+    if options.eventhandlers then
+      sol = MrMurano::EventHandler.new
+      sol.push( $cfg['location.base'] + $cfg['location.eventhandlers'], options.overwrite )
+    end
+
   end
 end
 
@@ -542,9 +553,9 @@ command :pull do |c|
   c.option '--files', 'Pull static files down'
   c.option '--endpoints', 'Pull endpoints down'
   c.option '--modules', 'Pull modules down'
+  c.option '--eventhandlers', 'Pull eventhandlers down'
   c.option '--roles', 'Pull roles down'
   c.option '--users', 'Pull users down'
-  c.option '--eventhandlers', 'Pull users down'
 
   c.action do |args, options|
 
