@@ -48,7 +48,7 @@ module MrMurano
       set('location.modules', 'modules', :defaults)
       set('location.eventhandlers', 'eventhandlers', :defaults)
       set('location.roles', 'roles.yaml', :defaults)
-      set('location.uesrs', 'uesrs.yaml', :defaults)
+      set('location.users', 'users.yaml', :defaults)
       # TODO: other defaults?
     end
 
