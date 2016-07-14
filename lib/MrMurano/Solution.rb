@@ -299,12 +299,12 @@ module MrMurano
     def upload(local, remote)
       local = Pathname.new(local) unless local.kind_of? Pathname
 
-      mime=`file -I -b #{local.to_s}`
-      mime='application/octect' if mime.nil?
+      #mime=`file -I -b #{local.to_s}`.chomp.sub(/;.*$/, '')
+      #mime='application/octect' if mime.nil?
 
       # FIXME: bad request? why?
-      uri = endPoint('upload' + remote)
-      upper = UploadIO.new(local.open('rb'), mime, local.basename)
+      uri = endPoint('upload' + remote[:path])
+      upper = UploadIO.new(local.open('rb'), remote[:mime_type], local.basename)
 			req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
       workit(req) do |request,http|
         request.delete 'Content-Type'
@@ -328,7 +328,21 @@ module MrMurano
     def toremotename(from, path)
       name = super(from, path)
       name = '/' if name == $cfg['files.default_page']
-      name
+
+      mime=`file -I -b #{path.to_s}`.chomp.sub(/;.*$/, '')
+      mime='application/octect' if mime.nil?
+
+      sha1 = Digest::SHA1.file(path.to_s).hexdigest
+
+      {:path=>name, :mime_type=>mime, :checksum=>sha1}
+    end
+
+    def synckey(item)
+      if item.has_key? :path then
+        "#{item[:path]}_#{item[:checksum]}_#{item[:mime_type]}"
+      else
+        "#{item['path']}_#{item['checksum']}_#{item['mime_type']}"
+      end
     end
   end
 
@@ -680,9 +694,9 @@ command :sol do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::User.new
+    sol = MrMurano::File.new
     pp sol.list
-    pp sol.locallist($cfg['location.base'] + $cfg['location.users'])
+    pp sol.locallist($cfg['location.base'] + $cfg['location.files'])
     #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
   end
@@ -696,6 +710,7 @@ command :syncup do |c|
   c.option '--eventhandlers'
   c.option '--roles'
   c.option '--users'
+  c.option '--files'
 
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}
@@ -737,6 +752,11 @@ command :syncup do |c|
     if options.users then
       sol = MrMurano::User.new
       sol.syncup( $cfg['location.base'] + $cfg['location.users'], options)
+    end
+
+    if options.files then
+      sol = MrMurano::File.new
+      sol.syncup( $cfg['location.base'] + $cfg['location.files'], options)
     end
 
   end
