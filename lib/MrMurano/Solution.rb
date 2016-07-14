@@ -53,6 +53,7 @@ module MrMurano
         case response
         when Net::HTTPSuccess
           return {} if response.body.nil?
+          return {} if response.body == 'OK'
           return JSON.parse(response.body)
         else
           say_error "got #{response} from #{request} #{request.uri.to_s}"
@@ -83,7 +84,7 @@ module MrMurano
 
     def delete(path='', &block)
       uri = endPoint(path)
-      workit(Net::HTTP::Delete.new(uri))
+      workit(Net::HTTP::Delete.new(uri), &block)
     end
 
     # …
@@ -452,11 +453,28 @@ module MrMurano
       get('/' + id.to_s)
     end
 
-    # delete
-    # create
-    # update?
+    def remove(id)
+      delete('/' + id.to_s)
+    end
+
+    def upload(local, remote)
+      # Roles cannot be modified, so must delete and post.
+      delete('/' + remote.to_s) do |request, http|
+        response = http.request(request)
+        case response
+        when Net::HTTPSuccess
+        when Net::HTTPNotFound
+        else
+          say_error "got #{response} from #{request} #{request.uri.to_s}"
+          say_error ":: #{response.body}"
+        end
+      end
+      post('/', local)
+    end
 
     # Since this works form a single file, needs different code.
+    # This currently assumes that #list gets all of the info, and that we dno't
+    # need to call #fetch on each item.
     def pull(into, overwrite=false)
       into = Pathname.new(into) unless into.kind_of? Pathname
       #into.mkdir unless into.exist?
@@ -478,6 +496,22 @@ module MrMurano
     end
 
     def push(from, overwrite=false)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      if not from.exist? then
+        say_warning "Skipping missing #{from.to_s}"
+        return
+      end
+      key = @itemkey.to_s
+
+      here = {}
+      from.open {|io| here = YAML.load(io) }
+      
+      here.each do |item|
+        verbose "Pushing #{item} to #{item[key]}"
+        if not $cfg['tool.dry'] then
+          upload(item, item[key])
+        end
+      end
     end
 
   end
@@ -522,9 +556,11 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::EventHandler.new
+    sol = MrMurano::Role.new
     say sol.list
-    #say sol.fetch('/')
+    #say sol.fetch('debug')
+    sol.remove('debug')
+    say sol.list
 
   end
 end
@@ -538,6 +574,7 @@ command :push do |c|
   c.option '--endpoints', 'Push endpoints up'
   c.option '--modules', 'Push modules up'
   c.option '--eventhandlers', 'Push eventhandlers up'
+  c.option '--roles', 'Push roles up'
 
   c.action do |args, options|
 
@@ -559,6 +596,11 @@ command :push do |c|
     if options.eventhandlers then
       sol = MrMurano::EventHandler.new
       sol.push( $cfg['location.base'] + $cfg['location.eventhandlers'], options.overwrite )
+    end
+
+    if options.roles then
+      sol = MrMurano::Role.new
+      sol.push( $cfg['location.base'] + $cfg['location.roles'], options.overwrite )
     end
 
   end
