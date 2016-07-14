@@ -160,41 +160,73 @@ module MrMurano
       end
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
-      Pathname.glob(from.to_s + '**/*')
+      Pathname.glob(from.to_s + '**/*').map do |path|
+        name = toremotename(from, path)
+        case name
+        when Hash
+          name[:local_path] = path
+          name
+        else
+          {:local_path => path, :name => name}
+        end
+      end
     end
 
-    def syncup
-      there = list()
-      here = locallist()
+    def synckey(item)
       key = @itemkey.to_s
-      
+      item[key]
+    end
+
+    def syncup(from, options={})
+      there = list()
+      here = locallist(from)
+      itemkey = @itemkey.to_s
+ 
       # split into three lists.
       # - Items here and not there. (toadd)
       # - Items there and not here. (todel)
       # - Items here and there. (tomod)
       therebox = {}
       there.each do |item|
-        therebox[ item[key] ] = item
+        therebox[ synckey(item) ] = item
       end
       herebox = {}
       here.each do |item|
-        herebox[ item[key] ] = item
+        herebox[ synckey(item) ] = item
       end
       toadd = herebox.keys - therebox.keys
       todel = therebox.keys - herebox.keys
       tomod = herebox.keys & therebox.keys
 
-      tomod.each do |key|
-        verbose "Removing item #{key}"
-        remove(key) unless $cfg['tool.dry']
+      if options.delete then
+        todel.each do |key|
+          verbose "Removing item #{key}"
+          unless $cfg['tool.dry'] then
+            item = therebox[key]
+            remove(item[itemkey])
+          end
+        end
       end
-      toadd.each do |key|
-        verbose "Adding item #{key}"
-        upload(here[key], ……) unless $cfg['tool.dry']
+      if options.create then
+        toadd.each do |key|
+          verbose "Adding item #{key}"
+          unless $cfg['tool.dry'] then
+            item = herebox[key]
+            upload(item[:local_path], item.reject{|k,v| k==:local_path})
+          end
+        end
       end
-      tomod.each do |key|
-        verbose "Updating item #{key}"
-        upload(here[key], ……) unless $cfg['tool.dry']
+      if options.update then
+        tomod.each do |key|
+          verbose "Updating item #{key}"
+          unless $cfg['tool.dry'] then
+            #item = therebox[key].merge herebox[key] # need to be consistent with key types for this to work
+            id = therebox[key][itemkey]
+            item = herebox[key].dup
+            item[itemkey] = id
+            upload(item[:local_path], item.reject{|k,v| k==:local_path})
+          end
+        end
       end
     end
 
@@ -361,7 +393,20 @@ module MrMurano
       script = local.read
       remote = remote.dup
       remote[:script] = script
-      post('', remote)
+      #post('', remote)
+      put('/' + remote[@itemkey.to_s], remote) do |request, http|
+        response = http.request(request)
+        case response
+        when Net::HTTPSuccess
+          #return JSON.parse(response.body)
+        when Net::HTTPNotFound
+          verbose "Doesn't exist, creating"
+          post('/', remote)
+        else
+          say_error "got #{response} from #{request} #{request.uri.to_s}"
+          say_error ":: #{response.body}"
+        end
+      end
     end
 
     ##
@@ -384,6 +429,14 @@ module MrMurano
       md = /--#ENDPOINT (\S+) (.*)/.match(aheader)
       raise "Not an Endpoint: #{path.to_s}" if md.nil?
       {:method=>md[1], :path=>md[2]}
+    end
+
+    def synckey(item)
+      if item.has_key? :method then
+        "#{item[:method]}_#{item[:path]}"
+      else
+        "#{item['method']}_#{item['path']}"
+      end
     end
 
   end
@@ -628,12 +681,29 @@ command :sol do |c|
   c.action do |args, options|
 
     sol = MrMurano::Endpoint.new
-    pp sol.list
-    pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
+    #pp sol.list
+    #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
+    sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
   end
 end
 
+command :syncup do |c|
+  c.syntax = %{mr syncup }
+  c.option '--endpoints'
+
+  c.option '--[no-]delete', %{Don't delete things from server}
+  c.option '--[no-]create', %{Don't create things on server}
+  c.option '--[no-]update', %{Don't update things on server}
+
+  c.action do |args,options|
+
+    if options.endpoints then
+      sol = MrMurano::Endpoint.new
+      sol.syncup($cfg['location.base'] + $cfg['location.endpoints'], options)
+    end
+  end
+end
 
 
 #  vim: set ai et sw=2 ts=2 :
