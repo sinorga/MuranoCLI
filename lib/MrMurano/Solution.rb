@@ -130,27 +130,6 @@ module MrMurano
       path.relative_path_from(root).to_s
     end
 
-    def push(from, overwrite=false)
-      from = Pathname.new(from) unless from.kind_of? Pathname
-      unless from.exist? then
-        say "Skipping non-existing #{from.to_s}"
-        return
-      end
-      raise "Not a directory: #{from.to_s}" unless from.directory?
-      key = @itemkey.to_s
-
-      # have an idea to not do the glob here, but call a locallist() method.
-      # Done right, then the UserBase push/pull could be identical to this
-      Pathname.glob(from.to_s + '**/*') do |path|
-        name = toremotename(from, path)
-
-        verbose "Pushing #{path.to_s} to #{name}"
-        if not $cfg['tool.dry'] then
-          upload(path, name)
-        end
-      end
-    end
-
     # TODO sync up: like push, but deletes remote things not local
 
     def locallist(from)
@@ -630,25 +609,6 @@ module MrMurano
         end
       else
           verbose "Skipping #{self.class.to_s} because #{into.to_s} exists"
-      end
-    end
-
-    def push(from, overwrite=false)
-      from = Pathname.new(from) unless from.kind_of? Pathname
-      if not from.exist? then
-        say_warning "Skipping missing #{from.to_s}"
-        return
-      end
-      key = @itemkey.to_s
-
-      here = {}
-      from.open {|io| here = YAML.load(io) }
-      
-      here.each do |item|
-        verbose "Pushing #{item} to #{item[key]}"
-        if not $cfg['tool.dry'] then
-          upload(from, item)
-        end
       end
     end
 
