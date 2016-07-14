@@ -770,6 +770,6 @@ command :syncup do |c|
 
   end
 end
-
+alias_command :push, :syncup, '--no-delete'
 
 #  vim: set ai et sw=2 ts=2 :
