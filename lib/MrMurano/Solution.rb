@@ -283,10 +283,6 @@ module MrMurano
       end
     end
 
-#    def push(local, remote, force=false)
-#        sha1 = Digest::SHA1.file(local.to_s).hexdigest
-#    end
-
     ##
     # Delete a file
     def remove(path)
@@ -298,9 +294,6 @@ module MrMurano
     # Upload a file
     def upload(local, remote)
       local = Pathname.new(local) unless local.kind_of? Pathname
-
-      #mime=`file -I -b #{local.to_s}`.chomp.sub(/;.*$/, '')
-      #mime='application/octect' if mime.nil?
 
       # FIXME: bad request? why?
       uri = endPoint('upload' + remote[:path])
@@ -691,6 +684,7 @@ end
 #
 command :sol do |c|
   c.syntax = %{mr solution ...}
+  c.description = %{debug junk; please ignore}
 
   c.action do |args, options|
 
@@ -704,6 +698,7 @@ end
 
 command :syncup do |c|
   c.syntax = %{mr syncup }
+  c.description = %{Sync project up into Murano}
   c.option '--all', 'Sync everything'
   c.option '--endpoints'
   c.option '--modules'

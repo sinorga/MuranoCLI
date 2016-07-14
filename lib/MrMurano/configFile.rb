@@ -142,7 +142,7 @@ end
 
 command :config do |c|
   c.syntax = %{mr config [options] <key> [<new value>]}
-  c.summary = %{}
+  c.summary = %{Get and set options}
   c.option '--system', 'Use only the system config file'
   c.option '--user', 'Use only the config file in $HOME'
   c.option '--project', 'Use only the config file in the project'
