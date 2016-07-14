@@ -232,11 +232,21 @@ module MrMurano
       mime=`file -I -b #{local.to_s}`
       mime='application/octect' if mime.nil?
 
+      # FIXME: bad request? why?
       uri = endPoint('upload' + remote)
-      upper = UploadIO.new(local.open, mime, local.basename)
+      upper = UploadIO.new(local.open('rb'), mime, local.basename)
 			req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
-      # FIXME: bad request?
-      workit(req)
+      workit(req) do |request,http|
+        request.delete 'Content-Type'
+
+        response = http.request(request)
+        case response
+        when Net::HTTPSuccess
+        else
+          say_error "got #{response} from #{request} #{request.uri.to_s}"
+          say_error ":: #{response.body}"
+        end
+      end
     end
 
     def tolocalname(item, key)
