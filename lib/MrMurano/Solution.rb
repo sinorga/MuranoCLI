@@ -161,6 +161,12 @@ module MrMurano
       get()
     end
 
+    def log
+      get('/logs')
+    end
+
+  end
+
   # …/serviceconfig
   class ServiceConfig < SolutionBase
     def initialize
