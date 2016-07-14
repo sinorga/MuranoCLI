@@ -247,12 +247,8 @@ module MrMurano
             name = tolocalname(item, itemkey)
             raise "Bad key(#{itemkey}) for #{item}" if name.nil?
             dest = into + name
-            id = item[itemkey]
-            dest.open('wb') do |io| # FIXME will fail for role/user
-              fetch(id) do |chunk|
-                io.write chunk
-              end
-            end
+
+            download(dest, item)
           end
         end
       end
@@ -261,19 +257,27 @@ module MrMurano
         tomod.each do |key|
           verbose "Updating item #{key}"
           unless $cfg['tool.dry'] then
-            lp = herebox[key][:local_path]
-            id = therebox[key][itemkey]
-            lp.open('wb') do |io| # FIXME will fail for role/user
-              fetch(id) do |chunk|
-                io.write chunk
-              end
-            end
+            dest = herebox[key][:local_path]
+            item = therebox[key]
+
+            download(dest, item)
           end
         end
       end
     end
 
+    def download(local, item)
+      id = item[@itemkey.to_s]
+      local.open('wb') do |io| # FIXME will fail for role/user
+        fetch(id) do |chunk|
+          io.write chunk
+        end
+      end
+
+    end
+
   end
+
   class Solution < SolutionBase
     def version
       get('/version')
@@ -761,6 +765,10 @@ command :syncdown do |c|
   c.syntax = %{mr syncdown [options]}
   c.description = %{Sync project down from Murano}
   c.option '--endpoints', %{Sync Endpoints}
+  c.option '--modules', %{Sync Modules}
+  c.option '--eventhandlers', %{Sync Event Handlers}
+
+  c.option '--files', %{Sync Static Files}
 
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}
@@ -772,6 +780,31 @@ command :syncdown do |c|
     if options.endpoints then
       sol = MrMurano::Endpoint.new
       sol.syncdown($cfg['location.base'] + $cfg['location.endpoints'], options)
+    end
+
+    if options.modules then
+      sol = MrMurano::Library.new
+      sol.syncdown( $cfg['location.base'] + $cfg['location.modules'], options)
+    end
+
+    if options.eventhandlers then
+      sol = MrMurano::EventHandler.new
+      sol.syncdown( $cfg['location.base'] + $cfg['location.eventhandlers'], options)
+    end
+
+    if options.roles then
+      sol = MrMurano::Role.new
+      sol.syncdown( $cfg['location.base'] + $cfg['location.roles'], options)
+    end
+
+    if options.users then
+      sol = MrMurano::User.new
+      sol.syncdown( $cfg['location.base'] + $cfg['location.users'], options)
+    end
+
+    if options.files then
+      sol = MrMurano::File.new
+      sol.syncdown( $cfg['location.base'] + $cfg['location.files'], options)
     end
 
   end
