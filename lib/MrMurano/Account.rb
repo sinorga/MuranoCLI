@@ -127,19 +127,33 @@ end
 # This is largely for testing.
 command :account do |c|
   c.syntax = %{mr account ...}
+  c.description = %{Show things about your account.}
   c.option '--businesses', 'Get businesses for user'
+  c.option '--products', 'Get products for user (needs a business)'
+  c.option '--solutions', 'Get solutions for user (needs a business)'
 
   c.action do |args, options|
 
     acc = MrMurano::Account.new
     if options.businesses then
       busy = acc.businesses.map{|row| [row['bizid'], row['role'], row['name']]}
-      
-      table = Terminal::Table.new :rows => busy, :headings => ['bizid', 'Role', 'Name']
+      table = Terminal::Table.new :rows => busy, :headings => ['Biz ID', 'Role', 'Name']
       say table
+
+    elsif options.products then
+      busy = acc.products.map{|r| [r['label'], r['type'], r['pid'], r['modelId']]}
+      table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
+      say table
+
+    elsif options.solutions then
+      busy = acc.solutions.map{|r| [r['apiId'], r['domain'], r['type'], r['sid']]}
+      table = Terminal::Table.new :rows => busy, :headings => ['API ID', 'Domain', 'Type', 'SID']
+      say table
+
     else
       say acc.token
     end
+
   end
 end
 #  vim: set ai et sw=2 ts=2 :
