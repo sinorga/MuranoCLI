@@ -95,33 +95,7 @@ module MrMurano
 
     def tolocalname(item, key)
       item[key]
-    end
-
-    def pull(into, overwrite=false)
-      into = Pathname.new(into) unless into.kind_of? Pathname
-      into.mkdir unless into.exist?
-      raise "Not a directory: #{into.to_s}" unless into.directory?
-      key = @itemkey.to_s
-
-      there = list()
-      there.each do |item|
-        name = tolocalname(item, key)
-        raise "Bad key(#{key}) for #{item}" if name.nil?
-        dest = into + name
-
-        if not dest.exist? or overwrite then
-          verbose "Pulling #{item[key]} into #{dest.to_s}"
-          if not $cfg['tool.dry'] then
-            dest.open('wb') do |outio|
-              fetch(item[key]) do |chunk|
-                outio.write chunk
-              end
-            end
-          end
-        else
-          verbose "Skipping #{item[key]} because it exists"
-        end
-      end
+      # should this return a Pathname instead?
     end
 
     def toremotename(root, path)
