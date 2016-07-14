@@ -152,6 +152,52 @@ module MrMurano
     end
 
     # TODO sync up: like push, but deletes remote things not local
+
+    def locallist(from)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      unless from.exist? then
+        return []
+      end
+      raise "Not a directory: #{from.to_s}" unless from.directory?
+
+      Pathname.glob(from.to_s + '**/*')
+    end
+
+    def syncup
+      there = list()
+      here = locallist()
+      key = @itemkey.to_s
+      
+      # split into three lists.
+      # - Items here and not there. (toadd)
+      # - Items there and not here. (todel)
+      # - Items here and there. (tomod)
+      therebox = {}
+      there.each do |item|
+        therebox[ item[key] ] = item
+      end
+      herebox = {}
+      here.each do |item|
+        herebox[ item[key] ] = item
+      end
+      toadd = herebox.keys - therebox.keys
+      todel = therebox.keys - herebox.keys
+      tomod = herebox.keys & therebox.keys
+
+      tomod.each do |key|
+        verbose "Removing item #{key}"
+        remove(key) unless $cfg['tool.dry']
+      end
+      toadd.each do |key|
+        verbose "Adding item #{key}"
+        upload(here[key], ……) unless $cfg['tool.dry']
+      end
+      tomod.each do |key|
+        verbose "Updating item #{key}"
+        upload(here[key], ……) unless $cfg['tool.dry']
+      end
+    end
+
     # TODO sync down: like pull, but deletes local things not remote
 
   end
@@ -162,6 +208,10 @@ module MrMurano
 
     def info
       get()
+    end
+
+    def list
+      get('/')
     end
 
     def log
@@ -336,17 +386,6 @@ module MrMurano
       {:method=>md[1], :path=>md[2]}
     end
 
-    def locallist(from)
-      from = Pathname.new(from) unless from.kind_of? Pathname
-      unless from.exist? then
-        return []
-      end
-      raise "Not a directory: #{from.to_s}" unless from.directory?
-
-      Pathname.glob(from.to_s + '**/*').map do |path|
-        toremotename(from, path)
-      end
-    end
   end
 
   ##
@@ -583,16 +622,14 @@ end
 # fe: mr file here there to upload a single file
 #     mr file --pull there here
 #
-command :solution do |c|
+command :sol do |c|
   c.syntax = %{mr solution ...}
 
   c.action do |args, options|
 
-    sol = MrMurano::Role.new
-    say sol.list
-    #say sol.fetch('debug')
-    sol.remove('debug')
-    say sol.list
+    sol = MrMurano::Endpoint.new
+    pp sol.list
+    pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
 
   end
 end
