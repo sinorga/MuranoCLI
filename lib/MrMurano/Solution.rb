@@ -184,7 +184,6 @@ module MrMurano
       end
     end
 
-    # TODO sync down: like pull, but deletes local things not remote
     def syncdown(into, options={})
       there = list()
       into = Pathname.new(into) unless into.kind_of? Pathname
@@ -651,29 +650,6 @@ module MrMurano
       into
     end
 
-    # Since this works form a single file, needs different code.
-    # This currently assumes that #list gets all of the info, and that we dno't
-    # need to call #fetch on each item.
-    def pull(into, overwrite=false)
-      into = Pathname.new(into) unless into.kind_of? Pathname
-      #into.mkdir unless into.exist?
-      raise "Not a file: #{into.to_s}" if into.exist? and not into.file?
-      key = @itemkey.to_s
-
-      there = list()
-
-      if not into.exist? or overwrite then
-        verbose "Pulling #{self.class.to_s} into #{into.to_s}"
-        if not $cfg['tool.dry'] then
-          into.open('wb') do |outio|
-            outio.write there.to_yaml
-          end
-        end
-      else
-          verbose "Skipping #{self.class.to_s} because #{into.to_s} exists"
-      end
-    end
-
     def locallist(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
       if not from.exist? then
@@ -725,12 +701,6 @@ module MrMurano
 
 end
 
-# I think what I want for top level commands is a 
-# - sync --down : Make working dir like servers
-#   --no-delete : Don't delete things at destination
-#   --no-create : Don't create things at destination
-#   --no-update : Don't update things at destination
-# 
 # And then various specific commands.
 # fe: mr file here there to upload a single file
 #     mr file --pull there here
@@ -767,6 +737,15 @@ command :syncdown do |c|
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
 
+    if options.all then
+      options.files = true
+      options.endpoints = true
+      options.modules = true
+      options.roles = true
+      options.users = true
+      options.eventhandlers = true
+    end
+    
     if options.endpoints then
       sol = MrMurano::Endpoint.new
       sol.syncdown($cfg['location.base'] + $cfg['location.endpoints'], options)
@@ -799,6 +778,7 @@ command :syncdown do |c|
 
   end
 end
+alias_command :pull, :syncdown, '--no-delete'
 
 command :syncup do |c|
   c.syntax = %{mr syncup [options]}
