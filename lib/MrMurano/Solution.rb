@@ -431,12 +431,11 @@ module MrMurano
     end
 
     def toremotename(from, path)
-      path.basename.to_s.sub(/\..*/, '')
-      # FIXME: how do we get the service and event for these?
-      # other tool does it by the config file.
-      # In endpoints, we do it with a header.
-      # --#EVENT service event
-      {:service=>'', :event=>''}
+      path = Pathname.new(path) unless path.kind_of? Pathname
+      aheader = path.readlines().first
+      md = /--#EVENT (\S+) (\S+)/.match(aheader)
+      raise "Not an Event handler: #{path.to_s}" if md.nil?
+      {:service=>md[1], :event=>md[2]}
     end
   end
 
