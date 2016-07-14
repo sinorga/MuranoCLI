@@ -51,6 +51,8 @@ module MrMurano
       set('location.users', 'users.yaml', :defaults)
 
       set('files.default_page', 'index.html', :defaults)
+
+      set('eventhandler.skiplist', 'websocket webservice', :defaults)
     end
 
     # Look at parent directories until HOME

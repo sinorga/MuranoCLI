@@ -413,11 +413,17 @@ module MrMurano
   end
 
   # …/eventhandler
-  class EventHandler < SolutionBase
+  class EventHandler < ServiceBase
     def initialize
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
+    end
+
+    def list
+      ret = get()
+      skiplist = ($cfg['eventhandler.skiplist'] or '').split
+      ret['items'].reject{|i| i.has_key?('service') and skiplist.include? i['service'] }
     end
 
     def tolocalname(item, key)
@@ -517,8 +523,8 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::Endpoint.new
-    say sol.locallist( $cfg['location.base'] + $cfg['location.endpoints'] )
+    sol = MrMurano::EventHandler.new
+    say sol.list
     #say sol.fetch('/')
 
   end
