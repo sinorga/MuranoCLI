@@ -53,8 +53,11 @@ module MrMurano
         case response
         when Net::HTTPSuccess
           return {} if response.body.nil?
-          return {} if response.body == 'OK'
-          return JSON.parse(response.body)
+          begin
+            return JSON.parse(response.body)
+          rescue
+            return response.body
+          end
         else
           say_error "got #{response} from #{request} #{request.uri.to_s}"
           say_error ":: #{response.body}"
@@ -531,6 +534,11 @@ module MrMurano
       super
       @uriparts << 'user'
     end
+
+    def upload(local, remote)
+      say_warning "Updating Users isn't working currently."
+      # post does work if the :password field is set.
+    end
   end
 
 end
@@ -575,6 +583,7 @@ command :push do |c|
   c.option '--modules', 'Push modules up'
   c.option '--eventhandlers', 'Push eventhandlers up'
   c.option '--roles', 'Push roles up'
+  c.option '--users', 'Push users up'
 
   c.action do |args, options|
 
@@ -601,6 +610,11 @@ command :push do |c|
     if options.roles then
       sol = MrMurano::Role.new
       sol.push( $cfg['location.base'] + $cfg['location.roles'], options.overwrite )
+    end
+
+    if options.users then
+      sol = MrMurano::User.new
+      sol.push( $cfg['location.base'] + $cfg['location.users'], options.overwrite )
     end
 
   end
