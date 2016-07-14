@@ -130,8 +130,6 @@ module MrMurano
       path.relative_path_from(root).to_s
     end
 
-    # TODO sync up: like push, but deletes remote things not local
-
     def locallist(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
       unless from.exist? then
@@ -139,7 +137,7 @@ module MrMurano
       end
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
-      Pathname.glob(from.to_s + '**/*').map do |path|
+      Pathname.glob(from.to_s + '/**/*').map do |path|
         name = toremotename(from, path)
         case name
         when Hash
@@ -210,6 +208,70 @@ module MrMurano
     end
 
     # TODO sync down: like pull, but deletes local things not remote
+    def syncdown(into, options={})
+      there = list()
+      into = Pathname.new(into) unless into.kind_of? Pathname
+      here = locallist(into)
+      itemkey = @itemkey.to_s
+ 
+      # split into three lists.
+      # - Items here and not there. (todel)
+      # - Items there and not here. (toadd)
+      # - Items here and there. (tomod)
+      therebox = {}
+      there.each do |item|
+        therebox[ synckey(item) ] = item
+      end
+      herebox = {}
+      here.each do |item|
+        herebox[ synckey(item) ] = item
+      end
+      todel = herebox.keys - therebox.keys
+      toadd = therebox.keys - herebox.keys
+      tomod = herebox.keys & therebox.keys
+
+      if options.delete then
+        todel.each do |key|
+          verbose "Removing item #{key}"
+          unless $cfg['tool.dry'] then
+            say_error "NOT IMPLEMENTED YET"
+          end
+        end
+      end
+      if options.create then
+        into.mkpath unless $cfg['tool.dry']
+        toadd.each do |key|
+          verbose "Adding item #{key}"
+          unless $cfg['tool.dry'] then
+            item = therebox[key]
+            name = tolocalname(item, itemkey)
+            raise "Bad key(#{itemkey}) for #{item}" if name.nil?
+            dest = into + name
+            id = item[itemkey]
+            dest.open('wb') do |io| # FIXME will fail for role/user
+              fetch(id) do |chunk|
+                io.write chunk
+              end
+            end
+          end
+        end
+      end
+      if options.update then
+        into.mkpath unless $cfg['tool.dry']
+        tomod.each do |key|
+          verbose "Updating item #{key}"
+          unless $cfg['tool.dry'] then
+            lp = herebox[key][:local_path]
+            id = therebox[key][itemkey]
+            lp.open('wb') do |io| # FIXME will fail for role/user
+              fetch(id) do |chunk|
+                io.write chunk
+              end
+            end
+          end
+        end
+      end
+    end
 
   end
   class Solution < SolutionBase
@@ -356,6 +418,7 @@ module MrMurano
       ret = get('/' + id.to_s)
       aheader = ret['script'].lines.first
       dheader = "--#ENDPOINT #{ret['method']} #{ret['path']}"
+      # FIXME is adding the header if it already exists.
       if block_given? then
         yield dheader + "\n" if aheader != dheader
         yield ret['script']
@@ -670,9 +733,7 @@ module MrMurano
 
 end
 
-#
 # I think what I want for top level commands is a 
-# - sync --up   : Make servers like my working dir
 # - sync --down : Make working dir like servers
 #   --no-delete : Don't delete things at destination
 #   --no-create : Don't create things at destination
@@ -688,24 +749,44 @@ command :sol do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::File.new
+    sol = MrMurano::Endpoint.new
     pp sol.list
-    pp sol.locallist($cfg['location.base'] + $cfg['location.files'])
+    pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
     #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
   end
 end
 
+command :syncdown do |c|
+  c.syntax = %{mr syncdown [options]}
+  c.description = %{Sync project down from Murano}
+  c.option '--endpoints', %{Sync Endpoints}
+
+  c.option '--[no-]delete', %{Don't delete things from server}
+  c.option '--[no-]create', %{Don't create things on server}
+  c.option '--[no-]update', %{Don't update things on server}
+
+  c.action do |args,options|
+    options.default :delete=>true, :create=>true, :update=>true
+
+    if options.endpoints then
+      sol = MrMurano::Endpoint.new
+      sol.syncdown($cfg['location.base'] + $cfg['location.endpoints'], options)
+    end
+
+  end
+end
+
 command :syncup do |c|
-  c.syntax = %{mr syncup }
+  c.syntax = %{mr syncup [options]}
   c.description = %{Sync project up into Murano}
   c.option '--all', 'Sync everything'
-  c.option '--endpoints'
-  c.option '--modules'
-  c.option '--eventhandlers'
-  c.option '--roles'
-  c.option '--users'
-  c.option '--files'
+  c.option '--endpoints', %{Sync Endpoints}
+  c.option '--modules', %{Sync Modules}
+  c.option '--eventhandlers', %{Sync Event Handlers}
+  c.option '--roles', %{Sync Roles}
+  c.option '--users', %{Sync Users}
+  c.option '--files', %{Sync Static Files}
 
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}
@@ -722,7 +803,6 @@ command :syncup do |c|
       options.users = true
       options.eventhandlers = true
     end
-
 
     if options.endpoints then
       sol = MrMurano::Endpoint.new
