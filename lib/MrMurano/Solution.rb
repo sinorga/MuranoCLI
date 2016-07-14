@@ -93,15 +93,18 @@ module MrMurano
 
     # …
 
-    def tolocalname(item, key)
-      item[key]
-      # should this return a Pathname instead?
-    end
-
     def toremotename(root, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
       root = Pathname.new(root) unless root.kind_of? Pathname
       path.relative_path_from(root).to_s
+    end
+    def tolocalpath(into, item)
+      into.mkpath unless $cfg['tool.dry']
+      return item[:local_path] if item.has_key? :local_path
+      itemkey = @itemkey.to_s
+      name = tolocalname(item, itemkey)
+      raise "Bad key(#{itemkey}) for #{item}" if name.nil?
+      dest = into + name
     end
 
     def locallist(from)
@@ -213,26 +216,22 @@ module MrMurano
         end
       end
       if options.create then
-        into.mkpath unless $cfg['tool.dry']
         toadd.each do |key|
           verbose "Adding item #{key}"
           unless $cfg['tool.dry'] then
             item = therebox[key]
-            name = tolocalname(item, itemkey)
-            raise "Bad key(#{itemkey}) for #{item}" if name.nil?
-            dest = into + name
+            dest = tolocalpath(into, item)
 
             download(dest, item)
           end
         end
       end
       if options.update then
-        into.mkpath unless $cfg['tool.dry']
         tomod.each do |key|
           verbose "Updating item #{key}"
           unless $cfg['tool.dry'] then
-            dest = herebox[key][:local_path]
             item = therebox[key]
+            dest = tolocalpath(into, herebox[key].merge(item) )
 
             download(dest, item)
           end
@@ -636,6 +635,22 @@ module MrMurano
       post('/', remote)
     end
 
+    def download(local, item)
+      # needs to append/merge with file
+      # for now, we'll read, modify, write
+      here = []
+      if local.exist? then
+        local.open('rb') {|io| here = YAML.load(io)}
+      end
+      here << item
+      local.open('wb') {|io| io.write here.to_yaml }
+
+    end
+
+    def tolocalpath(into, item)
+      into
+    end
+
     # Since this works form a single file, needs different code.
     # This currently assumes that #list gets all of the info, and that we dno't
     # need to call #fetch on each item.
@@ -741,7 +756,8 @@ command :syncdown do |c|
   c.option '--endpoints', %{Sync Endpoints}
   c.option '--modules', %{Sync Modules}
   c.option '--eventhandlers', %{Sync Event Handlers}
-
+  c.option '--roles', %{Sync Roles}
+  c.option '--users', %{Sync Users}
   c.option '--files', %{Sync Static Files}
 
   c.option '--[no-]delete', %{Don't delete things from server}
