@@ -568,6 +568,14 @@ module MrMurano
       raise "Not an Event handler: #{path.to_s}" if md.nil?
       {:service=>md[1], :event=>md[2]}
     end
+
+    def synckey(item)
+      if item.has_key? :service then
+        "#{item[:service]}_#{item[:event]}"
+      else
+        "#{item['service']}_#{item['event']}"
+      end
+    end
   end
 
   # How do we enable product.id to flow into the eventhandler?
@@ -699,6 +707,7 @@ command :syncup do |c|
   c.syntax = %{mr syncup }
   c.option '--endpoints'
   c.option '--modules'
+  c.option '--eventhandlers'
 
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}
@@ -715,6 +724,11 @@ command :syncup do |c|
     if options.modules then
       sol = MrMurano::Library.new
       sol.syncup( $cfg['location.base'] + $cfg['location.modules'], options)
+    end
+
+    if options.eventhandlers then
+      sol = MrMurano::EventHandler.new
+      sol.syncup( $cfg['location.base'] + $cfg['location.eventhandlers'], options)
     end
 
   end
