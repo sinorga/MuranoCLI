@@ -13,6 +13,10 @@ command :syncdown do |c|
   c.option '--[no-]create', %{Don't create things on server}
   c.option '--[no-]update', %{Don't update things on server}
 
+  c.example %{Make local be like what is on the server}, %{mr syncdown --all}
+  c.example %{Pull down new things, but don't delete or modify anything}, %{mr syncdown --all --no-delete --no-update}
+  c.example %{Only Pull new static files}, %{mr syncdown --files --no-delete --no-update}
+  
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
 
@@ -73,6 +77,10 @@ command :syncup do |c|
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}
   c.option '--[no-]update', %{Don't update things on server}
+
+  c.example %{Deploy project to server}, %{mr syncup --all}
+  c.example %{Update static files}, %{mr syncup --files}
+  c.example %{Only add or modify static files}, %{mr syncup --files --no-delete}
 
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
