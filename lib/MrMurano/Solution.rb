@@ -416,9 +416,8 @@ module MrMurano
 
     def fetch(id)
       ret = get('/' + id.to_s)
-      aheader = ret['script'].lines.first
+      aheader = ret['script'].lines.first.chomp
       dheader = "--#ENDPOINT #{ret['method']} #{ret['path']}"
-      # FIXME is adding the header if it already exists.
       if block_given? then
         yield dheader + "\n" if aheader != dheader
         yield ret['script']
@@ -750,8 +749,9 @@ command :sol do |c|
   c.action do |args, options|
 
     sol = MrMurano::Endpoint.new
-    pp sol.list
-    pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
+    pp sol.fetch('4JxZBgHmUO')
+    #pp sol.list
+    #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
     #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
   end
