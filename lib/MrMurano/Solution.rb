@@ -303,6 +303,18 @@ module MrMurano
       raise "Not an Endpoint: #{path.to_s}" if md.nil?
       {:method=>md[1], :path=>md[2]}
     end
+
+    def locallist(from)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      unless from.exist? then
+        return []
+      end
+      raise "Not a directory: #{from.to_s}" unless from.directory?
+
+      Pathname.glob(from.to_s + '**/*').map do |path|
+        toremotename(from, path)
+      end
+    end
   end
 
   ##
@@ -415,6 +427,9 @@ module MrMurano
     def toremotename(from, path)
       path.basename.to_s.sub(/\..*/, '')
       # FIXME: how do we get the service and event for these?
+      # other tool does it by the config file.
+      # In endpoints, we do it with a header.
+      # --#EVENT service event
       {:service=>'', :event=>''}
     end
   end
@@ -502,8 +517,8 @@ command :solution do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::Library.new
-    say sol.list
+    sol = MrMurano::Endpoint.new
+    say sol.locallist( $cfg['location.base'] + $cfg['location.endpoints'] )
     #say sol.fetch('/')
 
   end
