@@ -161,9 +161,18 @@ module MrMurano
       get()
     end
 
-    # …/serviceconfig
-    def sc # TODO understand this. (i think it has to do with getting data to flow)
-      get('/serviceconfig/')
+  # …/serviceconfig
+  class ServiceConfig < SolutionBase
+    def initialize
+      super
+      @uriparts << 'serviceconfig'
+    end
+
+    def list
+      get()['items']
+    end
+    def fetch(id)
+      get('/' + id.to_s)
     end
   end
 
