@@ -9,6 +9,7 @@ require 'pp'
 
 module MrMurano
   class SolutionBase
+    # This might also be a valid ProductBase.
     def initialize
       @token = Account.new.token
       @sid = $cfg['solution.id']
@@ -138,6 +139,8 @@ module MrMurano
       raise "Not a directory: #{from.to_s}" unless from.directory?
       key = @itemkey.to_s
 
+      # have an idea to not do the glob here, but call a locallist() method.
+      # Done right, then the UserBase push/pull could be identical to this
       Pathname.glob(from.to_s + '**/*') do |path|
         name = toremotename(from, path)
 
