@@ -597,7 +597,7 @@ module MrMurano
 
     def upload(local, remote)
       # Roles cannot be modified, so must delete and post.
-      delete('/' + remote.to_s) do |request, http|
+      delete('/' + remote[@itemkey.to_s]) do |request, http|
         response = http.request(request)
         case response
         when Net::HTTPSuccess
@@ -607,7 +607,7 @@ module MrMurano
           say_error ":: #{response.body}"
         end
       end
-      post('/', local)
+      post('/', remote)
     end
 
     # Since this works form a single file, needs different code.
@@ -647,11 +647,28 @@ module MrMurano
       here.each do |item|
         verbose "Pushing #{item} to #{item[key]}"
         if not $cfg['tool.dry'] then
-          upload(item, item[key])
+          upload(from, item)
         end
       end
     end
 
+    def locallist(from)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      if not from.exist? then
+        say_warning "Skipping missing #{from.to_s}"
+        return []
+      end
+      unless from.file? then
+        say_warning "Cannot read from #{from.to_s}"
+        return []
+      end
+      key = @itemkey.to_s
+
+      here = {}
+      from.open {|io| here = YAML.load(io) }
+      
+      here
+    end
   end
 
   # …/role
@@ -674,6 +691,14 @@ module MrMurano
       say_warning "Updating Users isn't working currently."
       # post does work if the :password field is set.
     end
+
+    def synckey(item)
+      if item.has_key? :email then
+        item[:email]
+      else
+        item['email']
+      end
+    end
   end
 
 end
@@ -695,10 +720,10 @@ command :sol do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::Endpoint.new
-    #pp sol.list
-    #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
-    sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
+    sol = MrMurano::User.new
+    pp sol.list
+    pp sol.locallist($cfg['location.base'] + $cfg['location.users'])
+    #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
   end
 end
@@ -708,6 +733,8 @@ command :syncup do |c|
   c.option '--endpoints'
   c.option '--modules'
   c.option '--eventhandlers'
+  c.option '--roles'
+  c.option '--users'
 
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}
@@ -729,6 +756,16 @@ command :syncup do |c|
     if options.eventhandlers then
       sol = MrMurano::EventHandler.new
       sol.syncup( $cfg['location.base'] + $cfg['location.eventhandlers'], options)
+    end
+
+    if options.roles then
+      sol = MrMurano::Role.new
+      sol.syncup( $cfg['location.base'] + $cfg['location.roles'], options)
+    end
+
+    if options.users then
+      sol = MrMurano::User.new
+      sol.syncup( $cfg['location.base'] + $cfg['location.users'], options)
     end
 
   end
