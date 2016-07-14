@@ -131,24 +131,41 @@ command :account do |c|
   c.option '--businesses', 'Get businesses for user'
   c.option '--products', 'Get products for user (needs a business)'
   c.option '--solutions', 'Get solutions for user (needs a business)'
+  c.option '--idonly', 'Only return the ids'
 
   c.action do |args, options|
 
     acc = MrMurano::Account.new
+
     if options.businesses then
-      busy = acc.businesses.map{|row| [row['bizid'], row['role'], row['name']]}
-      table = Terminal::Table.new :rows => busy, :headings => ['Biz ID', 'Role', 'Name']
-      say table
+      data = acc.businesses
+      if options.idonly then
+        say data.map{|row| row['bizid']}.join(' ')
+      else
+        busy = data.map{|row| [row['bizid'], row['role'], row['name']]}
+        table = Terminal::Table.new :rows => busy, :headings => ['Biz ID', 'Role', 'Name']
+        say table
+      end
 
     elsif options.products then
-      busy = acc.products.map{|r| [r['label'], r['type'], r['pid'], r['modelId']]}
-      table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
-      say table
+      data = acc.products
+      if options.idonly then
+        say data.map{|row| row['pid']}.join(' ')
+      else
+        busy = data.map{|r| [r['label'], r['type'], r['pid'], r['modelId']]}
+        table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
+        say table
+      end
 
     elsif options.solutions then
-      busy = acc.solutions.map{|r| [r['apiId'], r['domain'], r['type'], r['sid']]}
-      table = Terminal::Table.new :rows => busy, :headings => ['API ID', 'Domain', 'Type', 'SID']
-      say table
+      data = acc.solutions
+      if options.idonly then
+        say data.map{|row| row['apiId']}.join(' ')
+      else
+        busy = data.map{|r| [r['apiId'], r['domain'], r['type'], r['sid']]}
+        table = Terminal::Table.new :rows => busy, :headings => ['API ID', 'Domain', 'Type', 'SID']
+        say table
+      end
 
     else
       say acc.token
