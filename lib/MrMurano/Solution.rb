@@ -478,8 +478,7 @@ module MrMurano
 
     # ??? remove
     def remove(name)
-      # TODO Test this, I'm guesing.
-      delete(mkalias(name))
+      delete('/'+name)
     end
 
     def upload(local, remote)
@@ -533,6 +532,14 @@ module MrMurano
     def toremotename(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
       {:name => name}
+    end
+
+    def synckey(item)
+      if item.has_key? :name then
+        item[:name]
+      else
+        item['name']
+      end
     end
   end
 
@@ -691,17 +698,25 @@ end
 command :syncup do |c|
   c.syntax = %{mr syncup }
   c.option '--endpoints'
+  c.option '--modules'
 
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}
   c.option '--[no-]update', %{Don't update things on server}
 
   c.action do |args,options|
+    options.default :delete=>true, :create=>true, :update=>true
 
     if options.endpoints then
       sol = MrMurano::Endpoint.new
       sol.syncup($cfg['location.base'] + $cfg['location.endpoints'], options)
     end
+
+    if options.modules then
+      sol = MrMurano::Library.new
+      sol.syncup( $cfg['location.base'] + $cfg['location.modules'], options)
+    end
+
   end
 end
 
