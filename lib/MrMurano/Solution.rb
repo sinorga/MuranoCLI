@@ -210,7 +210,9 @@ module MrMurano
         todel.each do |key|
           verbose "Removing item #{key}"
           unless $cfg['tool.dry'] then
-            say_error "NOT IMPLEMENTED YET"
+            item = herebox[key]
+            dest = tolocalpath(into, item)
+            removelocal(dest, item)
           end
         end
       end
@@ -240,12 +242,15 @@ module MrMurano
 
     def download(local, item)
       id = item[@itemkey.to_s]
-      local.open('wb') do |io| # FIXME will fail for role/user
+      local.open('wb') do |io|
         fetch(id) do |chunk|
           io.write chunk
         end
       end
+    end
 
+    def removelocal(dest, item)
+      dest.unlink
     end
 
   end
@@ -643,7 +648,20 @@ module MrMurano
       end
       here << item
       local.open('wb') {|io| io.write here.to_yaml }
+    end
 
+    def removelocal(dest, item)
+      # needs to append/merge with file
+      # for now, we'll read, modify, write
+      here = []
+      if local.exist? then
+        local.open('rb') {|io| here = YAML.load(io)}
+      end
+      key = @itemkey.to_s
+      here.delete_if do |it|
+        it[key] == item[key]
+      end
+      local.open('wb') {|io| io.write here.to_yaml }
     end
 
     def tolocalpath(into, item)
