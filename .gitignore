@@ -6,11 +6,11 @@ Icon
 cookies
 .jiraProject
 .rpjProject
-jiraMule-*.gem
 tags
 
 xcuserdata
 Pods/
+pkg/
 
 .mrmuranorc
 files/
