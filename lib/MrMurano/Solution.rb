@@ -730,6 +730,7 @@ end
 
 command :syncup do |c|
   c.syntax = %{mr syncup }
+  c.option '--all', 'Sync everything'
   c.option '--endpoints'
   c.option '--modules'
   c.option '--eventhandlers'
@@ -742,6 +743,16 @@ command :syncup do |c|
 
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
+
+    if options.all then
+      options.files = true
+      options.endpoints = true
+      options.modules = true
+      options.roles = true
+      options.users = true
+      options.eventhandlers = true
+    end
+
 
     if options.endpoints then
       sol = MrMurano::Endpoint.new
