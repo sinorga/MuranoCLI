@@ -80,6 +80,7 @@ module MrMurano
     def toremotename(from, path)
       name = super(from, path)
       name = '/' if name == $cfg['files.default_page']
+      name = "/#{name}" unless name.chars.first == '/'
 
       mime=`file -I -b #{path.to_s}`.chomp.sub(/;.*$/, '')
       mime='application/octect' if mime.nil?
@@ -90,11 +91,7 @@ module MrMurano
     end
 
     def synckey(item)
-      if item.has_key? :path then
-        "#{item[:path]}_#{item[:checksum]}_#{item[:mime_type]}"
-      else
-        "#{item['path']}_#{item['checksum']}_#{item['mime_type']}"
-      end
+      "#{item[:path]}_#{item[:checksum]}_#{item[:mime_type]}"
     end
   end
 
