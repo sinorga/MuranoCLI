@@ -67,9 +67,9 @@ module MrMurano
     end
 
     def tolocalname(item, key)
-      name = item['method'].downcase
+      name = item[:method].downcase
       name << '_'
-      name << item['path'].gsub(/\//, '-')
+      name << item[:path].gsub(/\//, '-')
       name << '.lua'
     end
 
@@ -83,11 +83,7 @@ module MrMurano
     end
 
     def synckey(item)
-      if item.has_key? :method then
-        "#{item[:method]}_#{item[:path]}"
-      else
-        "#{item['method']}_#{item['path']}"
-      end
+      "#{item[:method]}_#{item[:path]}"
     end
 
   end

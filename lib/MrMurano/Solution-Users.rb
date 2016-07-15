@@ -78,7 +78,7 @@ module MrMurano
 
       here = {}
       from.open {|io| here = YAML.load(io) }
-      
+
       here
     end
   end
@@ -106,11 +106,7 @@ module MrMurano
     end
 
     def synckey(item)
-      if item.has_key? :email then
-        item[:email]
-      else
-        item['email']
-      end
+      item[:email]
     end
   end
 end

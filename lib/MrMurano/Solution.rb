@@ -97,7 +97,7 @@ module MrMurano
     def tolocalpath(into, item)
       into.mkpath unless $cfg['tool.dry']
       return item[:local_path] if item.has_key? :local_path
-      itemkey = @itemkey.to_s
+      itemkey = @itemkey.to_sym
       name = tolocalname(item, itemkey)
       raise "Bad key(#{itemkey}) for #{item}" if name.nil?
       dest = into + name
@@ -123,14 +123,14 @@ module MrMurano
     end
 
     def synckey(item)
-      key = @itemkey.to_s
+      key = @itemkey.to_sym
       item[key]
     end
 
     def syncup(from, options={})
       there = list()
       here = locallist(from)
-      itemkey = @itemkey.to_s
+      itemkey = @itemkey.to_sym
  
       # split into three lists.
       # - Items here and not there. (toadd)
@@ -138,10 +138,12 @@ module MrMurano
       # - Items here and there. (tomod)
       therebox = {}
       there.each do |item|
+        item = Hash.transform_keys_to_symbols(item)
         therebox[ synckey(item) ] = item
       end
       herebox = {}
       here.each do |item|
+        item = Hash.transform_keys_to_symbols(item)
         herebox[ synckey(item) ] = item
       end
       toadd = herebox.keys - therebox.keys
@@ -184,7 +186,7 @@ module MrMurano
       there = list()
       into = Pathname.new(into) unless into.kind_of? Pathname
       here = locallist(into)
-      itemkey = @itemkey.to_s
+      itemkey = @itemkey.to_sym
  
       # split into three lists.
       # - Items here and not there. (todel)
@@ -192,10 +194,12 @@ module MrMurano
       # - Items here and there. (tomod)
       therebox = {}
       there.each do |item|
+        item = Hash.transform_keys_to_symbols(item)
         therebox[ synckey(item) ] = item
       end
       herebox = {}
       here.each do |item|
+        item = Hash.transform_keys_to_symbols(item)
         herebox[ synckey(item) ] = item
       end
       todel = herebox.keys - therebox.keys
@@ -237,7 +241,7 @@ module MrMurano
     end
 
     def download(local, item)
-      id = item[@itemkey.to_s]
+      id = item[@itemkey.to_sym]
       local.open('wb') do |io|
         fetch(id) do |chunk|
           io.write chunk

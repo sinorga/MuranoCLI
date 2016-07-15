@@ -83,7 +83,7 @@ module MrMurano
     end
 
     def tolocalname(item, key)
-      name = item['name']
+      name = item[:name]
 #      altpath = $cfg["modules.pathfor_#{name}"]
 #      if not altpath.nil? then
 #        return altpath
@@ -98,11 +98,7 @@ module MrMurano
     end
 
     def synckey(item)
-      if item.has_key? :name then
-        item[:name]
-      else
-        item['name']
-      end
+      item[:name]
     end
   end
 
@@ -121,7 +117,7 @@ module MrMurano
     end
 
     def tolocalname(item, key)
-      "#{item['name']}.lua"
+      "#{item[:name]}.lua"
     end
 
     def toremotename(from, path)
@@ -133,11 +129,7 @@ module MrMurano
     end
 
     def synckey(item)
-      if item.has_key? :service then
-        "#{item[:service]}_#{item[:event]}"
-      else
-        "#{item['service']}_#{item['event']}"
-      end
+      "#{item[:service]}_#{item[:event]}"
     end
   end
 
