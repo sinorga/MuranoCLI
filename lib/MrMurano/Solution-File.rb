@@ -55,9 +55,10 @@ module MrMurano
       local = Pathname.new(local) unless local.kind_of? Pathname
 
       # FIXME: bad request? why?
+      # using curl -F works.  So is a bug in multipart-put?
       uri = endPoint('upload' + remote[:path])
       upper = UploadIO.new(local.open('rb'), remote[:mime_type], local.basename)
-			req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
+      req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
       workit(req) do |request,http|
         request.delete 'Content-Type'
 
