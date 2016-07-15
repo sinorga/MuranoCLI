@@ -1,23 +1,16 @@
 
 command :status do |c|
-  c.syntax = %{mr syncdown [options]}
-  c.description = %{Sync project down from Murano}
-  c.option '--all', 'Sync everything'
-  c.option '--endpoints', %{Sync Endpoints}
-  c.option '--modules', %{Sync Modules}
-  c.option '--eventhandlers', %{Sync Event Handlers}
-  c.option '--roles', %{Sync Roles}
-  c.option '--users', %{Sync Users}
-  c.option '--files', %{Sync Static Files}
+  c.syntax = %{mr status [options]}
+  c.description = %{Get the status of files}
+  c.option '--all', ' everything'
+  c.option '--endpoints', %{Endpoints}
+  c.option '--modules', %{Modules}
+  c.option '--eventhandlers', %{Event Handlers}
+  c.option '--roles', %{Roles}
+  c.option '--users', %{Users}
+  c.option '--files', %{Static Files}
 
   c.option '--asdown', %{Report as if syncdown instead of syncup}
-#  c.option '--[no-]delete', %{Don't delete things from server}
-#  c.option '--[no-]create', %{Don't create things on server}
-#  c.option '--[no-]update', %{Don't update things on server}
-#
-#  c.example %{Make local be like what is on the server}, %{mr syncdown --all}
-#  c.example %{Pull down new things, but don't delete or modify anything}, %{mr syncdown --all --no-delete --no-update}
-#  c.example %{Only Pull new static files}, %{mr syncdown --files --no-delete --no-update}
   
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true

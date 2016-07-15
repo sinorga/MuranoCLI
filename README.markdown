@@ -11,7 +11,7 @@ cd myproject
 mr syncdown --all
 ```
 
-Do stuff, then deploy `mr syncup --all`
+Do stuff, see what changed: `mr status --all`, then deploy `mr syncup --all`
 
 ## Install
 
