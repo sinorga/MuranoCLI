@@ -38,6 +38,7 @@ module MrMurano
     def set_req_defaults(request)
       request.content_type = 'application/json'
       request['authorization'] = 'token ' + @token
+      request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
       request
     end
 
