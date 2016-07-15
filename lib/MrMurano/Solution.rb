@@ -268,15 +268,16 @@ module MrMurano
       here.each do |item|
         item = Hash.transform_keys_to_symbols(item)
         item[:synckey] = synckey(item)
-        therebox[ item[:synckey] ] = item
+        herebox[ item[:synckey] ] = item
       end
-      unless options.asdown then
+      if options.asdown then
         todel = herebox.keys - therebox.keys
         toadd = therebox.keys - herebox.keys
         tomod = herebox.keys & therebox.keys
         {
           :toadd=> toadd.map{|key| therebox[key] },
           :todel=> todel.map{|key| herebox[key] },
+          # FIXME what if therebox[key] is nil?
           :tomod=> tomod.map{|key| therebox[key].merge(herebox[key]) }
         }
       else
