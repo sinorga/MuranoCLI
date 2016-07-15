@@ -258,10 +258,6 @@ module MrMurano
       here = locallist(from)
       itemkey = @itemkey.to_sym
  
-      # split into three lists.
-      # - Items here and not there. (toadd)
-      # - Items there and not here. (todel)
-      # - Items here and there. (tomod)
       therebox = {}
       there.each do |item|
         item = Hash.transform_keys_to_symbols(item)
@@ -274,7 +270,7 @@ module MrMurano
         item[:synckey] = synckey(item)
         therebox[ item[:synckey] ] = item
       end
-      if options.asdown then
+      unless options.asdown then
         todel = herebox.keys - therebox.keys
         toadd = therebox.keys - herebox.keys
         tomod = herebox.keys & therebox.keys
