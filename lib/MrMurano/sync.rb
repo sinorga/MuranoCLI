@@ -2,6 +2,7 @@
 command :syncdown do |c|
   c.syntax = %{mr syncdown [options]}
   c.description = %{Sync project down from Murano}
+  c.option '--all', 'Sync everything'
   c.option '--endpoints', %{Sync Endpoints}
   c.option '--modules', %{Sync Modules}
   c.option '--eventhandlers', %{Sync Event Handlers}
