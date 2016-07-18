@@ -340,9 +340,8 @@ command :sol do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::Endpoint.new
-    pp sol.fetch('4JxZBgHmUO')
-    #pp sol.list
+    sol = MrMurano::File.new
+    pp sol.list
     #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
     #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
