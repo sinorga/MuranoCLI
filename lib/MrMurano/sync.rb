@@ -3,12 +3,12 @@ command :syncdown do |c|
   c.syntax = %{mr syncdown [options]}
   c.description = %{Sync project down from Murano}
   c.option '--all', 'Sync everything'
-  c.option '--endpoints', %{Sync Endpoints}
-  c.option '--modules', %{Sync Modules}
-  c.option '--eventhandlers', %{Sync Event Handlers}
+  c.option '-s','--files', %{Sync Static Files}
+  c.option '-a','--endpoints', %{Sync Endpoints}
+  c.option '-m','--modules', %{Sync Modules}
+  c.option '-e','--eventhandlers', %{Sync Event Handlers}
   c.option '--roles', %{Sync Roles}
   c.option '--users', %{Sync Users}
-  c.option '--files', %{Sync Static Files}
 
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}
@@ -68,12 +68,12 @@ command :syncup do |c|
   c.syntax = %{mr syncup [options]}
   c.description = %{Sync project up into Murano}
   c.option '--all', 'Sync everything'
-  c.option '--endpoints', %{Sync Endpoints}
-  c.option '--modules', %{Sync Modules}
-  c.option '--eventhandlers', %{Sync Event Handlers}
+  c.option '-s','--files', %{Sync Static Files}
+  c.option '-a','--endpoints', %{Sync Endpoints}
+  c.option '-m','--modules', %{Sync Modules}
+  c.option '-e','--eventhandlers', %{Sync Event Handlers}
   c.option '--roles', %{Sync Roles}
   c.option '--users', %{Sync Users}
-  c.option '--files', %{Sync Static Files}
 
   c.option '--[no-]delete', %{Don't delete things from server}
   c.option '--[no-]create', %{Don't create things on server}

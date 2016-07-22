@@ -9,11 +9,12 @@ require 'pp'
 program :version, MrMurano::VERSION
 program :description, %{Manage a Solution in Exosite's Murano}
 
-global_option('--verbose', 'Be chatty') {
+global_option('-V', '--verbose', 'Be chatty') {
   $cfg['tool.verbose'] = true
 }
 global_option('-n', '--dry', %{Don't run actions that make changes}) {
   $cfg['tool.dry'] = true
+  $cfg['tool.verbose'] = true # dry implies verbose
 }
 global_option '--skip-plugins', %{Don't load plugins. Good for when one goes bad.}
 

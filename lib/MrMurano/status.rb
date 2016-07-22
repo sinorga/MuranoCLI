@@ -2,13 +2,13 @@
 command :status do |c|
   c.syntax = %{mr status [options]}
   c.description = %{Get the status of files}
-  c.option '--all', ' everything'
-  c.option '--endpoints', %{Endpoints}
-  c.option '--modules', %{Modules}
-  c.option '--eventhandlers', %{Event Handlers}
+  c.option '--all', 'Check everything'
+  c.option '-s','--files', %{Static Files}
+  c.option '-a','--endpoints', %{Endpoints}
+  c.option '-m','--modules', %{Modules}
+  c.option '-e','--eventhandlers', %{Event Handlers}
   c.option '--roles', %{Roles}
   c.option '--users', %{Users}
-  c.option '--files', %{Static Files}
 
   c.option '--asdown', %{Report as if syncdown instead of syncup}
   
