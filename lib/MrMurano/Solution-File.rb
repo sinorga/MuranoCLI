@@ -61,6 +61,9 @@ module MrMurano
       # kludge past for a bit.
       `curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
 
+      # http://stackoverflow.com/questions/184178/ruby-how-to-post-a-file-via-http-as-multipart-form-data
+      #
+
 #      upper = UploadIO.new(local.open('rb'), remote[:mime_type], local.basename)
 #      req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
 #      workit(req) do |request,http|
