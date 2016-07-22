@@ -106,18 +106,18 @@ module MrMurano
       end
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
-      Pathname.glob(from.to_s + '/*').map do |path|
+      from.children.map do |path|
         if path.directory? then
           # TODO: look for definition. ( ?.rockspec? ?mr.modules? )
           # Lacking definition, find all *.lua but not *_test.lua
           path.children.reject{|p|
-            p.to_s =~ /.*_test.lua$/
+            p.fnmatch('*_test.lua') or p.basename.fnmatch('.*')
           }.select{|p|
             p.extname == '.lua'
           }.map{|p|
             {:local_path=>p, :name=>p.basename.to_s.sub(/\..*/, '')}
           }
-        else
+        elsif path.fnmatch('*.lua') and not (path.fnmatch('*_test.lua') or path.basename.fnmatch('.*')) then
           name = toremotename(from, path)
           case name
           when Hash
@@ -127,7 +127,7 @@ module MrMurano
             {:local_path => path, :name => name}
           end
         end
-      end.flatten
+      end.flatten.compact
     end
 
 
