@@ -88,6 +88,8 @@ module MrMurano
     # Lacking the .rockspec, do what? (ignore?)
 
     def tolocalname(item, key)
+      # TODO maybe replace with tolocalpath()
+      # TODO pull into module directories if needed.
       name = item[:name]
 #      altpath = $cfg["modules.pathfor_#{name}"]
 #      if not altpath.nil? then
@@ -96,6 +98,38 @@ module MrMurano
         "#{name}.lua"
 #      end
     end
+
+    def locallist(from)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      unless from.exist? then
+        return []
+      end
+      raise "Not a directory: #{from.to_s}" unless from.directory?
+
+      Pathname.glob(from.to_s + '/*').map do |path|
+        if path.directory? then
+          # TODO: look for definition. ( ?.rockspec? ?mr.modules? )
+          # Lacking definition, find all *.lua but not *_test.lua
+          path.children.reject{|p|
+            p.to_s =~ /.*_test.lua$/
+          }.select{|p|
+            p.extname == '.lua'
+          }.map{|p|
+            {:local_path=>p, :name=>p.basename.to_s.sub(/\..*/, '')}
+          }
+        else
+          name = toremotename(from, path)
+          case name
+          when Hash
+            name[:local_path] = path
+            name
+          else
+            {:local_path => path, :name => name}
+          end
+        end
+      end.flatten
+    end
+
 
     def toremotename(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
