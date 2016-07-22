@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gemspec
+#gemspec
 
 gem 'commander'
 gem 'multipart-post'
