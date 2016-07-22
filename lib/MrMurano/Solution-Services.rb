@@ -155,6 +155,21 @@ module MrMurano
       ret['items'].reject{|i| i.has_key?('service') and skiplist.include? i['service'] }
     end
 
+    def fetch(name)
+      ret = get('/'+name)
+      aheader = (ret['script'].lines.first or "").chomp
+      dheader = "--#EVENT #{ret['service']} #{ret['event']}"
+      if block_given? then
+        yield dheader + "\n" if aheader != dheader
+        yield ret['script']
+      else
+        res = ''
+        res << dheader + "\n" if aheader != dheader
+        res << ret['script']
+        res
+      end
+    end
+
     def tolocalname(item, key)
       "#{item[:name]}.lua"
     end
