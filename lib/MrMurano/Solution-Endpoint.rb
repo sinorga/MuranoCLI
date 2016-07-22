@@ -45,7 +45,7 @@ module MrMurano
       remote = remote.dup
       remote[:script] = script
       #post('', remote)
-      put('/' + remote[@itemkey.to_s], remote) do |request, http|
+      put('/' + remote[@itemkey], remote) do |request, http|
         response = http.request(request)
         case response
         when Net::HTTPSuccess

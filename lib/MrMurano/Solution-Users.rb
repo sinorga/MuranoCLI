@@ -22,7 +22,7 @@ module MrMurano
 
     def upload(local, remote)
       # Roles cannot be modified, so must delete and post.
-      delete('/' + remote[@itemkey.to_s]) do |request, http|
+      delete('/' + remote[@itemkey]) do |request, http|
         response = http.request(request)
         case response
         when Net::HTTPSuccess
@@ -53,7 +53,7 @@ module MrMurano
       if local.exist? then
         local.open('rb') {|io| here = YAML.load(io)}
       end
-      key = @itemkey.to_s
+      key = @itemkey.to_sym
       here.delete_if do |it|
         it[key] == item[key]
       end
@@ -74,7 +74,7 @@ module MrMurano
         say_warning "Cannot read from #{from.to_s}"
         return []
       end
-      key = @itemkey.to_s
+      key = @itemkey.to_sym
 
       here = {}
       from.open {|io| here = YAML.load(io) }

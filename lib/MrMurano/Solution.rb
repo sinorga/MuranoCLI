@@ -11,7 +11,7 @@ module MrMurano
       @sid = $cfg['solution.id']
       raise "No solution!" if @sid.nil?
       @uriparts = [:solution, @sid]
-      @itemkey = 'id'
+      @itemkey = :id
     end
 
     def verbose(msg)
