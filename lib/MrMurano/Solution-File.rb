@@ -57,19 +57,23 @@ module MrMurano
       # FIXME: bad request? why?
       # using curl -F works.  So is a bug in multipart-put?
       uri = endPoint('upload' + remote[:path])
-      upper = UploadIO.new(local.open('rb'), remote[:mime_type], local.basename)
-      req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
-      workit(req) do |request,http|
-        request.delete 'Content-Type'
 
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-        else
-          say_error "got #{response} from #{request} #{request.uri.to_s}"
-          say_error ":: #{response.body}"
-        end
-      end
+      # kludge past for a bit.
+      `curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
+
+#      upper = UploadIO.new(local.open('rb'), remote[:mime_type], local.basename)
+#      req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
+#      workit(req) do |request,http|
+#        request.delete 'Content-Type'
+#
+#        response = http.request(request)
+#        case response
+#        when Net::HTTPSuccess
+#        else
+#          say_error "got #{response} from #{request} #{request.uri.to_s}"
+#          say_error ":: #{response.body}"
+#        end
+#      end
     end
 
     def tolocalname(item, key)
