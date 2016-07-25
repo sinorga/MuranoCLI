@@ -313,21 +313,6 @@ module MrMurano
 
   end
 
-  # …/serviceconfig
-  class ServiceConfig < SolutionBase
-    def initialize
-      super
-      @uriparts << 'serviceconfig'
-    end
-
-    def list
-      get()['items']
-    end
-    def fetch(id)
-      get('/' + id.to_s)
-    end
-  end
-
 end
 
 # And then various specific commands.
@@ -340,8 +325,9 @@ command :sol do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::File.new
-    pp sol.list
+    sol = MrMurano::ServiceConfig.new
+    #pp sol.list
+    pp sol.fetch('9e95a4b6-446d-11e6-b451-576ce3d4af78')
     #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
     #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
