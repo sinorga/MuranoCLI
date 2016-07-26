@@ -1,0 +1,21 @@
+
+Commands:
+	- Add Diff Command
+	Fetch remote into a temp file, then display diff output.
+
+Endpoints:
+	- Add directory support like in modules
+	- Add support for multiple endpoint in one file
+  
+Files:
+	- Fix upload.
+
+SolutionBase:
+	- Rebuild how local names and paths are computed from remote items.
+	Syncdown currently generates local names based on remote data.  What would be
+	better is if a local version already exists, to overwrite that.  This means that
+	files in sub-directories would go in the correct place. As well as multiple
+	endpoints in one file would remain in that file.
+
+
+
