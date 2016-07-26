@@ -45,18 +45,23 @@ module MrMurano
       remote = remote.dup
       remote[:script] = script
       #post('', remote)
-      put('/' + remote[@itemkey], remote) do |request, http|
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-          #return JSON.parse(response.body)
-        when Net::HTTPNotFound
-          verbose "Doesn't exist, creating"
-          post('/', remote)
-        else
-          say_error "got #{response} from #{request} #{request.uri.to_s}"
-          say_error ":: #{response.body}"
+      if remote.has_key? @itemkey then
+        put('/' + remote[@itemkey], remote) do |request, http|
+          response = http.request(request)
+          case response
+          when Net::HTTPSuccess
+            #return JSON.parse(response.body)
+          when Net::HTTPNotFound
+            verbose "\tDoesn't exist, creating"
+            post('/', remote)
+          else
+            say_error "got #{response} from #{request} #{request.uri.to_s}"
+            say_error ":: #{response.body}"
+          end
         end
+      else
+        verbose "\tNo itemkey, creating"
+        post('/', remote)
       end
     end
 
