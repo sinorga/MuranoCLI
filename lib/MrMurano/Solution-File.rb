@@ -101,26 +101,26 @@ module MrMurano
     def synckey(item)
       "#{item[:path]}_#{item[:checksum]}_#{item[:mime_type]}"
     end
-  end
 
-  def locallist(from)
-    from = Pathname.new(from) unless from.kind_of? Pathname
-    unless from.exist? then
-      return []
-    end
-    raise "Not a directory: #{from.to_s}" unless from.directory?
+    def locallist(from)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      unless from.exist? then
+        return []
+      end
+      raise "Not a directory: #{from.to_s}" unless from.directory?
 
-    Pathname.glob(from.to_s + '/**/*').map do |path|
-      name = toremotename(from, path)
-      case name
-      when Hash
-        name[:local_path] = path
-        name
-      else
-        {:local_path => path, :name => name}
+      Pathname.glob(from.to_s + '/**/*').map do |path|
+        name = toremotename(from, path)
+        case name
+        when Hash
+          name[:local_path] = path
+          name
+        else
+          {:local_path => path, :name => name}
+        end
       end
     end
-  end
 
+  end
 end
 #  vim: set ai et sw=2 ts=2 :
