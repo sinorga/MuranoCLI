@@ -111,7 +111,20 @@ module MrMurano
       end
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
-      Pathname.glob(from.to_s + '/**/*').map do |path|
+      from.children.map do |path|
+        if path.directory? then
+          # TODO: look for definition. ( ?.rockspec? ?mr.modules? )
+          # Lacking definition, find all *.lua but not *_test.lua
+          # This specifically and intentionally only goes one level deep.
+          path.children
+        else
+          path
+        end
+      end.flatten.compact.reject do |path|
+        path.fnmatch('*_test.lua') or path.basename.fnmatch('.*')
+      end.select do |path|
+        path.extname == '.lua'
+      end.map do |path|
         name = toremotename(from, path)
         case name
         when Hash
@@ -340,9 +353,9 @@ command :sol do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::File.new
-    pp sol.list
-    #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
+    sol = MrMurano::Endpoint.new
+    #pp sol.list
+    pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
     #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
   end
