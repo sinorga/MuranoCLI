@@ -83,7 +83,7 @@ module MrMurano
     end
 
     def synckey(item)
-      "#{item[:method]}_#{item[:path]}"
+      "#{item[:method].upcase}_#{item[:path]}"
     end
 
   end
