@@ -99,37 +99,6 @@ module MrMurano
 #      end
     end
 
-    def locallist(from)
-      from = Pathname.new(from) unless from.kind_of? Pathname
-      unless from.exist? then
-        return []
-      end
-      raise "Not a directory: #{from.to_s}" unless from.directory?
-
-      from.children.map do |path|
-        if path.directory? then
-          # TODO: look for definition. ( ?.rockspec? ?mr.modules? )
-          # Lacking definition, find all *.lua but not *_test.lua
-          path.children.reject{|p|
-            p.fnmatch('*_test.lua') or p.basename.fnmatch('.*')
-          }.select{|p|
-            p.extname == '.lua'
-          }.map{|p|
-            {:local_path=>p, :name=>p.basename.to_s.sub(/\..*/, '')}
-          }
-        elsif path.fnmatch('*.lua') and not (path.fnmatch('*_test.lua') or path.basename.fnmatch('.*')) then
-          name = toremotename(from, path)
-          case name
-          when Hash
-            name[:local_path] = path
-            name
-          else
-            {:local_path => path, :name => name}
-          end
-        end
-      end.flatten.compact
-    end
-
 
     def toremotename(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
