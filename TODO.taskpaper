@@ -4,8 +4,8 @@ Commands:
 	Fetch remote into a temp file, then display diff output.
 
 Endpoints:
-	- Add directory support like in modules
 	- Add support for multiple endpoint in one file
+	- Add directory support like in modules @done(2016-07-26)
   
 Files:
 	- Fix upload.
