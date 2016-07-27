@@ -4,11 +4,16 @@ Commands:
 	Fetch remote into a temp file, then display diff output.
 
 Endpoints:
-	- Add support for multiple endpoint in one file
+	- Add support for multiple endpoints in one file
 	- Add directory support like in modules @done(2016-07-26)
   
 Files:
 	- Fix upload.
+
+Users:
+	- Figure out how to upload (create and update) user info.
+	- Figure out how to add Roles to Users in the local data and upload it.
+	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
 
 SolutionBase:
 	- Rebuild how local names and paths are computed from remote items.
@@ -17,5 +22,18 @@ SolutionBase:
 	files in sub-directories would go in the correct place. As well as multiple
 	endpoints in one file would remain in that file.
 
+
+Bundles:
+	- Work on design
+	- Need to do rebuild of SolutionBase first.
+	Thinking of something like VIM bundles.  A directory of directories. Each with a
+	manafest file.  A Bundle is a group of modules, endpoints, static files and the
+	other things.  
+
+	There needs to be some layering logic added, where the bundles are stacked and
+	then the top-level files are stack on top of that. This builds the final map of
+	what gets uploaded to the server.
+
+	For syncdown, bundles are considered to be read-only.
 
 
