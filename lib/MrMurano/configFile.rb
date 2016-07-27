@@ -53,6 +53,8 @@ module MrMurano
       set('files.default_page', 'index.html', :defaults)
 
       set('eventhandler.skiplist', 'websocket webservice', :defaults)
+
+      set('diff.cmd', 'diff -u', :defaults)
     end
 
     # Look at parent directories until HOME

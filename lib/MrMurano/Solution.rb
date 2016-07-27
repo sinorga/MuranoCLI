@@ -1,6 +1,8 @@
 require 'uri'
 require 'net/http'
 require 'json'
+require 'tempfile'
+require 'shellwords'
 require 'pp'
 
 module MrMurano
@@ -253,7 +255,12 @@ module MrMurano
       df = ""
       begin
         download(Pathname.new(tfp.path), item)
-        df = `diff -u #{tfp.path} #{item[:local_path].to_s}`
+
+        cmd = $cfg['diff.cmd'].shellsplit
+        cmd << tfp.path
+        cmd << item[:local_path].to_s
+
+        IO.popen(cmd) {|io| df = io.read }
       ensure
         tfp.close
         tfp.unlink
