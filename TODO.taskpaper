@@ -17,6 +17,9 @@ Users:
 	- Figure out how to add Roles to Users in the local data and upload it.
 	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
 
+Config:
+	- Think about adding dev,staging,prod system; how would that work?
+
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
 	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
