@@ -166,6 +166,7 @@ module MrMurano
     end
 
     def download(local, item)
+      local.dirname.mkpath
       id = item[@itemkey.to_sym]
       local.open('wb') do |io|
         fetch(id) do |chunk|
@@ -229,7 +230,6 @@ module MrMurano
         end
       end
       if options.create then
-        into.mkpath unless $cfg['tool.dry']
         toadd.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
@@ -239,7 +239,6 @@ module MrMurano
         end
       end
       if options.update then
-        into.mkpath unless $cfg['tool.dry']
         tomod.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
