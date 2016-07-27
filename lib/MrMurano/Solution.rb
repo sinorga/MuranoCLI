@@ -163,90 +163,51 @@ module MrMurano
       item[key]
     end
 
-    def syncup(from, options={})
-      there = list()
-      here = locallist(from)
+    def syncup(from, options=Commander::Command::Options.new)
       itemkey = @itemkey.to_sym
- 
-      # split into three lists.
-      # - Items here and not there. (toadd)
-      # - Items there and not here. (todel)
-      # - Items here and there. (tomod)
-      therebox = {}
-      there.each do |item|
-        item = Hash.transform_keys_to_symbols(item)
-        therebox[ synckey(item) ] = item
-      end
-      herebox = {}
-      here.each do |item|
-        item = Hash.transform_keys_to_symbols(item)
-        herebox[ synckey(item) ] = item
-      end
-      toadd = herebox.keys - therebox.keys
-      todel = therebox.keys - herebox.keys
-      tomod = herebox.keys & therebox.keys
+      options.asdown=false
+      dt = status(from, options)
+      toadd = dt[:toadd]
+      todel = dt[:todel]
+      tomod = dt[:tomod]
 
       if options.delete then
-        todel.each do |key|
-          verbose "Removing item #{key}"
+        todel.each do |item|
+          verbose "Removing item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            item = therebox[key]
             remove(item[itemkey])
           end
         end
       end
       if options.create then
-        toadd.each do |key|
-          verbose "Adding item #{key}"
+        toadd.each do |item|
+          verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            item = herebox[key]
             upload(item[:local_path], item.reject{|k,v| k==:local_path})
           end
         end
       end
       if options.update then
-        tomod.each do |key|
-          verbose "Updating item #{key}"
+        tomod.each do |item|
+          verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            #item = therebox[key].merge herebox[key] # need to be consistent with key types for this to work
-            id = therebox[key][itemkey]
-            item = herebox[key].dup
-            item[itemkey] = id
             upload(item[:local_path], item.reject{|k,v| k==:local_path})
           end
         end
       end
     end
 
-    def syncdown(into, options={})
-      there = list()
-      into = Pathname.new(into) unless into.kind_of? Pathname
-      here = locallist(into)
-      itemkey = @itemkey.to_sym
- 
-      # split into three lists.
-      # - Items here and not there. (todel)
-      # - Items there and not here. (toadd)
-      # - Items here and there. (tomod)
-      therebox = {}
-      there.each do |item|
-        item = Hash.transform_keys_to_symbols(item)
-        therebox[ synckey(item) ] = item
-      end
-      herebox = {}
-      here.each do |item|
-        item = Hash.transform_keys_to_symbols(item)
-        herebox[ synckey(item) ] = item
-      end
-      todel = herebox.keys - therebox.keys
-      toadd = therebox.keys - herebox.keys
-      tomod = herebox.keys & therebox.keys
+    def syncdown(into, options=Commander::Command::Options.new)
+      options.asdown = true
+      dt = status(into, options)
+      toadd = dt[:toadd]
+      todel = dt[:todel]
+      tomod = dt[:tomod]
 
       if options.delete then
-        todel.each do |key|
-          verbose "Removing item #{key}"
+        todel.each do |item|
+          verbose "Removing item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            item = herebox[key]
             dest = tolocalpath(into, item)
             removelocal(dest, item)
           end
@@ -254,10 +215,9 @@ module MrMurano
       end
       if options.create then
         into.mkpath unless $cfg['tool.dry']
-        toadd.each do |key|
-          verbose "Adding item #{key}"
+        toadd.each do |item|
+          verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            item = therebox[key]
             dest = tolocalpath(into, item)
             download(dest, item)
           end
@@ -265,10 +225,9 @@ module MrMurano
       end
       if options.update then
         into.mkpath unless $cfg['tool.dry']
-        tomod.each do |key|
-          verbose "Updating item #{key}"
+        tomod.each do |item|
+          verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            item = therebox[key]
             dest = tolocalpath(into, herebox[key].merge(item) )
             download(dest, item)
           end
@@ -289,7 +248,7 @@ module MrMurano
       dest.unlink
     end
 
-    def status(from, options={})
+    def status(from, options=Commander::Command::Options.new)
       there = list()
       here = locallist(from)
       itemkey = @itemkey.to_sym
@@ -314,11 +273,10 @@ module MrMurano
           :toadd=> toadd.map{|key| therebox[key] },
           :todel=> todel.map{|key| herebox[key] },
           :tomod=> tomod.map{|key|
-            if therebox[key].nil? then
-              herebox[key]
-            else
-              therebox[key].merge(herebox[key])
-            end
+            raise "Impossible modify" if therebox[key].nil?
+            # Want here to override there except for itemkey.
+            mrg = herebox[key].reject{|k,v| k==itemkey}
+            therebox[key].merge(mrg)
           }
         }
       else
@@ -329,11 +287,10 @@ module MrMurano
           :toadd=> toadd.map{|key| herebox[key] },
           :todel=> todel.map{|key| therebox[key] },
           :tomod=> tomod.map{|key|
-            if therebox[key].nil? then
-              herebox[key]
-            else
-              therebox[key].merge(herebox[key])
-            end
+            raise "Impossible modify" if therebox[key].nil?
+            # Want here to override there except for itemkey.
+            mrg = herebox[key].reject{|k,v| k==itemkey}
+            therebox[key].merge(mrg)
           }
         }
       end

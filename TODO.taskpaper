@@ -18,6 +18,7 @@ Users:
 	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
 
 SolutionBase:
+	- All network traffic is serialized. Make some parallel.
 	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
 	Wait, this looks like it already is working.
 
