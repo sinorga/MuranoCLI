@@ -9,6 +9,8 @@ Endpoints:
   
 Files:
 	- Fix upload.
+	- Files won't update, they always delete then add.
+	This is because of the way the synckey is done
 
 Users:
 	- Figure out how to upload (create and update) user info.
@@ -16,7 +18,11 @@ Users:
 	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
 
 SolutionBase:
-	- Rebuild how local names and paths are computed from remote items.
+	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
+	Wait, this looks like it already is working.
+
+	Ah, not for Files.
+
 	Syncdown currently generates local names based on remote data.  What would be
 	better is if a local version already exists, to overwrite that.  This means that
 	files in sub-directories would go in the correct place. As well as multiple
@@ -27,8 +33,8 @@ Bundles:
 	- Work on design
 	- Need to do rebuild of SolutionBase first.
 	Thinking of something like VIM bundles.  A directory of directories. Each with a
-	manafest file.  A Bundle is a group of modules, endpoints, static files and the
-	other things.  
+	manafest file? (maybe)  A Bundle is a group of modules, endpoints, static files
+	and the other things.  
 
 	There needs to be some layering logic added, where the bundles are stacked and
 	then the top-level files are stack on top of that. This builds the final map of
@@ -36,4 +42,7 @@ Bundles:
 
 	For syncdown, bundles are considered to be read-only.
 
+	The goal is to have things like Users or Debug that you just include into a
+	project.  And it gives all of the library, routes, statics and whatnot that you
+	need.
 
