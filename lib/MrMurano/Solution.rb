@@ -291,8 +291,13 @@ module MrMurano
         {
           :toadd=> toadd.map{|key| therebox[key] },
           :todel=> todel.map{|key| herebox[key] },
-          # FIXME what if therebox[key] is nil?
-          :tomod=> tomod.map{|key| therebox[key].merge(herebox[key]) }
+          :tomod=> tomod.map{|key|
+            if therebox[key].nil? then
+              herebox[key]
+            else
+              therebox[key].merge(herebox[key])
+            end
+          }
         }
       else
         toadd = herebox.keys - therebox.keys
@@ -301,7 +306,13 @@ module MrMurano
         {
           :toadd=> toadd.map{|key| herebox[key] },
           :todel=> todel.map{|key| therebox[key] },
-          :tomod=> tomod.map{|key| therebox[key].merge(herebox[key]) }
+          :tomod=> tomod.map{|key|
+            if therebox[key].nil? then
+              herebox[key]
+            else
+              therebox[key].merge(herebox[key])
+            end
+          }
         }
       end
     end
