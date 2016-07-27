@@ -96,7 +96,6 @@ module MrMurano
       path.relative_path_from(root).to_s
     end
     def tolocalpath(into, item)
-      into.mkpath unless $cfg['tool.dry']
       return item[:local_path] if item.has_key? :local_path
       itemkey = @itemkey.to_sym
       name = tolocalname(item, itemkey)
@@ -113,7 +112,7 @@ module MrMurano
 
       from.children.map do |path|
         if path.directory? then
-          # TODO: look for definition. ( ?.rockspec? ?mr.modules? )
+          # TODO: look for definition. ( ?.rockspec? ?mr.modules? ?mr.manifest? )
           # Lacking definition, find all *.lua but not *_test.lua
           # This specifically and intentionally only goes one level deep.
           path.children
@@ -231,23 +230,23 @@ module MrMurano
         end
       end
       if options.create then
+        into.mkpath unless $cfg['tool.dry']
         toadd.each do |key|
           verbose "Adding item #{key}"
           unless $cfg['tool.dry'] then
             item = therebox[key]
             dest = tolocalpath(into, item)
-
             download(dest, item)
           end
         end
       end
       if options.update then
+        into.mkpath unless $cfg['tool.dry']
         tomod.each do |key|
           verbose "Updating item #{key}"
           unless $cfg['tool.dry'] then
             item = therebox[key]
             dest = tolocalpath(into, herebox[key].merge(item) )
-
             download(dest, item)
           end
         end
@@ -366,7 +365,7 @@ command :sol do |c|
 
     sol = MrMurano::Endpoint.new
     #pp sol.list
-    pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
+    #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
     #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
   end
