@@ -163,6 +163,19 @@ module MrMurano
       item[key]
     end
 
+    def download(local, item)
+      id = item[@itemkey.to_sym]
+      local.open('wb') do |io|
+        fetch(id) do |chunk|
+          io.write chunk
+        end
+      end
+    end
+
+    def removelocal(dest, item)
+      dest.unlink
+    end
+
     def syncup(from, options=Commander::Command::Options.new)
       itemkey = @itemkey.to_sym
       options.asdown=false
@@ -233,19 +246,6 @@ module MrMurano
           end
         end
       end
-    end
-
-    def download(local, item)
-      id = item[@itemkey.to_sym]
-      local.open('wb') do |io|
-        fetch(id) do |chunk|
-          io.write chunk
-        end
-      end
-    end
-
-    def removelocal(dest, item)
-      dest.unlink
     end
 
     def status(from, options=Commander::Command::Options.new)
