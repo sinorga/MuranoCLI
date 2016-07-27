@@ -41,6 +41,7 @@ module MrMurano
       here = []
       if local.exist? then
         local.open('rb') {|io| here = YAML.load(io)}
+        here = [] if here == false
       end
       here.delete_if do |i|
         Hash.transform_keys_to_symbols(i)[@itemkey] == item[@itemkey]
@@ -57,6 +58,7 @@ module MrMurano
       here = []
       if local.exist? then
         local.open('rb') {|io| here = YAML.load(io)}
+        here = [] if here == false
       end
       key = @itemkey.to_sym
       here.delete_if do |it|
@@ -83,8 +85,9 @@ module MrMurano
       end
       key = @itemkey.to_sym
 
-      here = {}
+      here = []
       from.open {|io| here = YAML.load(io) }
+      here = [] if here == false
 
       here
     end
