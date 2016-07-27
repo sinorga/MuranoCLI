@@ -42,8 +42,13 @@ module MrMurano
       if local.exist? then
         local.open('rb') {|io| here = YAML.load(io)}
       end
+      here.delete_if do |i|
+        Hash.transform_keys_to_symbols(i)[@itemkey] == item[@itemkey]
+      end
       here << item
-      local.open('wb') {|io| io.write here.to_yaml }
+      local.open('wb') do |io|
+        io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
+      end
     end
 
     def removelocal(dest, item)
@@ -55,9 +60,11 @@ module MrMurano
       end
       key = @itemkey.to_sym
       here.delete_if do |it|
-        it[key] == item[key]
+        Hash.transform_keys_to_symbols(it)[key] == item[key]
       end
-      local.open('wb') {|io| io.write here.to_yaml }
+      local.open('wb') do|io|
+        io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
+      end
     end
 
     def tolocalpath(into, item)
