@@ -1,7 +1,7 @@
 
 Commands:
-	- Add Diff Command
-	Fetch remote into a temp file, then display diff output.
+	- Fix diff for Users and Roles.
+	- Add Diff Command @done(2016-07-27)
 
 Endpoints:
 	- Add support for multiple endpoints in one file
@@ -20,15 +20,6 @@ Users:
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
 	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
-	Wait, this looks like it already is working.
-
-	Ah, not for Files.
-
-	Syncdown currently generates local names based on remote data.  What would be
-	better is if a local version already exists, to overwrite that.  This means that
-	files in sub-directories would go in the correct place. As well as multiple
-	endpoints in one file would remain in that file.
-
 
 Bundles:
 	- Work on design
