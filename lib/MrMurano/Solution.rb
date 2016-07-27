@@ -90,11 +90,34 @@ module MrMurano
 
     # …
 
+    ##
+    # Compute a remote resource name from the local path
+    # @param root Pathname: Root path for this resource type from config files
+    # @param path Pathname: Path to local item 
+    # @return String: remote resource name
     def toremotename(root, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
       root = Pathname.new(root) unless root.kind_of? Pathname
       path.relative_path_from(root).to_s
     end
+
+    ##
+    # Compute the local name from remote item details
+    # @param item Hash: listing details for the item.
+    # @param itemkey Symbol: Key for look up.
+    def tolocalname(item, itemkey)
+      item[itemkey]
+    end
+
+    ##
+    # Compute the local path from the listing details
+    # 
+    # If there is already a matching local item, some of its details are also in
+    # the item hash.
+    #
+    # @param into Pathname: Root path for this resource type from config files
+    # @param item Hash: listing details for the item.
+    # @return Pathname: path to save (or merge) remote item into
     def tolocalpath(into, item)
       return item[:local_path] if item.has_key? :local_path
       itemkey = @itemkey.to_sym
