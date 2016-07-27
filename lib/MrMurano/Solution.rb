@@ -248,6 +248,19 @@ module MrMurano
       end
     end
 
+    def dodiff(item)
+      tfp = Tempfile.new([item[:synckey], '.lua'])
+      df = ""
+      begin
+        download(Pathname.new(tfp.path), item)
+        df = `diff -u #{tfp.path} #{item[:local_path].to_s}`
+      ensure
+        tfp.close
+        tfp.unlink
+      end
+      df
+    end
+
     def status(from, options=Commander::Command::Options.new)
       there = list()
       here = locallist(from)
@@ -276,7 +289,9 @@ module MrMurano
             raise "Impossible modify" if therebox[key].nil?
             # Want here to override there except for itemkey.
             mrg = herebox[key].reject{|k,v| k==itemkey}
-            therebox[key].merge(mrg)
+            mrg = therebox[key].merge(mrg)
+            mrg[:diff] = dodiff(mrg) if options.diff
+            mrg
           }
         }
       else
@@ -290,7 +305,9 @@ module MrMurano
             raise "Impossible modify" if therebox[key].nil?
             # Want here to override there except for itemkey.
             mrg = herebox[key].reject{|k,v| k==itemkey}
-            therebox[key].merge(mrg)
+            mrg = therebox[key].merge(mrg)
+            mrg[:diff] = dodiff(mrg) if options.diff
+            mrg
           }
         }
       end
