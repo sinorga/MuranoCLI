@@ -2,6 +2,7 @@ require 'uri'
 require 'net/http'
 require 'net/http/post/multipart'
 require 'digest/sha1'
+require 'mime/types'
 require 'pp'
 
 module MrMurano
@@ -90,16 +91,20 @@ module MrMurano
       name = '/' if name == $cfg['files.default_page']
       name = "/#{name}" unless name.chars.first == '/'
 
-      mime=`file -I -b #{path.to_s}`.chomp.sub(/;.*$/, '')
-      mime='application/octect' if mime.nil?
+      mime = MIME::Types.type_for(path.to_s)[0] || MIME::Types["application/octet-stream"][0]
 
       sha1 = Digest::SHA1.file(path.to_s).hexdigest
 
-      {:path=>name, :mime_type=>mime, :checksum=>sha1}
+      {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1}
     end
 
     def synckey(item)
-      "#{item[:path]}_#{item[:checksum]}_#{item[:mime_type]}"
+      item[:path]
+    end
+
+    def docmp(itemA, itemB)
+      return (itemA[:mime_type] != itemB[:mime_type] or
+        itemA[:checksum] != itemB[:checksum])
     end
 
     def locallist(from)
