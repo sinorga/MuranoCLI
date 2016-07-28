@@ -92,21 +92,9 @@ module MrMurano
       @itemkey = :alias
     end
 
-    # TODO: Support having a folder of a module.
-    # Right now, this assumes that everything in local is a file
-    # Add suport that it could be a directory that has a .rockspec
-    # Lacking the .rockspec, do what? (ignore?)
-
     def tolocalname(item, key)
-      # TODO maybe replace with tolocalpath()
-      # TODO pull into module directories if needed.
       name = item[:name]
-#      altpath = $cfg["modules.pathfor_#{name}"]
-#      if not altpath.nil? then
-#        return altpath
-#      else
-        "#{name}.lua"
-#      end
+      "#{name}.lua"
     end
 
 
