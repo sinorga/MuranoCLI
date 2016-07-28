@@ -20,13 +20,13 @@ module MrMurano
     def fetch(id)
       ret = get('/' + id.to_s)
       aheader = ret['script'].lines.first.chomp
-      dheader = "--#ENDPOINT #{ret['method']} #{ret['path']}"
+      dheader = /^--#ENDPOINT (?i:#{ret['method']}) #{ret['path']}$/
       if block_given? then
-        yield dheader + "\n" if aheader != dheader
+        yield dheader + "\n" unless dheader =~ aheader
         yield ret['script']
       else
         res = ''
-        res << dheader + "\n" if aheader != dheader
+        res << dheader + "\n" unless dheader =~ aheader
         res << ret['script']
         res
       end
