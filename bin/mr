@@ -44,19 +44,21 @@ $cfg.load
 pgds = [
   Pathname.new(Dir.home) + '.mrmurano' + 'plugins'
 ]
-# TODO: add plugin dirs from configs
-# XXX this is run before the command line options are paresed.
-pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.has_key? 'MR_MURANO_PLUGIN_DIR'
-pgds.each do |path|
-  next unless path.exist?
-  path.each_child do |plugin|
-    next if plugin.directory?
-    next unless plugin.readable?
-    next if plugin.basename.fnmatch('.*') # don't read anything starting with .
-    begin
-      require plugin.to_s
-    rescue Exception => e
-      $stderr.puts "Failed to load plugin at #{plugin} because #{e}"
+# Add plugin dirs from configs
+# This is run before the command line options are parsed, so need to check old way.
+if not ARGV.include? '--skip-plugins' then
+  pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.has_key? 'MR_MURANO_PLUGIN_DIR'
+  pgds.each do |path|
+    next unless path.exist?
+    path.each_child do |plugin|
+      next if plugin.directory?
+      next unless plugin.readable?
+      next if plugin.basename.fnmatch('.*') # don't read anything starting with .
+      begin
+        require plugin.to_s
+      rescue Exception => e
+        $stderr.puts "Failed to load plugin at #{plugin} because #{e}"
+      end
     end
   end
 end
