@@ -42,9 +42,10 @@ module MrMurano
 
       # we assume these are small enough to slurp.
       script = local.read
-      remote = remote.dup
+      limitkeys = [:method, :path, :script, @itemkey]
+      remote = remote.select{|k,v| limitkeys.include? k }
       remote[:script] = script
-      #post('', remote)
+#      post('', remote)
       if remote.has_key? @itemkey then
         put('/' + remote[@itemkey], remote) do |request, http|
           response = http.request(request)
