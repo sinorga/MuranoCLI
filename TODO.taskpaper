@@ -1,6 +1,5 @@
 
 Commands:
-	- Fix diff for Users and Roles.
 	- Add Diff Command @done(2016-07-27)
 
 Endpoints:
@@ -9,12 +8,12 @@ Endpoints:
   
 Files:
 	- Fix upload.
-	- Files won't update, they always delete then add.
-	This is because of the way the synckey is done
+	- Files won't update, they always delete then add. @done(2016-07-28)
 
 Users:
 	- Figure out how to upload (create and update) user info.
 	- Figure out how to add Roles to Users in the local data and upload it.
+	- Fix diff for Users and Roles.
 	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
 
 Config:

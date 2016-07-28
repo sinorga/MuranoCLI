@@ -92,7 +92,16 @@ module MrMurano
       "#{item[:method].upcase}_#{item[:path]}"
     end
 
-  end
+    def docmp(itemA, itemB)
+      if itemA[:script].nil? and itemA[:local_path] then
+        itemA[:script] = itemA[:local_path].read
+      end
+      if itemB[:script].nil? and itemB[:local_path] then
+        itemB[:script] = itemB[:local_path].read
+      end
+      return itemA[:script] != itemB[:script]
+    end
 
+  end
 end
 #  vim: set ai et sw=2 ts=2 :

@@ -250,6 +250,12 @@ module MrMurano
       end
     end
 
+    ##
+    # True if itemA and itemB are different
+    def docmp(itemA, itemB)
+      true
+    end
+
     def dodiff(item)
       tfp = Tempfile.new([tolocalname(item, @itemkey), '.lua'])
       df = ""
@@ -285,39 +291,29 @@ module MrMurano
         item[:synckey] = synckey(item)
         herebox[ item[:synckey] ] = item
       end
+      toadd = []
+      todel = []
+      tomod = []
+      unchg = []
       if options.asdown then
-        todel = herebox.keys - therebox.keys
-        toadd = therebox.keys - herebox.keys
-        tomod = herebox.keys & therebox.keys
-        {
-          :toadd=> toadd.map{|key| therebox[key] },
-          :todel=> todel.map{|key| herebox[key] },
-          :tomod=> tomod.map{|key|
-            raise "Impossible modify" if therebox[key].nil?
-            # Want here to override there except for itemkey.
-            mrg = herebox[key].reject{|k,v| k==itemkey}
-            mrg = therebox[key].merge(mrg)
-            mrg[:diff] = dodiff(mrg) if options.diff
-            mrg
-          }
-        }
+        todel = (herebox.keys - therebox.keys).map{|key| therebox[key] }
+        toadd = (therebox.keys - herebox.keys).map{|key| herebox[key] }
       else
-        toadd = herebox.keys - therebox.keys
-        todel = therebox.keys - herebox.keys
-        tomod = herebox.keys & therebox.keys
-        {
-          :toadd=> toadd.map{|key| herebox[key] },
-          :todel=> todel.map{|key| therebox[key] },
-          :tomod=> tomod.map{|key|
-            raise "Impossible modify" if therebox[key].nil?
-            # Want here to override there except for itemkey.
-            mrg = herebox[key].reject{|k,v| k==itemkey}
-            mrg = therebox[key].merge(mrg)
-            mrg[:diff] = dodiff(mrg) if options.diff
-            mrg
-          }
-        }
+        toadd = (herebox.keys - therebox.keys).map{|key| herebox[key] }
+        todel = (therebox.keys - herebox.keys).map{|key| therebox[key] }
       end
+      (herebox.keys & therebox.keys).each do |key|
+        # Want here to override there except for itemkey.
+        mrg = herebox[key].reject{|k,v| k==itemkey}
+        mrg = therebox[key].merge(mrg)
+        if docmp(herebox[key], therebox[key]) then
+          mrg[:diff] = dodiff(mrg) if options.diff
+          tomod << mrg
+        else
+          unchg << mrg
+        end
+      end
+      { :toadd=>toadd, :todel=>todel, :tomod=>tomod, :unchg=>unchg }
     end
   end
 

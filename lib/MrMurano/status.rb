@@ -13,6 +13,7 @@ command :status do |c|
   c.option '--[no-]asdown', %{Report as if syncdown instead of syncup}
   c.option '--[no-]diff', %{For modified items, show a diff}
   c.option '--[no-]grouped', %{Group all adds, deletes, and mods together}
+  c.option '--[no-]showall', %{List unchanged as well}
   
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true, :diff=>false, :grouped => true
@@ -43,12 +44,16 @@ command :status do |c|
         say " M #{item[:pp_type]}  #{fmtr(item)}"
         say item[:diff] if options.diff
       }
+      if options.showall then
+        say "Unchanged:" if options.grouped
+        ret[:unchg].each{|item| say "   #{item[:pp_type]}  #{fmtr(item)}"}
+      end
     end
 
-    @grouped = {:toadd=>[],:todel=>[],:tomod=>[]}
+    @grouped = {:toadd=>[],:todel=>[],:tomod=>[], :unchg=>[]}
     def gmerge(ret, type, options)
       if options.grouped then
-        [:toadd, :todel, :tomod].each do |kind|
+        [:toadd, :todel, :tomod, :unchg].each do |kind|
           ret[kind].each{|item| item[:pp_type] = type; @grouped[kind] << item}
         end
       else
