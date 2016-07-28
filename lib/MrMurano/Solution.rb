@@ -61,6 +61,7 @@ module MrMurano
         else
           say_error "got #{response} from #{request} #{request.uri.to_s}"
           say_error ":: #{response.body}"
+          say_error '==='
           raise response
         end
       end
@@ -242,7 +243,7 @@ module MrMurano
         tomod.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            dest = tolocalpath(into, herebox[key].merge(item) )
+            dest = tolocalpath(into, item)
             download(dest, item)
           end
         end
