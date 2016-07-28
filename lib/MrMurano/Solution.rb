@@ -251,7 +251,7 @@ module MrMurano
     end
 
     def dodiff(item)
-      tfp = Tempfile.new([item[:synckey], '.lua'])
+      tfp = Tempfile.new([tolocalname(item, @itemkey), '.lua'])
       df = ""
       begin
         download(Pathname.new(tfp.path), item)
