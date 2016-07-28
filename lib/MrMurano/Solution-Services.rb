@@ -73,13 +73,17 @@ module MrMurano
     end
 
     def docmp(itemA, itemB)
-      if itemA[:script].nil? and itemA[:local_path] then
-        itemA[:script] = itemA[:local_path].read
+      if itemA[:updated_at].nil? and itemA[:local_path] then
+        itemA[:updated_at] = itemA[:local_path].mtime.getutc
+      elsif itemA[:updated_at].kind_of? String then
+        itemA[:updated_at] = DateTime.parse(itemA[:updated_at]).to_time.getutc
       end
-      if itemB[:script].nil? and itemB[:local_path] then
-        itemB[:script] = itemB[:local_path].read
+      if itemB[:updated_at].nil? and itemB[:local_path] then
+        itemB[:updated_at] = itemB[:local_path].mtime.getutc
+      elsif itemB[:updated_at].kind_of? String then
+        itemB[:updated_at] = DateTime.parse(itemB[:updated_at]).to_time.getutc
       end
-      return itemA[:script] != itemB[:script]
+      return itemA[:updated_at] != itemB[:updated_at]
     end
 
   end
