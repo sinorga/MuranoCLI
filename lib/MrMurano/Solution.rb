@@ -250,6 +250,8 @@ module MrMurano
       end
     end
 
+    ##
+    # True if itemA and itemB are different
     def docmp(itemA, itemB)
       true
     end
