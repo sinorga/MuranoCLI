@@ -1,6 +1,7 @@
 require 'uri'
 require 'net/http'
 require 'net/http/post/multipart'
+require "http/form_data"
 require 'digest/sha1'
 require 'mime/types'
 require 'pp'
@@ -60,24 +61,37 @@ module MrMurano
       uri = endPoint('upload' + remote[:path])
 
       # kludge past for a bit.
-      `curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
+      #`curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
 
       # http://stackoverflow.com/questions/184178/ruby-how-to-post-a-file-via-http-as-multipart-form-data
       #
+      # Look at: https://github.com/httprb/http
+      # If it works well, consider porting over to it.
+      #
+      # Or just: https://github.com/httprb/form_data.rb ?
+      #
+      # Most of these pull into ram.  So maybe just go with that. Would guess that
+      # truely large static content is rare, and we can optimize/fix that later.
+
+      form = HTTP::FormData.create(:file=>HTTP::FormData::File.new(local.to_s))
+      req = Net::HTTP::Put.new(uri)
 
 #      upper = UploadIO.new(local.open('rb'), remote[:mime_type], local.basename)
 #      req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
-#      workit(req) do |request,http|
-#        request.delete 'Content-Type'
-#
-#        response = http.request(request)
-#        case response
-#        when Net::HTTPSuccess
-#        else
-#          say_error "got #{response} from #{request} #{request.uri.to_s}"
-#          say_error ":: #{response.body}"
-#        end
-#      end
+      workit(req) do |request,http|
+        request.content_type = form.content_type
+        request.content_length = form.content_length
+        request.body = form.to_s
+        #request.delete 'Content-Type'
+
+        response = http.request(request)
+        case response
+        when Net::HTTPSuccess
+        else
+          say_error "got #{response} from #{request} #{request.uri.to_s}"
+          say_error ":: #{response.body}"
+        end
+      end
     end
 
     def tolocalname(item, key)
