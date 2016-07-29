@@ -16,6 +16,11 @@ Users:
 	- Fix diff for Users and Roles.
 	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
 
+Product:
+	- Need to add way to set the product ID on a device eventhandler.
+	Trying to decide if this is pure cmdline, a config file, or in the eventhandler
+	header.  Need more thinking.
+
 Config:
 	- Think about adding dev,staging,prod system; how would that work?
 
@@ -25,7 +30,6 @@ SolutionBase:
 
 Bundles:
 	- Work on design
-	- Need to do rebuild of SolutionBase first.
 	Thinking of something like VIM bundles.  A directory of directories. Each with a
 	manafest file? (maybe)  A Bundle is a group of modules, endpoints, static files
 	and the other things.  
