@@ -20,13 +20,13 @@ module MrMurano
     def fetch(id)
       ret = get('/' + id.to_s)
       aheader = ret['script'].lines.first.chomp
-      dheader = "--#ENDPOINT #{ret['method']} #{ret['path']}"
+      dheader = /^--#ENDPOINT (?i:#{ret['method']}) #{ret['path']}$/
       if block_given? then
-        yield dheader + "\n" if aheader != dheader
+        yield dheader + "\n" unless dheader =~ aheader
         yield ret['script']
       else
         res = ''
-        res << dheader + "\n" if aheader != dheader
+        res << dheader + "\n" unless dheader =~ aheader
         res << ret['script']
         res
       end
@@ -42,21 +42,27 @@ module MrMurano
 
       # we assume these are small enough to slurp.
       script = local.read
-      remote = remote.dup
+      limitkeys = [:method, :path, :script, @itemkey]
+      remote = remote.select{|k,v| limitkeys.include? k }
       remote[:script] = script
-      #post('', remote)
-      put('/' + remote[@itemkey], remote) do |request, http|
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-          #return JSON.parse(response.body)
-        when Net::HTTPNotFound
-          verbose "Doesn't exist, creating"
-          post('/', remote)
-        else
-          say_error "got #{response} from #{request} #{request.uri.to_s}"
-          say_error ":: #{response.body}"
+#      post('', remote)
+      if remote.has_key? @itemkey then
+        put('/' + remote[@itemkey], remote) do |request, http|
+          response = http.request(request)
+          case response
+          when Net::HTTPSuccess
+            #return JSON.parse(response.body)
+          when Net::HTTPNotFound
+            verbose "\tDoesn't exist, creating"
+            post('/', remote)
+          else
+            say_error "got #{response} from #{request} #{request.uri.to_s}"
+            say_error ":: #{response.body}"
+          end
         end
+      else
+        verbose "\tNo itemkey, creating"
+        post('/', remote)
       end
     end
 
@@ -83,10 +89,19 @@ module MrMurano
     end
 
     def synckey(item)
-      "#{item[:method]}_#{item[:path]}"
+      "#{item[:method].upcase}_#{item[:path]}"
+    end
+
+    def docmp(itemA, itemB)
+      if itemA[:script].nil? and itemA[:local_path] then
+        itemA[:script] = itemA[:local_path].read
+      end
+      if itemB[:script].nil? and itemB[:local_path] then
+        itemB[:script] = itemB[:local_path].read
+      end
+      return itemA[:script] != itemB[:script]
     end
 
   end
-
 end
 #  vim: set ai et sw=2 ts=2 :

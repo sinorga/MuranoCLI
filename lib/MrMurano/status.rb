@@ -10,10 +10,13 @@ command :status do |c|
   c.option '--roles', %{Roles}
   c.option '--users', %{Users}
 
-  c.option '--asdown', %{Report as if syncdown instead of syncup}
+  c.option '--[no-]asdown', %{Report as if syncdown instead of syncup}
+  c.option '--[no-]diff', %{For modified items, show a diff}
+  c.option '--[no-]grouped', %{Group all adds, deletes, and mods together}
+  c.option '--[no-]showall', %{List unchanged as well}
   
   c.action do |args,options|
-    options.default :delete=>true, :create=>true, :update=>true
+    options.default :delete=>true, :create=>true, :update=>true, :diff=>false, :grouped => true
 
     if options.all then
       options.files = true
@@ -31,59 +34,73 @@ command :status do |c|
         item[:synckey]
       end
     end
-    def pretty(ret)
-      say "Adding:"
+    def pretty(ret, options)
+      say "Adding:" if options.grouped
       ret[:toadd].each{|item| say " + #{item[:pp_type]}  #{fmtr(item)}"}
-      say "Deleteing:"
+      say "Deleteing:" if options.grouped
       ret[:todel].each{|item| say " - #{item[:pp_type]}  #{fmtr(item)}"}
-      say "Changing:"
-      ret[:tomod].each{|item| say " M #{item[:pp_type]}  #{fmtr(item)}"}
+      say "Changing:" if options.grouped
+      ret[:tomod].each{|item|
+        say " M #{item[:pp_type]}  #{fmtr(item)}"
+        say item[:diff] if options.diff
+      }
+      if options.showall then
+        say "Unchanged:" if options.grouped
+        ret[:unchg].each{|item| say "   #{item[:pp_type]}  #{fmtr(item)}"}
+      end
     end
 
-    @grouped = {:toadd=>[],:todel=>[],:tomod=>[]}
-    def gmerge(ret, type)
-      [:toadd, :todel, :tomod].each do |kind|
-        ret[kind].each{|item| item[:pp_type] = type; @grouped[kind] << item}
+    @grouped = {:toadd=>[],:todel=>[],:tomod=>[], :unchg=>[]}
+    def gmerge(ret, type, options)
+      if options.grouped then
+        [:toadd, :todel, :tomod, :unchg].each do |kind|
+          ret[kind].each{|item| item[:pp_type] = type; @grouped[kind] << item}
+        end
+      else
+        pretty(ret, options)
       end
     end
     
     if options.endpoints then
       sol = MrMurano::Endpoint.new
       ret = sol.status($cfg['location.base'] + $cfg['location.endpoints'], options)
-      gmerge(ret, ' EP ')
+      gmerge(ret, ' EP ', options)
     end
 
     if options.modules then
       sol = MrMurano::Library.new
       ret = sol.status( $cfg['location.base'] + $cfg['location.modules'], options)
-      gmerge(ret, 'MOD ')
+      gmerge(ret, 'MOD ', options)
     end
 
     if options.eventhandlers then
       sol = MrMurano::EventHandler.new
       ret = sol.status( $cfg['location.base'] + $cfg['location.eventhandlers'], options)
-      gmerge(ret, ' EH ')
+      gmerge(ret, ' EH ', options)
     end
 
     if options.roles then
       sol = MrMurano::Role.new
       ret = sol.status( $cfg['location.base'] + $cfg['location.roles'], options)
-      gmerge(ret, 'ROLE')
+      gmerge(ret, 'ROLE', options)
     end
 
     if options.users then
       sol = MrMurano::User.new
       ret = sol.status( $cfg['location.base'] + $cfg['location.users'], options)
-      gmerge(ret, 'USER')
+      gmerge(ret, 'USER', options)
     end
 
     if options.files then
       sol = MrMurano::File.new
       ret = sol.status( $cfg['location.base'] + $cfg['location.files'], options)
-      gmerge(ret, 'FILE')
+      gmerge(ret, 'FILE', options)
     end
 
-    pretty(@grouped)
+    pretty(@grouped, options) if options.grouped
   end
 end
+
+alias_command :diff, :status, '--diff', '--no-grouped'
+
 #  vim: set ai et sw=2 ts=2 :

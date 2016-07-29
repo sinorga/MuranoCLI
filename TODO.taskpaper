@@ -1,21 +1,46 @@
 
 Commands:
-	- Add Diff Command
-	Fetch remote into a temp file, then display diff output.
+	- Add Diff Command @done(2016-07-27)
 
 Endpoints:
-	- Add support for multiple endpoint in one file
+	- Add support for multiple endpoints in one file
 	- Add directory support like in modules @done(2016-07-26)
   
 Files:
 	- Fix upload.
+	- Files won't update, they always delete then add. @done(2016-07-28)
+
+Users:
+	- Figure out how to upload (create and update) user info.
+	- Figure out how to add Roles to Users in the local data and upload it.
+	- Fix diff for Users and Roles.
+	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
+
+Product:
+	- Need to add way to set the product ID on a device eventhandler.
+	Trying to decide if this is pure cmdline, a config file, or in the eventhandler
+	header.  Need more thinking.
+
+Config:
+	- Think about adding dev,staging,prod system; how would that work?
 
 SolutionBase:
-	- Rebuild how local names and paths are computed from remote items.
-	Syncdown currently generates local names based on remote data.  What would be
-	better is if a local version already exists, to overwrite that.  This means that
-	files in sub-directories would go in the correct place. As well as multiple
-	endpoints in one file would remain in that file.
+	- All network traffic is serialized. Make some parallel.
+	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
 
+Bundles:
+	- Work on design
+	Thinking of something like VIM bundles.  A directory of directories. Each with a
+	manafest file? (maybe)  A Bundle is a group of modules, endpoints, static files
+	and the other things.  
 
+	There needs to be some layering logic added, where the bundles are stacked and
+	then the top-level files are stack on top of that. This builds the final map of
+	what gets uploaded to the server.
+
+	For syncdown, bundles are considered to be read-only.
+
+	The goal is to have things like Users or Debug that you just include into a
+	project.  And it gives all of the library, routes, statics and whatnot that you
+	need.
 

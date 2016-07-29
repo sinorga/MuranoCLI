@@ -11,7 +11,10 @@ cd myproject
 mr syncdown --all
 ```
 
-Do stuff, see what changed: `mr status --all`, then deploy `mr syncup --all`
+Do stuff, see what changed: `mr status --all` or `mr diff -same`.
+Then deploy `mr syncup --all`
+
+
 
 ## Install
 

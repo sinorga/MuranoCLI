@@ -72,6 +72,20 @@ module MrMurano
       end
     end
 
+    def docmp(itemA, itemB)
+      if itemA[:updated_at].nil? and itemA[:local_path] then
+        itemA[:updated_at] = itemA[:local_path].mtime.getutc
+      elsif itemA[:updated_at].kind_of? String then
+        itemA[:updated_at] = DateTime.parse(itemA[:updated_at]).to_time.getutc
+      end
+      if itemB[:updated_at].nil? and itemB[:local_path] then
+        itemB[:updated_at] = itemB[:local_path].mtime.getutc
+      elsif itemB[:updated_at].kind_of? String then
+        itemB[:updated_at] = DateTime.parse(itemB[:updated_at]).to_time.getutc
+      end
+      return itemA[:updated_at] != itemB[:updated_at]
+    end
+
   end
 
   # …/library
@@ -82,21 +96,9 @@ module MrMurano
       @itemkey = :alias
     end
 
-    # TODO: Support having a folder of a module.
-    # Right now, this assumes that everything in local is a file
-    # Add suport that it could be a directory that has a .rockspec
-    # Lacking the .rockspec, do what? (ignore?)
-
     def tolocalname(item, key)
-      # TODO maybe replace with tolocalpath()
-      # TODO pull into module directories if needed.
       name = item[:name]
-#      altpath = $cfg["modules.pathfor_#{name}"]
-#      if not altpath.nil? then
-#        return altpath
-#      else
-        "#{name}.lua"
-#      end
+      "#{name}.lua"
     end
 
 
