@@ -1,6 +1,5 @@
 require 'uri'
 require 'net/http'
-require 'net/http/post/multipart'
 require "http/form_data"
 require 'digest/sha1'
 require 'mime/types'
@@ -56,10 +55,7 @@ module MrMurano
     def upload(local, remote)
       local = Pathname.new(local) unless local.kind_of? Pathname
 
-      # FIXME: bad request? why?
-      # using curl -F works.  So is a bug in multipart-put?
       uri = endPoint('upload' + remote[:path])
-
       # kludge past for a bit.
       #`curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
 
@@ -75,14 +71,10 @@ module MrMurano
 
       form = HTTP::FormData.create(:file=>HTTP::FormData::File.new(local.to_s))
       req = Net::HTTP::Put.new(uri)
-
-#      upper = UploadIO.new(local.open('rb'), remote[:mime_type], local.basename)
-#      req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
       workit(req) do |request,http|
         request.content_type = form.content_type
         request.content_length = form.content_length
         request.body = form.to_s
-        #request.delete 'Content-Type'
 
         response = http.request(request)
         case response
