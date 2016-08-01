@@ -33,14 +33,16 @@ module MrMurano
 
     attr :paths
 
-    CFG_LEVELS=%w{internal specified project user system defaults}.map{|i| i.to_sym}.freeze
+    CFG_SCOPES=%w{internal specified project private user system defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
+    CFG_PRVT_NAME = '.mrmuranorc.private'.freeze
 
     def initialize
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
       prjfile = findProjectFile()
+      @paths << ConfigFile.new(:private, prjfile.dirname + CFG_PRVT_NAME)
       @paths << ConfigFile.new(:project, prjfile)
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,''))
@@ -97,7 +99,7 @@ module MrMurano
     end
 
     # key is <section>.<key>
-    def get(key, scope=[:internal, :specified, :project, :user, :system, :defaults])
+    def get(key, scope=CFG_SCOPES)
       scope = [scope] unless scope.kind_of? Array
       paths = @paths.select{|p| scope.include? p.kind}
 
@@ -170,8 +172,10 @@ command :config do |c|
 
   c.option '--system', 'Use only the system config file'
   c.option '--user', 'Use only the config file in $HOME'
-  c.option '--project', 'Use only the config file in the project'
+  c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
+  c.option '--private', 'Use only the private config file in the project (.mrmuranorc.private)'
   c.option '--specified', 'Use only the config file from the --config option.'
+
   c.option '--unset', 'Remove key from config file.'
   c.option '--dump', 'Dump the current combined view of the config'
 
@@ -182,25 +186,29 @@ command :config do |c|
     elsif args.count == 0 then
       say_error "Need a config key"
     elsif args.count == 1 and not options.unset then
-      options.defaults :system=>false, :user=>false, :project=>false, :specified=>false
+      options.defaults :system=>false, :user=>false, :project=>false,
+        :specified=>false, :private=>false
 
       # For read, if no scopes, than all. Otherwise just those specified
       scopes = []
       scopes << :system if options.system
       scopes << :user if options.user
       scopes << :project if options.project
+      scopes << :private if options.private
       scopes << :specified if options.specified
-      scopes = [:internal, :specified, :project, :user, :system, :defaults] if scopes.empty?
+      scopes = MrMurano::Config.CFG_SCOPES if scopes.empty?
 
       say $cfg.get(args[0], scopes)
     else 
 
-      options.defaults :system=>false, :user=>false, :project=>true, :specified=>false
+      options.defaults :system=>false, :user=>false, :project=>true,
+        :specified=>false, :private=>false
       # For write, if scope is specified, only write to that scope.
       scope = :project
       scope = :system if options.system
       scope = :user if options.user
       scope = :project if options.project
+      scope = :private if options.private
       scope = :specified if options.specified
 
       args[1] = nil if options.unset

@@ -13,6 +13,7 @@ Pods/
 pkg/
 
 .mrmuranorc
+.mrmuranorc.private
 files/
 endpoints/
 modules/
