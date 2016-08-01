@@ -21,12 +21,13 @@ module MrMurano
       ret = get('/' + id.to_s)
       aheader = ret['script'].lines.first.chomp
       dheader = /^--#ENDPOINT (?i:#{ret['method']}) #{ret['path']}$/
+      rheader = %{--#ENDPOINT #{ret['method']} #{ret['path']}\n}
       if block_given? then
-        yield dheader + "\n" unless dheader =~ aheader
+        yield rheader unless dheader =~ aheader
         yield ret['script']
       else
         res = ''
-        res << dheader + "\n" unless dheader =~ aheader
+        res << rheader unless dheader =~ aheader
         res << ret['script']
         res
       end
