@@ -1,3 +1,4 @@
+require 'terminal-table'
 
 module MrMurano
   # …/serviceconfig
@@ -13,31 +14,71 @@ module MrMurano
     def fetch(id)
       get('/' + id.to_s)
     end
-  end
 
+
+    def assignTriggers(products)
+      scr = list().select{|i| i['service'] == 'device' or i[:service] == 'device'}.first
+      scid = scr['id'] or scr[:id]
+
+      details = Hash.transform_keys_to_symbols(fetch(scid))
+      products = [products] unless products.kind_of? Array
+      details[:triggers] = {:pid=>products}
+
+      put('/'+scid, details)
+      
+    end
+
+    def showTriggers
+      scr = list().select{|i| i['service'] == 'device' or i[:service] == 'device'}.first
+      scid = scr['id'] or scr[:id]
+
+      details = Hash.transform_keys_to_symbols(fetch(scid))
+
+      return [] if details[:triggers].nil?
+      details[:triggers][:pid]
+    end
+
+  end
 end
 
-command :prodSet do |c|
-  c.syntax = ''
-  c.description = ' Needs a better name'
+command :assign do |c|
+  c.syntax = 'mr assign [product]'
+  c.description = 'Assign a product to a eventhandler'
+
+  c.option '--list', %{List assigned products}
+  c.option '--idonly', 'Only return the ids'
 
   c.action do |args, options|
     sol = MrMurano::ServiceConfig.new
-    scs = sol.list
-    scr = scs.select{|i| i['service'] == 'device' or i[:service] == 'device'}
-    scid = scr['id'] or scr[:id]
-    raise "No Device Service!" if scid.nil?
 
-    prid = $cfg['product.id']
-    raise "No product ID!" if prid.nil?
+    if options.list then
+      trigs = sol.showTriggers()
+      if options.idonly then
+        say trigs.join(' ')
+      else
+        acc = MrMurano::Account.new
+        products = acc.products.map{|p| Hash.transform_keys_to_symbols(p)}
+        products.select!{|p| trigs.include? p[:pid] }
+        busy = products.map{|r| [r[:label], r[:type], r[:pid], r[:modelId]]}
+        table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
+        say table
+      end
 
-    details = sol.fetch(scid)
-    Hash.transform_keys_to_symbols(details)
-    # XXX Currently we overwrite this.  In the future we will need to append as
-    # well as replace.
-    details[:triggers] = {:pid=>[prid], :vendor=>[prid]}
+    else
+      prname = args.shift
+      if prname.nil? then
+        prid = $cfg['product.id']
+      else
+        acc = MrMurano::Account.new
+        products = acc.products.map{|p| Hash.transform_keys_to_symbols(p)}
+        products.select!{|p| p[:label] == prname or p[:pid] == prname }
+        prid = products.map{|p| p[:pid]}
+      end
+      raise "No product ID!" if prid.nil?
+      say "Assigning #{prid} to solution" if $cfg['tool.verbose']
+      sol.assignTriggers(prid) unless $cfg['tool.dry']
+    end
 
-    sol.put('/'+scid, details)
 
   end
 end
