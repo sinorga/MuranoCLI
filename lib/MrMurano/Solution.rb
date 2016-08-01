@@ -315,23 +315,4 @@ module MrMurano
 
 end
 
-# And then various specific commands.
-# fe: mr file here there to upload a single file
-#     mr file --pull there here
-#
-command :sol do |c|
-  c.syntax = %{mr solution ...}
-  c.description = %{debug junk; please ignore}
-
-  c.action do |args, options|
-
-    sol = MrMurano::ServiceConfig.new
-    #pp sol.list
-    pp sol.fetch('9e95a4b6-446d-11e6-b451-576ce3d4af78')
-    #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
-    #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
-
-  end
-end
-
 #  vim: set ai et sw=2 ts=2 :
