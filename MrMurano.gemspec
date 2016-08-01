@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('commander', '~> 4.4.0')
   s.add_runtime_dependency('inifile', '~> 3.0')
   s.add_runtime_dependency('netrc', '~> 0.11.0')
-  s.add_runtime_dependency('multipart-post', '~> 2.0.0')
+  s.add_runtime_dependency('http-form_data', '~> 1.0.1')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
   s.add_development_dependency('rspec', '~> 3.2')
