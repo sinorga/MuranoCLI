@@ -86,6 +86,7 @@ module MrMurano
     end
 
     def products
+      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
       r = endPoint('business/' + $cfg['business.id'] + '/product/')
       Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
         request = Net::HTTP::Get.new(r)
@@ -104,6 +105,7 @@ module MrMurano
     end
 
     def solutions
+      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
       r = endPoint('business/' + $cfg['business.id'] + '/solution/')
       Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
         request = Net::HTTP::Get.new(r)
