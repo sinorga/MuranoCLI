@@ -72,6 +72,20 @@ module MrMurano
       end
     end
 
+    def docmp(itemA, itemB)
+      if itemA[:updated_at].nil? and itemA[:local_path] then
+        itemA[:updated_at] = itemA[:local_path].mtime.getutc
+      elsif itemA[:updated_at].kind_of? String then
+        itemA[:updated_at] = DateTime.parse(itemA[:updated_at]).to_time.getutc
+      end
+      if itemB[:updated_at].nil? and itemB[:local_path] then
+        itemB[:updated_at] = itemB[:local_path].mtime.getutc
+      elsif itemB[:updated_at].kind_of? String then
+        itemB[:updated_at] = DateTime.parse(itemB[:updated_at]).to_time.getutc
+      end
+      return itemA[:updated_at] != itemB[:updated_at]
+    end
+
   end
 
   # …/library
@@ -84,13 +98,9 @@ module MrMurano
 
     def tolocalname(item, key)
       name = item[:name]
-#      altpath = $cfg["modules.pathfor_#{name}"]
-#      if not altpath.nil? then
-#        return altpath
-#      else
-        "#{name}.lua"
-#      end
+      "#{name}.lua"
     end
+
 
     def toremotename(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
@@ -114,6 +124,21 @@ module MrMurano
       ret = get()
       skiplist = ($cfg['eventhandler.skiplist'] or '').split
       ret['items'].reject{|i| i.has_key?('service') and skiplist.include? i['service'] }
+    end
+
+    def fetch(name)
+      ret = get('/'+name)
+      aheader = (ret['script'].lines.first or "").chomp
+      dheader = "--#EVENT #{ret['service']} #{ret['event']}"
+      if block_given? then
+        yield dheader + "\n" if aheader != dheader
+        yield ret['script']
+      else
+        res = ''
+        res << dheader + "\n" if aheader != dheader
+        res << ret['script']
+        res
+      end
     end
 
     def tolocalname(item, key)

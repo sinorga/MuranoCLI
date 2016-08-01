@@ -1,0 +1,45 @@
+
+Commands:
+	- Add Diff Command @done(2016-07-27)
+
+Endpoints:
+	- Add support for multiple endpoints in one file
+	- Add directory support like in modules @done(2016-07-26)
+  
+Files:
+	- Fix upload. @done(2016-08-01)
+	- Files won't update, they always delete then add. @done(2016-07-28)
+
+Users:
+	Much of this is stuck until we get more docs on the User/Role management
+	- Figure out how to upload (create and update) user info.
+	- Figure out how to add Roles to Users in the local data and upload it.
+	- Fix diff for Users and Roles.
+	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
+
+Product:
+	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
+
+Config:
+	- Think about adding dev,staging,prod system; how would that work?
+
+SolutionBase:
+	- All network traffic is serialized. Make some parallel.
+	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
+
+Bundles:
+	- Work on design
+	Thinking of something like VIM bundles.  A directory of directories. Each with a
+	manafest file? (maybe)  A Bundle is a group of modules, endpoints, static files
+	and the other things.  
+
+	There needs to be some layering logic added, where the bundles are stacked and
+	then the top-level files are stack on top of that. This builds the final map of
+	what gets uploaded to the server.
+
+	For syncdown, bundles are considered to be read-only.
+
+	The goal is to have things like Users or Debug that you just include into a
+	project.  And it gives all of the library, routes, statics and whatnot that you
+	need.
+

@@ -11,7 +11,7 @@ module MrMurano
       @sid = $cfg['solution.id']
       raise "No solution!" if @sid.nil?
       @uriparts = [:solution, @sid]
-      @itemkey = 'id'
+      @itemkey = :id
     end
 
     def verbose(msg)
@@ -313,39 +313,6 @@ module MrMurano
 
   end
 
-  # …/serviceconfig
-  class ServiceConfig < SolutionBase
-    def initialize
-      super
-      @uriparts << 'serviceconfig'
-    end
-
-    def list
-      get()['items']
-    end
-    def fetch(id)
-      get('/' + id.to_s)
-    end
-  end
-
-end
-
-# And then various specific commands.
-# fe: mr file here there to upload a single file
-#     mr file --pull there here
-#
-command :sol do |c|
-  c.syntax = %{mr solution ...}
-  c.description = %{debug junk; please ignore}
-
-  c.action do |args, options|
-
-    sol = MrMurano::File.new
-    pp sol.list
-    #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
-    #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
-
-  end
 end
 
 #  vim: set ai et sw=2 ts=2 :

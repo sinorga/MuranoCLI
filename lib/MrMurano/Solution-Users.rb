@@ -22,7 +22,7 @@ module MrMurano
 
     def upload(local, remote)
       # Roles cannot be modified, so must delete and post.
-      delete('/' + remote[@itemkey.to_s]) do |request, http|
+      delete('/' + remote[@itemkey]) do |request, http|
         response = http.request(request)
         case response
         when Net::HTTPSuccess
@@ -41,9 +41,15 @@ module MrMurano
       here = []
       if local.exist? then
         local.open('rb') {|io| here = YAML.load(io)}
+        here = [] if here == false
+      end
+      here.delete_if do |i|
+        Hash.transform_keys_to_symbols(i)[@itemkey] == item[@itemkey]
       end
       here << item
-      local.open('wb') {|io| io.write here.to_yaml }
+      local.open('wb') do |io|
+        io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
+      end
     end
 
     def removelocal(dest, item)
@@ -52,12 +58,15 @@ module MrMurano
       here = []
       if local.exist? then
         local.open('rb') {|io| here = YAML.load(io)}
+        here = [] if here == false
       end
-      key = @itemkey.to_s
+      key = @itemkey.to_sym
       here.delete_if do |it|
-        it[key] == item[key]
+        Hash.transform_keys_to_symbols(it)[key] == item[key]
       end
-      local.open('wb') {|io| io.write here.to_yaml }
+      local.open('wb') do|io|
+        io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
+      end
     end
 
     def tolocalpath(into, item)
@@ -74,10 +83,11 @@ module MrMurano
         say_warning "Cannot read from #{from.to_s}"
         return []
       end
-      key = @itemkey.to_s
+      key = @itemkey.to_sym
 
-      here = {}
+      here = []
       from.open {|io| here = YAML.load(io) }
+      here = [] if here == false
 
       here
     end
