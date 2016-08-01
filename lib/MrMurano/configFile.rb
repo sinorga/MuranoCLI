@@ -4,6 +4,15 @@ require 'pp'
 
 module MrMurano
   class Config
+    #
+    #  internal    transient this-run-only things (also -c options)
+    #  specified   from --configfile
+    #  private     .mrmuranorc.private at project dir (for things you don't want to commit)
+    #  project     .mrmuranorc at project dir
+    #  user        .mrmuranorc at $HOME
+    #  system      .mrmuranorc at /etc
+    #  defaults    Internal hardcoded defaults
+    #
     ConfigFile = Struct.new(:kind, :path, :data) do
       def load()
         return if kind == :internal
@@ -24,12 +33,13 @@ module MrMurano
 
     attr :paths
 
+    CFG_LEVELS=%w{internal specified project user system defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
 
     def initialize
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
-      # :specified --config FILE goes here. (see load_specific)
+      # :specified --configfile FILE goes here. (see load_specific)
       prjfile = findProjectFile()
       @paths << ConfigFile.new(:project, prjfile)
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
@@ -149,6 +159,15 @@ end
 command :config do |c|
   c.syntax = %{mr config [options] <key> [<new value>]}
   c.summary = %{Get and set options}
+  c.description = %{
+  You can get, set, or query config options with this command.  All config options
+  are in a 'section.key' format.  There is also a layer of scopes that the keys can
+  be saved in.
+
+  }
+
+  c.example %{See what the current combined config is}, 'mr config --dump'
+
   c.option '--system', 'Use only the system config file'
   c.option '--user', 'Use only the config file in $HOME'
   c.option '--project', 'Use only the config file in the project'
