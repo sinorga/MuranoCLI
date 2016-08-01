@@ -1,7 +1,8 @@
 require 'uri'
 require 'net/http'
-require 'net/http/post/multipart'
+require "http/form_data"
 require 'digest/sha1'
+require 'mime/types'
 require 'pp'
 
 module MrMurano
@@ -54,29 +55,35 @@ module MrMurano
     def upload(local, remote)
       local = Pathname.new(local) unless local.kind_of? Pathname
 
-      # FIXME: bad request? why?
-      # using curl -F works.  So is a bug in multipart-put?
       uri = endPoint('upload' + remote[:path])
-
       # kludge past for a bit.
-      `curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
+      #`curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
 
       # http://stackoverflow.com/questions/184178/ruby-how-to-post-a-file-via-http-as-multipart-form-data
       #
+      # Look at: https://github.com/httprb/http
+      # If it works well, consider porting over to it.
+      #
+      # Or just: https://github.com/httprb/form_data.rb ?
+      #
+      # Most of these pull into ram.  So maybe just go with that. Would guess that
+      # truely large static content is rare, and we can optimize/fix that later.
 
-#      upper = UploadIO.new(local.open('rb'), remote[:mime_type], local.basename)
-#      req = Net::HTTP::Put::Multipart.new(uri, 'file'=> upper )
-#      workit(req) do |request,http|
-#        request.delete 'Content-Type'
-#
-#        response = http.request(request)
-#        case response
-#        when Net::HTTPSuccess
-#        else
-#          say_error "got #{response} from #{request} #{request.uri.to_s}"
-#          say_error ":: #{response.body}"
-#        end
-#      end
+      form = HTTP::FormData.create(:file=>HTTP::FormData::File.new(local.to_s))
+      req = Net::HTTP::Put.new(uri)
+      workit(req) do |request,http|
+        request.content_type = form.content_type
+        request.content_length = form.content_length
+        request.body = form.to_s
+
+        response = http.request(request)
+        case response
+        when Net::HTTPSuccess
+        else
+          say_error "got #{response} from #{request} #{request.uri.to_s}"
+          say_error ":: #{response.body}"
+        end
+      end
     end
 
     def tolocalname(item, key)
@@ -90,19 +97,41 @@ module MrMurano
       name = '/' if name == $cfg['files.default_page']
       name = "/#{name}" unless name.chars.first == '/'
 
-      mime=`file -I -b #{path.to_s}`.chomp.sub(/;.*$/, '')
-      mime='application/octect' if mime.nil?
+      mime = MIME::Types.type_for(path.to_s)[0] || MIME::Types["application/octet-stream"][0]
 
       sha1 = Digest::SHA1.file(path.to_s).hexdigest
 
-      {:path=>name, :mime_type=>mime, :checksum=>sha1}
+      {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1}
     end
 
     def synckey(item)
-      "#{item[:path]}_#{item[:checksum]}_#{item[:mime_type]}"
+      item[:path]
     end
+
+    def docmp(itemA, itemB)
+      return (itemA[:mime_type] != itemB[:mime_type] or
+        itemA[:checksum] != itemB[:checksum])
+    end
+
+    def locallist(from)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      unless from.exist? then
+        return []
+      end
+      raise "Not a directory: #{from.to_s}" unless from.directory?
+
+      Pathname.glob(from.to_s + '/**/*').map do |path|
+        name = toremotename(from, path)
+        case name
+        when Hash
+          name[:local_path] = path
+          name
+        else
+          {:local_path => path, :name => name}
+        end
+      end
+    end
+
   end
-
-
 end
 #  vim: set ai et sw=2 ts=2 :

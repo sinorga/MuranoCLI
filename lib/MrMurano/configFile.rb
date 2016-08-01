@@ -53,6 +53,8 @@ module MrMurano
       set('files.default_page', 'index.html', :defaults)
 
       set('eventhandler.skiplist', 'websocket webservice', :defaults)
+
+      set('diff.cmd', 'diff -u', :defaults)
     end
 
     # Look at parent directories until HOME
@@ -112,9 +114,13 @@ module MrMurano
     end
 
     def set(key, value, scope=:project)
-      section, ikey = key.split('.')
-      raise "Missing section" if section.nil?
-      raise "Missing key" if ikey.nil?
+      section, ikey = key.split('.', 2)
+      raise "Invalid key" if section.nil?
+      if not section.nil? and ikey.nil? then
+        # If key isn't dotted, then assume the tool section.
+        ikey = section
+        section = 'tool'
+      end
 
       paths = @paths.select{|p| scope == p.kind}
       raise "Unknown scope" if paths.empty?

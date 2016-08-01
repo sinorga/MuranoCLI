@@ -72,6 +72,20 @@ module MrMurano
       end
     end
 
+    def docmp(itemA, itemB)
+      if itemA[:updated_at].nil? and itemA[:local_path] then
+        itemA[:updated_at] = itemA[:local_path].mtime.getutc
+      elsif itemA[:updated_at].kind_of? String then
+        itemA[:updated_at] = DateTime.parse(itemA[:updated_at]).to_time.getutc
+      end
+      if itemB[:updated_at].nil? and itemB[:local_path] then
+        itemB[:updated_at] = itemB[:local_path].mtime.getutc
+      elsif itemB[:updated_at].kind_of? String then
+        itemB[:updated_at] = DateTime.parse(itemB[:updated_at]).to_time.getutc
+      end
+      return itemA[:updated_at] != itemB[:updated_at]
+    end
+
   end
 
   # …/library
@@ -82,52 +96,9 @@ module MrMurano
       @itemkey = :alias
     end
 
-    # TODO: Support having a folder of a module.
-    # Right now, this assumes that everything in local is a file
-    # Add suport that it could be a directory that has a .rockspec
-    # Lacking the .rockspec, do what? (ignore?)
-
     def tolocalname(item, key)
-      # TODO maybe replace with tolocalpath()
-      # TODO pull into module directories if needed.
       name = item[:name]
-#      altpath = $cfg["modules.pathfor_#{name}"]
-#      if not altpath.nil? then
-#        return altpath
-#      else
-        "#{name}.lua"
-#      end
-    end
-
-    def locallist(from)
-      from = Pathname.new(from) unless from.kind_of? Pathname
-      unless from.exist? then
-        return []
-      end
-      raise "Not a directory: #{from.to_s}" unless from.directory?
-
-      from.children.map do |path|
-        if path.directory? then
-          # TODO: look for definition. ( ?.rockspec? ?mr.modules? )
-          # Lacking definition, find all *.lua but not *_test.lua
-          path.children.reject{|p|
-            p.fnmatch('*_test.lua') or p.basename.fnmatch('.*')
-          }.select{|p|
-            p.extname == '.lua'
-          }.map{|p|
-            {:local_path=>p, :name=>p.basename.to_s.sub(/\..*/, '')}
-          }
-        elsif path.fnmatch('*.lua') and not (path.fnmatch('*_test.lua') or path.basename.fnmatch('.*')) then
-          name = toremotename(from, path)
-          case name
-          when Hash
-            name[:local_path] = path
-            name
-          else
-            {:local_path => path, :name => name}
-          end
-        end
-      end.flatten.compact
+      "#{name}.lua"
     end
 
 
