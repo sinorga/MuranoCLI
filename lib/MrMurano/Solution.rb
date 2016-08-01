@@ -1,8 +1,6 @@
 require 'uri'
 require 'net/http'
 require 'json'
-require 'tempfile'
-require 'shellwords'
 require 'pp'
 
 module MrMurano
@@ -61,7 +59,6 @@ module MrMurano
         else
           say_error "got #{response} from #{request} #{request.uri.to_s}"
           say_error ":: #{response.body}"
-          say_error '==='
           raise response
         end
       end
@@ -93,35 +90,13 @@ module MrMurano
 
     # …
 
-    ##
-    # Compute a remote resource name from the local path
-    # @param root Pathname: Root path for this resource type from config files
-    # @param path Pathname: Path to local item 
-    # @return String: remote resource name
     def toremotename(root, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
       root = Pathname.new(root) unless root.kind_of? Pathname
       path.relative_path_from(root).to_s
     end
-
-    ##
-    # Compute the local name from remote item details
-    # @param item Hash: listing details for the item.
-    # @param itemkey Symbol: Key for look up.
-    def tolocalname(item, itemkey)
-      item[itemkey]
-    end
-
-    ##
-    # Compute the local path from the listing details
-    # 
-    # If there is already a matching local item, some of its details are also in
-    # the item hash.
-    #
-    # @param into Pathname: Root path for this resource type from config files
-    # @param item Hash: listing details for the item.
-    # @return Pathname: path to save (or merge) remote item into
     def tolocalpath(into, item)
+      into.mkpath unless $cfg['tool.dry']
       return item[:local_path] if item.has_key? :local_path
       itemkey = @itemkey.to_sym
       name = tolocalname(item, itemkey)
@@ -136,20 +111,7 @@ module MrMurano
       end
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
-      from.children.map do |path|
-        if path.directory? then
-          # TODO: look for definition. ( ?.rockspec? ?mr.modules? ?mr.manifest? )
-          # Lacking definition, find all *.lua but not *_test.lua
-          # This specifically and intentionally only goes one level deep.
-          path.children
-        else
-          path
-        end
-      end.flatten.compact.reject do |path|
-        path.fnmatch('*_test.lua') or path.basename.fnmatch('.*')
-      end.select do |path|
-        path.extname == '.lua'
-      end.map do |path|
+      Pathname.glob(from.to_s + '/**/*').map do |path|
         name = toremotename(from, path)
         case name
         when Hash
@@ -166,8 +128,120 @@ module MrMurano
       item[key]
     end
 
+    def syncup(from, options={})
+      there = list()
+      here = locallist(from)
+      itemkey = @itemkey.to_sym
+ 
+      # split into three lists.
+      # - Items here and not there. (toadd)
+      # - Items there and not here. (todel)
+      # - Items here and there. (tomod)
+      therebox = {}
+      there.each do |item|
+        item = Hash.transform_keys_to_symbols(item)
+        therebox[ synckey(item) ] = item
+      end
+      herebox = {}
+      here.each do |item|
+        item = Hash.transform_keys_to_symbols(item)
+        herebox[ synckey(item) ] = item
+      end
+      toadd = herebox.keys - therebox.keys
+      todel = therebox.keys - herebox.keys
+      tomod = herebox.keys & therebox.keys
+
+      if options.delete then
+        todel.each do |key|
+          verbose "Removing item #{key}"
+          unless $cfg['tool.dry'] then
+            item = therebox[key]
+            remove(item[itemkey])
+          end
+        end
+      end
+      if options.create then
+        toadd.each do |key|
+          verbose "Adding item #{key}"
+          unless $cfg['tool.dry'] then
+            item = herebox[key]
+            upload(item[:local_path], item.reject{|k,v| k==:local_path})
+          end
+        end
+      end
+      if options.update then
+        tomod.each do |key|
+          verbose "Updating item #{key}"
+          unless $cfg['tool.dry'] then
+            #item = therebox[key].merge herebox[key] # need to be consistent with key types for this to work
+            id = therebox[key][itemkey]
+            item = herebox[key].dup
+            item[itemkey] = id
+            upload(item[:local_path], item.reject{|k,v| k==:local_path})
+          end
+        end
+      end
+    end
+
+    def syncdown(into, options={})
+      there = list()
+      into = Pathname.new(into) unless into.kind_of? Pathname
+      here = locallist(into)
+      itemkey = @itemkey.to_sym
+ 
+      # split into three lists.
+      # - Items here and not there. (todel)
+      # - Items there and not here. (toadd)
+      # - Items here and there. (tomod)
+      therebox = {}
+      there.each do |item|
+        item = Hash.transform_keys_to_symbols(item)
+        therebox[ synckey(item) ] = item
+      end
+      herebox = {}
+      here.each do |item|
+        item = Hash.transform_keys_to_symbols(item)
+        herebox[ synckey(item) ] = item
+      end
+      todel = herebox.keys - therebox.keys
+      toadd = therebox.keys - herebox.keys
+      tomod = herebox.keys & therebox.keys
+
+      if options.delete then
+        todel.each do |key|
+          verbose "Removing item #{key}"
+          unless $cfg['tool.dry'] then
+            item = herebox[key]
+            dest = tolocalpath(into, item)
+            removelocal(dest, item)
+          end
+        end
+      end
+      if options.create then
+        toadd.each do |key|
+          verbose "Adding item #{key}"
+          unless $cfg['tool.dry'] then
+            item = therebox[key]
+            dest = tolocalpath(into, item)
+
+            download(dest, item)
+          end
+        end
+      end
+      if options.update then
+        tomod.each do |key|
+          verbose "Updating item #{key}"
+          unless $cfg['tool.dry'] then
+            item = therebox[key]
+            dest = tolocalpath(into, herebox[key].merge(item) )
+
+            download(dest, item)
+          end
+        end
+      end
+    end
+
     def download(local, item)
-      local.dirname.mkpath
       id = item[@itemkey.to_sym]
       local.open('wb') do |io|
         fetch(id) do |chunk|
@@ -180,101 +254,7 @@ module MrMurano
       dest.unlink
     end
 
-    def syncup(from, options=Commander::Command::Options.new)
-      itemkey = @itemkey.to_sym
-      options.asdown=false
-      dt = status(from, options)
-      toadd = dt[:toadd]
-      todel = dt[:todel]
-      tomod = dt[:tomod]
-
-      if options.delete then
-        todel.each do |item|
-          verbose "Removing item #{item[:synckey]}"
-          unless $cfg['tool.dry'] then
-            remove(item[itemkey])
-          end
-        end
-      end
-      if options.create then
-        toadd.each do |item|
-          verbose "Adding item #{item[:synckey]}"
-          unless $cfg['tool.dry'] then
-            upload(item[:local_path], item.reject{|k,v| k==:local_path})
-          end
-        end
-      end
-      if options.update then
-        tomod.each do |item|
-          verbose "Updating item #{item[:synckey]}"
-          unless $cfg['tool.dry'] then
-            upload(item[:local_path], item.reject{|k,v| k==:local_path})
-          end
-        end
-      end
-    end
-
-    def syncdown(into, options=Commander::Command::Options.new)
-      options.asdown = true
-      dt = status(into, options)
-      toadd = dt[:toadd]
-      todel = dt[:todel]
-      tomod = dt[:tomod]
-
-      if options.delete then
-        todel.each do |item|
-          verbose "Removing item #{item[:synckey]}"
-          unless $cfg['tool.dry'] then
-            dest = tolocalpath(into, item)
-            removelocal(dest, item)
-          end
-        end
-      end
-      if options.create then
-        toadd.each do |item|
-          verbose "Adding item #{item[:synckey]}"
-          unless $cfg['tool.dry'] then
-            dest = tolocalpath(into, item)
-            download(dest, item)
-          end
-        end
-      end
-      if options.update then
-        tomod.each do |item|
-          verbose "Updating item #{item[:synckey]}"
-          unless $cfg['tool.dry'] then
-            dest = tolocalpath(into, item)
-            download(dest, item)
-          end
-        end
-      end
-    end
-
-    ##
-    # True if itemA and itemB are different
-    def docmp(itemA, itemB)
-      true
-    end
-
-    def dodiff(item)
-      tfp = Tempfile.new([tolocalname(item, @itemkey), '.lua'])
-      df = ""
-      begin
-        download(Pathname.new(tfp.path), item)
-
-        cmd = $cfg['diff.cmd'].shellsplit
-        cmd << tfp.path
-        cmd << item[:local_path].to_s
-
-        IO.popen(cmd) {|io| df = io.read }
-      ensure
-        tfp.close
-        tfp.unlink
-      end
-      df
-    end
-
-    def status(from, options=Commander::Command::Options.new)
+    def status(from, options={})
       there = list()
       here = locallist(from)
       itemkey = @itemkey.to_sym
@@ -291,29 +271,26 @@ module MrMurano
         item[:synckey] = synckey(item)
         herebox[ item[:synckey] ] = item
       end
-      toadd = []
-      todel = []
-      tomod = []
-      unchg = []
       if options.asdown then
-        todel = (herebox.keys - therebox.keys).map{|key| therebox[key] }
-        toadd = (therebox.keys - herebox.keys).map{|key| herebox[key] }
+        todel = herebox.keys - therebox.keys
+        toadd = therebox.keys - herebox.keys
+        tomod = herebox.keys & therebox.keys
+        {
+          :toadd=> toadd.map{|key| therebox[key] },
+          :todel=> todel.map{|key| herebox[key] },
+          # FIXME what if therebox[key] is nil?
+          :tomod=> tomod.map{|key| therebox[key].merge(herebox[key]) }
+        }
       else
-        toadd = (herebox.keys - therebox.keys).map{|key| herebox[key] }
-        todel = (therebox.keys - herebox.keys).map{|key| therebox[key] }
+        toadd = herebox.keys - therebox.keys
+        todel = therebox.keys - herebox.keys
+        tomod = herebox.keys & therebox.keys
+        {
+          :toadd=> toadd.map{|key| herebox[key] },
+          :todel=> todel.map{|key| therebox[key] },
+          :tomod=> tomod.map{|key| therebox[key].merge(herebox[key]) }
+        }
       end
-      (herebox.keys & therebox.keys).each do |key|
-        # Want here to override there except for itemkey.
-        mrg = herebox[key].reject{|k,v| k==itemkey}
-        mrg = therebox[key].merge(mrg)
-        if docmp(herebox[key], therebox[key]) then
-          mrg[:diff] = dodiff(mrg) if options.diff
-          tomod << mrg
-        else
-          unchg << mrg
-        end
-      end
-      { :toadd=>toadd, :todel=>todel, :tomod=>tomod, :unchg=>unchg }
     end
   end
 
@@ -336,21 +313,6 @@ module MrMurano
 
   end
 
-  # …/serviceconfig
-  class ServiceConfig < SolutionBase
-    def initialize
-      super
-      @uriparts << 'serviceconfig'
-    end
-
-    def list
-      get()['items']
-    end
-    def fetch(id)
-      get('/' + id.to_s)
-    end
-  end
-
 end
 
 # And then various specific commands.
@@ -363,8 +325,9 @@ command :sol do |c|
 
   c.action do |args, options|
 
-    sol = MrMurano::Endpoint.new
+    sol = MrMurano::ServiceConfig.new
     #pp sol.list
+    pp sol.fetch('9e95a4b6-446d-11e6-b451-576ce3d4af78')
     #pp sol.locallist($cfg['location.base'] + $cfg['location.endpoints'])
     #sol.syncup($cfg['location.base'] + $cfg['location.endpoints'])
 
