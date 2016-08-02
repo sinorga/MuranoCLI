@@ -126,14 +126,16 @@ module MrMurano
   end
 end
 
-# This is largely for testing.
 command :account do |c|
-  c.syntax = %{mr account ...}
+  c.syntax = %{mr account [options]}
   c.description = %{Show things about your account.}
   c.option '--businesses', 'Get businesses for user'
   c.option '--products', 'Get products for user (needs a business)'
   c.option '--solutions', 'Get solutions for user (needs a business)'
   c.option '--idonly', 'Only return the ids'
+
+  c.example %{List all businesses}, 'mr account --businesses'
+  c.example %{List solutions}, 'mr account --solutions -c business.id=XXXXXXXX'
 
   c.action do |args, options|
 
