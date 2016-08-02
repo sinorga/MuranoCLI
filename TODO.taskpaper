@@ -1,5 +1,6 @@
 
 Commands:
+	- Default for most commands should be -same
 	- Add Diff Command @done(2016-07-27)
 
 Endpoints:
