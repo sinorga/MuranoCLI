@@ -17,17 +17,9 @@ command :status do |c|
   
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true, :diff=>false,
-      :grouped => true, :files=>true, :endpoints=>true, :modules=>true,
-      :eventhandlers=>true
+      :grouped => true
 
-    if options.all then
-      options.files = true
-      options.endpoints = true
-      options.modules = true
-      options.roles = true
-      options.users = true
-      options.eventhandlers = true
-    end
+    MrMurano.checkSAME(options)
 
     def fmtr(item)
       if item.has_key? :local_path then

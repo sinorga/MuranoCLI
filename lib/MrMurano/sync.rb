@@ -19,17 +19,8 @@ command :syncdown do |c|
   c.example %{Only Pull new static files}, %{mr syncdown --files --no-delete --no-update}
   
   c.action do |args,options|
-    options.default :delete=>true, :create=>true, :update=>true,
-      :files=>true, :endpoints=>true, :modules=>true, :eventhandlers=>true
-
-    if options.all then
-      options.files = true
-      options.endpoints = true
-      options.modules = true
-      options.roles = true
-      options.users = true
-      options.eventhandlers = true
-    end
+    options.default :delete=>true, :create=>true, :update=>true
+    MrMurano.checkSAME(options)
     
     if options.endpoints then
       sol = MrMurano::Endpoint.new
@@ -85,17 +76,8 @@ command :syncup do |c|
   c.example %{Only add or modify static files}, %{mr syncup --files --no-delete}
 
   c.action do |args,options|
-    options.default :delete=>true, :create=>true, :update=>true,
-      :files=>true, :endpoints=>true, :modules=>true, :eventhandlers=>true
-
-    if options.all then
-      options.files = true
-      options.endpoints = true
-      options.modules = true
-      options.roles = true
-      options.users = true
-      options.eventhandlers = true
-    end
+    options.default :delete=>true, :create=>true, :update=>true
+    MrMurano.checkSAME(options)
 
     if options.endpoints then
       sol = MrMurano::Endpoint.new
