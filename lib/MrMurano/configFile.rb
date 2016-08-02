@@ -196,7 +196,7 @@ command :config do |c|
       scopes << :project if options.project
       scopes << :private if options.private
       scopes << :specified if options.specified
-      scopes = MrMurano::Config.CFG_SCOPES if scopes.empty?
+      scopes = MrMurano::Config::CFG_SCOPES if scopes.empty?
 
       say $cfg.get(args[0], scopes)
     else 
