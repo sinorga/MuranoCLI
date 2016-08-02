@@ -231,6 +231,7 @@ module MrMurano
         end
       end
       if options.create then
+        pp toadd
         toadd.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
@@ -296,8 +297,8 @@ module MrMurano
       tomod = []
       unchg = []
       if options.asdown then
-        todel = (herebox.keys - therebox.keys).map{|key| therebox[key] }
-        toadd = (therebox.keys - herebox.keys).map{|key| herebox[key] }
+        todel = (herebox.keys - therebox.keys).map{|key| herebox[key] }
+        toadd = (therebox.keys - herebox.keys).map{|key| therebox[key] }
       else
         toadd = (herebox.keys - therebox.keys).map{|key| herebox[key] }
         todel = (therebox.keys - herebox.keys).map{|key| therebox[key] }
