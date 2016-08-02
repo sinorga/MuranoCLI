@@ -181,16 +181,22 @@ command :config do |c|
   c.syntax = %{mr config [options] <key> [<new value>]}
   c.summary = %{Get and set options}
   c.description = %{
-  You can get, set, or query config options with this command.  All config options
-  are in a 'section.key' format.  There is also a layer of scopes that the keys can
-  be saved in.
-
+  You can get, set, or query config options with this command.  All config
+  options are in a 'section.key' format.  There is also a layer of scopes
+  that the keys can be saved in.
   }
 
   c.example %{See what the current combined config is}, 'mr config --dump'
+  c.example %{Query a value}, 'mr config solution.id'
+  c.example %{Set a new value; writing to the project config file}, 'mr config solution.id XXXXXXXX'
+  c.example %{Set a new value; writing to the private config file}, 'mr config --private solution.id XXXXXXXX'
+  c.example %{Set a new value; writing to the user config file}, 'mr config --user user.name my@email.address'
+  c.example %{Unset a value in a configfile. (lower scopes will become visible if set)},
+    'mr config diff.cmd --unset'
 
-  c.option '--system', 'Use only the system config file'
-  c.option '--user', 'Use only the config file in $HOME'
+
+  c.option '--system', 'Use only the system config file. (/etc/mrmuranorc)'
+  c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
   c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
   c.option '--private', 'Use only the private config file in the project (.mrmuranorc.private)'
   c.option '--specified', 'Use only the config file from the --config option.'
