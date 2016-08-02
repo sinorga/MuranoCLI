@@ -3,12 +3,12 @@ command :status do |c|
   c.syntax = %{mr status [options]}
   c.description = %{Get the status of files}
   c.option '--all', 'Check everything'
-  c.option '-s','--files', %{Static Files}
-  c.option '-a','--endpoints', %{Endpoints}
-  c.option '-m','--modules', %{Modules}
-  c.option '-e','--eventhandlers', %{Event Handlers}
-  c.option '--roles', %{Roles}
-  c.option '--users', %{Users}
+  c.option '-s','--[no-]files', %{Static Files}
+  c.option '-a','--[no-]endpoints', %{Endpoints}
+  c.option '-m','--[no-]modules', %{Modules}
+  c.option '-e','--[no-]eventhandlers', %{Event Handlers}
+  c.option '--[no-]roles', %{Roles}
+  c.option '--[no-]users', %{Users}
 
   c.option '--[no-]asdown', %{Report as if syncdown instead of syncup}
   c.option '--[no-]diff', %{For modified items, show a diff}
@@ -16,7 +16,9 @@ command :status do |c|
   c.option '--[no-]showall', %{List unchanged as well}
   
   c.action do |args,options|
-    options.default :delete=>true, :create=>true, :update=>true, :diff=>false, :grouped => true
+    options.default :delete=>true, :create=>true, :update=>true, :diff=>false,
+      :grouped => true, :files=>true, :endpoints=>true, :modules=>true,
+      :eventhandlers=>true
 
     if options.all then
       options.files = true
