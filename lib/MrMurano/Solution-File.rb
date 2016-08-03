@@ -115,7 +115,7 @@ module MrMurano
         itemA[:checksum] != itemB[:checksum])
     end
 
-    def locallist(from)
+    def localitems(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
       unless from.exist? then
         return []

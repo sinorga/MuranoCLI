@@ -137,6 +137,11 @@ module MrMurano
     #
     # Which means it needs the from to be split into the base and the sub so we can
     # inject bundle directories.
+
+    ##
+    # Get a list of local items.
+    #
+    # This collects items in the project and all bundles.
     def locallist()
       # so. if @locationbase/bundles exists
       #  gather and merge: @locationbase/bundles/*/@location
@@ -148,18 +153,19 @@ module MrMurano
       items = {}
       if (@locationbase + bundleDir).directory? then
         (@locationbase + bundleDir).children.sort.each do |bndl|
-          if (bndl + @location).directory? then
+          if (bndl + @location).exist? then
             verbose("Loading from bundle #{bndl.basename}")
-            bitems = _localitems(bndl + @location)
+            bitems = localitems(bndl + @location)
             bitems.map!{|b| b[:bundled] = true; b} # mark items from bundles.
 
+            
             # use synckey for quicker merging.
             bitems.each { |b| items[synckey(b)] = b }
           end
         end
       end
-      if (@locationbase + @location).directory? then
-        bitems = _localitems(@locationbase + @location)
+      if (@locationbase + @location).exist? then
+        bitems = localitems(@locationbase + @location)
         # use synckey for quicker merging.
         bitems.each { |b| items[synckey(b)] = b }
       end
@@ -167,7 +173,9 @@ module MrMurano
       items.values
     end
 
-    def _localitems(from)
+    ##
+    # Get a list of local items rooted at #from
+    def localitems(from)
       from.children.map do |path|
         if path.directory? then
           # TODO: look for definition. ( ?.rockspec? ?mr.modules? ?mr.manifest? )
@@ -196,6 +204,10 @@ module MrMurano
     end
 
     def download(local, item)
+      if item[:bundled] then
+        say_warning "Not downloading into bundled item #{synckey(item)}"
+        return
+      end
       local.dirname.mkpath
       id = item[@itemkey.to_sym]
       local.open('wb') do |io|
