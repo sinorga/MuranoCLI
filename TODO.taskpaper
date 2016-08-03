@@ -1,9 +1,11 @@
 
 Commands:
+	- Status will show things have changes when they don’t.
+	- Default for most commands should be -same @done(2016-08-02)
 	- Add Diff Command @done(2016-07-27)
 
 Endpoints:
-	- Add support for multiple endpoints in one file
+	- Add support for multiple endpoints in one file (maybe)
 	- Add directory support like in modules @done(2016-07-26)
   
 Files:
@@ -22,6 +24,7 @@ Product:
 
 Config:
 	- Think about adding dev,staging,prod system; how would that work?
+	Would it work ok to just use the --configfile option?
 
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.

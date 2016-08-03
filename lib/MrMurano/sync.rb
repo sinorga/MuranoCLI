@@ -3,10 +3,10 @@ command :syncdown do |c|
   c.syntax = %{mr syncdown [options]}
   c.description = %{Sync project down from Murano}
   c.option '--all', 'Sync everything'
-  c.option '-s','--files', %{Sync Static Files}
-  c.option '-a','--endpoints', %{Sync Endpoints}
-  c.option '-m','--modules', %{Sync Modules}
-  c.option '-e','--eventhandlers', %{Sync Event Handlers}
+  c.option '-s','--[no-]files', %{Sync Static Files}
+  c.option '-a','--[no-]endpoints', %{Sync Endpoints}
+  c.option '-m','--[no-]modules', %{Sync Modules}
+  c.option '-e','--[no-]eventhandlers', %{Sync Event Handlers}
   c.option '--roles', %{Sync Roles}
   c.option '--users', %{Sync Users}
 
@@ -20,15 +20,7 @@ command :syncdown do |c|
   
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
-
-    if options.all then
-      options.files = true
-      options.endpoints = true
-      options.modules = true
-      options.roles = true
-      options.users = true
-      options.eventhandlers = true
-    end
+    MrMurano.checkSAME(options)
     
     if options.endpoints then
       sol = MrMurano::Endpoint.new
@@ -68,10 +60,10 @@ command :syncup do |c|
   c.syntax = %{mr syncup [options]}
   c.description = %{Sync project up into Murano}
   c.option '--all', 'Sync everything'
-  c.option '-s','--files', %{Sync Static Files}
-  c.option '-a','--endpoints', %{Sync Endpoints}
-  c.option '-m','--modules', %{Sync Modules}
-  c.option '-e','--eventhandlers', %{Sync Event Handlers}
+  c.option '-s','--[no-]files', %{Sync Static Files}
+  c.option '-a','--[no-]endpoints', %{Sync Endpoints}
+  c.option '-m','--[no-]modules', %{Sync Modules}
+  c.option '-e','--[no-]eventhandlers', %{Sync Event Handlers}
   c.option '--roles', %{Sync Roles}
   c.option '--users', %{Sync Users}
 
@@ -85,15 +77,7 @@ command :syncup do |c|
 
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
-
-    if options.all then
-      options.files = true
-      options.endpoints = true
-      options.modules = true
-      options.roles = true
-      options.users = true
-      options.eventhandlers = true
-    end
+    MrMurano.checkSAME(options)
 
     if options.endpoints then
       sol = MrMurano::Endpoint.new
