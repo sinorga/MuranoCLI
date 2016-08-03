@@ -1,5 +1,6 @@
 
 Commands:
+	- First time run needs to be smoothed out.
 	- Status will show things have changes when they don’t.
 	- Default for most commands should be -same @done(2016-08-02)
 	- Add Diff Command @done(2016-07-27)
@@ -9,6 +10,7 @@ Endpoints:
 	- Add directory support like in modules @done(2016-07-26)
   
 Files:
+	- Switch to mime-types v3
 	- Fix upload. @done(2016-08-01)
 	- Files won't update, they always delete then add. @done(2016-07-28)
 
