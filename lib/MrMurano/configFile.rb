@@ -160,7 +160,8 @@ module MrMurano
   ##
   # IF none of -same, then -same; else just the ones listed.
   def self.checkSAME(opt)
-    unless opt.files or opt.endpoints or opt.modules or opt.eventhandlers then
+    unless opt.files or opt.endpoints or opt.modules or
+        opt.eventhandlers or opt.roles or opt.users then
       opt.files = true
       opt.endpoints = true
       opt.modules = true
