@@ -137,13 +137,37 @@ module MrMurano
     #
     # Which means it needs the from to be split into the base and the sub so we can
     # inject bundle directories.
-    def locallist(from)
-      from = Pathname.new(from) unless from.kind_of? Pathname
-      unless from.exist? then
-        return []
-      end
-      raise "Not a directory: #{from.to_s}" unless from.directory?
+    def locallist()
+      # so. if @locationbase/bundles exists
+      #  gather and merge: @locationbase/bundles/*/@location
+      # then merge @locationbase/@location
+      #
 
+      bundleDir = $cfg['location.bundles'] or 'bundles'
+      bundleDir = 'bundles' if bundleDir.nil?
+      items = {}
+      if (@locationbase + bundleDir).directory? then
+        (@locationbase + bundleDir).children.sort.each do |bndl|
+          if (bndl + @location).directory? then
+            verbose("Loading from bundle #{bndl.basename}")
+            bitems = _localitems(bndl + @location)
+            bitems.map!{|b| b[:bundled] = true; b} # mark items from bundles.
+
+            # use synckey for quicker merging.
+            bitems.each { |b| items[synckey(b)] = b }
+          end
+        end
+      end
+      if (@locationbase + @location).directory? then
+        bitems = _localitems(@locationbase + @location)
+        # use synckey for quicker merging.
+        bitems.each { |b| items[synckey(b)] = b }
+      end
+
+      items.values
+    end
+
+    def _localitems(from)
       from.children.map do |path|
         if path.directory? then
           # TODO: look for definition. ( ?.rockspec? ?mr.modules? ?mr.manifest? )
