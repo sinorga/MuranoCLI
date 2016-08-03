@@ -94,14 +94,14 @@ module MrMurano
     # …
 
     ##
-    # Compute a remote resource name from the local path
+    # Compute a remote item hash from the local path
     # @param root Pathname: Root path for this resource type from config files
     # @param path Pathname: Path to local item 
-    # @return String: remote resource name
-    def toremotename(root, path)
+    # @return Hash: hash of the details for the remote item for this path
+    def toRemoteItem(root, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
       root = Pathname.new(root) unless root.kind_of? Pathname
-      path.relative_path_from(root).to_s
+      {:name => path.relative_path_from(root).to_s}
     end
 
     ##
@@ -129,6 +129,12 @@ module MrMurano
       dest = into + name
     end
 
+    ##
+    # So, for bundles this needs to look at all the places and build up the mered
+    # stack of local items.
+    #
+    # Which means it needs the from to be split into the base and the sub so we can
+    # inject bundle directories.
     def locallist(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
       unless from.exist? then
@@ -150,14 +156,11 @@ module MrMurano
       end.select do |path|
         path.extname == '.lua'
       end.map do |path|
-        name = toremotename(from, path)
-        case name
-        when Hash
-          name[:local_path] = path
-          name
-        else
-          {:local_path => path, :name => name}
-        end
+        # sometimes this is a name, sometimes it is an item.
+        # do I want to keep that? NO.
+        name = toRemoteItem(from, path)
+        name[:local_path] = path
+        name
       end
     end
 

@@ -92,8 +92,9 @@ module MrMurano
       name
     end
 
-    def toremotename(from, path)
-      name = super(from, path)
+    def toRemoteItem(from, path)
+      item = super(from, path)
+      name = item[:name]
       name = '/' if name == $cfg['files.default_page']
       name = "/#{name}" unless name.chars.first == '/'
 
@@ -121,14 +122,9 @@ module MrMurano
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
       Pathname.glob(from.to_s + '/**/*').map do |path|
-        name = toremotename(from, path)
-        case name
-        when Hash
-          name[:local_path] = path
-          name
-        else
-          {:local_path => path, :name => name}
-        end
+        name = toRemoteItem(from, path)
+        name[:local_path] = path
+        name
       end
     end
 

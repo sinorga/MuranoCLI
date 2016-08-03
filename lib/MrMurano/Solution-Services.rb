@@ -102,7 +102,7 @@ module MrMurano
     end
 
 
-    def toremotename(from, path)
+    def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
       {:name => name}
     end
@@ -145,7 +145,7 @@ module MrMurano
       "#{item[:name]}.lua"
     end
 
-    def toremotename(from, path)
+    def toRemoteItem(from, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
       aheader = path.readlines().first
       md = /--#EVENT (\S+) (\S+)/.match(aheader)
