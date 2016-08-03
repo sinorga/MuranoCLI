@@ -12,6 +12,7 @@ module MrMurano
       super
       @uriparts << 'file'
       @itemkey = :path
+      @location = $cfg['location.files']
     end
 
     ##

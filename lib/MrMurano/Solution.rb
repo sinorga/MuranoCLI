@@ -14,6 +14,8 @@ module MrMurano
       raise "No solution!" if @sid.nil?
       @uriparts = [:solution, @sid]
       @itemkey = :id
+      @locationbase = $cfg['location.base']
+      @location = nil
     end
 
     def verbose(msg)
@@ -183,10 +185,10 @@ module MrMurano
       dest.unlink
     end
 
-    def syncup(from, options=Commander::Command::Options.new)
+    def syncup(options=Commander::Command::Options.new)
       itemkey = @itemkey.to_sym
       options.asdown=false
-      dt = status(from, options)
+      dt = status(options)
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
@@ -217,9 +219,12 @@ module MrMurano
       end
     end
 
-    def syncdown(into, options=Commander::Command::Options.new)
+    # FIXME this still needs the path passed in.
+    # Need to think some more on how syncdown works with bundles.
+    def syncdown(options=Commander::Command::Options.new)
       options.asdown = true
-      dt = status(into, options)
+      dt = status(options)
+      into = @locationbase + @location
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
@@ -278,9 +283,9 @@ module MrMurano
       df
     end
 
-    def status(from, options=Commander::Command::Options.new)
+    def status(options=Commander::Command::Options.new)
       there = list()
-      here = locallist(from)
+      here = locallist()
       itemkey = @itemkey.to_sym
  
       therebox = {}

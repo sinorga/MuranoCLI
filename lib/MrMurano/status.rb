@@ -57,37 +57,37 @@ command :status do |c|
     
     if options.endpoints then
       sol = MrMurano::Endpoint.new
-      ret = sol.status($cfg['location.base'] + $cfg['location.endpoints'], options)
+      ret = sol.status(options)
       gmerge(ret, 'A', options)
     end
 
     if options.modules then
       sol = MrMurano::Library.new
-      ret = sol.status( $cfg['location.base'] + $cfg['location.modules'], options)
+      ret = sol.status(options)
       gmerge(ret, 'M', options)
     end
 
     if options.eventhandlers then
       sol = MrMurano::EventHandler.new
-      ret = sol.status( $cfg['location.base'] + $cfg['location.eventhandlers'], options)
+      ret = sol.status(options)
       gmerge(ret, 'E', options)
     end
 
     if options.roles then
       sol = MrMurano::Role.new
-      ret = sol.status( $cfg['location.base'] + $cfg['location.roles'], options)
+      ret = sol.status(options)
       gmerge(ret, 'R', options)
     end
 
     if options.users then
       sol = MrMurano::User.new
-      ret = sol.status( $cfg['location.base'] + $cfg['location.users'], options)
+      ret = sol.status(options)
       gmerge(ret, 'U', options)
     end
 
     if options.files then
       sol = MrMurano::File.new
-      ret = sol.status( $cfg['location.base'] + $cfg['location.files'], options)
+      ret = sol.status(options)
       gmerge(ret, 'S', options)
     end
 

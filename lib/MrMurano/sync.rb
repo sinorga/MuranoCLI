@@ -24,32 +24,32 @@ command :syncdown do |c|
     
     if options.endpoints then
       sol = MrMurano::Endpoint.new
-      sol.syncdown($cfg['location.base'] + $cfg['location.endpoints'], options)
+      sol.syncdown(options)
     end
 
     if options.modules then
       sol = MrMurano::Library.new
-      sol.syncdown( $cfg['location.base'] + $cfg['location.modules'], options)
+      sol.syncdown(options)
     end
 
     if options.eventhandlers then
       sol = MrMurano::EventHandler.new
-      sol.syncdown( $cfg['location.base'] + $cfg['location.eventhandlers'], options)
+      sol.syncdown(options)
     end
 
     if options.roles then
       sol = MrMurano::Role.new
-      sol.syncdown( $cfg['location.base'] + $cfg['location.roles'], options)
+      sol.syncdown(options)
     end
 
     if options.users then
       sol = MrMurano::User.new
-      sol.syncdown( $cfg['location.base'] + $cfg['location.users'], options)
+      sol.syncdown(options)
     end
 
     if options.files then
       sol = MrMurano::File.new
-      sol.syncdown( $cfg['location.base'] + $cfg['location.files'], options)
+      sol.syncdown(options)
     end
 
   end
@@ -81,32 +81,32 @@ command :syncup do |c|
 
     if options.endpoints then
       sol = MrMurano::Endpoint.new
-      sol.syncup($cfg['location.base'] + $cfg['location.endpoints'], options)
+      sol.syncup(options)
     end
 
     if options.modules then
       sol = MrMurano::Library.new
-      sol.syncup( $cfg['location.base'] + $cfg['location.modules'], options)
+      sol.syncup(options)
     end
 
     if options.eventhandlers then
       sol = MrMurano::EventHandler.new
-      sol.syncup( $cfg['location.base'] + $cfg['location.eventhandlers'], options)
+      sol.syncup(options)
     end
 
     if options.roles then
       sol = MrMurano::Role.new
-      sol.syncup( $cfg['location.base'] + $cfg['location.roles'], options)
+      sol.syncup(options)
     end
 
     if options.users then
       sol = MrMurano::User.new
-      sol.syncup( $cfg['location.base'] + $cfg['location.users'], options)
+      sol.syncup(options)
     end
 
     if options.files then
       sol = MrMurano::File.new
-      sol.syncup( $cfg['location.base'] + $cfg['location.files'], options)
+      sol.syncup(options)
     end
 
   end

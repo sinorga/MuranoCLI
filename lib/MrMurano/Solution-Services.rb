@@ -94,6 +94,7 @@ module MrMurano
       super
       @uriparts << 'library'
       @itemkey = :alias
+      @location = $cfg['location.modules']
     end
 
     def tolocalname(item, key)
@@ -118,6 +119,7 @@ module MrMurano
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
+      @location = $cfg['location.eventhandlers']
     end
 
     def list

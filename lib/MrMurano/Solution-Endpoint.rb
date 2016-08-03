@@ -9,6 +9,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'endpoint'
+      @location = $cfg['location.endpoints']
     end
 
     ##
