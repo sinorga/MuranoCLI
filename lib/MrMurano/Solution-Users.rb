@@ -32,6 +32,7 @@ module MrMurano
           say_error ":: #{response.body}"
         end
       end
+      remote.reject!{|k,v| k==:synckey}
       post('/', remote)
     end
 
@@ -46,7 +47,7 @@ module MrMurano
       here.delete_if do |i|
         Hash.transform_keys_to_symbols(i)[@itemkey] == item[@itemkey]
       end
-      here << item
+      here << item.reject{|k,v| k==:synckey}
       local.open('wb') do |io|
         io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
       end
