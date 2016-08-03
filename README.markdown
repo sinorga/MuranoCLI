@@ -24,6 +24,12 @@ Then deploy `mr syncup -same`
 > gem install MrMurano
 ```
 
+## Sub-directories
+
+For the endpoints, modules, and eventhandlers directories. The can contain both
+files or a sub-directory of files.  This allows for keeping common things grouped
+together.  Or adding a git submodule in to manage reusable chunks.
+
 
 
 ## Bundles
