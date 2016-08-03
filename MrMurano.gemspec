@@ -23,6 +23,9 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_runtime_dependency('commander', '~> 4.4.0')
+  s.add_runtime_dependency('terminal-table', '~> 1.4.5')
+  s.add_runtime_dependency('mime-types', '~> 1.25.1')
+  s.add_runtime_dependency('mime-types-data', '~> 3.2016')
   s.add_runtime_dependency('inifile', '~> 3.0')
   s.add_runtime_dependency('netrc', '~> 0.11.0')
   s.add_runtime_dependency('http-form_data', '~> 1.0.1')
