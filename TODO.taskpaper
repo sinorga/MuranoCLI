@@ -5,7 +5,7 @@ Commands:
 	- Add Diff Command @done(2016-07-27)
 
 Endpoints:
-	- Add support for multiple endpoints in one file
+	- Add support for multiple endpoints in one file (maybe)
 	- Add directory support like in modules @done(2016-07-26)
   
 Files:
