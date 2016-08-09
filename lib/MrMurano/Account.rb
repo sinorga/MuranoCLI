@@ -14,12 +14,12 @@ module MrMurano
       URI('https://' + $cfg['net.host'] + '/api:1/' + path.to_s)
     end
 
-    def _password
+    def _loginInfo
       host = $cfg['net.host']
       user = $cfg['user.name']
       if user.nil? then
         user = ask("Account name: ")
-        $cfg['user.name'] = user
+        $cfg.set('user.name', user, :user)
       end
       # Maybe in the future use Keychain.  For now all in Netrc.
 #      if (/darwin/ =~ RUBY_PLATFORM) != nil then
@@ -37,7 +37,10 @@ module MrMurano
         nrc[host] = user, pws
         nrc.save
       end
-      pws
+      {
+        :email => $cfg['user.name'],
+        :password => pws
+      }
     end
 
     def token
@@ -47,10 +50,7 @@ module MrMurano
           request = Net::HTTP::Post.new(r)
           request.content_type = 'application/json'
           #request.basic_auth(username(), password())
-          request.body = JSON.generate({
-            :email => $cfg['user.name'],
-            :password => _password
-          })
+          request.body = JSON.generate(_loginInfo)
 
           response = http.request(request)
           case response
