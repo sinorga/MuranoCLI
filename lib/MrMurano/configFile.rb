@@ -28,6 +28,7 @@ module MrMurano
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
         self[:data].save
+        path.chmod(0600)
       end
     end
 
