@@ -32,7 +32,7 @@ module MrMurano
           say_error ":: #{response.body}"
         end
       end
-      remote.reject!{|k,v| k==:synckey}
+      remote.reject!{|k,v| k==:synckey or k==:bundled}
       post('/', remote)
     end
 
@@ -74,7 +74,7 @@ module MrMurano
       into
     end
 
-    def locallist(from)
+    def localitems(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
       if not from.exist? then
         say_warning "Skipping missing #{from.to_s}"
@@ -90,7 +90,7 @@ module MrMurano
       from.open {|io| here = YAML.load(io) }
       here = [] if here == false
 
-      here
+      here.map{|i| Hash.transform_keys_to_symbols(i)}
     end
   end
 
@@ -100,6 +100,7 @@ module MrMurano
       super
       @uriparts << 'role'
       @itemkey = :role_id
+      @location = $cfg['location.roles']
     end
   end
 
@@ -108,6 +109,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'user'
+      @location = $cfg['location.users']
     end
 
     def upload(local, remote)

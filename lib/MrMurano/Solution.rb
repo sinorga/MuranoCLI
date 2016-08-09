@@ -14,6 +14,8 @@ module MrMurano
       raise "No solution!" if @sid.nil?
       @uriparts = [:solution, @sid]
       @itemkey = :id
+      @locationbase = $cfg['location.base']
+      @location = nil
     end
 
     def verbose(msg)
@@ -94,14 +96,14 @@ module MrMurano
     # …
 
     ##
-    # Compute a remote resource name from the local path
+    # Compute a remote item hash from the local path
     # @param root Pathname: Root path for this resource type from config files
     # @param path Pathname: Path to local item 
-    # @return String: remote resource name
-    def toremotename(root, path)
+    # @return Hash: hash of the details for the remote item for this path
+    def toRemoteItem(root, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
       root = Pathname.new(root) unless root.kind_of? Pathname
-      path.relative_path_from(root).to_s
+      {:name => path.relative_path_from(root).to_s}
     end
 
     ##
@@ -129,13 +131,51 @@ module MrMurano
       dest = into + name
     end
 
-    def locallist(from)
-      from = Pathname.new(from) unless from.kind_of? Pathname
-      unless from.exist? then
-        return []
-      end
-      raise "Not a directory: #{from.to_s}" unless from.directory?
+    ##
+    # So, for bundles this needs to look at all the places and build up the mered
+    # stack of local items.
+    #
+    # Which means it needs the from to be split into the base and the sub so we can
+    # inject bundle directories.
 
+    ##
+    # Get a list of local items.
+    #
+    # This collects items in the project and all bundles.
+    def locallist()
+      # so. if @locationbase/bundles exists
+      #  gather and merge: @locationbase/bundles/*/@location
+      # then merge @locationbase/@location
+      #
+
+      bundleDir = $cfg['location.bundles'] or 'bundles'
+      bundleDir = 'bundles' if bundleDir.nil?
+      items = {}
+      if (@locationbase + bundleDir).directory? then
+        (@locationbase + bundleDir).children.sort.each do |bndl|
+          if (bndl + @location).exist? then
+            verbose("Loading from bundle #{bndl.basename}")
+            bitems = localitems(bndl + @location)
+            bitems.map!{|b| b[:bundled] = true; b} # mark items from bundles.
+
+            
+            # use synckey for quicker merging.
+            bitems.each { |b| items[synckey(b)] = b }
+          end
+        end
+      end
+      if (@locationbase + @location).exist? then
+        bitems = localitems(@locationbase + @location)
+        # use synckey for quicker merging.
+        bitems.each { |b| items[synckey(b)] = b }
+      end
+
+      items.values
+    end
+
+    ##
+    # Get a list of local items rooted at #from
+    def localitems(from)
       from.children.map do |path|
         if path.directory? then
           # TODO: look for definition. ( ?.rockspec? ?mr.modules? ?mr.manifest? )
@@ -150,14 +190,11 @@ module MrMurano
       end.select do |path|
         path.extname == '.lua'
       end.map do |path|
-        name = toremotename(from, path)
-        case name
-        when Hash
-          name[:local_path] = path
-          name
-        else
-          {:local_path => path, :name => name}
-        end
+        # sometimes this is a name, sometimes it is an item.
+        # do I want to keep that? NO.
+        name = toRemoteItem(from, path)
+        name[:local_path] = path
+        name
       end
     end
 
@@ -167,6 +204,10 @@ module MrMurano
     end
 
     def download(local, item)
+      if item[:bundled] then
+        say_warning "Not downloading into bundled item #{synckey(item)}"
+        return
+      end
       local.dirname.mkpath
       id = item[@itemkey.to_sym]
       local.open('wb') do |io|
@@ -180,10 +221,10 @@ module MrMurano
       dest.unlink
     end
 
-    def syncup(from, options=Commander::Command::Options.new)
+    def syncup(options=Commander::Command::Options.new)
       itemkey = @itemkey.to_sym
       options.asdown=false
-      dt = status(from, options)
+      dt = status(options)
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
@@ -214,9 +255,12 @@ module MrMurano
       end
     end
 
-    def syncdown(into, options=Commander::Command::Options.new)
+    # FIXME this still needs the path passed in.
+    # Need to think some more on how syncdown works with bundles.
+    def syncdown(options=Commander::Command::Options.new)
       options.asdown = true
-      dt = status(into, options)
+      dt = status(options)
+      into = @locationbase + @location
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
@@ -275,9 +319,9 @@ module MrMurano
       df
     end
 
-    def status(from, options=Commander::Command::Options.new)
+    def status(options=Commander::Command::Options.new)
       there = list()
-      here = locallist(from)
+      here = locallist()
       itemkey = @itemkey.to_sym
  
       therebox = {}

@@ -9,6 +9,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'endpoint'
+      @location = $cfg['location.endpoints']
     end
 
     ##
@@ -80,7 +81,7 @@ module MrMurano
       name << '.lua'
     end
 
-    def toremotename(from, path)
+    def toRemoteItem(from, path)
       # read first line of file and get method/path from it?
       path = Pathname.new(path) unless path.kind_of? Pathname
       aheader = path.readlines().first
