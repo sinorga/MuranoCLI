@@ -6,7 +6,7 @@ Commands:
 	- Add Diff Command @done(2016-07-27)
 
 Account:
-	- Netrc library (or the netrc format) doesn't allow '#' in passwords.
+	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
 	- Add support for multiple endpoints in one file (maybe)
