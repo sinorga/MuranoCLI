@@ -10,6 +10,7 @@ To start from an existing project in Murano
 ```
 mkdir myproject
 cd myproject
+mr config solution.id XXXXXX
 mr syncdown -same
 ```
 
@@ -23,5 +24,32 @@ Then deploy `mr syncup -same`
 ```
 > gem install MrMurano
 ```
+Or
+```
+> gem update MrMurano
+```
+
+## Features
+
+### Sub-directories
+
+For the endpoints, modules, and eventhandlers directories. The can contain both
+files or a sub-directory of files.  This allows for keeping common things grouped
+together.  Or adding a git submodule in to manage reusable chunks.
+
+
+
+### Bundles
+
+MrMuanro allows adding bundles of resources to your project.
+
+A Bundle is a group of modules, endpoints, and static files.
+
+Bundles live in the 'bundle' directory.  Each bundle is a directory that matches
+the layout of a project. (with directories for endpoints, modules, files, etc)
+
+The items in bundles are layered by sorting the bundle names. Then your project's
+items are layered on top.  This builds the list of what is synced.  It also allows
+you to override things that are in a bundle from you project.
 
 

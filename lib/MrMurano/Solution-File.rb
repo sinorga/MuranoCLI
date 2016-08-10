@@ -12,6 +12,7 @@ module MrMurano
       super
       @uriparts << 'file'
       @itemkey = :path
+      @location = $cfg['location.files']
     end
 
     ##
@@ -69,7 +70,8 @@ module MrMurano
       # Most of these pull into ram.  So maybe just go with that. Would guess that
       # truely large static content is rare, and we can optimize/fix that later.
 
-      form = HTTP::FormData.create(:file=>HTTP::FormData::File.new(local.to_s))
+      file = HTTP::FormData::File.new(local.to_s, {:mime_type=>remote[:mime_type]})
+      form = HTTP::FormData.create(:file=>file)
       req = Net::HTTP::Put.new(uri)
       workit(req) do |request,http|
         request.content_type = form.content_type
@@ -92,8 +94,9 @@ module MrMurano
       name
     end
 
-    def toremotename(from, path)
-      name = super(from, path)
+    def toRemoteItem(from, path)
+      item = super(from, path)
+      name = item[:name]
       name = '/' if name == $cfg['files.default_page']
       name = "/#{name}" unless name.chars.first == '/'
 
@@ -113,7 +116,7 @@ module MrMurano
         itemA[:checksum] != itemB[:checksum])
     end
 
-    def locallist(from)
+    def localitems(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
       unless from.exist? then
         return []
@@ -121,14 +124,9 @@ module MrMurano
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
       Pathname.glob(from.to_s + '/**/*').map do |path|
-        name = toremotename(from, path)
-        case name
-        when Hash
-          name[:local_path] = path
-          name
-        else
-          {:local_path => path, :name => name}
-        end
+        name = toRemoteItem(from, path)
+        name[:local_path] = path
+        name
       end
     end
 

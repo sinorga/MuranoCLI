@@ -1,12 +1,55 @@
-require 'netrc'
 require 'uri'
 require 'net/http'
 require 'json'
 require 'date'
 require 'pp'
 require 'terminal-table'
+require 'pathname'
+require 'yaml'
 
 module MrMurano
+  class Passwords
+    def initialize(path)
+      path = Pathname.new(path) unless path.kind_of? Pathname
+      @path = path
+      @data = nil
+    end
+    def load()
+      if @path.exist? then
+        @path.chmod(0600)
+        @path.open('rb') do |io|
+          @data = YAML.load(io)
+        end
+      end
+    end
+    def save()
+      @path.open('wb') do |io|
+        io << @data.to_yaml
+      end
+      @path.chmod(0600)
+    end
+    def set(host, user, pass)
+      unless @data.kind_of? Hash then
+        @data = {host=>{user=>pass}}
+        return
+      end
+      hd = @data[host]
+      if hd.nil? or not hd.kind_of?(Hash) then
+        hd = {user=>pass}
+        return
+      end
+      hd[user] = pass
+      return
+    end
+    def get(host, user)
+      return nil unless @data.kind_of? Hash
+      return nil unless @data.has_key? host
+      return nil unless @data[host].kind_of? Hash
+      return nil unless @data[host].has_key? user
+      return @data[host][user]
+    end
+  end
+
   class Account
 
 
@@ -21,21 +64,14 @@ module MrMurano
         user = ask("Account name: ")
         $cfg.set('user.name', user, :user)
       end
-      # Maybe in the future use Keychain.  For now all in Netrc.
-#      if (/darwin/ =~ RUBY_PLATFORM) != nil then
-#        # macOS
-#        pws = `security 2>&1 >/dev/null find-internet-password -gs "#{host}" -a "#{user}"`
-#        pws.strip!
-#        pws.sub!(/^password: "(.*)"$/, '\1')
-#        return pws
-      # Use Netrc
-      nrc = Netrc.read
-      ruser, pws = nrc[host]
-      pws = nil unless ruser == user
+      pff = Pathname.new(ENV['HOME']) + '.mrmurano/passwords'
+      pf = Passwords.new(pff)
+      pf.load
+      pws = pf.get(host, user)
       if pws.nil? then
         pws = ask("Password:  ") { |q| q.echo = "*" }
-        nrc[host] = user, pws
-        nrc.save
+        pf.set(host, user, pws)
+        pf.save
       end
       {
         :email => $cfg['user.name'],
