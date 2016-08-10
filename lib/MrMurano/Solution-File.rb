@@ -70,7 +70,8 @@ module MrMurano
       # Most of these pull into ram.  So maybe just go with that. Would guess that
       # truely large static content is rare, and we can optimize/fix that later.
 
-      form = HTTP::FormData.create(:file=>HTTP::FormData::File.new(local.to_s))
+      file = HTTP::FormData::File.new(local.to_s, {:mime_type=>remote[:mime_type]})
+      form = HTTP::FormData.create(:file=>file)
       req = Net::HTTP::Put.new(uri)
       workit(req) do |request,http|
         request.content_type = form.content_type
