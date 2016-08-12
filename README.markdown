@@ -11,11 +11,12 @@ To start from an existing project in Murano
 mkdir myproject
 cd myproject
 mr config solution.id XXXXXX
-mr syncdown -same
+mr syncdown
 ```
 
-Do stuff, see what changed: `mr status -same` or `mr diff -same`.
-Then deploy `mr syncup -same`
+Do stuff, see what changed: `mr status` or `mr diff`.
+Then deploy with `mr syncup`
+
 
 
 
