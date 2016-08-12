@@ -275,7 +275,6 @@ module MrMurano
         end
       end
       if options.create then
-        pp toadd
         toadd.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then

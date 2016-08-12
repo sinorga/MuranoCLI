@@ -209,7 +209,7 @@ command :config do |c|
   c.action do |args, options|
 
     if options.dump then
-      say $cfg.dump()
+      puts $cfg.dump()
     elsif args.count == 0 then
       say_error "Need a config key"
     elsif args.count == 1 and not options.unset then
