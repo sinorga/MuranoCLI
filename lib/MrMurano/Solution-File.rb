@@ -6,7 +6,7 @@ require 'mime/types'
 require 'pp'
 
 module MrMurano
-  # …/file 
+  # …/file
   class File < SolutionBase
     def initialize
       super
@@ -52,7 +52,7 @@ module MrMurano
     end
 
     def curldebug(request)
-      # The upload will get printed out inside of upload. 
+      # The upload will get printed out inside of upload.
       # Because we don't have the correct info here.
       if request.method != 'PUT' then
         super(request)
@@ -120,6 +120,7 @@ module MrMurano
 
       mime = MIME::Types.type_for(path.to_s)[0] || MIME::Types["application/octet-stream"][0]
 
+      # TODO: are we doing the correct calculation here?
       sha1 = Digest::SHA1.file(path.to_s).hexdigest
 
       {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1}
