@@ -43,8 +43,10 @@ module MrMurano
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
       prjfile = findProjectFile()
-      @paths << ConfigFile.new(:private, prjfile.dirname + CFG_PRVT_NAME)
-      @paths << ConfigFile.new(:project, prjfile)
+      unless prjfile.nil? then
+        @paths << ConfigFile.new(:private, prjfile.dirname + CFG_PRVT_NAME)
+        @paths << ConfigFile.new(:project, prjfile)
+      end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,''))
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
@@ -55,7 +57,7 @@ module MrMurano
 
       set('net.host', 'bizapi.hosted.exosite.io', :defaults)
 
-      set('location.base', prjfile.dirname, :defaults)
+      set('location.base', prjfile.dirname, :defaults) unless prjfile.nil?
       set('location.files', 'files', :defaults)
       set('location.endpoints', 'endpoints', :defaults)
       set('location.modules', 'modules', :defaults)
@@ -76,7 +78,7 @@ module MrMurano
       result=nil
       home = Pathname.new(Dir.home)
       pwd = Pathname.new(Dir.pwd)
-      return a if home == pwd
+      return nil if home == pwd
       pwd.dirname.ascend do |i| 
         break if i == home
         if (i + CFG_FILE_NAME).exist? then
