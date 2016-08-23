@@ -52,7 +52,7 @@ pgds = [
 if not ARGV.include? '--skip-plugins' then
   pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.has_key? 'MR_MURANO_PLUGIN_DIR'
   pgds.each do |path|
-    ext unless path.exist?
+    next unless path.exist?
     path.each_child do |plugin|
       next if plugin.directory?
       next unless plugin.readable?
