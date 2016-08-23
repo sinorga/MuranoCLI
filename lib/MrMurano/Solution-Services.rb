@@ -83,6 +83,8 @@ module MrMurano
       elsif itemB[:updated_at].kind_of? String then
         itemB[:updated_at] = DateTime.parse(itemB[:updated_at]).to_time.getutc
       end
+      # It is a common thing that the thing in murano has a newer updated timestamp
+      # than the file here on disk.
       return itemA[:updated_at] != itemB[:updated_at]
     end
 
