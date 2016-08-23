@@ -24,6 +24,19 @@ module MrMurano
       end
     end
 
+    def curldebug(request)
+      if $cfg['tool.curldebug'] then
+        a = []
+        a << %{curl -s -H 'Authorization: #{request['authorization']}'}
+        a << %{-H 'User-Agent: #{request['User-Agent']}'}
+        a << %{-H 'Content-Type: #{request.content_type}'}
+        a << %{-X #{request.method}}
+        a << %{'#{request.uri.to_s}'}
+        a << %{-d '#{request.body}'} unless request.body.nil?
+        puts a.join(' ')
+      end
+    end
+
     def endPoint(path='')
       parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
       s = parts.map{|v| v.to_s}.join('/')
@@ -48,6 +61,7 @@ module MrMurano
 
     def workit(request, &block)
       set_req_defaults(request)
+      curldebug(request)
       if block_given? then
         yield request, http()
       else

@@ -33,7 +33,7 @@ Config:
 
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
-	- Add the --curl verbose option.
+	- Add the --curl verbose option. @done(2016-08-12)
 	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
 
 Bundles:

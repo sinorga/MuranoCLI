@@ -51,6 +51,14 @@ module MrMurano
       delete('/'+path)
     end
 
+    def curldebug(request)
+      # The upload will get printed out inside of upload. 
+      # Because we don't have the correct info here.
+      if request.method != 'PUT' then
+        super(request)
+      end
+    end
+
     ##
     # Upload a file
     def upload(local, remote)
@@ -77,6 +85,16 @@ module MrMurano
         request.content_type = form.content_type
         request.content_length = form.content_length
         request.body = form.to_s
+
+        if $cfg['tool.curldebug'] then
+          a = []
+          a << %{curl -s -H 'Authorization: #{request['authorization']}'}
+          a << %{-H 'User-Agent: #{request['User-Agent']}'}
+          a << %{-X #{request.method}}
+          a << %{'#{request.uri.to_s}'}
+          a << %{-F file=@#{local.to_s}}
+          puts a.join(' ')
+        end
 
         response = http.request(request)
         case response
@@ -123,7 +141,9 @@ module MrMurano
       end
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
-      Pathname.glob(from.to_s + '/**/*').map do |path|
+      Pathname.glob(from.to_s + '/**/*').reject do |path|
+        path.directory?
+      end.map do |path|
         name = toRemoteItem(from, path)
         name[:local_path] = path
         name
