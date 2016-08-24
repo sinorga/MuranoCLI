@@ -85,7 +85,7 @@ module MrMurano
 
     def get(path='', &block)
       uri = endPoint(path)
-      workit(Net::HTTP::Get.new(uri), &block) 
+      workit(Net::HTTP::Get.new(uri), &block)
     end
 
     def post(path='', body={}, &block)
@@ -112,7 +112,7 @@ module MrMurano
     ##
     # Compute a remote item hash from the local path
     # @param root Pathname: Root path for this resource type from config files
-    # @param path Pathname: Path to local item 
+    # @param path Pathname: Path to local item
     # @return Hash: hash of the details for the remote item for this path
     def toRemoteItem(root, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
@@ -130,7 +130,7 @@ module MrMurano
 
     ##
     # Compute the local path from the listing details
-    # 
+    #
     # If there is already a matching local item, some of its details are also in
     # the item hash.
     #
@@ -142,6 +142,8 @@ module MrMurano
       itemkey = @itemkey.to_sym
       name = tolocalname(item, itemkey)
       raise "Bad key(#{itemkey}) for #{item}" if name.nil?
+      name = Pathname.new(name) unless name.kind_of? Pathname
+      name = name.relative_path_from(Pathname.new('/')) if name.absolute?
       dest = into + name
     end
 
@@ -172,7 +174,7 @@ module MrMurano
             bitems = localitems(bndl + @location)
             bitems.map!{|b| b[:bundled] = true; b} # mark items from bundles.
 
-            
+
             # use synckey for quicker merging.
             bitems.each { |b| items[synckey(b)] = b }
           end
@@ -336,7 +338,7 @@ module MrMurano
       there = list()
       here = locallist()
       itemkey = @itemkey.to_sym
- 
+
       therebox = {}
       there.each do |item|
         item = Hash.transform_keys_to_symbols(item)
