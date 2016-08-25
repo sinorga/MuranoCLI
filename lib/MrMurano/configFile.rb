@@ -98,6 +98,7 @@ module MrMurano
 
     def load_specific(file)
       spc = ConfigFile.new(:specified, Pathname.new(file))
+      spc.load
       @paths.insert(1, spc)
     end
 
