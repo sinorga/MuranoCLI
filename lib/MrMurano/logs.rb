@@ -4,7 +4,7 @@ require 'rainbow/ext/string'
 command :logs do |c|
   c.syntax = %{mr logs [options]}
   c.description = %{Get the logs for a solution}
-  c.option '-f','--follow', %{Follow logs from server}
+  #c.option '-f','--follow', %{Follow logs from server}
   c.option('--[no-]color', %{Toggle colorizing of logs}) {
     Rainbow.enabled = false
   }
@@ -14,7 +14,7 @@ command :logs do |c|
     options.default :pretty=>true
 
     sol = MrMurano::Solution.new
-    ret = sol.get('/logs') # TODO: ('/logs?polling=true')
+    ret = sol.get('/logs') # TODO: ('/logs?polling=true') Currently ignored.
 
     if ret.kind_of?(Hash) and ret.has_key?('items') then
       ret['items'].reverse.each do |line|
