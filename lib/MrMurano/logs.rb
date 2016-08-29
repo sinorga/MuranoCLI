@@ -24,16 +24,19 @@ command :logs do |c|
           m.color(:blue)
         }
 
-        line.gsub!(/\{(?>[^}{]+|\g<0>)*\}/m) {|m|
+        line.gsub!(/\{(?>[^}{]+|\g<0>)*\}/m) do |m|
           if options.pretty then
             js = JSON.parse(m, {:allow_nan=>true, :create_additions=>false})
             ret = JSON.pretty_generate(js).to_s
-            ret.sub!(/^{/){|m| m.color(:magenta)}
-            ret.sub!(/^}/){|m| m.color(:magenta)}
+            ret[0] = ret[0].color(:magenta)
+            ret[-1] = ret[-1].color(:magenta)
+            ret
           else
-            m.color(:green)
+            m.sub!(/^{/){|ml| ml.color(:magenta)}
+            m.sub!(/}$/){|ml| ml.color(:magenta)}
+            m
           end
-        }
+        end
 
         puts line
       end
