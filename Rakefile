@@ -1,6 +1,6 @@
 require "bundler/gem_tasks"
 
-#task :default => []
+task :default => [:test]
 
 # TODO: figure out better way to test.
 desc "Install gem in user dir"
@@ -19,6 +19,10 @@ end
 
 task :run do
 	sh %{ruby -Ilib bin/mr }
+end
+
+
+task :test do
 end
 
 #  vim: set sw=4 ts=4 :
