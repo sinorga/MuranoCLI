@@ -1,6 +1,6 @@
 require "bundler/gem_tasks"
 
-#task :default => []
+task :default => [:test]
 
 # TODO: figure out better way to test.
 desc "Install gem in user dir"
