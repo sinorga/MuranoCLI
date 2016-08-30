@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
-require_relative 'lib/mrmurano/version.rb'
+require_relative 'lib/MrMurano/version.rb'
 
 Gem::Specification.new do |s|
   s.name        = 'MrMurano'
