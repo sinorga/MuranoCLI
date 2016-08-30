@@ -1,3 +1,4 @@
+require 'date'
 require 'json'
 require 'rainbow/ext/string'
 
@@ -9,9 +10,10 @@ command :logs do |c|
     Rainbow.enabled = false
   }
   c.option '--[no-]pretty', %{Reformat JSON blobs in logs.}
+  c.option '--[no-]localtime', %{Adjust Timestamps to be in local time}
 
   c.action do |args,options|
-    options.default :pretty=>true
+    options.default :pretty=>true, :localtime=>true
 
     sol = MrMurano::Solution.new
     ret = sol.get('/logs') # TODO: ('/logs?polling=true') Currently ignored.
@@ -21,6 +23,9 @@ command :logs do |c|
 
         line.sub!(/^\[[^\]]*\]/) {|m| m.color(:red).background(:aliceblue)}
         line.sub!(/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)(?:\+\d\d:\d\d)/) {|m|
+          if options.localtime then
+            m = DateTime.parse(m).to_time.localtime.to_datetime.iso8601(3)
+          end
           m.color(:blue)
         }
 
