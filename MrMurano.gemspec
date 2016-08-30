@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/tadpol/MrMurano'
   s.summary     = 'Do more from the command line with Murano'
   s.description = %{Do more from the command line with Murano
-  
+
   Push and pull data from Murano.
   Get status on what things have changed.
   See a diff of the changes before you push.
@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('mime-types-data', '~> 3.2016')
   s.add_runtime_dependency('inifile', '~> 3.0')
   s.add_runtime_dependency('http-form_data', '~> 1.0.1')
+  s.add_runtime_dependency('rainbow', '~> 2.1.0')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
   s.add_development_dependency('rspec', '~> 3.2')
