@@ -10,6 +10,7 @@ module MrMurano
     # This might also be a valid ProductBase.
     def initialize
       @token = Account.new.token
+      raise "Not logged in!" if @token.nil?
       @sid = $cfg['solution.id']
       raise "No solution!" if @sid.nil?
       @uriparts = [:solution, @sid]
