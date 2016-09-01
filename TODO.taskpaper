@@ -11,7 +11,7 @@ Account:
 Endpoints:
 	- Add support for multiple endpoints in one file (maybe)
 	- Add directory support like in modules @done(2016-07-26)
-  
+
 Files:
 	- Switch to mime-types v3
 	- Fix upload. @done(2016-08-01)
@@ -33,6 +33,7 @@ Config:
 
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
+	- JSON parse should use symbols for keys. @done(2016-09-01)
 	- Add the --curl verbose option. @done(2016-08-12)
 	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
 
@@ -41,7 +42,7 @@ Bundles:
 	- Work on design @done(2016-08-09)
 	Thinking of something like VIM bundles.  A directory of directories. Each with a
 	manafest file? (maybe)  A Bundle is a group of modules, endpoints, static files
-	and the other things.  
+	and the other things.
 
 	There needs to be some layering logic added, where the bundles are stacked and
 	then the top-level files are stack on top of that. This builds the final map of

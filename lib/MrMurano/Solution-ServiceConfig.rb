@@ -9,7 +9,7 @@ module MrMurano
     end
 
     def list
-      get()['items']
+      get()[:items]
     end
     def fetch(id)
       get('/' + id.to_s)
@@ -17,20 +17,20 @@ module MrMurano
 
 
     def assignTriggers(products)
-      scr = list().select{|i| i['service'] == 'device' or i[:service] == 'device'}.first
-      scid = scr['id'] or scr[:id]
+      scr = list().select{|i|i[:service] == 'device'}.first
+      scid = scr[:id]
 
       details = Hash.transform_keys_to_symbols(fetch(scid))
       products = [products] unless products.kind_of? Array
       details[:triggers] = {:pid=>products}
 
       put('/'+scid, details)
-      
+
     end
 
     def showTriggers
-      scr = list().select{|i| i['service'] == 'device' or i[:service] == 'device'}.first
-      scid = scr['id'] or scr[:id]
+      scr = list().select{|i|i[:service] == 'device'}.first
+      scid = scr[:id]
 
       details = Hash.transform_keys_to_symbols(fetch(scid))
 

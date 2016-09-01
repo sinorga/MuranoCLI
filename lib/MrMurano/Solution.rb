@@ -16,6 +16,11 @@ module MrMurano
       @itemkey = :id
       @locationbase = $cfg['location.base']
       @location = nil
+      @json_opts = {
+        :allow_nan => true,
+        :symbolize_names => true,
+        :create_additions => false
+      }
     end
 
     def verbose(msg)
@@ -70,7 +75,7 @@ module MrMurano
         when Net::HTTPSuccess
           return {} if response.body.nil?
           begin
-            return JSON.parse(response.body)
+            return JSON.parse(response.body, @json_opts)
           rescue
             return response.body
           end
@@ -394,21 +399,6 @@ module MrMurano
       get('/logs')
     end
 
-  end
-
-  # …/serviceconfig
-  class ServiceConfig < SolutionBase
-    def initialize
-      super
-      @uriparts << 'serviceconfig'
-    end
-
-    def list
-      get()['items']
-    end
-    def fetch(id)
-      get('/' + id.to_s)
-    end
   end
 
 end
