@@ -57,7 +57,7 @@ command :assign do |c|
         say trigs.join(' ')
       else
         acc = MrMurano::Account.new
-        products = acc.products.map{|p| Hash.transform_keys_to_symbols(p)}
+        products = acc.products
         products.select!{|p| trigs.include? p[:pid] }
         busy = products.map{|r| [r[:label], r[:type], r[:pid], r[:modelId]]}
         table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
@@ -70,7 +70,7 @@ command :assign do |c|
         prid = $cfg['product.id']
       else
         acc = MrMurano::Account.new
-        products = acc.products.map{|p| Hash.transform_keys_to_symbols(p)}
+        products = acc.products
         products.select!{|p| p[:label] == prname or p[:pid] == prname }
         prid = products.map{|p| p[:pid]}
       end
