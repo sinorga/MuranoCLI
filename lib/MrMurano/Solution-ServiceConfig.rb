@@ -15,12 +15,16 @@ module MrMurano
       get('/' + id.to_s)
     end
 
+    def scid_for_name(name)
+      name = name.to_s unless name.kind_of? String
+      scr = list().select{|i| i[:service] == name}.first
+      scid = scr[:id]
+    end
 
     def assignTriggers(products)
-      scr = list().select{|i|i[:service] == 'device'}.first
-      scid = scr[:id]
+      scid = scid_for_name('device')
 
-      details = Hash.transform_keys_to_symbols(fetch(scid))
+      details = fetch(scid)
       products = [products] unless products.kind_of? Array
       details[:triggers] = {:pid=>products}
 
@@ -29,10 +33,9 @@ module MrMurano
     end
 
     def showTriggers
-      scr = list().select{|i|i[:service] == 'device'}.first
-      scid = scr[:id]
+      scid = scid_for_name('device')
 
-      details = Hash.transform_keys_to_symbols(fetch(scid))
+      details = fetch(scid)
 
       return [] if details[:triggers].nil?
       details[:triggers][:pid]
