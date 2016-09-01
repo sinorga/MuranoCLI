@@ -51,6 +51,13 @@ module MrMurano
   end
 
   class Account
+    def initialize
+      @json_opts = {
+        :allow_nan => true,
+        :symbolize_names => true,
+        :create_additions => false
+      }
+    end
 
 
     def endPoint(path)
@@ -91,8 +98,8 @@ module MrMurano
           response = http.request(request)
           case response
           when Net::HTTPSuccess
-            token = JSON.parse(response.body)
-            @token = token['token']
+            token = JSON.parse(response.body, @json_opts)
+            @token = token[:token]
           else
             say_error "No token! because: #{response}"
             @token = nil
@@ -113,7 +120,7 @@ module MrMurano
         response = http.request(request)
         case response
         when Net::HTTPSuccess
-          busy = JSON.parse(response.body)
+          busy = JSON.parse(response.body, @json_opts)
           return busy
         else
           raise response
@@ -132,7 +139,7 @@ module MrMurano
         response = http.request(request)
         case response
         when Net::HTTPSuccess
-          busy = JSON.parse(response.body)
+          busy = JSON.parse(response.body, @json_opts)
           return busy
         else
           raise response
@@ -151,7 +158,7 @@ module MrMurano
         response = http.request(request)
         case response
         when Net::HTTPSuccess
-          busy = JSON.parse(response.body)
+          busy = JSON.parse(response.body, @json_opts)
           return busy
         else
           raise response
@@ -180,9 +187,9 @@ command :account do |c|
     if options.businesses then
       data = acc.businesses
       if options.idonly then
-        say data.map{|row| row['bizid']}.join(' ')
+        say data.map{|row| row[:bizid]}.join(' ')
       else
-        busy = data.map{|row| [row['bizid'], row['role'], row['name']]}
+        busy = data.map{|row| [row[:bizid], row[:role], row[:name]]}
         table = Terminal::Table.new :rows => busy, :headings => ['Biz ID', 'Role', 'Name']
         say table
       end
@@ -190,9 +197,9 @@ command :account do |c|
     elsif options.products then
       data = acc.products
       if options.idonly then
-        say data.map{|row| row['pid']}.join(' ')
+        say data.map{|row| row[:pid]}.join(' ')
       else
-        busy = data.map{|r| [r['label'], r['type'], r['pid'], r['modelId']]}
+        busy = data.map{|r| [r[:label], r[:type], r[:pid], r[:modelId]]}
         table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
         say table
       end
@@ -200,9 +207,9 @@ command :account do |c|
     elsif options.solutions then
       data = acc.solutions
       if options.idonly then
-        say data.map{|row| row['apiId']}.join(' ')
+        say data.map{|row| row[:apiId]}.join(' ')
       else
-        busy = data.map{|r| [r['apiId'], r['domain'], r['type'], r['sid']]}
+        busy = data.map{|r| [r[:apiId], r[:domain], r[:type], r[:sid]]}
         table = Terminal::Table.new :rows => busy, :headings => ['API ID', 'Domain', 'Type', 'SID']
         say table
       end
