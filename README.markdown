@@ -19,8 +19,6 @@ Do stuff, see what changed: `mr status` or `mr diff`.
 Then deploy with `mr syncup`
 
 
-
-
 ## Install
 
 ```
@@ -32,6 +30,23 @@ Or
 ```
 
 ## Features
+
+### Logs
+
+You can monitor the log messages from your solution with the `mr logs --follow`.
+Or quickly get the last few with `mr logs`
+
+MrMurano does a few things to make your log output easier to follow.
+- Adds color to easily see where each log message starts.
+- Reformats the timestamps to be in local time.
+- Finds JSON blobs and pretty prints them.
+
+All of these can be toggled with command line options.
+
+### Keystore
+
+To aid with debugging, MrMurano has direct access to a solution's Keystore service.
+
 
 ### Sub-directories
 

@@ -21,6 +21,13 @@ module MrMurano
       scid = scr[:id]
     end
 
+    def scid
+      return @scid unless @scid.nil?
+      @scid = scid_for_name(@serviceName)
+    end
+
+    #  Below is Device ServiceConfig Specific.  Should it be in its own class?
+
     def assignTriggers(products)
       scid = scid_for_name('device')
 
