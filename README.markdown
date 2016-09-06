@@ -47,6 +47,9 @@ All of these can be toggled with command line options.
 
 To aid with debugging, MrMurano has direct access to a solution's Keystore service.
 
+### Timeseries
+
+To aid with debugging, MrMurano has direct access to a solution's Timeseries service.
 
 ### Sub-directories
 
