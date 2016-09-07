@@ -1,3 +1,5 @@
+Readme:
+	- Add more walk-thrus of common actions. (create new solution, …)
 
 Commands:
 	- Status will show things have changes when they don’t.
@@ -9,6 +11,7 @@ Account:
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
+	- GET&PUT /cors data
 	- Add support for multiple endpoints in one file (maybe)
 	- Add directory support like in modules @done(2016-07-26)
 
@@ -17,7 +20,7 @@ Files:
 	- Fix upload. @done(2016-08-01)
 	- Files won't update, they always delete then add. @done(2016-07-28)
 
-Users:
+Users and Roles:
 	Much of this is stuck until we get more docs on the User/Role management
 	- Figure out how to upload (create and update) user info.
 	- Figure out how to add Roles to Users in the local data and upload it.
@@ -30,6 +33,9 @@ Product:
 Config:
 	- Think about adding dev,staging,prod system; how would that work?
 	Would it work ok to just use the --configfile option?
+	I'm thinking so.  To the point of dropping the :private scope.
+	- Add ENV support for some (or all?) options.
+	- Maybe add dotenv support.
 
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.

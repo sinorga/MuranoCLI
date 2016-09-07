@@ -282,7 +282,7 @@ module MrMurano
     def syncdown(options=Commander::Command::Options.new)
       options.asdown = true
       dt = status(options)
-      into = @locationbase + @location
+      into = @locationbase + @location ###
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
