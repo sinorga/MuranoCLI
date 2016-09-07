@@ -53,7 +53,6 @@ command :logs do |c|
             out = line
 
           elsif line.kind_of?(Hash) then
-            line = Hash.transform_keys_to_symbols(line)
             out=""
 
             out << "[#{line[:subject]}]".color(:red).background(:aliceblue)
