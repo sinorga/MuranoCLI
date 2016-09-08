@@ -11,27 +11,44 @@ module MrMurano
       ret = get()
       ret[:cors]
     end
+
+    # TODO: fill out other metheds so this could be part of sync up/down.
+
+    ##
+    # Upload CORS
+    # :local path to file to push
+    # :remote hash of method and endpoint path (ignored for now)
+    def upload(local, remote)
+      local = Pathname.new(local) unless local.kind_of? Pathname
+      raise "no file" unless local.exist?
+
+      local.open do |io|
+        data = YAML.load(io)
+        put('', data)
+      end
+    end
+
+    def tolocalpath(into, item)
+      into
+    end
   end
 end
 
 command :cors do |c|
-  c.syntax = %{mr cors [<new cors>|-]}
+  c.syntax = %{mr cors [options]}
   c.description = %{Get or set the CORS for the solution.}
+  c.option '-f','--file FILE', String, %{File to set CORS from}
 
   c.action do |args,options|
     sol = MrMurano::Cors.new
-    if args.count == 0 then
+
+    if options.file then
+      #set
+      pp sol.upload(options.file, {})
+    else
       # get
       ret = sol.fetch()
       puts ret
-    else
-      # set
-      if args.first == '-' then # FIXME how to do this?
-        pp 'TICK'
-      else
-        data = args.join(' ')
-      end
-      #ret = sol.put('', data)
     end
   end
 
