@@ -8,6 +8,8 @@ require 'MrMurano/Solution-File.rb'
 require 'MrMurano/Solution-Services.rb'
 require 'MrMurano/Solution-Users.rb'
 require 'MrMurano/Solution-ServiceConfig.rb'
+
+require 'MrMurano/cors'
 require 'MrMurano/keystore.rb'
 require 'MrMurano/logs.rb'
 require 'MrMurano/sync.rb'

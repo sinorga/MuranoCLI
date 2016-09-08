@@ -6,6 +6,11 @@ module MrMurano
       @uriparts << 'cors'
       @location = $cfg['location.cors']
     end
+
+    def fetch()
+      ret = get()
+      ret[:cors]
+    end
   end
 end
 
@@ -17,15 +22,16 @@ command :cors do |c|
     sol = MrMurano::Cors.new
     if args.count == 0 then
       # get
-      ret = sol.get()
-      pp ret
+      ret = sol.fetch()
+      puts ret
     else
       # set
-      if args.first == '-' then
+      if args.first == '-' then # FIXME how to do this?
+        pp 'TICK'
       else
         data = args.join(' ')
       end
-      ret = sol.put('', data)
+      #ret = sol.put('', data)
     end
   end
 
