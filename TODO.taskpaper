@@ -11,7 +11,6 @@ Account:
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
-	- GET&PUT /cors data
 	- Add support for multiple endpoints in one file (maybe)
 	- Add directory support like in modules @done(2016-07-26)
 
@@ -28,6 +27,10 @@ Users and Roles:
 	- Fix diff for Users and Roles.
 	- Have hash keys in the yaml be strings not symbols. (don't start with colon) @done(2016-07-27)
 
+CORS:
+	- Get working with sync up/down.
+	- GET&PUT /cors data @done(2016-09-08)
+
 Product:
 	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
 
@@ -36,6 +39,7 @@ Config:
 	Would it work ok to just use the --configfile option?
 	I'm thinking so.  To the point of dropping the :private scope.
 	- Add ENV support for some (or all?) options.
+	At least the --configfile option. (and --config option)
 	- Maybe add dotenv support.
 
 SolutionBase:
