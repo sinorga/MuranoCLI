@@ -120,10 +120,22 @@ module MrMurano
 
       mime = MIME::Types.type_for(path.to_s)[0] || MIME::Types["application/octet-stream"][0]
 
-      # TODO: are we doing the correct calculation here?
-      sha1 = Digest::SHA1.file(path.to_s).hexdigest
+      # It does not actually take the SHA1 of the file.
+      # It first converts the file to hex, then takes the SHA1 of that string
+      #sha1 = Digest::SHA1.file(path.to_s).hexdigest
+      def hexit(str)
+        ret=''
+        str.each_byte{|b| ret << "%02x" % b}
+        ret
+      end
+      sha1 = Digest::SHA1.new
+      path.open('rb:ASCII-8BIT') do |io|
+        while chunk = io.read(4096) do
+          sha1 << hexit(chunk)
+        end
+      end
 
-      {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1}
+      {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest}
     end
 
     def synckey(item)
