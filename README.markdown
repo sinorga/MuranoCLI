@@ -12,7 +12,7 @@ To start from an existing project in Murano
 mkdir myproject
 cd myproject
 mr config solution.id XXXXXX
-mr syncdown
+mr syncdown -V
 ```
 
 Do stuff, see what changed: `mr status` or `mr diff`.
@@ -47,9 +47,12 @@ All of these can be toggled with command line options.
 
 To aid with debugging, MrMurano has direct access to a solution's Keystore service.
 
+To see all of the keys in the current solution: `mr keystore` 
+
 ### Timeseries
 
 To aid with debugging, MrMurano has direct access to a solution's Timeseries service.
+
 
 ### Sub-directories
 
