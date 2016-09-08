@@ -10,12 +10,18 @@ module MrMurano
     # This might also be a valid ProductBase.
     def initialize
       @token = Account.new.token
+      raise "Not logged in!" if @token.nil?
       @sid = $cfg['solution.id']
       raise "No solution!" if @sid.nil?
       @uriparts = [:solution, @sid]
       @itemkey = :id
       @locationbase = $cfg['location.base']
       @location = nil
+      @json_opts = {
+        :allow_nan => true,
+        :symbolize_names => true,
+        :create_additions => false
+      }
     end
 
     def verbose(msg)
@@ -70,7 +76,7 @@ module MrMurano
         when Net::HTTPSuccess
           return {} if response.body.nil?
           begin
-            return JSON.parse(response.body)
+            return JSON.parse(response.body, @json_opts)
           rescue
             return response.body
           end
@@ -276,7 +282,7 @@ module MrMurano
     def syncdown(options=Commander::Command::Options.new)
       options.asdown = true
       dt = status(options)
-      into = @locationbase + @location
+      into = @locationbase + @location ###
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
@@ -394,21 +400,6 @@ module MrMurano
       get('/logs')
     end
 
-  end
-
-  # …/serviceconfig
-  class ServiceConfig < SolutionBase
-    def initialize
-      super
-      @uriparts << 'serviceconfig'
-    end
-
-    def list
-      get()['items']
-    end
-    def fetch(id)
-      get('/' + id.to_s)
-    end
   end
 
 end

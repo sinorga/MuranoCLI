@@ -10,3 +10,7 @@ gem 'inifile', '~> 3.0'
 gem 'http-form_data', '~> 1.0.1'
 gem 'rainbow', '~> 2.1.0'
 
+group :test do
+  gem 'rake'
+end
+

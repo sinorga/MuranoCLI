@@ -27,15 +27,15 @@ module MrMurano
 
     def list
       ret = get()
-      ret['items']
+      ret[:items]
     end
 
     def fetch(name)
       ret = get('/'+name)
       if block_given? then
-        yield ret['script']
+        yield ret[:script]
       else
-        ret['script']
+        ret[:script]
       end
     end
 
@@ -127,20 +127,20 @@ module MrMurano
     def list
       ret = get()
       skiplist = ($cfg['eventhandler.skiplist'] or '').split
-      ret['items'].reject{|i| i.has_key?('service') and skiplist.include? i['service'] }
+      ret[:items].reject{|i| i.has_key?(:service) and skiplist.include? i[:service] }
     end
 
     def fetch(name)
       ret = get('/'+name)
-      aheader = (ret['script'].lines.first or "").chomp
-      dheader = "--#EVENT #{ret['service']} #{ret['event']}"
+      aheader = (ret[:script].lines.first or "").chomp
+      dheader = "--#EVENT #{ret[:service]} #{ret[:event]}"
       if block_given? then
         yield dheader + "\n" if aheader != dheader
-        yield ret['script']
+        yield ret[:script]
       else
         res = ''
         res << dheader + "\n" if aheader != dheader
-        res << ret['script']
+        res << ret[:script]
         res
       end
     end

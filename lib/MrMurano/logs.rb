@@ -22,8 +22,8 @@ command :logs do |c|
     begin
       ret = sol.get('/logs') # TODO: ('/logs?polling=true') Currently ignored.
 
-      if ret.kind_of?(Hash) and ret.has_key?('items') then
-        ret['items'].reverse.each do |line|
+      if ret.kind_of?(Hash) and ret.has_key?(:items) then
+        ret[:items].reverse.each do |line|
           curtime = ""
           if line.kind_of?(String) then
 
@@ -53,7 +53,6 @@ command :logs do |c|
             out = line
 
           elsif line.kind_of?(Hash) then
-            line = Hash.transform_keys_to_symbols(line)
             out=""
 
             out << "[#{line[:subject]}]".color(:red).background(:aliceblue)

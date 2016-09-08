@@ -9,30 +9,40 @@ module MrMurano
     end
 
     def list
-      get()['items']
+      get()[:items]
     end
     def fetch(id)
       get('/' + id.to_s)
     end
 
+    def scid_for_name(name)
+      name = name.to_s unless name.kind_of? String
+      scr = list().select{|i| i[:service] == name}.first
+      scid = scr[:id]
+    end
+
+    def scid
+      return @scid unless @scid.nil?
+      @scid = scid_for_name(@serviceName)
+    end
+
+    #  Below is Device ServiceConfig Specific.  Should it be in its own class?
 
     def assignTriggers(products)
-      scr = list().select{|i| i['service'] == 'device' or i[:service] == 'device'}.first
-      scid = scr['id'] or scr[:id]
+      scid = scid_for_name('device')
 
-      details = Hash.transform_keys_to_symbols(fetch(scid))
+      details = fetch(scid)
       products = [products] unless products.kind_of? Array
       details[:triggers] = {:pid=>products}
 
       put('/'+scid, details)
-      
+
     end
 
     def showTriggers
-      scr = list().select{|i| i['service'] == 'device' or i[:service] == 'device'}.first
-      scid = scr['id'] or scr[:id]
+      scid = scid_for_name('device')
 
-      details = Hash.transform_keys_to_symbols(fetch(scid))
+      details = fetch(scid)
 
       return [] if details[:triggers].nil?
       details[:triggers][:pid]
@@ -57,7 +67,7 @@ command :assign do |c|
         say trigs.join(' ')
       else
         acc = MrMurano::Account.new
-        products = acc.products.map{|p| Hash.transform_keys_to_symbols(p)}
+        products = acc.products
         products.select!{|p| trigs.include? p[:pid] }
         busy = products.map{|r| [r[:label], r[:type], r[:pid], r[:modelId]]}
         table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
@@ -70,7 +80,7 @@ command :assign do |c|
         prid = $cfg['product.id']
       else
         acc = MrMurano::Account.new
-        products = acc.products.map{|p| Hash.transform_keys_to_symbols(p)}
+        products = acc.products
         products.select!{|p| p[:label] == prname or p[:pid] == prname }
         prid = products.map{|p| p[:pid]}
       end

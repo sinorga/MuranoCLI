@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
-require 'mrmurano/version'
+require_relative 'lib/MrMurano/version.rb'
 
 Gem::Specification.new do |s|
   s.name        = 'MrMurano'
@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency('bundler', '~> 1.7.6')
   s.add_development_dependency('rspec', '~> 3.2')
-  s.add_development_dependency('rake')
+  s.add_development_dependency('rake', '~> 10.1.1')
 end
 
 
