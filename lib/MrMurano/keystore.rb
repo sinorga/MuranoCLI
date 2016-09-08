@@ -28,6 +28,10 @@ module MrMurano
       post("/#{scid}/call/delete", { :key=>key})
     end
 
+    def command(key, cmd, args)
+      post("/#{scid}/call/command", {:key=>key, :command=>cmd, :args=>args})
+    end
+
   end
 end
 
@@ -80,5 +84,22 @@ command 'keystore delete' do |c|
   end
 end
 alias_command 'keystore rm', 'keystore delete'
+
+command 'keystore command' do |c|
+  c.syntax = %{mr keystore command <key> <command> <args...>}
+  c.description = %{Call some Redis commands in the Keystore.
+
+Only a subset of all Redis commands is supported.
+See http://docs.exosite.com/murano/services/keystore/#command for current list.
+  }
+  c.example %{mr keystore command mykey lpush myvalue}, %{Push a value onto list}
+  c.example %{mr keystore command mykey lpush A B C}, %{Push three values onto list}
+  c.example %{mr keystore command mykey lrem 0 B}, %{Remove all B values from list}
+  c.action do |args,options|
+    sol = MrMurano::Keystore.new
+    pp sol.command(args[0], args[1], args[2..-1])
+  end
+end
+alias_command 'keystore cmd', 'keystore command'
 
 #  vim: set ai et sw=2 ts=2 :
