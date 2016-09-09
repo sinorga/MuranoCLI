@@ -87,6 +87,7 @@ alias_command 'keystore rm', 'keystore delete'
 
 command 'keystore command' do |c|
   c.syntax = %{mr keystore command <key> <command> <args...>}
+  c.summary = %{Call some Redis commands in the Keystore}
   c.description = %{Call some Redis commands in the Keystore.
 
 Only a subset of all Redis commands is supported.
