@@ -31,7 +31,11 @@ CORS:
 	- Get working with sync up/down.
 	- GET&PUT /cors data @done(2016-09-08)
 
+Timeseries:
+	- Add CSV output option.
+
 Product:
+	- When listing and bussiness.id is missing, gracefully fall back to --idonly
 	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
 
 Config:
@@ -43,6 +47,7 @@ Config:
 	- Maybe add dotenv support.
 
 SolutionBase:
+	- Errors from the server should be displayed prettier.
 	- All network traffic is serialized. Make some parallel.
 	- JSON parse should use symbols for keys. @done(2016-09-01)
 	- Add the --curl verbose option. @done(2016-08-12)
