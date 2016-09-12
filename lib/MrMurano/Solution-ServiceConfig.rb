@@ -25,23 +25,23 @@ module MrMurano
       return @scid unless @scid.nil?
       @scid = scid_for_name(@serviceName)
     end
+  end
 
-    #  Below is Device ServiceConfig Specific.  Should it be in its own class?
+  class SC_Device < ServiceConfig
+    def initialize
+      super
+      @serviceName = 'device'
+    end
 
     def assignTriggers(products)
-      scid = scid_for_name('device')
-
       details = fetch(scid)
       products = [products] unless products.kind_of? Array
       details[:triggers] = {:pid=>products}
 
       put('/'+scid, details)
-
     end
 
     def showTriggers
-      scid = scid_for_name('device')
-
       details = fetch(scid)
 
       return [] if details[:triggers].nil?
@@ -59,7 +59,7 @@ command :assign do |c|
   c.option '--idonly', 'Only return the ids'
 
   c.action do |args, options|
-    sol = MrMurano::ServiceConfig.new
+    sol = MrMurano::SC_Device.new
 
     if options.list then
       trigs = sol.showTriggers()
