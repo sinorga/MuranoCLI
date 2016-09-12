@@ -81,14 +81,15 @@ command :assign do |c|
       else
         acc = MrMurano::Account.new
         products = acc.products
-        products.select!{|p| p[:label] == prname or p[:pid] == prname }
-        prid = products.map{|p| p[:pid]}
+        products.select!{|p|
+          p[:label] == prname or p[:modelId] == prname or p[:pid] == prname
+        }
+        prid = products.map{|p| p[:modelId]}
       end
       raise "No product ID!" if prid.nil?
       say "Assigning #{prid} to solution" if $cfg['tool.verbose']
       sol.assignTriggers(prid) unless $cfg['tool.dry']
     end
-
 
   end
 end
