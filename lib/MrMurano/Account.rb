@@ -79,8 +79,11 @@ module MrMurano
       }
     end
 
+    # Store the token in a class variable so that we only fetch it once per run
+    # session of this tool
+    @@token = nil
     def token
-      if @token.nil? then
+      if @@token.nil? then
         # Cannot have token call token, so cannot use workit.
         uri = endPoint('token/')
         request = Net::HTTP::Post.new(uri)
@@ -94,14 +97,14 @@ module MrMurano
         case response
         when Net::HTTPSuccess
           token = JSON.parse(response.body, json_opts)
-          @token = token[:token]
+          @@token = token[:token]
         else
           say_error "No token! because: #{response}"
-          @token = nil
+          @@token = nil
           raise response
         end
       end
-      @token
+      @@token
     end
 
     def businesses
