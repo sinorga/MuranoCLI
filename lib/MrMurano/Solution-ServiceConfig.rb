@@ -36,7 +36,7 @@ module MrMurano
     def assignTriggers(products)
       details = fetch(scid)
       products = [products] unless products.kind_of? Array
-      details[:triggers] = {:pid=>products}
+      details[:triggers] = {:pid=>products, :vendor=>products}
 
       put('/'+scid, details)
     end
