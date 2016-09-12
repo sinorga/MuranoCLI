@@ -153,7 +153,11 @@ module MrMurano
       path = Pathname.new(path) unless path.kind_of? Pathname
       aheader = path.readlines().first
       md = /--#EVENT (\S+) (\S+)/.match(aheader)
-      raise "Not an Event handler: #{path.to_s}" if md.nil?
+      if md.nil? then
+        rp = path.relative_path_from(Pathname.new(Dir.pwd))
+        say_warning "Not an Event handler: #{rp}"
+        return nil
+      end
       {:service=>md[1], :event=>md[2]}
     end
 

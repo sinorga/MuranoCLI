@@ -132,9 +132,11 @@ module MrMurano
         # sometimes this is a name, sometimes it is an item.
         # do I want to keep that? NO.
         name = toRemoteItem(from, path)
-        name[:local_path] = path
-        name
-      end
+        unless name.nil? then
+          name[:local_path] = path
+          name
+        end
+      end.flatten.compact
     end
 
     def synckey(item)
