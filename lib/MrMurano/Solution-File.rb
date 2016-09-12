@@ -131,7 +131,7 @@ module MrMurano
       end
       sha1 = Digest::SHA1.new
       path.open('rb:ASCII-8BIT') do |io|
-        while chunk = io.read(nil) do
+        while chunk = io.read(1048576) do
           sha1 << hexit(chunk)
         end
       end
