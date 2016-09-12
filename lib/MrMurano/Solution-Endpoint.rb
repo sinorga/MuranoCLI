@@ -20,7 +20,7 @@ module MrMurano
 
     def fetch(id)
       ret = get('/' + id.to_s)
-      aheader = ret[:script].lines.first.chomp
+      aheader = (ret[:script].lines.first or "").chomp
       dheader = /^--#ENDPOINT (?i:#{ret[:method]}) #{ret[:path]}$/
       rheader = %{--#ENDPOINT #{ret[:method]} #{ret[:path]}\n}
       if block_given? then
