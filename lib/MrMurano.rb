@@ -1,5 +1,6 @@
 require 'MrMurano/version'
 require 'MrMurano/hash.rb'
+require 'MrMurano/http'
 require 'MrMurano/configFile'
 require 'MrMurano/Account'
 require 'MrMurano/Solution'

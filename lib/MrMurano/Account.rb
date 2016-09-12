@@ -51,14 +51,7 @@ module MrMurano
   end
 
   class Account
-    def initialize
-      @json_opts = {
-        :allow_nan => true,
-        :symbolize_names => true,
-        :create_additions => false
-      }
-    end
-
+    include Http
 
     def endPoint(path)
       URI('https://' + $cfg['net.host'] + '/api:1/' + path.to_s)
@@ -88,82 +81,41 @@ module MrMurano
 
     def token
       if @token.nil? then
-        r = endPoint('token/')
-        Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-          request = Net::HTTP::Post.new(r)
-          request.content_type = 'application/json'
-          #request.basic_auth(username(), password())
-          request.body = JSON.generate(_loginInfo)
+        # Cannot have token call token, so cannot use workit.
+        uri = endPoint('token/')
+        request = Net::HTTP::Post.new(uri)
+        curldebug(request)
 
-          response = http.request(request)
-          case response
-          when Net::HTTPSuccess
-            token = JSON.parse(response.body, @json_opts)
-            @token = token[:token]
-          else
-            say_error "No token! because: #{response}"
-            @token = nil
-            raise response
-          end
+        request.content_type = 'application/json'
+        #request.basic_auth(username(), password())
+        request.body = JSON.generate(_loginInfo)
+
+        response = http.request(request)
+        case response
+        when Net::HTTPSuccess
+          token = JSON.parse(response.body, json_opts)
+          @token = token[:token]
+        else
+          say_error "No token! because: #{response}"
+          @token = nil
+          raise response
         end
       end
       @token
     end
 
     def businesses
-      r = endPoint('user/' + $cfg['user.name'] + '/membership/')
-      Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-        request = Net::HTTP::Get.new(r)
-        request.content_type = 'application/json'
-        request['authorization'] = 'token ' + token
-
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-          busy = JSON.parse(response.body, @json_opts)
-          return busy
-        else
-          raise response
-        end
-      end
+      get('user/' + $cfg['user.name'] + '/membership/')
     end
 
     def products
       raise "Missing Bussiness ID" if $cfg['business.id'].nil?
-      r = endPoint('business/' + $cfg['business.id'] + '/product/')
-      Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-        request = Net::HTTP::Get.new(r)
-        request.content_type = 'application/json'
-        request['authorization'] = 'token ' + token
-
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-          busy = JSON.parse(response.body, @json_opts)
-          return busy
-        else
-          raise response
-        end
-      end
+      get('business/' + $cfg['business.id'] + '/product/')
     end
 
     def solutions
       raise "Missing Bussiness ID" if $cfg['business.id'].nil?
-      r = endPoint('business/' + $cfg['business.id'] + '/solution/')
-      Net::HTTP.start(r.host, r.port, :use_ssl=>true) do |http|
-        request = Net::HTTP::Get.new(r)
-        request.content_type = 'application/json'
-        request['authorization'] = 'token ' + token
-
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-          busy = JSON.parse(response.body, @json_opts)
-          return busy
-        else
-          raise response
-        end
-      end
+      get('business/' + $cfg['business.id'] + '/solution/')
     end
 
   end
