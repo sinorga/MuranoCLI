@@ -35,10 +35,10 @@ module MrMurano
       end
       hd = @data[host]
       if hd.nil? or not hd.kind_of?(Hash) then
-        hd = {user=>pass}
+        @data[host] = {user=>pass}
         return
       end
-      hd[user] = pass
+      @data[host][user] = pass
       return
     end
     def get(host, user)
