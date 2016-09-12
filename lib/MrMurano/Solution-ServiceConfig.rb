@@ -68,10 +68,14 @@ command :assign do |c|
       else
         acc = MrMurano::Account.new
         products = acc.products
-        products.select!{|p| trigs.include? p[:pid] }
-        busy = products.map{|r| [r[:label], r[:type], r[:pid], r[:modelId]]}
-        table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
-        say table
+        products.select!{|p| trigs.include? p[:modelId] }
+        if products.empty? then
+          say trigs.join(' ')
+        else
+          busy = products.map{|r| [r[:label], r[:type], r[:pid], r[:modelId]]}
+          table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
+          say table
+        end
       end
 
     else
