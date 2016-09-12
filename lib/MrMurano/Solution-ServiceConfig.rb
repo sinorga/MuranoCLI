@@ -63,7 +63,7 @@ command :assign do |c|
 
     if options.list then
       trigs = sol.showTriggers()
-      if options.idonly then
+      if options.idonly or $cfg['business.id'].nil? then
         say trigs.join(' ')
       else
         acc = MrMurano::Account.new

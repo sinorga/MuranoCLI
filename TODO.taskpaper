@@ -35,8 +35,10 @@ Timeseries:
 	- Add CSV output option. @done(2016-09-09)
 
 Product:
-	- When listing and bussiness.id is missing, gracefully fall back to --idonly
 	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
+
+Service Device:
+	- When listing and bussiness.id is missing, gracefully fall back to --idonly @done(2016-09-12)
 
 Config:
 	- Think about adding dev,staging,prod system; how would that work?
