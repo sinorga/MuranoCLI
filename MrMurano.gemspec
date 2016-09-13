@@ -31,8 +31,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('rainbow', '~> 2.1.0')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
-  s.add_development_dependency('rspec', '~> 3.2')
   s.add_development_dependency('rake', '~> 10.1.1')
+  s.add_development_dependency('rspec', '~> 3.5')
 end
 
 
