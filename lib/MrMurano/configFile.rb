@@ -285,7 +285,13 @@ command 'config import' do |c|
         $cfg.set('location.files', sf['file_dir']) if sf.has_key? 'file_dir'
         $cfg.set('files.default_page', sf['default_page']) if sf.has_key? 'default_page'
 
-        # TODO: other bits.
+        if sf.has_key?('modules') then
+          # How to import if not in common sub-directory?
+        end
+
+        if sf.has_key?('event_handler') then
+          # How to import if not in common sub-directory?
+        end
       end
     end
 
