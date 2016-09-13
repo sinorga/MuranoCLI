@@ -267,4 +267,38 @@ command :config do |c|
 
 end
 
+command 'config import' do |c|
+  c.syntax = %{mr config import}
+  c.summary = %{Import data from a Solutionfile.json and .Solutionfile.secret}
+  c.description = %{
+  }
+
+  c.action do |args, options|
+    solfile = ($cfg['location.base'] + 'Solutionfile.json')
+    solsecret = ($cfg['location.base'] + '.Solutionfile.secret')
+
+    if solfile.exists? then
+      # Is in JSON, which as a subset of YAML, so use YAML parser
+      solfile.open do |io|
+        sf = YAML.load(io)
+        $cfg.set('location.files', sf['assets']) if sf.has_key? 'assets'
+        $cfg.set('location.files', sf['file_dir']) if sf.has_key? 'file_dir'
+        $cfg.set('files.default_page', sf['default_page']) if sf.has_key? 'default_page'
+      end
+    end
+
+    if solsecret.exists? then
+      # Is in JSON, which as a subset of YAML, so use YAML parser
+      solsecret.open do |io|
+        ss = YAML.load(io)
+        ss['email']
+        ss['password']
+        $cfg.set('solution.id', ss['solution_id']) if ss.has_key? 'solution_id'
+        $cfg.set('solution.id', ss['product_id']) if ss.has_key? 'product_id'
+      end
+    end
+  end
+
+end
+
 #  vim: set ai et sw=2 ts=2 :
