@@ -37,18 +37,21 @@ module MrMurano
     CFG_SCOPES=%w{internal specified project private user system defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
     CFG_PRVT_NAME = '.mrmuranorc.private'.freeze
+    CFG_DIR_NAME = '.mrmurano'.freeze
+    CFG_ALTRC_NAME = '.mrmurano/config'.freeze
+    CFG_SYS_NAME = '/etc/mrmuranorc'.freeze
 
     def initialize
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
-      prjfile = findProjectFile()
+      prjfile = findProjectDir()
       unless prjfile.nil? then
-        @paths << ConfigFile.new(:private, prjfile.dirname + CFG_PRVT_NAME)
-        @paths << ConfigFile.new(:project, prjfile)
+        @paths << ConfigFile.new(:private, prjfile + CFG_PRVT_NAME)
+        @paths << ConfigFile.new(:project, prjfile + CFG_FILE_NAME)
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
-      @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,''))
+      @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
@@ -57,7 +60,7 @@ module MrMurano
 
       set('net.host', 'bizapi.hosted.exosite.io', :defaults)
 
-      set('location.base', prjfile.dirname, :defaults) unless prjfile.nil?
+      set('location.base', prjfile, :defaults) unless prjfile.nil?
       set('location.files', 'files', :defaults)
       set('location.endpoints', 'endpoints', :defaults)
       set('location.modules', 'modules', :defaults)
@@ -72,22 +75,38 @@ module MrMurano
       set('diff.cmd', 'diff -u', :defaults)
     end
 
-    # Look at parent directories until HOME
-    # Stop at first.
-    def findProjectFile()
+    ## Find the root of this project Directory.
+    #
+    # The Project dir is the directory between PWD and HOME that has one of (in
+    # order of preference):
+    # - .mrmuranorc
+    # - .mrmuranorc.private
+    # - .mrmurano/config
+    # - .mrmurano/
+    # - .git/
+    def findProjectDir()
       result=nil
+      fileNames=[CFG_FILE_NAME, CFG_PRVT_NAME, CFG_ALTRC_NAME]
+      dirNames=[CFG_DIR_NAME, '.git']
       home = Pathname.new(Dir.home)
       pwd = Pathname.new(Dir.pwd)
       return nil if home == pwd
-      pwd.dirname.ascend do |i| 
+      pwd.dirname.ascend do |i|
+        break unless result.nil?
         break if i == home
-        if (i + CFG_FILE_NAME).exist? then
-          result = i + CFG_FILE_NAME
-          break
+        fileNames.each do |f|
+          if (i + f).exist? then
+            result = i
+          end
+        end
+        dirNames.each do |f|
+          if (i + f).directory? then
+            result = i
+          end
         end
       end
       # if nothing found, assume it will live in pwd.
-      result = Pathname.new(Dir.pwd) + CFG_FILE_NAME if result.nil?
+      result = Pathname.new(Dir.pwd) if result.nil?
       return result
     end
 
@@ -229,7 +248,7 @@ command :config do |c|
       scopes = MrMurano::Config::CFG_SCOPES if scopes.empty?
 
       say $cfg.get(args[0], scopes)
-    else 
+    else
 
       options.defaults :system=>false, :user=>false, :project=>true,
         :specified=>false, :private=>false
