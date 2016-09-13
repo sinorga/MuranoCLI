@@ -125,12 +125,13 @@ module MrMurano
       #sha1 = Digest::SHA1.file(path.to_s).hexdigest
       def hexit(str)
         ret=''
+        # TODO: find a faster way to do this.
         str.each_byte{|b| ret << "%02x" % b}
         ret
       end
       sha1 = Digest::SHA1.new
       path.open('rb:ASCII-8BIT') do |io|
-        while chunk = io.read(4096) do
+        while chunk = io.read(1048576) do
           sha1 << hexit(chunk)
         end
       end

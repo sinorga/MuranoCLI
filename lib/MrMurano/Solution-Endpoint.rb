@@ -20,7 +20,7 @@ module MrMurano
 
     def fetch(id)
       ret = get('/' + id.to_s)
-      aheader = ret[:script].lines.first.chomp
+      aheader = (ret[:script].lines.first or "").chomp
       dheader = /^--#ENDPOINT (?i:#{ret[:method]}) #{ret[:path]}$/
       rheader = %{--#ENDPOINT #{ret[:method]} #{ret[:path]}\n}
       if block_given? then
@@ -86,7 +86,11 @@ module MrMurano
       path = Pathname.new(path) unless path.kind_of? Pathname
       aheader = path.readlines().first
       md = /--#ENDPOINT (\S+) (.*)/.match(aheader)
-      raise "Not an Endpoint: #{path.to_s}" if md.nil?
+      if md.nil? then
+        rp = path.relative_path_from(Pathname.new(Dir.pwd))
+        say_warning "Not an Endpoint: #{rp.to_s}"
+        return nil
+      end
       {:method=>md[1], :path=>md[2]}
     end
 

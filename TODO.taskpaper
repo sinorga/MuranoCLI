@@ -2,12 +2,13 @@ Readme:
 	- Add more walk-thrus of common actions. (create new solution, …)
 
 Commands:
-	- Status will show things have changes when they don’t.
+	- Status will show {modules,eventhandlers} have changes when they don’t.
 	- First time run needs to be smoothed out. @done(2016-08-09)
 	- Default for most commands should be -same @done(2016-08-02)
 	- Add Diff Command @done(2016-07-27)
 
 Account:
+	- token is refetched many times. Do this once per run. @done(2016-09-12)
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
@@ -31,8 +32,14 @@ CORS:
 	- Get working with sync up/down.
 	- GET&PUT /cors data @done(2016-09-08)
 
+Timeseries:
+	- Add CSV output option. @done(2016-09-09)
+
 Product:
 	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
+
+Service Device:
+	- When listing and bussiness.id is missing, gracefully fall back to --idonly @done(2016-09-12)
 
 Config:
 	- Think about adding dev,staging,prod system; how would that work?
@@ -43,6 +50,7 @@ Config:
 	- Maybe add dotenv support.
 
 SolutionBase:
+	- Errors from the server should be displayed prettier.
 	- All network traffic is serialized. Make some parallel.
 	- JSON parse should use symbols for keys. @done(2016-09-01)
 	- Add the --curl verbose option. @done(2016-08-12)

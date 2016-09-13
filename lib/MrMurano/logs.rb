@@ -55,6 +55,9 @@ command :logs do |c|
           elsif line.kind_of?(Hash) then
             out=""
 
+            if line.has_key?(:type) then
+              out << "#{line[:type]} ".upcase.color(:red).background(:aliceblue)
+            end
             out << "[#{line[:subject]}]".color(:red).background(:aliceblue)
             out << " "
             if options.localtime then
@@ -63,24 +66,37 @@ command :logs do |c|
               curtime = Time.at(line[:timestamp]).to_datetime.iso8601(3)
             end
             out << curtime.color(:blue)
-            out << ":"
-            out << "\n---------\nrequest:"
-            if options.pretty then
-              ret = JSON.pretty_generate(line[:data][:request]).to_s
-              ret[0] = ret[0].color(:magenta)
-              ret[-1] = ret[-1].color(:magenta)
-              out << ret
+            out << ":\n"
+            if line.has_key?(:data) then
+              data = line[:data]
+
+              if data.kind_of?(Hash) and data.has_key?(:request) and data.has_key?(:response) then
+                out << "---------\nrequest:"
+                if options.pretty then
+                  ret = JSON.pretty_generate(data[:request]).to_s
+                  ret[0] = ret[0].color(:magenta)
+                  ret[-1] = ret[-1].color(:magenta)
+                  out << ret
+                else
+                  out << data[:request].to_json
+                end
+
+                out << "\n---------\nresponse:"
+                if options.pretty then
+                  ret = JSON.pretty_generate(data[:response]).to_s
+                  ret[0] = ret[0].color(:magenta)
+                  ret[-1] = ret[-1].color(:magenta)
+                  out << ret
+                else
+                  out << data[:response].to_json
+                end
+
+              else
+                out << data.to_s
+              end
+
             else
-              out << line[:data][:request].to_json
-            end
-            out << "\n---------\nresponse:"
-            if options.pretty then
-              ret = JSON.pretty_generate(line[:data][:response]).to_s
-              ret[0] = ret[0].color(:magenta)
-              ret[-1] = ret[-1].color(:magenta)
-              out << ret
-            else
-              out << line[:data][:response].to_json
+              out << line.to_s
             end
 
           end

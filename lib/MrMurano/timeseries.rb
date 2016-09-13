@@ -1,3 +1,4 @@
+require 'csv'
 
 module MrMurano
   class Timeseries < ServiceConfig
@@ -25,14 +26,25 @@ command 'timeseries query' do |c|
   c.syntax = %{mr timeseries query <query string>}
   c.description = %{Query the timeseries database}
   c.option '--[no-]json', %{Display results as raw json}
-  #c.option '--csv', %{Display results as csv}
-  # Should get a CSV formatter to make sure cells are properly escapped.
+  c.option '--[no-]csv', %{Display results as CSV}
+
   c.action do |args,options|
-    options.defalts :json=>false
+    options.defalts :json=>false, :csv=>false
     sol = MrMurano::Timeseries.new
     ret = sol.query args.join(' ')
     if options.json then
       puts ret.to_json
+
+    elsif options.csv then
+      (ret[:results] or []).each do |res|
+        (res[:series] or []).each do |ser|
+          cols = ser[:columns] #.map{|h| "#{ser[:name]}.#{h}"}
+          CSV($stdout, :headers=>cols, :write_headers=>true) do |csv|
+            ser[:values].each{|v| csv << v}
+          end
+        end
+      end
+
     else
       (ret[:results] or []).each do |res|
         (res[:series] or []).each do |ser|
