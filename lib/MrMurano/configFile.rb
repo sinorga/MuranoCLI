@@ -70,7 +70,7 @@ module MrMurano
 
       set('files.default_page', 'index.html', :defaults)
 
-      set('eventhandler.skiplist', 'websocket webservice', :defaults)
+      set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
 
       set('diff.cmd', 'diff -u', :defaults)
     end
