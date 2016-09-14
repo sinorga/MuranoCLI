@@ -2,6 +2,7 @@ require 'uri'
 #require 'net/http'
 #require 'json'
 require 'mime/types'
+require 'csv'
 #require 'tempfile'
 #require 'shellwords'
 require 'pp'
@@ -138,7 +139,6 @@ module MrMurano
 
   end
 
-
   class ProductModel < Product
     def initialize
       super
@@ -161,7 +161,52 @@ module MrMurano
     def list_sn(modelID=@pid)
       get("/#{modelID}/")
     end
+  end
 
+  class ProductSerialNumber < Product
+    def initialize
+      super
+      @uriparts << :proxy
+      @uriparts << :provision
+      @uriparts << :manage
+      @uriparts << :model
+      @uriparts << @pid
+    end
+
+    def list(offset=0, limit=1000)
+      ret = get("/?offset=#{offset}&limit=#{limit}&status=true")
+      return [] if ret.kind_of?(Hash)
+      CSV.parse(ret)
+    end
+
+    def logs(sn)
+      get("/#{sn}?show=log") # results are empty
+    end
+
+    def regen(sn)
+      postf("/#{sn}", {:enable=>true})
+    end
+
+    def disable(sn)
+      postf("/#{sn}", {:disable=>true})
+    end
+
+    def add_sn(sn, extra='')
+      # this added. but what does that mean?
+      postf('/', {:sn=>sn,:extra=>extra})
+    end
+
+    def remove_sn(sn)
+      postf('/', {:sn=>sn, :delete=>true})
+    end
+
+    def ranges
+      get('/?show=ranges')
+    end
+
+    def add_range()
+      post('/', {:ranges=>[ ]})
+    end
 
   end
 
