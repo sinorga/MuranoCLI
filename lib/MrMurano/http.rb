@@ -43,10 +43,14 @@ module MrMurano
       @http
     end
 
-    def workit(request, content_type='application/json', &block)
-      request.content_type = content_type
+    def set_def_headers(request)
+      request.content_type = 'application/json'
       request['authorization'] = 'token ' + token
       request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
+      request
+    end
+
+    def workit(request, &block)
       curldebug(request)
       if block_given? then
         yield request, http()
@@ -71,12 +75,13 @@ module MrMurano
 
     def get(path='', &block)
       uri = endPoint(path)
-      workit(Net::HTTP::Get.new(uri), &block)
+      workit(set_def_headers(Net::HTTP::Get.new(uri)), &block)
     end
 
     def post(path='', body={}, &block)
       uri = endPoint(path)
       req = Net::HTTP::Post.new(uri)
+      set_def_headers(req)
       req.body = JSON.generate(body)
       workit(req, &block)
     end
@@ -84,20 +89,23 @@ module MrMurano
     def postf(path='', form={}, &block)
       uri = endPoint(path)
       req = Net::HTTP::Post.new(uri)
+      set_def_headers(req)
+      req.content_type = 'application/x-www-form-urlencoded; charset=utf-8'
       req.form_data = form
-      workit(req, 'application/x-www-form-urlencoded; charset=utf-8', &block)
+      workit(req, &block)
     end
 
     def put(path='', body={}, &block)
       uri = endPoint(path)
       req = Net::HTTP::Put.new(uri)
+      set_def_headers(req)
       req.body = JSON.generate(body)
       workit(req, &block)
     end
 
     def delete(path='', &block)
       uri = endPoint(path)
-      workit(Net::HTTP::Delete.new(uri), &block)
+      workit(set_def_headers(Net::HTTP::Delete.new(uri)), &block)
     end
 
   end

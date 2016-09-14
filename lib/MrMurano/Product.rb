@@ -123,8 +123,10 @@ module MrMurano
 
       path.open do |io|
         request.body_stream = io
+        set_def_headers(request)
         request.content_length = path.size
-        ret = workit(request, mime.simplified)
+        request.content_type = mime.simplified
+        ret = workit(request)
       end
       ret
     end
@@ -132,14 +134,12 @@ module MrMurano
     ## Delete data for content item
     # Note that the content item is still present and listed.
     def remove_content(id)
-      uri = endPoint("/#{id}")
-      req = Net::HTTP::Delete.new(uri)
-      workit(req)
+      delete("/#{id}")
     end
 
   end
 
-  class ProductModel < Product
+  class ProductModel < ProductBase
     def initialize
       super
       @uriparts << :proxy
