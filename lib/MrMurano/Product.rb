@@ -8,7 +8,7 @@ require 'csv'
 require 'pp'
 
 module MrMurano
-  class Product
+  class ProductBase
     def initialize
       @pid = $cfg['product.id']
       raise "No Product ID!" if @pid.nil?
@@ -23,9 +23,9 @@ module MrMurano
       s = parts.map{|v| v.to_s}.join('/')
       URI(s + path.to_s)
     end
+  end
 
-    ####…………
-
+  class Product < ProductBase
     def info
       get('/info')
     end
@@ -49,7 +49,7 @@ module MrMurano
 
   end
 
-  class ProductContent < Product
+  class ProductContent < ProductBase
     def initialize
       super
       @uriparts << :proxy
@@ -163,7 +163,7 @@ module MrMurano
     end
   end
 
-  class ProductSerialNumber < Product
+  class ProductSerialNumber < ProductBase
     def initialize
       super
       @uriparts << :proxy
