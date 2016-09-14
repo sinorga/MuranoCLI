@@ -11,6 +11,7 @@ gem 'http-form_data', '~> 1.0.1'
 gem 'rainbow', '~> 2.1.0'
 
 group :test do
-  gem 'rake'
+  gem 'rake', '~> 10.1.1'
+  gem 'rspec', '~> 3.5'
 end
 

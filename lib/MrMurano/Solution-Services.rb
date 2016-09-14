@@ -126,8 +126,15 @@ module MrMurano
 
     def list
       ret = get()
+      # eventhandler.skiplist is a list of whitespace seperated dot-paired values.
+      # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] or '').split
-      ret[:items].reject{|i| i.has_key?(:service) and skiplist.include? i[:service] }
+      ret[:items].reject { |i|
+        i.has_key?(:service) and i.has_key?(:event) and
+        ( skiplist.include? i[:service] or
+          skiplist.include? "#{i[:service]}.#{i[:event]}"
+        )
+      }
     end
 
     def fetch(name)
