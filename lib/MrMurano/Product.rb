@@ -203,8 +203,22 @@ module MrMurano
       postf("/#{sn}", {:disable=>true})
     end
 
+    def activate(sn)
+      uri = URI("https://#{@pid}.m2.exosite.com/provision/activate")
+      request = Net::HTTP::Post.new(uri)
+      request.form_data = {
+        :vendor => @pid,
+        :model => @pid,
+        :sn => sn
+      }
+      request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
+      workit(request)
+    end
+
     def add_sn(sn, extra='')
-      # this added. but what does that mean?
+      # this does add, but what does that mean?
+      # Still need to call …/device/<sn> to enable.
+      # How long is the activation window?
       postf('/', {:sn=>sn,:extra=>extra})
     end
 
