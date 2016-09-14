@@ -135,7 +135,7 @@ module MrMurano
           sha1 << hexit(chunk)
         end
       end
-      #verbose "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
+      debug "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
 
       {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest}
     end
