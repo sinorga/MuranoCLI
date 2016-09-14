@@ -18,12 +18,7 @@ module MrMurano
     end
 
     include Http
-
-    def verbose(msg)
-      if $cfg['tool.verbose'] then
-        say msg
-      end
-    end
+    include Verbose
 
     def endPoint(path='')
       parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts

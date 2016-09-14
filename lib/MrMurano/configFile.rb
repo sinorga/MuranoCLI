@@ -56,6 +56,7 @@ module MrMurano
 
 
       set('tool.verbose', false, :defaults)
+      set('tool.debug', false, :defaults)
       set('tool.dry', false, :defaults)
 
       set('net.host', 'bizapi.hosted.exosite.io', :defaults)
