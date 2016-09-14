@@ -39,8 +39,20 @@ module MrMurano
     end
 
     def update(specFile)
-      post('/definition') do |http,request|
+      specFile = Pathname.new(specFile) unless specFile.kind_of? Pathname
+
+      uri = endPoint('/definition')
+      request = Net::HTTP::Post.new(uri)
+      ret = nil
+
+      specFile.open do |io|
+        request.body_stream = io
+        request.content_length = path.size
+        set_def_headers(request)
+        request.content_type = 'text/yaml' 
+        ret = workit(request)
       end
+      ret
     end
 
     def write(sn, values)
