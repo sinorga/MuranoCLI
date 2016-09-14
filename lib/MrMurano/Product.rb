@@ -31,7 +31,7 @@ module MrMurano
     end
 
     def list(offset=0, limit=50)
-      get('/device/')
+      get("/device/?offset=#{offset}&limit=#{limit}")
     end
 
     def enable(sn)
