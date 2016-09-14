@@ -72,8 +72,6 @@ end
 command 'config import' do |c|
   c.syntax = %{mr config import}
   c.summary = %{Import data from a Solutionfile.json and .Solutionfile.secret}
-  c.description = %{
-  }
 
   c.action do |args, options|
     solfile = ($cfg['location.base'] + 'Solutionfile.json')
@@ -86,20 +84,6 @@ command 'config import' do |c|
         $cfg.set('location.files', sf['assets']) if sf.has_key? 'assets'
         $cfg.set('location.files', sf['file_dir']) if sf.has_key? 'file_dir'
         $cfg.set('files.default_page', sf['default_page']) if sf.has_key? 'default_page'
-
-        if sf.has_key?('modules') and sf['modules'].kind_of?(Hash) then
-          # How to import if not in common sub-directory? warn that user will need
-          # manual work.
-
-
-          # If all modules are in 
-          # ./moddir(/subdir)?/file
-
-        end
-
-        if sf.has_key?('event_handler') then
-          # How to import if not in common sub-directory?
-        end
       end
     end
 
@@ -129,6 +113,9 @@ command 'config import' do |c|
         $cfg.set('solution.id', ss['product_id']) if ss.has_key? 'product_id'
       end
     end
+
+    say "Configuration items have been imported."
+    say "Use `mr syncdown` get get all endpoints, modules, and event handlers"
   end
 
 end
