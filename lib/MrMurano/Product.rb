@@ -35,7 +35,7 @@ module MrMurano
     end
 
     def enable(sn)
-      post("/device/#{sn}")
+      post("/device/#{sn.to_s}")
     end
 
     def update(specFile)
@@ -47,7 +47,7 @@ module MrMurano
 
       specFile.open do |io|
         request.body_stream = io
-        request.content_length = path.size
+        request.content_length = specFile.size
         set_def_headers(request)
         request.content_type = 'text/yaml'
         ret = workit(request)
