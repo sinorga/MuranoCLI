@@ -105,7 +105,7 @@ module MrMurano
     end
 
     ## Download data for content item
-    def download(id)
+    def download(id, &block)
       get("/#{id}?download=true") do |request, http|
         http.request(request) do |resp|
           case resp
