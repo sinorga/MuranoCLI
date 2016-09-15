@@ -49,7 +49,7 @@ module MrMurano
         request.body_stream = io
         request.content_length = path.size
         set_def_headers(request)
-        request.content_type = 'text/yaml' 
+        request.content_type = 'text/yaml'
         ret = workit(request)
       end
       ret
@@ -204,6 +204,7 @@ module MrMurano
     end
 
     def activate(sn)
+      # TODO: Need to create a new @http for the different host. Fails otherwise
       uri = URI("https://#{@pid}.m2.exosite.com/provision/activate")
       request = Net::HTTP::Post.new(uri)
       request.form_data = {
@@ -212,6 +213,8 @@ module MrMurano
         :sn => sn
       }
       request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
+      request['authorization'] = nil
+      request.content_type = 'application/x-www-form-urlencoded; charset=utf-8'
       workit(request)
     end
 
