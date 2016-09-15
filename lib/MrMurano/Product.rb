@@ -61,6 +61,8 @@ module MrMurano
 
   end
 
+  ##
+  # Manage the uploadable content for products.
   class ProductContent < ProductBase
     def initialize
       super
@@ -151,6 +153,8 @@ module MrMurano
 
   end
 
+  ##
+  # This is not applicable to Murano.  Remove?
   class ProductModel < ProductBase
     def initialize
       super
@@ -175,6 +179,7 @@ module MrMurano
     end
   end
 
+  ## TODO: Determine which of these are expected to be used.
   class ProductSerialNumber < ProductBase
     def initialize
       super
