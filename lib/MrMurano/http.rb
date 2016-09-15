@@ -23,7 +23,10 @@ module MrMurano
     def curldebug(request)
       if $cfg['tool.curldebug'] then
         a = []
-        a << %{curl -s -H 'Authorization: #{request['authorization']}'}
+        a << %{curl -s }
+        if request.key?('Authorization') then
+          a << %{-H 'Authorization: #{request['Authorization']}'}
+        end
         a << %{-H 'User-Agent: #{request['User-Agent']}'}
         a << %{-H 'Content-Type: #{request.content_type}'}
         a << %{-X #{request.method}}
@@ -45,7 +48,7 @@ module MrMurano
 
     def set_def_headers(request)
       request.content_type = 'application/json'
-      request['authorization'] = 'token ' + token
+      request['Authorization'] = 'token ' + token
       request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
       request
     end
