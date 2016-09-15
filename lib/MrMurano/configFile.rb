@@ -1,6 +1,5 @@
 require 'pathname'
 require 'inifile'
-require 'pp'
 
 module MrMurano
   class Config
@@ -200,72 +199,6 @@ module MrMurano
       opt.users = true
     end
   end
-end
-
-command :config do |c|
-  c.syntax = %{mr config [options] <key> [<new value>]}
-  c.summary = %{Get and set options}
-  c.description = %{
-  You can get, set, or query config options with this command.  All config
-  options are in a 'section.key' format.  There is also a layer of scopes
-  that the keys can be saved in.
-  }
-
-  c.example %{See what the current combined config is}, 'mr config --dump'
-  c.example %{Query a value}, 'mr config solution.id'
-  c.example %{Set a new value; writing to the project config file}, 'mr config solution.id XXXXXXXX'
-  c.example %{Set a new value; writing to the private config file}, 'mr config --private solution.id XXXXXXXX'
-  c.example %{Set a new value; writing to the user config file}, 'mr config --user user.name my@email.address'
-  c.example %{Unset a value in a configfile. (lower scopes will become visible if set)},
-    'mr config diff.cmd --unset'
-
-
-  c.option '--system', 'Use only the system config file. (/etc/mrmuranorc)'
-  c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
-  c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
-  c.option '--private', 'Use only the private config file in the project (.mrmuranorc.private)'
-  c.option '--specified', 'Use only the config file from the --config option.'
-
-  c.option '--unset', 'Remove key from config file.'
-  c.option '--dump', 'Dump the current combined view of the config'
-
-  c.action do |args, options|
-
-    if options.dump then
-      puts $cfg.dump()
-    elsif args.count == 0 then
-      say_error "Need a config key"
-    elsif args.count == 1 and not options.unset then
-      options.defaults :system=>false, :user=>false, :project=>false,
-        :specified=>false, :private=>false
-
-      # For read, if no scopes, than all. Otherwise just those specified
-      scopes = []
-      scopes << :system if options.system
-      scopes << :user if options.user
-      scopes << :project if options.project
-      scopes << :private if options.private
-      scopes << :specified if options.specified
-      scopes = MrMurano::Config::CFG_SCOPES if scopes.empty?
-
-      say $cfg.get(args[0], scopes)
-    else
-
-      options.defaults :system=>false, :user=>false, :project=>true,
-        :specified=>false, :private=>false
-      # For write, if scope is specified, only write to that scope.
-      scope = :project
-      scope = :system if options.system
-      scope = :user if options.user
-      scope = :project if options.project
-      scope = :private if options.private
-      scope = :specified if options.specified
-
-      args[1] = nil if options.unset
-      $cfg.set(args[0], args[1], scope)
-    end
-  end
-
 end
 
 #  vim: set ai et sw=2 ts=2 :

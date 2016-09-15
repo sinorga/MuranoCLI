@@ -12,6 +12,7 @@ require 'MrMurano/Solution-Users.rb'
 require 'MrMurano/Solution-ServiceConfig.rb'
 require 'MrMurano/Product'
 
+require 'MrMurano/configCommand'
 require 'MrMurano/cors'
 require 'MrMurano/exportImport'
 require 'MrMurano/keystore.rb'
