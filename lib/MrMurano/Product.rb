@@ -97,7 +97,16 @@ module MrMurano
 
     ## Get info for content item
     def info(id)
-      get("/#{id}")
+      get("/#{id}") do |request, http|
+        http.request(request) do |resp|
+          case resp
+          when Net::HTTPSuccess
+            return CSV.parse(resp.body)
+          else
+            return nil
+          end
+        end
+      end
     end
 
     ## Download data for content item
@@ -123,6 +132,7 @@ module MrMurano
     end
 
     ## Upload data for content item
+    # TODO: add support for passing in IOStream
     def upload(id, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
 

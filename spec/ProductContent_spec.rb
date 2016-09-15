@@ -56,7 +56,7 @@ RSpec.describe MrMurano::ProductContent, "#product_content" do
       to_return(body: "text/plain,42,123456789,test meta,false")
 
     ret = @prd.info("testFor")
-    expect(ret).to eq("text/plain,42,123456789,test meta,false")
+    expect(ret).to eq([['text/plain','42','123456789','test meta','false']])
   end
 
   it "removes content" do

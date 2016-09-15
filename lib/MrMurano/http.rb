@@ -56,7 +56,7 @@ module MrMurano
     def workit(request, &block)
       curldebug(request)
       if block_given? then
-        yield request, http()
+        return yield request, http()
       else
         response = http().request(request)
         case response
