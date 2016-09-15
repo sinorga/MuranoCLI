@@ -1,10 +1,6 @@
 require 'uri'
-#require 'net/http'
-#require 'json'
 require 'mime/types'
 require 'csv'
-#require 'tempfile'
-#require 'shellwords'
 require 'pp'
 
 module MrMurano
