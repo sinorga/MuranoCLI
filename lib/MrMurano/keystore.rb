@@ -68,7 +68,7 @@ end
 
 command 'keystore set' do |c|
   c.syntax = %{mr keystore set <key> <value...>}
-  c.description = %{Set teh value of a key in the Keystore}
+  c.description = %{Set the value of a key in the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
     sol.setkey(args[0], args[1..-1].join(' '))
