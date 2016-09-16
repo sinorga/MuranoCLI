@@ -5,6 +5,7 @@ require 'date'
 require 'pathname'
 require 'yaml'
 require 'MrMurano/Config'
+require 'MrMurano/http'
 
 module MrMurano
   class Passwords
