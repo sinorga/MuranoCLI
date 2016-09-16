@@ -3,6 +3,10 @@ Readme:
 
 Commands:
 	- Status will show {modules,eventhandlers} have changes when they don’t.
+	The best solution I can think of for this is to have a cache of the last uploaded
+	timestamps for each item. The cache would hold the path and SHA and upload time.
+	So for a file, if the SHA was different, then that item is dropped from the
+	cache. Otherwise compare update/upload timestamps.
 	- First time run needs to be smoothed out. @done(2016-08-09)
 	- Default for most commands should be -same @done(2016-08-02)
 	- Add Diff Command @done(2016-07-27)
@@ -18,6 +22,7 @@ Endpoints:
 Files:
 	- Add ignore patterns to config
 	- Switch to mime-types v3
+	- Figure out how to make the hexed-sha checksum faster.
 	- Fix upload. @done(2016-08-01)
 	- Files won't update, they always delete then add. @done(2016-07-28)
 
@@ -42,12 +47,11 @@ Service Device:
 	- When listing and bussiness.id is missing, gracefully fall back to --idonly @done(2016-09-12)
 
 Config:
-	- Think about adding dev,staging,prod system; how would that work?
-	Would it work ok to just use the --configfile option?
-	I'm thinking so.  To the point of dropping the :private scope.
-	- Add ENV support for some (or all?) options.
-	At least the --configfile option. (and --config option)
+	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile
+	- Add ENV['MR_CONFIGOPT'] string of "<key>=<value>"
 	- Maybe add dotenv support.
+	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
+	Do this with the ENVs above.
 
 SolutionBase:
 	- Errors from the server should be displayed prettier.
