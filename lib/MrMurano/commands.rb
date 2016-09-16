@@ -1,0 +1,13 @@
+
+require 'MrMurano/commands/account'
+require 'MrMurano/commands/assign'
+require 'MrMurano/commands/config'
+require 'MrMurano/commands/content'
+require 'MrMurano/commands/cors'
+require 'MrMurano/commands/exportImport'
+require 'MrMurano/commands/keystore'
+require 'MrMurano/commands/logs'
+require 'MrMurano/commands/productSpec'
+require 'MrMurano/commands/status'
+require 'MrMurano/commands/sync'
+require 'MrMurano/commands/timeseries'
