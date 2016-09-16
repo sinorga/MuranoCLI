@@ -45,6 +45,9 @@ module MrMurano
       end
       @http
     end
+    def http_reset
+      @http = nil
+    end
 
     def set_def_headers(request)
       request.content_type = 'application/json'
