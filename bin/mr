@@ -7,7 +7,7 @@ require 'MrMurano'
 require 'pp'
 
 program :version, MrMurano::VERSION
-program :description, %{Manage a Solution in Exosite's Murano}
+program :description, %{Manage a Solution and Product in Exosite's Murano}
 
 global_option('-V', '--verbose', 'Be chatty') {
   $cfg['tool.verbose'] = true
