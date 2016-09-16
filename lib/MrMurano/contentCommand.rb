@@ -1,7 +1,12 @@
 
 command 'content list' do |c|
   c.syntax = %{mr content list}
-  c.description = %{List downloadable content for a product}
+  c.summary = %{List downloadable content for a product}
+  c.description = %{List downloadable content for a product
+
+  Data uploaded to a product's content area can be downloaded by devices using the
+  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+  }
   c.action do |args, options|
     prd = MrMurano::ProductContent.new
     prd.list.each{|item| say item}
@@ -11,7 +16,12 @@ alias_command :content, 'content list'
 
 command 'content info' do |c|
   c.syntax = %{mr content info <content id>}
-  c.description = %{Show more info for a content item}
+  c.summary = %{Show more info for a content item}
+  c.description = %{Show more info for a content item
+
+  Data uploaded to a product's content area can be downloaded by devices using the
+  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+  }
   c.action do |args, options|
     if args[0].nil? then
       say_error "Missing <content id>"
@@ -24,7 +34,12 @@ end
 
 command 'content delete' do |c|
   c.syntax = %{mr content delete <content id>}
-  c.description = %{Delete a content item}
+  c.summary = %{Delete a content item}
+  c.description = %{Delete a content item
+
+  Data uploaded to a product's content area can be downloaded by devices using the
+  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+  }
   c.action do |args, options|
     if args[0].nil? then
       say_error "Missing <content id>"
@@ -37,7 +52,12 @@ end
 
 command 'content upload' do |c|
   c.syntax = %{mr content upload <content id> <file>}
-  c.description = %{Upload content}
+  c.summary = %{Upload content}
+  c.description = %{Upload a content item
+
+  Data uploaded to a product's content area can be downloaded by devices using the
+  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+  }
   c.option '--meta STRING', %{Add extra meta info to the content item}
 
   c.action do |args, options|
@@ -52,7 +72,7 @@ command 'content upload' do |c|
 
       ret = prd.info(args[0])
       if ret.nil? then
-        pp prd.create(args[0], options.meta) # FIXME: bad headers?
+        pp prd.create(args[0], options.meta)
       end
 
       pp prd.upload(args[0], args[1])
@@ -62,7 +82,12 @@ end
 
 command 'content download' do |c|
   c.syntax = %{mr content download <content id>}
-  c.description = %{Download a content item}
+  c.summary = %{Download a content item}
+  c.description = %{Download a content item
+
+  Data uploaded to a product's content area can be downloaded by devices using the
+  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+  }
   c.option '-o','--output FILE',%{save to this file}
   c.action do |args, options|
     if args[0].nil? then
