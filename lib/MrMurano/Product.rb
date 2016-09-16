@@ -85,6 +85,7 @@ module MrMurano
 
     ## Create a new content item
     def create(id, meta='', protect=false)
+      http_reset
       data = {:id=>id, :meta=>meta}
       data[:protected] = true if protect
       postf('/', data)
