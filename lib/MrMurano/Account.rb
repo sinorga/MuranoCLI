@@ -4,6 +4,7 @@ require 'json'
 require 'date'
 require 'pathname'
 require 'yaml'
+require 'MrMurano/Config'
 
 module MrMurano
   class Passwords

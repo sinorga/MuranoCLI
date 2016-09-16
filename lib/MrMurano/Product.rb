@@ -2,6 +2,8 @@ require 'uri'
 require 'mime/types'
 require 'csv'
 require 'pp'
+require 'MrMurano/http'
+require 'MrMurano/verbosing'
 
 module MrMurano
   class ProductBase

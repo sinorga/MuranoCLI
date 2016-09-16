@@ -2,6 +2,7 @@ require 'uri'
 require 'net/http'
 require 'json'
 require 'pp'
+require 'MrMurano/Solution'
 
 module MrMurano
   ##

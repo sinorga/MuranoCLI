@@ -1,7 +1,4 @@
 require 'MrMurano/version'
-require 'MrMurano/verbosing'
-require 'MrMurano/http'
-require 'MrMurano/Config'
 require 'MrMurano/Account'
 require 'tempfile'
 

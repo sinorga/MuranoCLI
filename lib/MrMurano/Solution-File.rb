@@ -4,6 +4,7 @@ require "http/form_data"
 require 'digest/sha1'
 require 'mime/types'
 require 'pp'
+require 'MrMurano/Solution'
 
 module MrMurano
   # …/file

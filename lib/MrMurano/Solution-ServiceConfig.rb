@@ -1,3 +1,4 @@
+require 'MrMurano/Solution'
 
 module MrMurano
   # …/serviceconfig

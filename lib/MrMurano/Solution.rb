@@ -4,6 +4,9 @@ require 'json'
 require 'tempfile'
 require 'shellwords'
 require 'pp'
+require 'MrMurano/Config'
+require 'MrMurano/http'
+require 'MrMurano/verbosing'
 
 module MrMurano
   class SolutionBase

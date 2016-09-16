@@ -3,6 +3,7 @@ require 'net/http'
 require 'json'
 require 'yaml'
 require 'pp'
+require 'MrMurano/Solution'
 
 module MrMurano
   ##
