@@ -23,7 +23,10 @@ module MrMurano
     def curldebug(request)
       if $cfg['tool.curldebug'] then
         a = []
-        a << %{curl -s -H 'Authorization: #{request['authorization']}'}
+        a << %{curl -s }
+        if request.key?('Authorization') then
+          a << %{-H 'Authorization: #{request['Authorization']}'}
+        end
         a << %{-H 'User-Agent: #{request['User-Agent']}'}
         a << %{-H 'Content-Type: #{request.content_type}'}
         a << %{-X #{request.method}}
@@ -42,19 +45,21 @@ module MrMurano
       end
       @http
     end
+    def http_reset
+      @http = nil
+    end
 
-    def set_req_defaults(request)
+    def set_def_headers(request)
       request.content_type = 'application/json'
-      request['authorization'] = 'token ' + token
+      request['Authorization'] = 'token ' + token
       request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
       request
     end
 
     def workit(request, &block)
-      set_req_defaults(request)
       curldebug(request)
       if block_given? then
-        yield request, http()
+        return yield request, http()
       else
         response = http().request(request)
         case response
@@ -76,26 +81,37 @@ module MrMurano
 
     def get(path='', &block)
       uri = endPoint(path)
-      workit(Net::HTTP::Get.new(uri), &block)
+      workit(set_def_headers(Net::HTTP::Get.new(uri)), &block)
     end
 
     def post(path='', body={}, &block)
       uri = endPoint(path)
       req = Net::HTTP::Post.new(uri)
+      set_def_headers(req)
       req.body = JSON.generate(body)
+      workit(req, &block)
+    end
+
+    def postf(path='', form={}, &block)
+      uri = endPoint(path)
+      req = Net::HTTP::Post.new(uri)
+      set_def_headers(req)
+      req.content_type = 'application/x-www-form-urlencoded; charset=utf-8'
+      req.form_data = form
       workit(req, &block)
     end
 
     def put(path='', body={}, &block)
       uri = endPoint(path)
       req = Net::HTTP::Put.new(uri)
+      set_def_headers(req)
       req.body = JSON.generate(body)
       workit(req, &block)
     end
 
     def delete(path='', &block)
       uri = endPoint(path)
-      workit(Net::HTTP::Delete.new(uri), &block)
+      workit(set_def_headers(Net::HTTP::Delete.new(uri)), &block)
     end
 
   end

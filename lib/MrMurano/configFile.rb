@@ -1,6 +1,5 @@
 require 'pathname'
 require 'inifile'
-require 'pp'
 
 module MrMurano
   class Config
@@ -37,27 +36,31 @@ module MrMurano
     CFG_SCOPES=%w{internal specified project private user system defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
     CFG_PRVT_NAME = '.mrmuranorc.private'.freeze
+    CFG_DIR_NAME = '.mrmurano'.freeze
+    CFG_ALTRC_NAME = '.mrmurano/config'.freeze
+    CFG_SYS_NAME = '/etc/mrmuranorc'.freeze
 
     def initialize
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
-      prjfile = findProjectFile()
+      prjfile = findProjectDir()
       unless prjfile.nil? then
-        @paths << ConfigFile.new(:private, prjfile.dirname + CFG_PRVT_NAME)
-        @paths << ConfigFile.new(:project, prjfile)
+        @paths << ConfigFile.new(:private, prjfile + CFG_PRVT_NAME)
+        @paths << ConfigFile.new(:project, prjfile + CFG_FILE_NAME)
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
-      @paths << ConfigFile.new(:system, Pathname.new('/etc') + CFG_FILE_NAME.sub(/^\./,''))
+      @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
       set('tool.verbose', false, :defaults)
+      set('tool.debug', false, :defaults)
       set('tool.dry', false, :defaults)
 
       set('net.host', 'bizapi.hosted.exosite.io', :defaults)
 
-      set('location.base', prjfile.dirname, :defaults) unless prjfile.nil?
+      set('location.base', prjfile, :defaults) unless prjfile.nil?
       set('location.files', 'files', :defaults)
       set('location.endpoints', 'endpoints', :defaults)
       set('location.modules', 'modules', :defaults)
@@ -67,27 +70,43 @@ module MrMurano
 
       set('files.default_page', 'index.html', :defaults)
 
-      set('eventhandler.skiplist', 'websocket webservice', :defaults)
+      set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
 
       set('diff.cmd', 'diff -u', :defaults)
     end
 
-    # Look at parent directories until HOME
-    # Stop at first.
-    def findProjectFile()
+    ## Find the root of this project Directory.
+    #
+    # The Project dir is the directory between PWD and HOME that has one of (in
+    # order of preference):
+    # - .mrmuranorc
+    # - .mrmuranorc.private
+    # - .mrmurano/config
+    # - .mrmurano/
+    # - .git/
+    def findProjectDir()
       result=nil
+      fileNames=[CFG_FILE_NAME, CFG_PRVT_NAME, CFG_ALTRC_NAME]
+      dirNames=[CFG_DIR_NAME, '.git']
       home = Pathname.new(Dir.home)
       pwd = Pathname.new(Dir.pwd)
       return nil if home == pwd
-      pwd.dirname.ascend do |i| 
+      pwd.dirname.ascend do |i|
+        break unless result.nil?
         break if i == home
-        if (i + CFG_FILE_NAME).exist? then
-          result = i + CFG_FILE_NAME
-          break
+        fileNames.each do |f|
+          if (i + f).exist? then
+            result = i
+          end
+        end
+        dirNames.each do |f|
+          if (i + f).directory? then
+            result = i
+          end
         end
       end
       # if nothing found, assume it will live in pwd.
-      result = Pathname.new(Dir.pwd) + CFG_FILE_NAME if result.nil?
+      result = Pathname.new(Dir.pwd) if result.nil?
       return result
     end
 
@@ -180,72 +199,6 @@ module MrMurano
       opt.users = true
     end
   end
-end
-
-command :config do |c|
-  c.syntax = %{mr config [options] <key> [<new value>]}
-  c.summary = %{Get and set options}
-  c.description = %{
-  You can get, set, or query config options with this command.  All config
-  options are in a 'section.key' format.  There is also a layer of scopes
-  that the keys can be saved in.
-  }
-
-  c.example %{See what the current combined config is}, 'mr config --dump'
-  c.example %{Query a value}, 'mr config solution.id'
-  c.example %{Set a new value; writing to the project config file}, 'mr config solution.id XXXXXXXX'
-  c.example %{Set a new value; writing to the private config file}, 'mr config --private solution.id XXXXXXXX'
-  c.example %{Set a new value; writing to the user config file}, 'mr config --user user.name my@email.address'
-  c.example %{Unset a value in a configfile. (lower scopes will become visible if set)},
-    'mr config diff.cmd --unset'
-
-
-  c.option '--system', 'Use only the system config file. (/etc/mrmuranorc)'
-  c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
-  c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
-  c.option '--private', 'Use only the private config file in the project (.mrmuranorc.private)'
-  c.option '--specified', 'Use only the config file from the --config option.'
-
-  c.option '--unset', 'Remove key from config file.'
-  c.option '--dump', 'Dump the current combined view of the config'
-
-  c.action do |args, options|
-
-    if options.dump then
-      puts $cfg.dump()
-    elsif args.count == 0 then
-      say_error "Need a config key"
-    elsif args.count == 1 and not options.unset then
-      options.defaults :system=>false, :user=>false, :project=>false,
-        :specified=>false, :private=>false
-
-      # For read, if no scopes, than all. Otherwise just those specified
-      scopes = []
-      scopes << :system if options.system
-      scopes << :user if options.user
-      scopes << :project if options.project
-      scopes << :private if options.private
-      scopes << :specified if options.specified
-      scopes = MrMurano::Config::CFG_SCOPES if scopes.empty?
-
-      say $cfg.get(args[0], scopes)
-    else 
-
-      options.defaults :system=>false, :user=>false, :project=>true,
-        :specified=>false, :private=>false
-      # For write, if scope is specified, only write to that scope.
-      scope = :project
-      scope = :system if options.system
-      scope = :user if options.user
-      scope = :project if options.project
-      scope = :private if options.private
-      scope = :specified if options.specified
-
-      args[1] = nil if options.unset
-      $cfg.set(args[0], args[1], scope)
-    end
-  end
-
 end
 
 #  vim: set ai et sw=2 ts=2 :

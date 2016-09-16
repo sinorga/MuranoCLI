@@ -87,9 +87,9 @@ module MrMurano
         # Cannot have token call token, so cannot use workit.
         uri = endPoint('token/')
         request = Net::HTTP::Post.new(uri)
-        curldebug(request)
-
+        request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
         request.content_type = 'application/json'
+        curldebug(request)
         #request.basic_auth(username(), password())
         request.body = JSON.generate(_loginInfo)
 

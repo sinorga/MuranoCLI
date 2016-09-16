@@ -47,12 +47,30 @@ All of these can be toggled with command line options.
 
 To aid with debugging, MrMurano has direct access to a solution's Keystore service.
 
-To see all of the keys in the current solution: `mr keystore` 
+To see all of the keys in the current solution: `mr keystore`
 
 ### Timeseries
 
 To aid with debugging, MrMurano has direct access to a solution's Timeseries service.
 
+### Product Content Area
+
+MrMurano can manage the content area for a product.  This area is a place to store
+files for use by devices.  Typically holding firmware images for Over-The-Air
+updating.  Although any kind of fleet wide data that devices may need to download
+can be stored here.
+
+Once the `product.id` is set, the content for that product can be accessed with the
+following commands:
+```
+> mr content list
+> mr content upload
+> mr content info
+> mr content delete
+> mr content download
+```
+
+Call them with `--help` for details.
 
 ### Sub-directories
 

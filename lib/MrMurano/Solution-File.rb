@@ -81,6 +81,7 @@ module MrMurano
       file = HTTP::FormData::File.new(local.to_s, {:mime_type=>remote[:mime_type]})
       form = HTTP::FormData.create(:file=>file)
       req = Net::HTTP::Put.new(uri)
+      set_def_headers(req)
       workit(req) do |request,http|
         request.content_type = form.content_type
         request.content_length = form.content_length
@@ -135,6 +136,7 @@ module MrMurano
           sha1 << hexit(chunk)
         end
       end
+      debug "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
 
       {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest}
     end
