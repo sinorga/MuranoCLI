@@ -17,7 +17,7 @@ command 'product spec' do |c|
 
     file = $cfg['product.spec']
     prid = $cfg['product.id']
-    file = $cfg[ prid + '.spec'] unless prid.nil? or $cfg[ prid + '.spec'].nil?
+    file = $cfg["p-#{prid}.spec"] unless prid.nil? or $cfg["p-#{prid}.spec"].nil?
     file = options.file unless options.file.nil?
 
     if FileTest.exist?(file) then
