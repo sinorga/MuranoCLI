@@ -23,6 +23,7 @@ module MrMurano
       end
     end
     def save()
+      @path.dirname.mkpath unless @path.dirname.exist?
       @path.open('wb') do |io|
         io << @data.to_yaml
       end

@@ -15,6 +15,18 @@ RSpec.describe MrMurano::Passwords, "#pwd" do
     end
   end
 
+  it "Creates a file in a directory that doesn't exist." do
+    tmpfile = Dir.tmpdir + '/deeper/pwtest' # This way because Tempfile.new creates.
+    begin
+      pwd = MrMurano::Passwords.new( tmpfile )
+      pwd.save
+
+      expect( FileTest.exists?(tmpfile) )
+    ensure
+      File.unlink(tmpfile) if File.exists? tmpfile
+    end
+  end
+
   it "Loads a file" do
     Tempfile.open('test') do |tf|
       tf << %{---
