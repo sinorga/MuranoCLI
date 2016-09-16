@@ -1,15 +1,9 @@
-require 'rubygems'
-require 'commander/import'
-require 'MrMurano'
+require 'MrMurano/version'
+require 'MrMurano/verbosing'
+require 'MrMurano/http'
+require 'MrMurano/configFile'
+require 'MrMurano/Account'
 require 'tempfile'
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Some kludgery to work around commander.  Likely a better way to do this.
-program :version, MrMurano::VERSION
-program :description, %{Manage a Solution in Exosite's Murano}
-command(:nop){ |c| c.action {|a,o|} }
-default_command :nop
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 RSpec.describe MrMurano::Passwords, "#pwd" do
   it "Creates a file " do
