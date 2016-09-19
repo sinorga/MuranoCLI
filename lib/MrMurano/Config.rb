@@ -36,7 +36,7 @@ module MrMurano
 
     CFG_SCOPES=%w{internal specified project private user system defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
-    CFG_PRVT_NAME = '.mrmuranorc.private'.freeze
+    CFG_PRVT_NAME = '.mrmuranorc.private'.freeze # Going away.
     CFG_DIR_NAME = '.mrmurano'.freeze
     CFG_ALTRC_NAME = '.mrmurano/config'.freeze
     CFG_SYS_NAME = '/etc/mrmuranorc'.freeze
@@ -122,17 +122,21 @@ module MrMurano
       root + name
     end
 
+    ## Load all of the potential config files
     def load()
       # - read/write config file in [Project, User, System] (all are optional)
       @paths.each { |cfg| cfg.load }
     end
 
+    ## Load specified file into the config stack
+    # This can be called multiple times and each will get loaded into the config
     def load_specific(file)
       spc = ConfigFile.new(:specified, Pathname.new(file))
       spc.load
       @paths.insert(1, spc)
     end
 
+    ## Get a value for key, looking at the specificed scopes
     # key is <section>.<key>
     def get(key, scope=CFG_SCOPES)
       scope = [scope] unless scope.kind_of? Array
@@ -151,6 +155,7 @@ module MrMurano
       return nil
     end
 
+    ## Dump out a combined config
     def dump()
       # have a fake, merge all into it, then dump it.
       base = IniFile.new()
