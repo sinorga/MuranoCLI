@@ -1,5 +1,6 @@
 Readme:
 	- Add more walk-thrus of common actions. (create new solution, …)
+	- Look into using VCR for testing.
 
 Commands:
 	- Status will show {modules,eventhandlers} have changes when they don’t.
