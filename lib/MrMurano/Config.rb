@@ -110,6 +110,7 @@ module MrMurano
       result = Pathname.new(Dir.pwd) if result.nil?
       return result
     end
+    private :findProjectDir
 
     def file_at(name, scope=:project)
       return nil if scope == :internal
