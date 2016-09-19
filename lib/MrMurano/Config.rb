@@ -32,6 +32,7 @@ module MrMurano
     end
 
     attr :paths
+    attr_reader :projectDir
 
     CFG_SCOPES=%w{internal specified project private user system defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
@@ -44,10 +45,10 @@ module MrMurano
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
-      prjfile = findProjectDir()
-      unless prjfile.nil? then
-        @paths << ConfigFile.new(:private, prjfile + CFG_PRVT_NAME)
-        @paths << ConfigFile.new(:project, prjfile + CFG_FILE_NAME)
+      @projectDir = findProjectDir()
+      unless @projectDir.nil? then
+        @paths << ConfigFile.new(:private, @projectDir + CFG_PRVT_NAME)
+        @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
@@ -60,7 +61,7 @@ module MrMurano
 
       set('net.host', 'bizapi.hosted.exosite.io', :defaults)
 
-      set('location.base', prjfile, :defaults) unless prjfile.nil?
+      set('location.base', @projectDir, :defaults) unless @projectDir.nil?
       set('location.files', 'files', :defaults)
       set('location.endpoints', 'endpoints', :defaults)
       set('location.modules', 'modules', :defaults)
@@ -108,6 +109,17 @@ module MrMurano
       # if nothing found, assume it will live in pwd.
       result = Pathname.new(Dir.pwd) if result.nil?
       return result
+    end
+
+    def file_at(name, scope=:project)
+      return nil if scope == :internal
+      return nil if scope == :defaults
+
+      paths = @paths.select{|p| scope == p.kind}
+      raise "Unknown scope" if paths.empty?
+      cfg = path.first
+      root = cfg.path.dirname
+      root + name
     end
 
     def load()
