@@ -32,10 +32,11 @@ module MrMurano
     end
 
     attr :paths
+    attr_reader :projectDir
 
     CFG_SCOPES=%w{internal specified project private user system defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
-    CFG_PRVT_NAME = '.mrmuranorc.private'.freeze
+    CFG_PRVT_NAME = '.mrmuranorc.private'.freeze # Going away.
     CFG_DIR_NAME = '.mrmurano'.freeze
     CFG_ALTRC_NAME = '.mrmurano/config'.freeze
     CFG_SYS_NAME = '/etc/mrmuranorc'.freeze
@@ -44,10 +45,10 @@ module MrMurano
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
-      prjfile = findProjectDir()
-      unless prjfile.nil? then
-        @paths << ConfigFile.new(:private, prjfile + CFG_PRVT_NAME)
-        @paths << ConfigFile.new(:project, prjfile + CFG_FILE_NAME)
+      @projectDir = findProjectDir()
+      unless @projectDir.nil? then
+        @paths << ConfigFile.new(:private, @projectDir + CFG_PRVT_NAME)
+        @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
@@ -60,7 +61,7 @@ module MrMurano
 
       set('net.host', 'bizapi.hosted.exosite.io', :defaults)
 
-      set('location.base', prjfile, :defaults) unless prjfile.nil?
+      set('location.base', @projectDir, :defaults) unless @projectDir.nil?
       set('location.files', 'files', :defaults)
       set('location.endpoints', 'endpoints', :defaults)
       set('location.modules', 'modules', :defaults)
@@ -109,18 +110,34 @@ module MrMurano
       result = Pathname.new(Dir.pwd) if result.nil?
       return result
     end
+    private :findProjectDir
 
+    def file_at(name, scope=:project)
+      return nil if scope == :internal
+      return nil if scope == :defaults
+
+      paths = @paths.select{|p| scope == p.kind}
+      raise "Unknown scope" if paths.empty?
+      cfg = path.first
+      root = cfg.path.dirname
+      root + name
+    end
+
+    ## Load all of the potential config files
     def load()
       # - read/write config file in [Project, User, System] (all are optional)
       @paths.each { |cfg| cfg.load }
     end
 
+    ## Load specified file into the config stack
+    # This can be called multiple times and each will get loaded into the config
     def load_specific(file)
       spc = ConfigFile.new(:specified, Pathname.new(file))
       spc.load
       @paths.insert(1, spc)
     end
 
+    ## Get a value for key, looking at the specificed scopes
     # key is <section>.<key>
     def get(key, scope=CFG_SCOPES)
       scope = [scope] unless scope.kind_of? Array
@@ -139,6 +156,7 @@ module MrMurano
       return nil
     end
 
+    ## Dump out a combined config
     def dump()
       # have a fake, merge all into it, then dump it.
       base = IniFile.new()
