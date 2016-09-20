@@ -17,40 +17,62 @@ RSpec.describe MrMurano::Config do
     end
 
     it "Sets defaults" do
-      cfg = MrMurano::Config.new
-      cfg.load
-      # Don't check for all of them, just a few.
-      expect(cfg['files.default_page']).to eq('index.html')
-      expect(cfg.get('files.default_page', :defaults)).to eq('index.html')
-      expect(cfg['tool.debug']).to eq(false)
-      expect(cfg.get('tool.debug', :defaults)).to eq(false)
+      Dir.chdir(@projectDir) do
+        cfg = MrMurano::Config.new
+        cfg.load
+        # Don't check for all of them, just a few.
+        expect(cfg['files.default_page']).to eq('index.html')
+        expect(cfg.get('files.default_page', :defaults)).to eq('index.html')
+        expect(cfg['tool.debug']).to eq(false)
+        expect(cfg.get('tool.debug', :defaults)).to eq(false)
+      end
     end
 
     it "Sets internal values" do
-      cfg = MrMurano::Config.new
-      cfg.load
+      Dir.chdir(@projectDir) do
+        cfg = MrMurano::Config.new
+        cfg.load
 
-      cfg['bob.test'] = 'twelve'
+        cfg['bob.test'] = 'twelve'
 
-      expect(cfg['bob.test']).to eq('twelve')
-      expect(cfg.get('bob.test', :internal)).to eq('twelve')
+        expect(cfg['bob.test']).to eq('twelve')
+        expect(cfg.get('bob.test', :internal)).to eq('twelve')
+      end
     end
 
     it "Sets project values" do # This should write
-      cfg = MrMurano::Config.new
-      cfg.load
+      Dir.chdir(@projectDir) do
+        cfg = MrMurano::Config.new
+        cfg.load
 
-      cfg.set('bob.test', 'twelve', :project)
+        cfg.set('bob.test', 'twelve', :project)
 
-      expect(cfg['bob.test']).to eq('twelve')
-      expect(cfg.get('bob.test', :project)).to eq('twelve')
+        expect(cfg['bob.test']).to eq('twelve')
+        expect(cfg.get('bob.test', :project)).to eq('twelve')
 
-      expect(FileTest.exist?(@projectDir + '.mrmuranorc'))
+        expect(FileTest.exist?(@projectDir + '.mrmuranorc'))
 
-      #reload
-      cfg = MrMurano::Config.new
-      cfg.load
-      expect(cfg.get('bob.test', :project)).to eq('twelve')
+        #reload
+        cfg = MrMurano::Config.new
+        cfg.load
+        expect(cfg.get('bob.test', :project)).to eq('twelve')
+      end
+    end
+
+    it "loads from a specific file" do
+      Dir.chdir(@projectDir) do
+        File.open(@projectDir + '/foo.cfg', 'w') do |io|
+          io << %{[test]
+bob = test
+          }
+        end
+
+        cfg = MrMurano::Config.new
+        cfg.load
+        cfg.load_specific(@projectDir + '/foo.cfg')
+
+        expect(cfg['test.bob']).to eq('test')
+      end
     end
 
   end
