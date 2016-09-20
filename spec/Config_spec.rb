@@ -75,6 +75,16 @@ bob = test
       end
     end
 
+    it "returns a path to a file in a scope" do
+      Dir.chdir(@projectDir) do
+        cfg = MrMurano::Config.new
+        cfg.load
+        path = cfg.file_at('testfile').realdirpath
+        want = Pathname.new(@projectDir + '/.mrmurano/testfile').realdirpath
+
+        expect(path).to eq(want)
+      end
+    end
   end
 
   context "Can find the project directory by .mrmuranorc" do

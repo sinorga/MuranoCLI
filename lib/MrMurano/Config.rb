@@ -125,13 +125,22 @@ module MrMurano
     private :findProjectDir
 
     def file_at(name, scope=:project)
-      return nil if scope == :internal
-      return nil if scope == :defaults
-
-      paths = @paths.select{|p| scope == p.kind}
-      raise "Unknown scope" if paths.empty?
-      cfg = path.first
-      root = cfg.path.dirname
+      case scope
+      when :internal
+        root = nil
+      when :specified
+        root = nil
+      when :project
+        root = @projectDir + CFG_DIR_NAME
+      when :user
+        root = Pathname.new(Dir.home) + CFG_DIR_NAME
+      when :system
+        root = nil
+      when :defaults
+        root = nil
+      end
+      return nil if root.nil?
+      root.mkpath
       root + name
     end
 
