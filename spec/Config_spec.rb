@@ -75,12 +75,23 @@ bob = test
       end
     end
 
-    it "returns a path to a file in a scope" do
+    it "returns a path to a file in project mrmurano dir" do
       Dir.chdir(@projectDir) do
         cfg = MrMurano::Config.new
         cfg.load
         path = cfg.file_at('testfile').realdirpath
         want = Pathname.new(@projectDir + '/.mrmurano/testfile').realdirpath
+
+        expect(path).to eq(want)
+      end
+    end
+
+    it "returns a path to a file in user mrmurano dir" do
+      Dir.chdir(@projectDir) do
+        cfg = MrMurano::Config.new
+        cfg.load
+        path = cfg.file_at('testfile', :user).realdirpath
+        want = Pathname.new(Dir.home + '/.mrmurano/testfile').realdirpath
 
         expect(path).to eq(want)
       end
