@@ -66,7 +66,7 @@ command 'config export' do |c|
     end
 
     solsecret.open('w') do |io|
-        pff = Pathname.new(ENV['HOME']) + '.mrmurano/passwords'
+        pff = $cfg.file_at('passwords', :user)
         pwd = MrMurano::Passwords.new(pff)
         pwd.load
         ps = pwd.get($cfg['net.host'], $cfg['user.name'])
@@ -109,7 +109,7 @@ command 'config import' do |c|
       solsecret.open do |io|
         ss = YAML.load(io)
 
-        pff = Pathname.new(ENV['HOME']) + '.mrmurano/passwords'
+        pff = $cfg.file_at('passwords', :user)
         pwd = MrMurano::Passwords.new(pff)
         pwd.load
         ps = pwd.get($cfg['net.host'], ss['email'])

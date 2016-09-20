@@ -65,7 +65,7 @@ module MrMurano
         user = ask("Account name: ")
         $cfg.set('user.name', user, :user)
       end
-      pff = Pathname.new(ENV['HOME']) + '.mrmurano/passwords'
+      pff = $cfg.file_at('passwords', :user)
       pf = Passwords.new(pff)
       pf.load
       pws = pf.get(host, user)
