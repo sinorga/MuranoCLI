@@ -36,7 +36,7 @@ module MrMurano
     end
 
     ##
-    # Upload endpoint 
+    # Upload endpoint
     # :local path to file to push
     # :remote hash of method and endpoint path
     def upload(local, remote)
