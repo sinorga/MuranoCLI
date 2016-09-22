@@ -48,8 +48,7 @@ Service Device:
 	- When listing and bussiness.id is missing, gracefully fall back to --idonly @done(2016-09-12)
 
 Config:
-	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile
-	- Add ENV['MR_CONFIGOPT'] string of "<key>=<value>"
+	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support.
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
 	Do this with the ENVs above.
