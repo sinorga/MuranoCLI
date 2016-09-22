@@ -17,10 +17,11 @@ task :echo do
     puts "= #{Bundler::GemHelper.gemspec.version} ="
 end
 
-task :run do
-    sh %{ruby -Ilib bin/mr }
+desc "Prints a cmd to test this in another directory"
+task :testwith do
+    pwd=Dir.pwd.sub(Dir.home, '~')
+    puts "ruby -I#{pwd}/lib #{pwd}/bin/mr "
 end
-
 
 task :test do
     sh %{rspec}
