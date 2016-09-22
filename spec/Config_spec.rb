@@ -96,6 +96,36 @@ bob = test
         expect(path).to eq(want)
       end
     end
+
+    context "ENV['MR_CONFIGFILE']" do
+      it "loads file in env" do
+        ENV['MR_CONFIGFILE'] = @tmpdir + '/home/test.config'
+        File.open(@tmpdir + '/home/test.config', 'w') do |io|
+          io << %{[test]
+bob = test
+          }
+        end
+
+        cfg = MrMurano::Config.new
+        cfg.load
+        expect(cfg['test.bob']).to eq('test')
+      end
+
+      it "will create file at env" do
+        ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
+        cfg = MrMurano::Config.new
+        cfg.load
+        cfg.set('coffee.hot', 'yes', :env)
+
+        expect(FileTest.exist?(ENV['MR_CONFIGFILE']))
+
+        #reload
+        cfg = MrMurano::Config.new
+        cfg.load
+        expect(cfg['coffee.hot']).to eq('yes')
+        expect(cfg.get('coffee.hot', :env)).to eq('yes')
+      end
+    end
   end
 
   context "Can find the project directory by .mrmuranorc" do

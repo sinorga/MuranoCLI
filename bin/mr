@@ -5,6 +5,8 @@ require 'commander/import'
 require 'pathname'
 require 'MrMurano'
 require 'pp'
+require 'dotenv'
+Dotenv.load
 
 program :version, MrMurano::VERSION
 program :description, %{Manage a Solution and Product in Exosite's Murano}

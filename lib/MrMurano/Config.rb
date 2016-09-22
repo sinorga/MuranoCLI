@@ -6,6 +6,7 @@ module MrMurano
     #
     #  internal    transient this-run-only things (also -c options)
     #  specified   from --configfile
+    #  env         from ENV['MR_CONFIGFILE']
     #  private     .mrmuranorc.private at project dir (for things you don't want to commit)
     #  project     .mrmuranorc at project dir
     #  user        .mrmuranorc at $HOME
@@ -34,7 +35,7 @@ module MrMurano
     attr :paths
     attr_reader :projectDir
 
-    CFG_SCOPES=%w{internal specified project private user system defaults}.map{|i| i.to_sym}.freeze
+    CFG_SCOPES=%w{internal specified env project private user system defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
     CFG_PRVT_NAME = '.mrmuranorc.private'.freeze # Going away.
     CFG_DIR_NAME = '.mrmurano'.freeze
@@ -45,6 +46,14 @@ module MrMurano
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
+      unless ENV['MR_CONFIGFILE'].nil? then
+        # if it exists, must be a file
+        # if it doesn't exist, that's ok
+        ep = Pathname.new(ENV['MR_CONFIGFILE'])
+        if ep.file? or not ep.exist? then
+          @paths << ConfigFile.new(:env, ep)
+        end
+      end
       @projectDir = findProjectDir()
       unless @projectDir.nil? then
         @paths << ConfigFile.new(:private, @projectDir + CFG_PRVT_NAME)
