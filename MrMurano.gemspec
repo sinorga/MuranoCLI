@@ -15,6 +15,8 @@ Gem::Specification.new do |s|
   Push and pull data from Murano.
   Get status on what things have changed.
   See a diff of the changes before you push.
+
+  and so much more.
   }
 
   s.files         = `git ls-files`.split("\n")
@@ -29,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('inifile', '~> 3.0')
   s.add_runtime_dependency('http-form_data', '~> 1.0.1')
   s.add_runtime_dependency('rainbow', '~> 2.1.0')
+  s.add_runtime_dependency('dotenv', '~> 2.1.1')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
   s.add_development_dependency('rake', '~> 10.1.1')

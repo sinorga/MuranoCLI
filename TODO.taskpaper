@@ -49,7 +49,7 @@ Service Device:
 
 Config:
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
-	- Maybe add dotenv support.
+	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
 	Do this with the ENVs above.
 
