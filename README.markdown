@@ -43,6 +43,41 @@ MrMurano does a few things to make your log output easier to follow.
 
 All of these can be toggled with command line options.
 
+### MR_CONFIGFILE environment and Dotenv
+
+The environment variable `MR_CONFIGFILE` is checked for an additional config to
+load.  This in conjuction with dotenv support, allows for easily switching between
+development, staging, and production setups.
+
+To use this, write the three solution ids into `.mrmurano.dev`, `.mrmurano.stg`,
+and `.mrmurano.prod`. Then write the `.env` file to point at the system you're
+currently working on.
+
+The files for this are then:
+```
+cat >> .mrmurano.dev <<EOF
+[solution]
+id=AAAAAAAA
+EOF
+
+cat >> .mrmurano.stg <<EOF
+[solution]
+id=BBBBBBBB
+EOF
+
+cat >> .mrmurano.prod <<EOF
+[solution]
+id=CCCCCCCC
+EOF
+
+cat >> .env <<EOF
+MR_CONFIGFILE=.mrmurano.dev
+EOF
+```
+
+This also allows for keeping private things in a seperate config file and having
+the shared things checked into source control.
+
 ### Keystore
 
 To aid with debugging, MrMurano has direct access to a solution's Keystore service.
