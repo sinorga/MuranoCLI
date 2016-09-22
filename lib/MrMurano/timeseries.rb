@@ -12,7 +12,7 @@ module MrMurano
     end
 
     def write(writestr)
-      post("/#{scid}/call/write", { :q=>writestr })
+      post("/#{scid}/call/write", { :query=>writestr })
     end
 
     def command(cmd)
