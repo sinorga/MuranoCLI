@@ -3,7 +3,7 @@ Readme:
 	- Look into using VCR for testing.
 
 Commands:
-	- Status will show {modules,eventhandlers} have changes when they don’t.
+	- Status will show {modules,eventhandlers} have changes when they don’t. @done(2016-09-23)
 	The best solution I can think of for this is to have a cache of the last uploaded
 	timestamps for each item. The cache would hold the path and SHA and upload time.
 	So for a file, if the SHA was different, then that item is dropped from the

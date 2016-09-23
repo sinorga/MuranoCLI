@@ -1,7 +1,8 @@
 require 'uri'
 require 'net/http'
 require 'json'
-require 'pp'
+require 'yaml'
+require 'date'
 require 'MrMurano/Solution'
 
 module MrMurano
@@ -71,24 +72,59 @@ module MrMurano
           say_error ":: #{response.body}"
         end
       end
+      cacheUpdateTimeFor(local)
     end
 
     def docmp(itemA, itemB)
       if itemA[:updated_at].nil? and itemA[:local_path] then
-        itemA[:updated_at] = itemA[:local_path].mtime.getutc
+        ct = cachedUpdateTimeFor(itemA[:local_path])
+        itemA[:updated_at] = ct unless ct.nil?
+        itemA[:updated_at] = itemA[:local_path].mtime.getutc if ct.nil?
       elsif itemA[:updated_at].kind_of? String then
         itemA[:updated_at] = DateTime.parse(itemA[:updated_at]).to_time.getutc
       end
       if itemB[:updated_at].nil? and itemB[:local_path] then
-        itemB[:updated_at] = itemB[:local_path].mtime.getutc
+        ct = cachedUpdateTimeFor(itemB[:local_path])
+        itemB[:updated_at] = ct unless ct.nil?
+        itemB[:updated_at] = itemB[:local_path].mtime.getutc if ct.nil?
       elsif itemB[:updated_at].kind_of? String then
         itemB[:updated_at] = DateTime.parse(itemB[:updated_at]).to_time.getutc
       end
-      # It is a common thing that the thing in murano has a newer updated timestamp
-      # than the file here on disk.
-      return itemA[:updated_at] != itemB[:updated_at]
+      return itemA[:updated_at].to_time.round != itemB[:updated_at].to_time.round
     end
 
+    def cacheUpdateTimeFor(local_path, time=nil)
+      time = Time.now.getutc if time.nil?
+      cacheFile = $cfg.file_at("cache.#{self.class.to_s}.yaml")
+      if cacheFile.file? then
+        cacheFile.open('r+') do |io|
+          cache = YAML.load(io)
+          io.rewind
+          cache[local_path.to_s] = time.to_datetime.iso8601(3)
+          io << cache.to_yaml
+        end
+      else
+        cacheFile.open('w') do |io|
+          cache = {}
+          cache[local_path.to_s] = time.to_datetime.iso8601(3)
+          io << cache.to_yaml
+        end
+      end
+      time
+    end
+
+    def cachedUpdateTimeFor(local_path)
+      cacheFile = $cfg.file_at("cache.#{self.class.to_s}.yaml")
+      return nil unless cacheFile.file?
+      ret = nil
+      cacheFile.open('r') do |io|
+        cache = YAML.load(io)
+        if cache.has_key?(local_path.to_s) then
+          ret = DateTime.parse(cache[local_path.to_s])
+        end
+      end
+      ret
+    end
   end
 
   # …/library

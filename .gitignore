@@ -12,6 +12,7 @@ xcuserdata
 Pods/
 pkg/
 
+.mrmurano/
 .mrmuranorc
 .mrmuranorc.private
 files/
