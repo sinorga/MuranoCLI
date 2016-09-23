@@ -7,7 +7,6 @@ module MrMurano
     #  internal    transient this-run-only things (also -c options)
     #  specified   from --configfile
     #  env         from ENV['MR_CONFIGFILE']
-    #  private     .mrmuranorc.private at project dir (for things you don't want to commit)
     #  project     .mrmuranorc at project dir
     #  user        .mrmuranorc at $HOME
     #  system      .mrmuranorc at /etc
@@ -56,6 +55,9 @@ module MrMurano
       end
       @projectDir = findProjectDir()
       unless @projectDir.nil? then
+        if (@projectDir + CFG_PRVT_NAME).exist? then
+          say_warning "!!! Using .mrmuranorc.private is deprecated"
+        end
         @paths << ConfigFile.new(:private, @projectDir + CFG_PRVT_NAME)
         @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
       end
