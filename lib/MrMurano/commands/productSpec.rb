@@ -4,7 +4,7 @@ require 'yaml'
 
 command 'product spec convert' do |c|
   c.syntax = %{mr product spec convert FILE}
-  c.summary = %{Takes an exoline spec file, and convert it into a Murano spec file}
+  c.summary = %{Convert exoline spec file into Murano format}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
