@@ -2,6 +2,41 @@ require 'MrMurano/Product'
 require 'MrMurano/hash'
 require 'yaml'
 
+command 'product spec convert' do |c|
+  c.syntax = %{mr product spec convert FILE}
+  c.summary = %{Takes an exoline spec file, and convert it into a Murano spec file}
+  c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
+
+  c.action do |args, options|
+    if args.count == 0 then
+      say_error "Missing file"
+    else
+
+      File.open(args[0]) do |fin|
+        spec = YAML.load(fin)
+        unless spec.has_key?('dataports') then
+          say_error "Not an exoline spec file"
+        else
+          dps = spec['dataports'].map do |dp|
+            dp.delete_if{|k,v| k != 'alias' and k != 'format' and k != 'initial'}
+            dp['format'] = 'string' if dp['format'][0..5] == 'string'
+            dp
+          end
+
+          spec = {'resource'=>dps}
+          if options.output then
+            File.open(options.output, 'w') do |io|
+              io << spec.to_yaml
+            end
+          else
+            puts spec.to_yaml
+          end
+        end
+      end
+    end
+  end
+end
+
 command 'product spec' do |c|
   c.syntax = %{mr product spec [--file FILE]}
   c.summary = %{Upload a new specification for a product}
@@ -39,10 +74,12 @@ command 'product spec pull' do |c|
     prd = MrMurano::Product.new
     ret = prd.info
 
-    spec = ret[:resources].map do |r|
+    resources = ret[:resources].map do |r|
       r.delete(:rid)
       Hash.transform_keys_to_strings(r)
     end
+
+    spec = { 'resources'=> resources }
 
     if options.output then
       File.open(options.output, 'w') do |io|
