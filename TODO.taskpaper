@@ -17,7 +17,7 @@ Account:
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
-	- Add support for multiple endpoints in one file (maybe)
+	- Add support for multiple endpoints in one file (maybe) @pri(low)
 	- Add directory support like in modules @done(2016-07-26)
 
 Files:
