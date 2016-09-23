@@ -1,7 +1,8 @@
 require 'uri'
 require 'net/http'
 require 'json'
-require 'pp'
+require 'yaml'
+require 'date'
 require 'MrMurano/Solution'
 
 module MrMurano
@@ -71,6 +72,7 @@ module MrMurano
           say_error ":: #{response.body}"
         end
       end
+      cacheUpdateTimeFor(local)
     end
 
     def docmp(itemA, itemB)
@@ -89,6 +91,38 @@ module MrMurano
       return itemA[:updated_at] != itemB[:updated_at]
     end
 
+    def cacheUpdateTimeFor(local_path, time=nil)
+      time = Time.now.getutc if time.nil?
+      cacheFile = $cfg.file_at("cache.#{self.class.to_s}.yaml")
+      if cacheFile.file? then
+        cacheFile.open('r+') do |io|
+          cache = YAML.load(io)
+          io.rewind
+          cache[local_path.to_s] = time.to_datetime.iso8601
+          io << cache.to_yaml
+        end
+      else
+        cacheFile.open('w') do |io|
+          cache = {}
+          cache[local_path.to_s] = time.to_datetime.iso8601
+          io << cache.to_yaml
+        end
+      end
+      time
+    end
+
+    def cachedUpdateTimeFor(local_path)
+      cacheFile = $cfg.file_at("cache.#{self.class.to_s}.yaml")
+      return nil unless cacheFile.file?
+      ret = nil
+      cacheFile.open('r') do |io|
+        cache = YAML.load(io)
+        if cache.has_key?(local_path.to_s) then
+          ret = Date.parse(cache[local_path.to_s])
+        end
+      end
+      ret
+    end
   end
 
   # …/library
