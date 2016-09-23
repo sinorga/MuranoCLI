@@ -4,10 +4,6 @@ Readme:
 
 Commands:
 	- Status will show {modules,eventhandlers} have changes when they don’t. @done(2016-09-23)
-	The best solution I can think of for this is to have a cache of the last uploaded
-	timestamps for each item. The cache would hold the path and SHA and upload time.
-	So for a file, if the SHA was different, then that item is dropped from the
-	cache. Otherwise compare update/upload timestamps.
 	- First time run needs to be smoothed out. @done(2016-08-09)
 	- Default for most commands should be -same @done(2016-08-02)
 	- Add Diff Command @done(2016-07-27)
@@ -42,6 +38,7 @@ Timeseries:
 	- Add CSV output option. @done(2016-09-09)
 
 Product:
+	- Auto convert exoline spec files into murano spec files on upload?
 	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
 
 Service Device:
