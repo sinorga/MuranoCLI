@@ -127,7 +127,7 @@ command 'config import' do |c|
         end
 
         $cfg.set('solution.id', ss['solution_id']) if ss.has_key? 'solution_id'
-        $cfg.set('solution.id', ss['product_id']) if ss.has_key? 'product_id'
+        $cfg.set('product.id', ss['product_id']) if ss.has_key? 'product_id'
       end
     end
 
