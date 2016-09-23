@@ -2,7 +2,7 @@ require 'MrMurano/version'
 require 'MrMurano/Solution-Services'
 require 'tempfile'
 
-RSpec.describe MrMurano::ServiceBase do
+RSpec.describe MrMurano::Library do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
