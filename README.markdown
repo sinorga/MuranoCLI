@@ -29,6 +29,17 @@ Or
 > gem update MrMurano
 ```
 
+You will likely need to be root for the above commands.  If you would rather not
+install as root, you can install gems in the user directory.
+
+```
+> gem install MrMurano --user-install
+```
+
+Your `PATH` may need to be updated to find the installed `mr` command.  See the
+[Ruby Gem FAQ](http://guides.rubygems.org/faqs/#user-install).  In short, you need
+to add the output of `ruby -rubygems -e 'puts Gems.user_dir'` to your `PATH`.
+
 ## Features
 
 ### Logs
