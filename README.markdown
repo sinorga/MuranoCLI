@@ -113,6 +113,44 @@ For the endpoints, modules, and eventhandlers directories. The can contain both
 files or a sub-directory of files.  This allows for keeping common things grouped
 together.  Or adding a git submodule in to manage reusable chunks.
 
+So, as an example, your project could be like:
+```
+endpoints
+endpoints/get_-v1-data-averaged.lua
+endpoints/get_-v1-data-cupsDrank.lua
+endpoints/get_-v1-data-latest.lua
+endpoints/statusboard-data.lua
+endpoints/users
+endpoints/users/get_-session.lua
+endpoints/users/get_-v1-verify-code.lua
+endpoints/users/patch_-v1-user.lua
+endpoints/users/post_-session.lua
+endpoints/users/post_-v1-pushtoken.lua
+endpoints/users/put_-v1-user-email.lua
+eventhandlers
+eventhandlers/product.lua
+eventhandlers/timer_timer.lua
+files
+files/batteryMeter.svg
+files/index.html
+files/meter.html
+modules
+modules/TSQ
+modules/TSQ/func_field_quote_test.lua
+modules/TSQ/isadate_test.lua
+modules/TSQ/README.md
+modules/TSQ/results_test.lua
+modules/TSQ/select_fields_test.lua
+modules/TSQ/tsq-1.2-2.rockspec
+modules/TSQ/tsq.lua
+modules/TSQ/tsq_test.lua
+modules/TSQ/tsw.lua
+modules/TSQ/tsw_test.lua
+modules/users.lua
+modules/util.lua
+spec
+spec/cico.murano.spec
+```
 
 
 ### Bundles
