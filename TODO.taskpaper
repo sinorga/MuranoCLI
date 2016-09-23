@@ -19,7 +19,7 @@ Endpoints:
 Files:
 	- Add ignore patterns to config
 	- Switch to mime-types v3
-	- Figure out how to make the hexed-sha checksum faster.
+	- Figure out how to make the hexed-sha checksum faster. @done(2016-09-23)
 	- Fix upload. @done(2016-08-01)
 	- Files won't update, they always delete then add. @done(2016-07-28)
 
