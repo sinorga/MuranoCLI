@@ -38,7 +38,7 @@ install as root, you can install gems in the user directory.
 
 Your `PATH` may need to be updated to find the installed `mr` command.  See the
 [Ruby Gem FAQ](http://guides.rubygems.org/faqs/#user-install).  In short, you need
-to add the output of `ruby -rubygems -e 'puts Gems.user_dir'` to your `PATH`.
+to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 
 ## Features
 
