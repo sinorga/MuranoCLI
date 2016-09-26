@@ -48,11 +48,10 @@ Config:
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
-	Do this with the ENVs above.
 
 SolutionBase:
-	- Errors from the server should be displayed prettier.
 	- All network traffic is serialized. Make some parallel.
+	- Errors from the server should be displayed prettier. @done(2016-09-26)
 	- JSON parse should use symbols for keys. @done(2016-09-01)
 	- Add the --curl verbose option. @done(2016-08-12)
 	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
