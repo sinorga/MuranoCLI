@@ -2,10 +2,10 @@ require 'uri'
 require 'net/http'
 require 'json'
 require 'date'
-require 'pp'
-require 'terminal-table'
 require 'pathname'
 require 'yaml'
+require 'MrMurano/Config'
+require 'MrMurano/http'
 
 module MrMurano
   class Passwords
@@ -65,7 +65,7 @@ module MrMurano
         user = ask("Account name: ")
         $cfg.set('user.name', user, :user)
       end
-      pff = Pathname.new(ENV['HOME']) + '.mrmurano/passwords'
+      pff = $cfg.file_at('passwords', :user)
       pf = Passwords.new(pff)
       pf.load
       pws = pf.get(host, user)
@@ -100,7 +100,7 @@ module MrMurano
           token = JSON.parse(response.body, json_opts)
           @@token = token[:token]
         else
-          say_error "No token! because: #{response}"
+          showHttpError(request, response)
           @@token = nil
           raise response
         end
@@ -125,55 +125,4 @@ module MrMurano
   end
 end
 
-command :account do |c|
-  c.syntax = %{mr account [options]}
-  c.description = %{Show things about your account.}
-  c.option '--businesses', 'Get businesses for user'
-  c.option '--products', 'Get products for user (needs a business)'
-  c.option '--solutions', 'Get solutions for user (needs a business)'
-  c.option '--idonly', 'Only return the ids'
-
-  c.example %{List all businesses}, 'mr account --businesses'
-  c.example %{List solutions}, 'mr account --solutions -c business.id=XXXXXXXX'
-
-  c.action do |args, options|
-
-    acc = MrMurano::Account.new
-
-    if options.businesses then
-      data = acc.businesses
-      if options.idonly then
-        say data.map{|row| row[:bizid]}.join(' ')
-      else
-        busy = data.map{|row| [row[:bizid], row[:role], row[:name]]}
-        table = Terminal::Table.new :rows => busy, :headings => ['Biz ID', 'Role', 'Name']
-        say table
-      end
-
-    elsif options.products then
-      data = acc.products
-      if options.idonly then
-        say data.map{|row| row[:pid]}.join(' ')
-      else
-        busy = data.map{|r| [r[:label], r[:type], r[:pid], r[:modelId]]}
-        table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
-        say table
-      end
-
-    elsif options.solutions then
-      data = acc.solutions
-      if options.idonly then
-        say data.map{|row| row[:apiId]}.join(' ')
-      else
-        busy = data.map{|r| [r[:apiId], r[:domain], r[:type], r[:sid]]}
-        table = Terminal::Table.new :rows => busy, :headings => ['API ID', 'Domain', 'Type', 'SID']
-        say table
-      end
-
-    else
-      say acc.token
-    end
-
-  end
-end
 #  vim: set ai et sw=2 ts=2 :

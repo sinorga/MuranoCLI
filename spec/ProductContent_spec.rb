@@ -1,8 +1,5 @@
 require 'MrMurano/version'
-require 'MrMurano/verbosing'
-require 'MrMurano/http'
 require 'MrMurano/Product'
-require 'MrMurano/configFile'
 
 RSpec.describe MrMurano::ProductContent, "#product_content" do
   before(:example) do

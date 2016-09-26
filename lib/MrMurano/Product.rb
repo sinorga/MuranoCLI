@@ -2,6 +2,8 @@ require 'uri'
 require 'mime/types'
 require 'csv'
 require 'pp'
+require 'MrMurano/http'
+require 'MrMurano/verbosing'
 
 module MrMurano
   class ProductBase
@@ -124,7 +126,7 @@ module MrMurano
               end
             end
           else
-            say_error "got #{resp.to_s} from #{request} #{request.uri.to_s}"
+            showHttpError(request, response)
             raise resp
           end
         end
@@ -216,8 +218,10 @@ module MrMurano
     end
 
     def activate(sn)
-      # TODO: Need to create a new @http for the different host. Fails otherwise
       uri = URI("https://#{@pid}.m2.exosite.com/provision/activate")
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.start
       request = Net::HTTP::Post.new(uri)
       request.form_data = {
         :vendor => @pid,
@@ -225,9 +229,17 @@ module MrMurano
         :sn => sn
       }
       request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
-      request['authorization'] = nil
+      request['Authorization'] = nil
       request.content_type = 'application/x-www-form-urlencoded; charset=utf-8'
-      workit(request)
+      curldebug(request)
+      response = http.request(request)
+      case response
+      when Net::HTTPSuccess
+        return response.body
+      else
+        showHttpError(request, response)
+        raise response
+      end
     end
 
     def add_sn(sn, extra='')

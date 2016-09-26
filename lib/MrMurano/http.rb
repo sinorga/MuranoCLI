@@ -56,6 +56,29 @@ module MrMurano
       request
     end
 
+    def tryToPrettyJSON(data)
+      begin
+        ret = JSON.parse(data, json_opts)
+        return JSON.pretty_generate(ret)
+      rescue
+        return response.body
+      end
+    end
+
+    def showHttpError(request, response)
+      if $cfg['tool.debug'] then
+        puts "Sent #{request.method} #{request.uri.to_s}"
+        request.each_capitalized{|k,v| puts "> #{k}: #{v}"}
+        if request.body.nil? then
+        else
+          puts " > #{request.body[0..156]}"
+        end
+        puts "Got #{response.code} #{response.message}"
+        response.each_capitalized{|k,v| puts "< #{k}: #{v}"}
+      end
+      say_error "Request Failed: #{response.code}: #{tryToPrettyJSON(response.body)}"
+    end
+
     def workit(request, &block)
       curldebug(request)
       if block_given? then
@@ -71,9 +94,7 @@ module MrMurano
             return response.body
           end
         else
-          say_error "got #{response} from #{request} #{request.uri.to_s}"
-          say_error ":: #{response.body}"
-          say_error '==='
+          showHttpError(request, response)
           raise response
         end
       end

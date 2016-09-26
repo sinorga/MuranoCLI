@@ -4,11 +4,21 @@ require 'fileutils'
 
 command 'config export' do |c|
   c.syntax = %{mr config export}
-  c.summary = %{Export data to a Solutionfile.json and .Solutionfile.secret}
+  c.summary = %{Export data to Solutionfiles}
+  c.description = %{Export data to Solutionfiles
+
+  This will write to the Solutionfile.json and .Solutionfile.secret used by the
+  exosite-cil tool.
+
+  This also will merge all of the endpoints into a single 'routes.lua' file.
+  }
 
   c.option '--force', "Overwrite existing files."
+  c.option '--[no-]merge', "Merge endpoints into a single routes.lua file"
 
   c.action do |args, options|
+    options.defaults :merge => true
+
     solfile = Pathname.new($cfg['location.base'] + 'Solutionfile.json')
     solsecret = Pathname.new($cfg['location.base'] + '.Solutionfile.secret')
 
@@ -17,23 +27,25 @@ command 'config export' do |c|
       say "Use --force to overwrite"
     end
 
-    epf = 'routes.lua'
-      File.open(epf, 'w') do |dst|
-      MrMurano::Endpoint.new.locallist.each do |ed|
-        ed[:local_path].open do |fin|
-          FileUtils.copy_stream(fin, dst)
-        end
-        dst << "\n\n"
-      end
-    end
-
     solf = {
-      :routes => 'epf',
       :assets => $cfg['location.files'],
       :default_page => $cfg['files.default_page'],
       :services => {},
       :modules => {}
     }
+
+    if options.merge then
+      epf = 'routes.lua'
+      File.open(epf, 'w') do |dst|
+        MrMurano::Endpoint.new.locallist.each do |ed|
+          ed[:local_path].open do |fin|
+            FileUtils.copy_stream(fin, dst)
+          end
+          dst << "\n\n"
+        end
+      end
+      solf[:routes] = epf
+    end
 
     dpwd = Pathname.new(Dir.pwd)
     MrMurano::EventHandler.new.locallist.each do |ev|
@@ -54,7 +66,7 @@ command 'config export' do |c|
     end
 
     solsecret.open('w') do |io|
-        pff = Pathname.new(ENV['HOME']) + '.mrmurano/passwords'
+        pff = $cfg.file_at('passwords', :user)
         pwd = MrMurano::Passwords.new(pff)
         pwd.load
         ps = pwd.get($cfg['net.host'], $cfg['user.name'])
@@ -71,7 +83,12 @@ end
 
 command 'config import' do |c|
   c.syntax = %{mr config import}
-  c.summary = %{Import data from a Solutionfile.json and .Solutionfile.secret}
+  c.summary = %{Import data from Solutionfiles}
+  c.description = %{Import data from Solutionfiles
+
+  This imports from the Solutionfile.json and .Solutionfile.secret that are created
+  by the exosite-cli tool.
+  }
 
   c.action do |args, options|
     solfile = ($cfg['location.base'] + 'Solutionfile.json')
@@ -92,7 +109,7 @@ command 'config import' do |c|
       solsecret.open do |io|
         ss = YAML.load(io)
 
-        pff = Pathname.new(ENV['HOME']) + '.mrmurano/passwords'
+        pff = $cfg.file_at('passwords', :user)
         pwd = MrMurano::Passwords.new(pff)
         pwd.load
         ps = pwd.get($cfg['net.host'], ss['email'])

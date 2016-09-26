@@ -4,6 +4,7 @@ require "http/form_data"
 require 'digest/sha1'
 require 'mime/types'
 require 'pp'
+require 'MrMurano/Solution'
 
 module MrMurano
   # …/file
@@ -36,7 +37,7 @@ module MrMurano
               end
             end
           else
-            say_error "got #{resp.to_s} from #{request} #{request.uri.to_s}"
+            showHttpError(request, response)
             raise resp
           end
         end
@@ -101,8 +102,7 @@ module MrMurano
         case response
         when Net::HTTPSuccess
         else
-          say_error "got #{response} from #{request} #{request.uri.to_s}"
-          say_error ":: #{response.body}"
+          showHttpError(request, response)
         end
       end
     end
@@ -124,16 +124,10 @@ module MrMurano
       # It does not actually take the SHA1 of the file.
       # It first converts the file to hex, then takes the SHA1 of that string
       #sha1 = Digest::SHA1.file(path.to_s).hexdigest
-      def hexit(str)
-        ret=''
-        # TODO: find a faster way to do this.
-        str.each_byte{|b| ret << "%02x" % b}
-        ret
-      end
       sha1 = Digest::SHA1.new
       path.open('rb:ASCII-8BIT') do |io|
         while chunk = io.read(1048576) do
-          sha1 << hexit(chunk)
+          sha1 << Digest.hexencode(chunk)
         end
       end
       debug "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
