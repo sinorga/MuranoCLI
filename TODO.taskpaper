@@ -39,6 +39,7 @@ Timeseries:
 
 Product:
 	- Auto convert exoline spec files into murano spec files on upload?
+	- write alias command @done(2016-09-26)
 	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
 
 Service Device:
