@@ -65,6 +65,20 @@ module MrMurano
       end
     end
 
+    def showHttpError(request, response)
+      if $cfg['tool.debug'] then
+        puts "Sent #{request.method} #{request.uri.to_s}"
+        request.each_capitalized{|k,v| puts "> #{k}: #{v}"}
+        if request.body.nil? then
+        else
+          puts " > #{request.body[0..156]}"
+        end
+        puts "Got #{response.code} #{response.message}"
+        response.each_capitalized{|k,v| puts "< #{k}: #{v}"}
+      end
+      say_error "Request Failed: #{response.code}: #{tryToPrettyJSON(response.body)}"
+    end
+
     def workit(request, &block)
       curldebug(request)
       if block_given? then
@@ -80,14 +94,7 @@ module MrMurano
             return response.body
           end
         else
-          if $cfg['tool.debug'] then
-            say_error "From #{request.method} #{request.uri.to_s}"
-            request.each_capitalized{|k,v| say_error "  #{k}: #{v}"}
-            # ?? body?
-            say_error "got #{response.code} #{response.message}"
-            response.each_capitalized{|k,v| say_error "  #{k}: #{v}"}
-          end
-          say_error "Request Failed: #{response.code}: #{tryToPrettyJSON(response.body)}"
+          showHttpError(request, response)
           raise response
         end
       end
