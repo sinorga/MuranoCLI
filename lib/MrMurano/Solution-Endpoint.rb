@@ -59,8 +59,7 @@ module MrMurano
             verbose "\tDoesn't exist, creating"
             post('/', remote)
           else
-            say_error "got #{response} from #{request} #{request.uri.to_s}"
-            say_error ":: #{response.body}"
+            showHttpError(request, response)
           end
         end
       else

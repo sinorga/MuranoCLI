@@ -29,8 +29,7 @@ module MrMurano
         when Net::HTTPSuccess
         when Net::HTTPNotFound
         else
-          say_error "got #{response} from #{request} #{request.uri.to_s}"
-          say_error ":: #{response.body}"
+          showHttpError(request, response)
         end
       end
       remote.reject!{|k,v| k==:synckey or k==:bundled}

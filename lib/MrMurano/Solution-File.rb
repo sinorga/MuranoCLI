@@ -37,7 +37,7 @@ module MrMurano
               end
             end
           else
-            say_error "got #{resp.to_s} from #{request} #{request.uri.to_s}"
+            showHttpError(request, response)
             raise resp
           end
         end
@@ -102,8 +102,7 @@ module MrMurano
         case response
         when Net::HTTPSuccess
         else
-          say_error "got #{response} from #{request} #{request.uri.to_s}"
-          say_error ":: #{response.body}"
+          showHttpError(request, response)
         end
       end
     end

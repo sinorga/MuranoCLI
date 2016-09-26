@@ -68,8 +68,7 @@ module MrMurano
           verbose "Doesn't exist, creating"
           post('/', pst)
         else
-          say_error "got #{response} from #{request} #{request.uri.to_s}"
-          say_error ":: #{response.body}"
+          showHttpError(request, response)
         end
       end
       cacheUpdateTimeFor(local)

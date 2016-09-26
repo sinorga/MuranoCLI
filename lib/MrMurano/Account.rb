@@ -100,7 +100,7 @@ module MrMurano
           token = JSON.parse(response.body, json_opts)
           @@token = token[:token]
         else
-          say_error "No token! because: #{response}"
+          showHttpError(request, response)
           @@token = nil
           raise response
         end
