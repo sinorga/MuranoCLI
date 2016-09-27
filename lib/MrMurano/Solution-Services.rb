@@ -3,6 +3,7 @@ require 'net/http'
 require 'json'
 require 'yaml'
 require 'date'
+require 'digest/sha1'
 require 'MrMurano/Solution'
 
 module MrMurano
@@ -94,18 +95,22 @@ module MrMurano
 
     def cacheUpdateTimeFor(local_path, time=nil)
       time = Time.now.getutc if time.nil?
+      entry = {
+        :sha1=>Digest::SHA1.file(local_path.to_s).hexdigest,
+        :updated_at=>time.to_datetime.iso8601(3)
+      }
       cacheFile = $cfg.file_at("cache.#{self.class.to_s}.yaml")
       if cacheFile.file? then
         cacheFile.open('r+') do |io|
           cache = YAML.load(io)
           io.rewind
-          cache[local_path.to_s] = time.to_datetime.iso8601(3)
+          cache[local_path.to_s] = entry
           io << cache.to_yaml
         end
       else
         cacheFile.open('w') do |io|
           cache = {}
-          cache[local_path.to_s] = time.to_datetime.iso8601(3)
+          cache[local_path.to_s] = entry
           io << cache.to_yaml
         end
       end
@@ -113,13 +118,22 @@ module MrMurano
     end
 
     def cachedUpdateTimeFor(local_path)
+      cksm = Digest::SHA1.file(local_path.to_s).hexdigest
       cacheFile = $cfg.file_at("cache.#{self.class.to_s}.yaml")
       return nil unless cacheFile.file?
       ret = nil
       cacheFile.open('r') do |io|
         cache = YAML.load(io)
         if cache.has_key?(local_path.to_s) then
-          ret = DateTime.parse(cache[local_path.to_s])
+          entry = cache[local_path.to_s]
+          debug("For #{local_path}:")
+          debug(" cached: #{entry.to_s}")
+          debug(" cm: #{cksm}")
+          if entry.kind_of?(Hash) then
+            if entry[:sha1] == cksm and entry.has_key?(:updated_at) then
+              ret = DateTime.parse(entry[:updated_at])
+            end
+          end
         end
       end
       ret
