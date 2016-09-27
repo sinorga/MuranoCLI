@@ -55,11 +55,11 @@ command 'product spec' do |c|
     file = $cfg["p-#{prid}.spec"] unless prid.nil? or $cfg["p-#{prid}.spec"].nil?
     file = options.file unless options.file.nil?
 
-    if FileTest.exist?(file) then
+    if not file.nil? and FileTest.exist?(file) then
       prd = MrMurano::Product.new
       pp prd.update(file)
     else
-      say_error "File Missing: #{file}"
+      say_error "No spec file to push: #{file}"
     end
   end
 end
