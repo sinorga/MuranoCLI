@@ -84,6 +84,7 @@ command 'keystore delete' do |c|
   end
 end
 alias_command 'keystore rm', 'keystore delete'
+alias_command 'keystore del', 'keystore delete'
 
 command 'keystore command' do |c|
   c.syntax = %{mr keystore command <command> <key> <args...>}
@@ -101,7 +102,13 @@ See http://docs.exosite.com/murano/services/keystore/#command for current list.
       say_error "Not enough params"
     else
       sol = MrMurano::Keystore.new
-      pp sol.command(args[1], args[0], args[2..-1])
+      ret = sol.command(args[1], args[0], args[2..-1])
+      if ret.has_key?(:value) then
+        puts ret[:value]
+      else
+        say_error "#{ret[:code]}: #{ret.message}"
+        pp ret[:error] if ($cfg['tool.debug'] and ret.has_key?(:error))
+      end
     end
   end
 end
