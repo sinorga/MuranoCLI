@@ -1,4 +1,3 @@
-
 require 'MrMurano/commands/account'
 require 'MrMurano/commands/assign'
 require 'MrMurano/commands/config'
@@ -13,3 +12,6 @@ require 'MrMurano/commands/productWrite'
 require 'MrMurano/commands/status'
 require 'MrMurano/commands/sync'
 require 'MrMurano/commands/timeseries'
+
+require 'MrMurano/commands/completion'
+

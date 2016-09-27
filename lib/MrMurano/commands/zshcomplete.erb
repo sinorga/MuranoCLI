@@ -1,0 +1,76 @@
+#compdef <%= program :name %>
+
+__<%= program :name %>_sub_commands () {
+  local -a list
+  list=(
+  <%- for name, command in @commands.sort -%>
+    <%- unless alias? name -%>
+      <%= command.name %>:'<%= command.summary || command.description.lines[0] -%>'
+    <%- end -%>
+  <%- end -%>
+  )
+  _describe -t sub-commands 'sub commands' list
+}
+
+__<%= program :name %>_aliases () {
+  local -a list
+  list=(
+  <% for alias_name, args in @aliases.sort -%>
+     <%= alias_name %>:'Alias for <%= command(alias_name).name %> <%= args.join(' ') -%>'
+  <% end -%>
+  )
+  _describe -t aliased-commands 'aliases' list
+}
+
+__<%= program :name %>_subcommand () {
+  case "$words[1]" in
+  <%- for name, command in @commands.sort -%>
+    <%- unless alias? name -%>
+      <%- if command.options.count > 0 -%>
+      (<%= name %>)
+        _arguments \
+        <%- for option in command.options -%>
+          <%- if flatswitches(option).count > 1 -%>
+            {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :" \
+          <%- else -%>
+            "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :" \
+          <%- end -%>
+        <%- end %>
+        ;;
+    <%- end -%>
+    <%- end %>
+  <%- end -%>
+    (*)
+      _message 'Unknown sub command'
+  esac
+}
+
+_<%= program :name %> () {
+    local curcontext="$curcontext" state common_options
+    common_options=(
+    <% for option in @options -%>
+      <%- if flatswitches(option).count > 1 -%>
+        {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :"
+      <%- else -%>
+        "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :"
+      <%- end -%>
+    <% end %>
+    )
+    _arguments -C \
+         ${common_options} \
+        '(-): :->command' \
+        '(-)*:: :->option-or-argument'
+    case $state in
+        (command)
+            __<%= program :name %>_sub_commands
+            __<%= program :name %>_aliases
+            ;;
+        (option-or-argument)
+            curcontext=${curcontext%:*:*}:jm-$words[1]:
+            __<%= program :name %>_subcommand
+            ;;
+    esac
+}
+
+
+#  vim: set ai et sw=2 ts=2 :
