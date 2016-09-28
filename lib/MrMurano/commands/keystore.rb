@@ -114,4 +114,21 @@ See http://docs.exosite.com/murano/services/keystore/#command for current list.
 end
 alias_command 'keystore cmd', 'keystore command'
 
+# A bunch of common REDIS commands that are suported in Murano
+alias_command 'keystore lpush', 'keystore command', 'lpush'
+alias_command 'keystore lindex', 'keystore command', 'lindex'
+alias_command 'keystore llen', 'keystore command', 'llen'
+alias_command 'keystore linsert', 'keystore command', 'linsert'
+alias_command 'keystore lrange', 'keystore command', 'lrange'
+alias_command 'keystore lrem', 'keystore command', 'lrem'
+alias_command 'keystore lset', 'keystore command', 'lset'
+alias_command 'keystore ltrim', 'keystore command', 'ltrim'
+alias_command 'keystore rpop', 'keystore command', 'rpop'
+alias_command 'keystore rpush', 'keystore command', 'rpush'
+alias_command 'keystore sadd', 'keystore command', 'sadd'
+alias_command 'keystore srem', 'keystore command', 'srem'
+alias_command 'keystore scard', 'keystore command', 'scard'
+alias_command 'keystore smembers', 'keystore command', 'smembers'
+alias_command 'keystore spop', 'keystore command', 'spop'
+
 #  vim: set ai et sw=2 ts=2 :
