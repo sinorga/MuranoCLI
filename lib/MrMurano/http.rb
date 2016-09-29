@@ -61,7 +61,7 @@ module MrMurano
         ret = JSON.parse(data, json_opts)
         return JSON.pretty_generate(ret)
       rescue
-        return response.body
+        return data
       end
     end
 

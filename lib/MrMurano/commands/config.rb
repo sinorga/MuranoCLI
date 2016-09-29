@@ -11,7 +11,6 @@ command :config do |c|
   c.example %{See what the current combined config is}, 'mr config --dump'
   c.example %{Query a value}, 'mr config solution.id'
   c.example %{Set a new value; writing to the project config file}, 'mr config solution.id XXXXXXXX'
-  c.example %{Set a new value; writing to the private config file}, 'mr config --private solution.id XXXXXXXX'
   c.example %{Set a new value; writing to the user config file}, 'mr config --user user.name my@email.address'
   c.example %{Unset a value in a configfile. (lower scopes will become visible if set)},
     'mr config diff.cmd --unset'
@@ -20,7 +19,7 @@ command :config do |c|
   c.option '--system', 'Use only the system config file. (/etc/mrmuranorc)'
   c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
   c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
-  c.option '--private', 'Use only the private config file in the project (.mrmuranorc.private)'
+  c.option '--env', 'Use only the config file from $MR_CONFIGFILE'
   c.option '--specified', 'Use only the config file from the --config option.'
 
   c.option '--unset', 'Remove key from config file.'
@@ -34,14 +33,14 @@ command :config do |c|
       say_error "Need a config key"
     elsif args.count == 1 and not options.unset then
       options.defaults :system=>false, :user=>false, :project=>false,
-        :specified=>false, :private=>false
+        :specified=>false, :env=>false
 
       # For read, if no scopes, than all. Otherwise just those specified
       scopes = []
       scopes << :system if options.system
       scopes << :user if options.user
       scopes << :project if options.project
-      scopes << :private if options.private
+      scopes << :env if options.env
       scopes << :specified if options.specified
       scopes = MrMurano::Config::CFG_SCOPES if scopes.empty?
 
@@ -49,13 +48,13 @@ command :config do |c|
     else
 
       options.defaults :system=>false, :user=>false, :project=>true,
-        :specified=>false, :private=>false
+        :specified=>false, :env=>false
       # For write, if scope is specified, only write to that scope.
       scope = :project
       scope = :system if options.system
       scope = :user if options.user
       scope = :project if options.project
-      scope = :private if options.private
+      scope = :env if options.env
       scope = :specified if options.specified
 
       args[1] = nil if options.unset
