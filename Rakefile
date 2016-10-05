@@ -2,7 +2,6 @@ require "bundler/gem_tasks"
 
 task :default => [:test]
 
-# TODO: figure out better way to test.
 desc "Install gem in user dir"
 task :bob do
     sh %{gem install --user-install pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
@@ -16,6 +15,19 @@ end
 task :echo do
     puts "= #{Bundler::GemHelper.gemspec.version} ="
 end
+
+desc "Push only develop, master, and tags to origin"
+task :gitpush do
+    sh %{git checkout develop}
+    sh %{git push}
+    sh %{git checkout master}
+    sh %{git push}
+    sh %{git push --tags}
+end
+
+#task :gempush do
+#    sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
+#end
 
 desc "Prints a cmd to test this in another directory"
 task :testwith do
