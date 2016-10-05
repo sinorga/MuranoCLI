@@ -74,10 +74,24 @@ command :logs do |c|
         sol.get('/logs?polling=true') do |request, http|
           request["Accept-Encoding"] = "None"
           http.request(request) do |response|
+            remainder=''
             response.read_body do |chunk|
-              puts "==#{chunk}=="
-              # TODO build chunks up into JSON objects.
-              # TODO Pass those to makePretty
+              chunk = remainder + chunk unless remainder.empty?
+
+              # for all complete JSON blobs, make them pretty.
+              chunk.gsub!(/\{(?>[^}{]+|\g<0>)*\}/m) do |m|
+                js = JSON.parse(m, {:allow_nan=>true,
+                                    :symbolize_names => true,
+                                    :create_additions=>false})
+                puts makePretty(js, options)
+                '' #remove
+              end
+
+              # is there an incomplete one?
+              if chunk.match(/(\{.*$)/m) then
+                remainder = $1
+              end
+
             end
           end
         end
