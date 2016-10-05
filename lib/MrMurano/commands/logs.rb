@@ -68,11 +68,24 @@ command :logs do |c|
 
     sol = MrMurano::Solution.new
 
-
     if options.follow then
-    else
+      # open a lasting connection and continueally feed makePretty()
+      begin
+        sol.get('/logs?polling=true') do |request, http|
+          request["Accept-Encoding"] = "None"
+          http.request(request) do |response|
+            response.read_body do |chunk|
+              puts "==#{chunk}=="
+              # TODO build chunks up into JSON objects.
+              # TODO Pass those to makePretty
+            end
+          end
+        end
+      rescue Interrupt => e
+      end
 
-      ret = sol.get('/logs') # TODO: ('/logs?polling=true') Currently ignored.
+    else
+      ret = sol.get('/logs')
 
       if ret.kind_of?(Hash) and ret.has_key?(:items) then
         ret[:items].reverse.each do |line|
@@ -84,12 +97,6 @@ command :logs do |c|
       end
 
     end
-
-
-    #begin
-    #rescue Interrupt => e
-    #end
-
   end
 end
 #  vim: set ai et sw=2 ts=2 :
