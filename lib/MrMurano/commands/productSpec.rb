@@ -37,8 +37,8 @@ command 'product spec convert' do |c|
   end
 end
 
-command 'product spec' do |c|
-  c.syntax = %{mr product spec [--file FILE]}
+command 'product spec push' do |c|
+  c.syntax = %{mr product spec push [--file FILE]}
   c.summary = %{Upload a new specification for a product}
 
   c.option '--file FILE', "The spec file to upload"
@@ -89,6 +89,7 @@ command 'product spec pull' do |c|
       puts spec.to_yaml
     end
   end
-
 end
+alias_command 'product spec', 'product spec pull'
+
 #  vim: set ai et sw=2 ts=2 :
