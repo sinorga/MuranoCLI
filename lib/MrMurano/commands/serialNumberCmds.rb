@@ -1,4 +1,24 @@
 require 'MrMurano/Product'
+require 'terminal-table'
+
+command 'sn list' do |c|
+  c.syntax = %{mr sn list [options]}
+  c.summary = %{List serial numbers for a product}
+
+  c.option '--offset NUMBER', Integer, %{Offset to start listing at}
+  c.option '--limit NUMBER', Integer, %{How many devices to return}
+
+  c.action do |args,options|
+    options.default :offset=>0, :limit=>50
+
+    prd = MrMurano::Product.new
+    data = prd.list(options.offset, options.limit)
+    busy = data.map{|row| [row[:sn], row[:status], row[:rid]]}
+    table = Terminal::Table.new :rows => busy, :headings => ['SN', 'Status', 'RID']
+    say table
+  end
+end
+alias_command :sn, 'sn list'
 
 command 'sn enable' do |c|
   c.syntax = %{mr sn enable [<sn>|--file <sns>]}
