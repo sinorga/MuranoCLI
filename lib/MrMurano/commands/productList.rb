@@ -1,3 +1,4 @@
+require 'MrMurano/Account'
 require 'terminal-table'
 
 command 'product list' do |c|
@@ -17,4 +18,6 @@ command 'product list' do |c|
     end
   end
 end
+alias_command :product, 'product list'
+
 #  vim: set ai et sw=2 ts=2 :

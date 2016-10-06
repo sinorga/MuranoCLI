@@ -1,3 +1,4 @@
+require 'MrMurano/Account'
 require 'terminal-table'
 
 command 'solution list' do |c|
@@ -17,4 +18,6 @@ command 'solution list' do |c|
     end
   end
 end
+alias_command :solution, 'solution list'
+
 #  vim: set ai et sw=2 ts=2 :
