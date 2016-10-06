@@ -27,4 +27,29 @@ the activation call within this time, it will need to be enabled again.
   end
 end
 
+command 'sn activate' do |c|
+  c.syntax = %{mr sn activate <sn>}
+  c.summary = %{Activate a serial number, retriving its CIK}
+  c.description = %{Activates a serial number.
+
+Generally you should not use this.  Instead the device should make the activation
+call itself and save the CIK token.  Its just that sometimes when building a
+proof-of-concept it is just easier to hardcode the CIK.
+
+Note that you can only activate a device once.  After that you cannot retrive the
+CIK again.
+}
+
+  c.action do |args,options|
+    if args.count < 1 then
+      say_error "Serial number missing"
+      return
+    end
+    sn = args.first
+
+    prd = MrMurano::ProductSerialNumber.new
+    pp prd.activate(sn)
+
+  end
+end
 #  vim: set ai et sw=2 ts=2 :
