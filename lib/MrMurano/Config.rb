@@ -60,8 +60,10 @@ module MrMurano
         end
         @paths << ConfigFile.new(:private, @projectDir + CFG_PRVT_NAME)
         @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
+        fixModes(@projectDir + CFG_DIR_NAME)
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
+      fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
       @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
@@ -134,6 +136,14 @@ module MrMurano
       return result
     end
     private :findProjectDir
+
+    def fixModes(path)
+      if path.directory? then
+        path.chmod(0700)
+      elsif path.file? then
+        path.chmod(0600)
+      end
+    end
 
     def file_at(name, scope=:project)
       case scope
