@@ -1,7 +1,7 @@
 require 'MrMurano/Product'
 
-command 'product enable' do |c|
-  c.syntax = %{mr product enable [<sn>|--file <sns>]}
+command 'sn enable' do |c|
+  c.syntax = %{mr sn enable [<sn>|--file <sns>]}
   c.summary = %{Enable a serial number; Creates device in Murano}
   c.description = %{Enables serial numbers, creating the digial shadow in Murano.
 
