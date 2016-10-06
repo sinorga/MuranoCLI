@@ -122,6 +122,11 @@ module MrMurano
       get('business/' + $cfg['business.id'] + '/solution/')
     end
 
+    ## Create a new product in the current business
+    def new_product(name, type='onepModel')
+      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
+      post('business/' + $cfg['business.id'] + '/product/', {:label=>name, :type=>type})
+    end
   end
 end
 
