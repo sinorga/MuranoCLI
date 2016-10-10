@@ -38,7 +38,8 @@ class ::Commander::Runner
     option[:description].sub(/\n.*$/,'')
   end
 
-
+  ##
+  # Get a tree of all commands and sub commands
   def cmdTree
     tree={}
     @commands.sort.each do |name,cmd|
@@ -53,6 +54,8 @@ class ::Commander::Runner
     tree
   end
 
+  ##
+  # Get maximum depth of sub-commands.
   def cmdMaxDepth
     depth=0
     @commands.sort.each do |name,cmd|
@@ -62,6 +65,8 @@ class ::Commander::Runner
     depth
   end
 
+  ##
+  # Alternate tree of sub-commands.
   def cmdTreeB
     tree={}
     @commands.sort.each do |name,cmd|
@@ -83,16 +88,6 @@ class ::Commander::Runner
   end
 
 end
-class Array
-  def popuntil(&block)
-    a = self.dup
-    loop do
-      b = a.pop
-      yield a, b
-      break if a.empty?
-    end
-  end
-end
 
 command :completion do |c|
   c.syntax = %{mr completion [options] }
@@ -108,8 +103,6 @@ command :completion do |c|
   c.option '--subs', 'List sub commands'
   c.option '--opts CMD', 'List options for subcommand'
   c.option '--gopts', 'List global options'
-  c.option '--tree', ''
-  c.option '--next LEVEL', ''
 
   # Changing direction.
   # Will poop out the file to be included as the completion script.
@@ -118,13 +111,7 @@ command :completion do |c|
 
     runner = ::Commander::Runner.instance
 
-    if options.tree then
-      pp runner.cmdTreeB
-
-    elsif options.next then
-      pp runner.cmdNext( options.next.to_i )
-
-    elsif options.gopts then
+    if options.gopts then
       opts = runner.instance_variable_get(:@options)
       pp opts.first
       pp runner.takesArg(opts.first)
