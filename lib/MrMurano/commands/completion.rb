@@ -53,6 +53,7 @@ command :completion do |c|
   c.option '--subs', 'List sub commands'
   c.option '--opts CMD', 'List options for subcommand'
   c.option '--gopts', 'List global options'
+  c.option '--tree', ''
 
   # Changing direction.
   # Will poop out the file to be included as the completion script.
@@ -61,8 +62,19 @@ command :completion do |c|
 
     runner = ::Commander::Runner.instance
 
-    #pp runner
-    if options.gopts then
+    if options.tree then
+      tree={}
+      runner.instance_variable_get(:@commands).each do |name,cmd|
+        levels = name.split
+        pos = tree
+        levels.each do |step|
+          pos[step] = {} unless pos.has_key? step
+          pos = pos[step]
+        end
+      end
+      pp tree
+
+    elsif options.gopts then
       opts = runner.instance_variable_get(:@options)
       pp opts.first
       pp runner.takesArg(opts.first)
