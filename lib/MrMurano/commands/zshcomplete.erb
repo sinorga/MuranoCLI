@@ -5,7 +5,7 @@ __<%= program :name %>_sub_commands () {
   list=(
   <%- for name, command in @commands.sort -%>
     <%- unless alias? name -%>
-      <%= command.name %>:'<%= command.summary || command.description.lines[0] -%>'
+      '<%= command.name %>':'<%= command.summary || command.description.lines[0] -%>'
     <%- end -%>
   <%- end -%>
   )
@@ -23,7 +23,7 @@ __<%= program :name %>_aliases () {
 }
 
 __<%= program :name %>_subcommand () {
-  case "$words[1]" in
+  case "$words" in
   <%- for name, command in @commands.sort -%>
     <%- unless alias? name -%>
       <%- if command.options.count > 0 -%>
@@ -45,6 +45,22 @@ __<%= program :name %>_subcommand () {
   esac
 }
 
+__<%= program :name %>_firstArg_commands () {
+  local -a list
+  list=(
+<%- for name, subs in cmdTree -%>
+  <%- cmd = subs["\0cmd"] -%>
+  <%- if cmd.nil? -%>
+    <%= name %>:'  '
+  <%-else-%>
+    <%= name %>:'<%= cmd.summary || cmd.description.lines[0] -%>'
+  <%-end-%>
+<%end-%>
+  )
+  _describe -t firstArg 'firstArg' list
+}
+
+
 _<%= program :name %> () {
     local curcontext="$curcontext" state common_options
     common_options=(
@@ -58,17 +74,24 @@ _<%= program :name %> () {
     )
     _arguments -C \
          ${common_options} \
-        '(-): :->command' \
-        '(-)*:: :->option-or-argument'
+        '1: :->firstArg' \
+        '2: :->secondArg' \
+        '3: :->thirdArg' \
+        '*:: :->option-or-argument'
     case $state in
-        (command)
-            __<%= program :name %>_sub_commands
-            __<%= program :name %>_aliases
-            ;;
+        (firstArg)
+          __<%= program :name %>_firstArg_commands
+          ;;
+        (secondArg)
+          __<%= program :name %>_secondArg_commands
+          ;;
+        (thirdArg)
+          __<%= program :name %>_thirdArg_commands
+          ;;
         (option-or-argument)
-            curcontext=${curcontext%:*:*}:jm-$words[1]:
-            __<%= program :name %>_subcommand
-            ;;
+          curcontext=${curcontext%:*:*}:jm-$words[1]:
+          #__<%= program :name %>_subcommand
+          ;;
     esac
 }
 

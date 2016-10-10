@@ -37,6 +37,21 @@ class ::Commander::Runner
   def optionDesc(option)
     option[:description].sub(/\n.*$/,'')
   end
+
+
+  def cmdTree
+    tree={}
+    @commands.sort.each do |name,cmd|
+      levels = name.split
+      pos = tree
+      levels.each do |step|
+        pos[step] = {} unless pos.has_key? step
+        pos = pos[step]
+      end
+      pos["\0cmd"] = cmd
+    end
+    tree
+  end
 end
 
 command :completion do |c|
@@ -63,16 +78,7 @@ command :completion do |c|
     runner = ::Commander::Runner.instance
 
     if options.tree then
-      tree={}
-      runner.instance_variable_get(:@commands).each do |name,cmd|
-        levels = name.split
-        pos = tree
-        levels.each do |step|
-          pos[step] = {} unless pos.has_key? step
-          pos = pos[step]
-        end
-      end
-      pp tree
+      pp runner.cmdTree
 
     elsif options.gopts then
       opts = runner.instance_variable_get(:@options)
