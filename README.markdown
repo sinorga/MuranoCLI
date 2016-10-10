@@ -7,7 +7,7 @@ Do more from the command line with [Murano](https://exosite.com/platform/)
 
 ## Usage
 
-To start from an existing project in Murano
+### To start from an existing project in Murano
 ```
 mkdir myproject
 cd myproject
@@ -18,6 +18,22 @@ mr syncdown -V
 Do stuff, see what changed: `mr status` or `mr diff`.
 Then deploy with `mr syncup`
 
+### To start a brand new project
+There are a few steps and pieces to getting a solution with a product up and
+running in Murano. Here is the list.
+
+- Pick a bussiness: `mr account --business`
+- Set it: `mr config business.id ZZZZZZZZZ`
+- Create a product: `mr product create myawesomeproduct`
+- Save the result: `mr config product.id YYYYYYYYY`
+- Define the product: `mr product spec push --file prd.spec`
+- Create a solution: `mr solution create myawesomesolution`
+- Save the result: `mr config solution.id XXXXXX`
+- Sync solution code up: `mr syncup -V`
+- Assign the prodcut to the solution: `mr assign set`
+
+Do stuff, see what changed: `mr status` or `mr diff`.
+Then deploy with `mr syncup`
 
 ## Install
 

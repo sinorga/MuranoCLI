@@ -56,12 +56,11 @@ module MrMurano
       request
     end
 
-    def tryToPrettyJSON(data)
+    def isJSON(data)
       begin
-        ret = JSON.parse(data, json_opts)
-        return JSON.pretty_generate(ret)
+        return true, JSON.parse(data, json_opts)
       rescue
-        return response.body
+        return false, data
       end
     end
 
@@ -76,7 +75,19 @@ module MrMurano
         puts "Got #{response.code} #{response.message}"
         response.each_capitalized{|k,v| puts "< #{k}: #{v}"}
       end
-      say_error "Request Failed: #{response.code}: #{tryToPrettyJSON(response.body)}"
+      isj, jsn = isJSON(response.body)
+      resp = "Request Failed: #{response.code}: "
+      if isj then
+        if $cfg['tool.fullerror'] then
+          resp << JSON.pretty_generate(jsn)
+        else
+          resp << "[#{jsn[:statusCode]}] " if jsn.has_key? :statusCode
+          resp << jsn[:message] if jsn.has_key? :message
+        end
+      else
+        resp << jsn
+      end
+      say_error resp
     end
 
     def workit(request, &block)
