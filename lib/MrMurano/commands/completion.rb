@@ -69,19 +69,15 @@ command :completion do |c|
 #      opts.each do |o|
 #        puts runner.optionLine o, 'GlobalOption'
 #      end
-      return
-    end
 
-    if options.subs then
+    elsif options.subs then
       runner.instance_variable_get(:@commands).each do |name,cmd|
         #desc = cmd.instance_variable_get(:@summary) #.lines[0]
         #say "#{name}:'#{desc}'"
         say "#{name}"
       end
-      return
-    end
 
-    if options.opts then
+    elsif options.opts then
       cmds = runner.instance_variable_get(:@commands)
       cmd = cmds[options.opts]
       pp cmd.syntax
@@ -92,14 +88,14 @@ command :completion do |c|
       cmds[options.opts].options.each do |o|
         pp opts.make_switch(o[:args])
       end
-      return
+
+    else
+
+      tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), "zshcomplete.erb")), nil, '-<>')
+
+      pc = CompletionContext.new(runner)
+      puts tmpl.result(pc.get_binding)
     end
-
-
-    tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), "zshcomplete.erb")), nil, '-<>')
-
-    pc = CompletionContext.new(runner)
-    puts tmpl.result(pc.get_binding)
 
 
   end
