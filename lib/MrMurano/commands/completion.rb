@@ -52,6 +52,46 @@ class ::Commander::Runner
     end
     tree
   end
+
+  def cmdMaxDepth
+    depth=0
+    @commands.sort.each do |name,cmd|
+      levels = name.split
+      depth = levels.count if levels.count > depth
+    end
+    depth
+  end
+
+  def cmdTreeB
+    tree={}
+    @commands.sort.each do |name,cmd|
+      levels = name.split
+      tree[levels.join(' ')] = {:cmd=>cmd}
+
+      # load parent.
+      left = levels[0..-2]
+      right = levels[-1]
+      key = left.join(' ')
+      tree[key] = {} unless tree.has_key? key
+      if tree[key].has_key?(:subs) then
+        tree[key][:subs] << right 
+      else
+        tree[key][:subs] = [right]
+      end
+    end
+    tree
+  end
+
+end
+class Array
+  def popuntil(&block)
+    a = self.dup
+    loop do
+      b = a.pop
+      yield a, b
+      break if a.empty?
+    end
+  end
 end
 
 command :completion do |c|
@@ -69,6 +109,7 @@ command :completion do |c|
   c.option '--opts CMD', 'List options for subcommand'
   c.option '--gopts', 'List global options'
   c.option '--tree', ''
+  c.option '--next LEVEL', ''
 
   # Changing direction.
   # Will poop out the file to be included as the completion script.
@@ -78,7 +119,10 @@ command :completion do |c|
     runner = ::Commander::Runner.instance
 
     if options.tree then
-      pp runner.cmdTree
+      pp runner.cmdTreeB
+
+    elsif options.next then
+      pp runner.cmdNext( options.next.to_i )
 
     elsif options.gopts then
       opts = runner.instance_variable_get(:@options)
