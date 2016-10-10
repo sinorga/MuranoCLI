@@ -30,7 +30,7 @@ _<%= program :name %> () {
             <%-else-%>
               <%= name %>:'<%= cmd.summary || cmd.description.lines[0] -%>'
             <%-end-%>
-          <%end-%>
+          <%-end-%>
           )
           _describe -t firstArg 'firstArg' list
           _describe -t options 'global options' __<%= program :name %>_common_options
@@ -62,14 +62,19 @@ __<%=program :name%>-<%= name %> () {
       <%- unless subs.empty? -%>
       local -a subcommands
       subcommands=(
-      <%- for sname, _ in subs -%>
-        <%=sname%>:''
+      <%- for sname, ssubs in subs -%>
+        <%- command = ssubs["\0cmd"] -%>
+        <%- if command.nil? then -%>
+          <%=sname%>:''
+        <%-else-%>
+          <%=sname%>:'<%= command.summary || command.description.lines[0] -%>'
+        <%-end-%>
       <%-end-%>
       )
 			_describe -t commands 'subcommand' subcommands
       <%-end-%>
       _describe -t options 'global options' __<%= program :name %>_common_options
-      <%- unless command.nil? then -%>
+      <%- unless command.nil? or command.options.empty? then -%>
       _arguments \
         <%- for option in command.options -%>
           <%- if flatswitches(option).count > 1 -%>
@@ -85,7 +90,8 @@ __<%=program :name%>-<%= name %> () {
       <%- for sname, ssubs in subs -%>
         <%- command = ssubs["\0cmd"]; subs = ssubs.reject{|k,_| k == "\0cmd"} -%>
         (<%=sname%>)
-        <%- unless command.nil? then -%>
+        _describe -t options 'global options' __<%= program :name %>_common_options
+        <%- unless command.nil? or command.options.empty? then -%>
           _arguments \
           <%- for option in command.options -%>
             <%- if flatswitches(option).count > 1 -%>
