@@ -1,90 +1,10 @@
 #compdef <%= program :name %>
 
 
-__<%= program :name %>_deeper () {
-  case "${words%% }" in
-  <%- for name, details in cmdTreeB -%>
-    <%- command = details[:cmd]; subs = details[:subs]||[] -%>
-      (<%= name %>)
-      <%- unless command.nil? and subs.empty? -%>
-      _arguments \
-      <%- end -%>
-      <%- unless command.nil? then -%>
-        <%- for option in command.options -%>
-          <%- if flatswitches(option).count > 1 -%>
-            {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :" \
-          <%- else -%>
-            "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :" \
-          <%- end -%>
-        <%- end -%>
-      <%- end -%>
-      <%- unless subs.empty? then -%>
-        ": :(<%=subs.join(' ')%>)"
-      <%-end-%>
-
-      ;;
-  <%- end -%>
-    (*)
-      _message 'Unknown sub command'
-  esac
-}
-
-__<%= program :name %>_firstArg_commands () {
-  local -a list
-  list=(
-<%- for name, subs in cmdTree -%>
-  <%- cmd = subs["\0cmd"] -%>
-  <%- if cmd.nil? -%>
-    <%= name %>:'  '
-  <%-else-%>
-    <%= name %>:'<%= cmd.summary || cmd.description.lines[0] -%>'
-  <%-end-%>
-<%end-%>
-  )
-  _describe -t firstArg 'firstArg' list
-}
-
-__<%= program :name %>_secondArg_commands () {
-  local -a list
-  case "$words[2]" in
-  <%- for name, subs in cmdTree -%>
-    <%- cmd = subs["\0cmd"]; ssubs = subs.reject{|k,_| k == "\0cmd"} -%>
-    <%- if ssubs.count > 0 then -%>
-    (<%=name%>)
-      list=(
-      <%- for sname, cmd in ssubs -%>
-        <%- scmd = cmd["\0cmd"] -%>
-        <%- if scmd.nil? -%>
-          <%= sname %>:'  '
-        <%-else-%>
-          <%= sname %>:'<%= scmd.summary || scmd.description.lines[0] -%>'
-        <%-end-%>
-      <%-end-%>
-      )
-      ;;
-    <%-end-%>
-  <%-end-%>
-  esac
-  _describe -t secondArg 'secondArg' list
-}
-
-__<%= program :name %>_thirdArg_commands () {
-  local -a list
-  case "$words[3]" in
-  (spec)
-    list=(
-          'convert':'Convert exoline spec file into Murano format'
-          'pull':'Pull down the specification for a product'
-          'push':'Upload a new specification for a product'
-          )
-    ;;
-  esac
-  _describe -t thirdArg 'thirdArg' list
-}
-
-
 _<%= program :name %> () {
-    local curcontext="$curcontext" state common_options
+    local curcontext="$curcontext" state line common_options
+    typeset -A opt_args
+
     common_options=(
     <% for option in @options -%>
       <%- if flatswitches(option).count > 1 -%>
@@ -96,20 +16,78 @@ _<%= program :name %> () {
     )
     # except this fails when a command only has one arg and then options.
     _arguments -C \
-         ${common_options} \
-        '1: :->firstArg' \
-        '*:: :->option-or-argument'
-    echo "\n=$curcontext=$state=$words=\n"
+        ':command:->command' \
+        '*::options:->options'
+    #echo "\n=$curcontext=$state=$words=\n"
     case $state in
-        (firstArg)
-          __<%= program :name %>_firstArg_commands
+        (command)
+          local -a list
+          list=(
+          <%- for name, subs in cmdTree -%>
+            <%- cmd = subs["\0cmd"] -%>
+            <%- if cmd.nil? -%>
+              <%= name %>:'  '
+            <%-else-%>
+              <%= name %>:'<%= cmd.summary || cmd.description.lines[0] -%>'
+            <%-end-%>
+          <%end-%>
+          )
+          _describe -t firstArg 'firstArg' list
           ;;
-        (option-or-argument)
-          #curcontext=${curcontext%:*:*}:jm-$words[1]:
-          __<%= program :name %>_deeper
+        (options)
+          case $line[1] in
+          <%- for name, subs in cmdTree -%>
+            (<%= name %>)
+              __<%=program :name%>-<%= name %>
+            ;;
+          <%-end-%>
+          esac
           ;;
     esac
 }
 
+<%- for  name, subs in cmdTree -%>
+  <%- command = subs["\0cmd"]; subs = subs.reject{|k,_| k == "\0cmd"} -%>
+__<%=program :name%>-<%= name %> () {
+	local curcontext="$curcontext" state line
+	typeset -A opt_args
+
+	_arguments -C \
+		':command:->command' \
+		'*::options:->options'
+
+	case $state in
+		(command)
+      <%- unless subs.empty? -%>
+      local -a subcommands
+      subcommands=(
+      <%- for sname, _ in subs -%>
+        <%=sname%>:''
+      <%-end-%>
+      )
+			_describe -t commands 'subcommsnd' subcommands
+      <%-end-%>
+      <%- unless command.nil? then -%>
+      _arguments \
+        <%- for option in command.options -%>
+          <%- if flatswitches(option).count > 1 -%>
+            {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :" \
+          <%- else -%>
+            "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :" \
+          <%- end -%>
+        <%- end -%>
+      <%- end -%>
+    ;;
+    (options)
+      case $line[1] in
+      <%- for sname, cmd in subs -%>
+        (<%=sname%>)
+        ;;
+      <%-end-%>
+      esac
+    ;;
+  esac
+}
+<%- end -%>
 
 #  vim: set ai et sw=2 ts=2 :
