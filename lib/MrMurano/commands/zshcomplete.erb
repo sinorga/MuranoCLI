@@ -1,19 +1,19 @@
 #compdef <%= program :name %>
 
+__<%= program :name %>_common_options=(
+<% for option in @options -%>
+  <%- if flatswitches(option).count > 1 -%>
+    {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>:"<%= optionDesc option %>"
+  <%- else -%>
+    "<%= flatswitches(option).first %><%= takesArg(option) %>:<%= optionDesc option %>"
+  <%- end -%>
+<% end %>
+)
 
 _<%= program :name %> () {
-    local curcontext="$curcontext" state line common_options
+    local curcontext="$curcontext" state line
     typeset -A opt_args
 
-    common_options=(
-    <% for option in @options -%>
-      <%- if flatswitches(option).count > 1 -%>
-        {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :"
-      <%- else -%>
-        "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :"
-      <%- end -%>
-    <% end %>
-    )
     # except this fails when a command only has one arg and then options.
     _arguments -C \
         ':command:->command' \
@@ -33,6 +33,7 @@ _<%= program :name %> () {
           <%end-%>
           )
           _describe -t firstArg 'firstArg' list
+          _describe -t options 'global options' __<%= program :name %>_common_options
           ;;
         (options)
           case $line[1] in
@@ -65,8 +66,9 @@ __<%=program :name%>-<%= name %> () {
         <%=sname%>:''
       <%-end-%>
       )
-			_describe -t commands 'subcommsnd' subcommands
+			_describe -t commands 'subcommand' subcommands
       <%-end-%>
+      _describe -t options 'global options' __<%= program :name %>_common_options
       <%- unless command.nil? then -%>
       _arguments \
         <%- for option in command.options -%>
@@ -76,12 +78,23 @@ __<%=program :name%>-<%= name %> () {
             "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :" \
           <%- end -%>
         <%- end -%>
-      <%- end -%>
+      <%- end %>
     ;;
     (options)
       case $line[1] in
-      <%- for sname, cmd in subs -%>
+      <%- for sname, ssubs in subs -%>
+        <%- command = ssubs["\0cmd"]; subs = ssubs.reject{|k,_| k == "\0cmd"} -%>
         (<%=sname%>)
+        <%- unless command.nil? then -%>
+          _arguments \
+          <%- for option in command.options -%>
+            <%- if flatswitches(option).count > 1 -%>
+              {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :" \
+            <%- else -%>
+              "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :" \
+            <%- end -%>
+          <%- end -%>
+        <%- end %>
         ;;
       <%-end-%>
       esac
