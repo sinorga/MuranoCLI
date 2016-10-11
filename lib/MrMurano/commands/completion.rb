@@ -79,7 +79,7 @@ class ::Commander::Runner
       key = left.join(' ')
       tree[key] = {} unless tree.has_key? key
       if tree[key].has_key?(:subs) then
-        tree[key][:subs] << right 
+        tree[key][:subs] << right
       else
         tree[key][:subs] = [right]
       end
@@ -90,19 +90,18 @@ class ::Commander::Runner
 end
 
 command :completion do |c|
-  c.syntax = %{mr completion [options] }
-  c.summary = %{Tool for getting bits for tab completion.}
-  c.description = %{
-  For starts, this is zsh only. Because that is what I use.
+  c.syntax = %{mr completion}
+  c.summary = %{Generate a completion file}
+  c.description = %{For starts, this is zsh only. Because that is what I use.
 
-  eval "$(mr completion)"
-  or
-  mr completion > _mr
-  source _mr
+eval "$(mr completion)"
+or
+mr completion > _mr
+source _mr
 }
   c.option '--subs', 'List sub commands'
-  c.option '--opts CMD', 'List options for subcommand'
-  c.option '--gopts', 'List global options'
+  #c.option '--opts CMD', 'List options for subcommand'
+  #c.option '--gopts', 'List global options'
 
   # Changing direction.
   # Will poop out the file to be included as the completion script.
@@ -120,7 +119,7 @@ command :completion do |c|
 #      end
 
     elsif options.subs then
-      runner.instance_variable_get(:@commands).each do |name,cmd|
+      runner.instance_variable_get(:@commands).sort.each do |name,cmd|
         #desc = cmd.instance_variable_get(:@summary) #.lines[0]
         #say "#{name}:'#{desc}'"
         say "#{name}"

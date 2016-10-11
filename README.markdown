@@ -134,6 +134,10 @@ following commands:
 
 Call them with `--help` for details.
 
+### ZSH tab completion
+
+Basic completion support for zsh.
+
 ### Sub-directories
 
 For the endpoints, modules, and eventhandlers directories. The can contain both
