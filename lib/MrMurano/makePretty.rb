@@ -25,7 +25,7 @@ module MrMurano
           if options.localtime then
             curtime = Time.at(line[:timestamp]).localtime.to_datetime.iso8601(3)
           else
-            curtime = Time.at(line[:timestamp]).to_datetime.iso8601(3)
+            curtime = Time.at(line[:timestamp]).gmtime.to_datetime.iso8601(3)
           end
         else
           curtime = line[:timestamp]
