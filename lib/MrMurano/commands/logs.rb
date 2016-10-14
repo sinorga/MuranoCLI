@@ -1,6 +1,5 @@
-require 'date'
-require 'json'
-require 'rainbow/ext/string'
+require 'MrMurano/Solution'
+require 'MrMurano/makePretty'
 
 command :logs do |c|
   c.syntax = %{mr logs [options]}
@@ -15,59 +14,6 @@ command :logs do |c|
 
   c.action do |args,options|
     options.default :pretty=>true, :localtime=>true, :raw => false
-
-    def makeJsonPretty(data, options)
-      if options.pretty then
-        ret = JSON.pretty_generate(data).to_s
-        ret[0] = ret[0].color(:magenta)
-        ret[-1] = ret[-1].color(:magenta)
-        ret
-      else
-        data.to_json
-      end
-    end
-
-    def makePretty(line, options)
-      out=''
-      out << "#{line[:type] || '--'} ".upcase.color(:red).background(:aliceblue)
-      out << "[#{line[:subject] || ''}]".color(:red).background(:aliceblue)
-      out << " "
-      if line.has_key?(:timestamp) then
-        if options.localtime then
-          curtime = Time.at(line[:timestamp]).localtime.to_datetime.iso8601(3)
-        else
-          curtime = Time.at(line[:timestamp]).to_datetime.iso8601(3)
-        end
-      else
-        curtime = "<no timestamp>"
-      end
-      out << curtime.color(:blue)
-      out << ":\n"
-      if line.has_key?(:data) then
-        data = line[:data]
-
-        if data.kind_of?(Hash) then
-          if data.has_key?(:request) and data.has_key?(:response) then
-            out << "---------\nrequest:"
-            out << makeJsonPretty(data[:request], options)
-
-            out << "\n---------\nresponse:"
-            out << makeJsonPretty(data[:response], options)
-          else
-            out << makeJsonPretty(data, options)
-          end
-        else
-          out << data.to_s
-        end
-
-      else
-        line.delete :type
-        line.delete :timestamp
-        line.delete :subject
-        out << makeJsonPretty(line, options)
-      end
-      out
-    end
 
     sol = MrMurano::Solution.new
 
@@ -89,7 +35,7 @@ command :logs do |c|
                   js = JSON.parse(m, {:allow_nan=>true,
                                       :symbolize_names => true,
                                       :create_additions=>false})
-                  puts makePretty(js, options)
+                  puts MrMurano::Pretties::makePretty(js, options)
                 end
                 '' #remove (we're kinda abusing gsub here.)
               end
@@ -113,7 +59,7 @@ command :logs do |c|
           if options.raw then
             puts line
           else
-            puts makePretty(line, options)
+            puts MrMurano::Pretties::makePretty(line, options)
           end
         end
       else
