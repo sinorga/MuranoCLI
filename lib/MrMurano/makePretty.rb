@@ -21,10 +21,14 @@ module MrMurano
       out << "[#{line[:subject] || ''}]".color(:red).background(:aliceblue)
       out << " "
       if line.has_key?(:timestamp) then
-        if options.localtime then
-          curtime = Time.at(line[:timestamp]).localtime.to_datetime.iso8601(3)
+        if line[:timestamp].kind_of? Numeric then
+          if options.localtime then
+            curtime = Time.at(line[:timestamp]).localtime.to_datetime.iso8601(3)
+          else
+            curtime = Time.at(line[:timestamp]).to_datetime.iso8601(3)
+          end
         else
-          curtime = Time.at(line[:timestamp]).to_datetime.iso8601(3)
+          curtime = line[:timestamp]
         end
       else
         curtime = "<no timestamp>"
