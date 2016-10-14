@@ -75,9 +75,10 @@ module MrMurano
     end
 
     def tolocalname(item, key)
-      name = item[:method].downcase
-      name << '_'
-      name << item[:path].gsub(/\//, '-')
+      name = ''
+      name << item[:path].split('/').reject{|i|i.empty?}.join('-')
+      name << '.'
+      name << item[:method].downcase
       name << '.lua'
     end
 
