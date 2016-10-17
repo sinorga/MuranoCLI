@@ -32,10 +32,15 @@ command :logs do |c|
                 if options.raw then
                   puts m
                 else
-                  js = JSON.parse(m, {:allow_nan=>true,
-                                      :symbolize_names => true,
-                                      :create_additions=>false})
-                  puts MrMurano::Pretties::makePretty(js, options)
+                  begin
+                    js = JSON.parse(m, {:allow_nan=>true,
+                                        :symbolize_names => true,
+                                        :create_additions=>false})
+                    puts MrMurano::Pretties::makePretty(js, options)
+                  rescue
+                    say_error '=== JSON parse error, showing raw instead ==='
+                    puts m
+                  end
                 end
                 '' #remove (we're kinda abusing gsub here.)
               end
