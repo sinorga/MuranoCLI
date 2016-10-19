@@ -2,6 +2,7 @@ source 'http://rubygems.org'
 
 #gemspec
 
+gem 'MrMurano'
 gem 'commander', '~> 4.4.0'
 gem 'terminal-table', '~> 1.4.5'
 gem 'mime-types', '~> 1.25.1'
