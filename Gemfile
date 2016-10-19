@@ -15,5 +15,6 @@ group :test do
   gem 'rake', '~> 10.1.1'
   gem 'rspec', '~> 3.5'
   gem 'webmock', '~> 2.1.0'
+  gem 'rspec-command', '~> 1.0.1'
 end
 
