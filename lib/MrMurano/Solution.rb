@@ -65,7 +65,7 @@ module MrMurano
       raise "Bad key(#{itemkey}) for #{item}" if name.nil?
       name = Pathname.new(name) unless name.kind_of? Pathname
       name = name.relative_path_from(Pathname.new('/')) if name.absolute?
-      dest = into + name
+      into + name
     end
 
     ##
