@@ -131,7 +131,7 @@ module MrMurano
         remove(rid)
       end
 
-      nil
+      {}
     end
 
     def create(alias_id, format=:string)

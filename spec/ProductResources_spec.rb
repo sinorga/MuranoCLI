@@ -99,6 +99,68 @@ RSpec.describe MrMurano::ProductResources do
     end
   end
 
+  context "Modifying" do
+    it "Drops RID" do
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"drop",
+                              :arguments=>["abcdefg"]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+
+      ret = @prd.remove("abcdefg")
+      expect(ret).to eq({})
+    end
+
+    it "Drops Alias" do
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"info",
+                              :arguments=>["LLLLLLLLLL", {}]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{:aliases=>{
+          :abcdefg=>["bob"]}
+      }}])
+
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"drop",
+                              :arguments=>["abcdefg"]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+
+      ret = @prd.remove_alias("bob")
+      expect(ret).to eq({})
+    end
+
+    it "Creates" do
+      frid = "ffffffffffffffffffffffffffffffffffffffff"
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"create",
+                              :arguments=>["dataport",{
+                                :format=>"string",
+                                :name=>"bob",
+                                :retention=>{
+                                  :count=>1,
+                                  :duration=>"infinity"
+                                }
+                              }]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>frid}])
+
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"map",
+                              :arguments=>["alias", frid, "bob"]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+
+      ret = @prd.create("bob")
+      expect(ret).to eq({})
+    end
+  end
+
 end
 
 #  vim: set ai et sw=2 ts=2 :
