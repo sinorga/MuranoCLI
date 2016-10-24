@@ -1,0 +1,9 @@
+[solution]
+id = XXXXXXXXXX
+
+[doThisTest]
+bob = build
+
+[s-fDEADBEEFGAEG]
+spec = bobo.yaml
+

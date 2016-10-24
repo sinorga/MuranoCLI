@@ -119,7 +119,7 @@ module MrMurano
           case resp
           when Net::HTTPSuccess
             if block_given? then
-              resp.read_body &block
+              resp.read_body(&block)
             else
               resp.read_body do |chunk|
                 $stdout.write chunk
