@@ -59,6 +59,99 @@ module MrMurano
 
   end
 
+  ## Manage the resources on a Product
+  #
+  # There isn't an okami-shim for most of this, it maps right over to 1P-RPC.
+  class ProductResources < ProductBase
+    def initialize
+      super
+      @uriparts << :proxy
+      @uriparts << 'onep:v1'
+      @uriparts << :rpc
+      @uriparts << :process
+      @model_rid = nil
+    end
+
+    def model_rid
+      return @model_rid unless @model_rid.nil?
+      prd = Product.new
+      data = prd.info
+      if data.kind_of?(Hash) and data.has_key?(:modelrid) then
+        @model_rid = data[:modelrid]
+      else
+        raise "Bad info; #{data}"
+      end
+      @model_rid
+    end
+
+    def do_rpc(calls)
+      calls = [calls] unless calls.kind_of?(Array)
+      r = post('', {
+        :auth=>{:client_id=>model_rid},
+        :calls=>calls
+      })
+      r unless not r.kind_of?(Array) or r.count != 1
+      r = r[0]
+      r unless not r.kind_of?(Hash) or r[:status] != 'ok'
+      r[:result]
+    end
+
+    def info
+      do_rpc({:id=>1,
+              :procedure=>:info,
+              :arguments=>[model_rid, {}]
+      })
+    end
+
+    def list
+      do_rpc({:id=>1,
+              :procedure=>:listing,
+              :arguments=>[model_rid, [:dataport], {:owned=>true}]
+      })
+    end
+
+    def remove(rid)
+      do_rpc({:id=>1,
+              :procedure=>:drop,
+              :arguments=>[rid]
+      })
+    end
+
+    def remove_alias(aid)
+      inf = info
+      raise "Bad info" unless inf[:aliases].kind_of?(Hash)
+      aliases = inf[:aliases].select{|k,v| v.include? aid}
+
+      raise "Unknown alias: #{aid}" if aliases.count == 0
+
+      aliases.each do |rid, aids|
+        remove(rid)
+      end
+
+      nil
+    end
+
+    def create(alias_id, format=:string)
+      # create then map.
+      rid = do_rpc({:id=>1,
+                  :procedure=>:create,
+                  :arguments=>[:dataport,
+                               {:format=>format,
+                                :name=>alias_id,
+                                :retention=>{:count=>1,:duration=>:infinity}
+                               }
+                              ]
+      })
+      return rid unless not rid.kind_of?(String) or rid.match(/\p{XDigit}{40}/)
+
+      do_rpc({:id=>1,
+              :procedure=>:map,
+              :arguments=>[:alias, rid, alias_id]
+      })
+    end
+
+  end
+
   ##
   # Manage the uploadable content for products.
   class ProductContent < ProductBase
