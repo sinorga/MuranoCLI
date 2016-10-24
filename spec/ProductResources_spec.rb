@@ -73,6 +73,32 @@ RSpec.describe MrMurano::ProductResources do
     end
   end
 
+  context "queries" do
+    it "gets info" do
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"info",
+                              :arguments=>["LLLLLLLLLL", {}]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{:comments=>[]}}])
+
+      ret = @prd.info
+      expect(ret).to eq({:comments=>[]})
+    end
+
+    it "gets listing" do
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"listing",
+                              :arguments=>["LLLLLLLLLL", ["dataport"],{:owned=>true}]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{:dataport=>[]}}])
+
+      ret = @prd.list
+      expect(ret).to eq({:dataport=>[]})
+    end
+  end
+
 end
 
 #  vim: set ai et sw=2 ts=2 :
