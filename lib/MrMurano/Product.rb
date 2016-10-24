@@ -84,15 +84,18 @@ module MrMurano
       @model_rid
     end
 
+    ## Do a 1P RPC call
+    #
+    # While this will take an array of calls, don't. Only pass one.
     def do_rpc(calls)
       calls = [calls] unless calls.kind_of?(Array)
       r = post('', {
         :auth=>{:client_id=>model_rid},
         :calls=>calls
       })
-      r unless not r.kind_of?(Array) or r.count != 1
+      return r if not r.kind_of?(Array) or r.count < 1
       r = r[0]
-      r unless not r.kind_of?(Hash) or r[:status] != 'ok'
+      return r if not r.kind_of?(Hash) or r[:status] != 'ok'
       r[:result]
     end
 
