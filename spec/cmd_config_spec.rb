@@ -1,36 +1,50 @@
+require 'tmpdir'
+require 'open3'
+require 'fileutils'
 
 RSpec.describe 'mr config' do
-  def read_temp(path)
-    puts temp_path
-    IO.read(File.join(temp_path, path))
+
+  pref = "ruby -Ilib bin/"
+  around(:example) do |ex|
+    Dir.mktmpdir do |dir|
+      @tmpdir = dir
+      ex.run
+    end
   end
 
-  describe "Needs a key" do
-    command %w{mr config}
-    its(:stdout) { is_expected.to include('Need a config key')}
-    its(:stderr) { is_expected.to eq('')}
+  it "Needs a key" do
+    out, err, status = Open3.capture3("#{pref}mr config")
+    expect(status).to eq(0)
+    expect(out).to eq("\e[31mNeed a config key\e[0m\n")
+    expect(err).to eq('')
   end
 
-  describe "Set a key" do
-    command %w{mr config bob build}
-    its(:stdout) { is_expected.to eq('')}
-    its(:stderr) { is_expected.to eq('')}
+  it "Sets a key" do
+    out, err, status = Open3.capture3("#{pref}mr config bob build")
+    expect(status).to eq(0)
+    expect(out).to eq('')
+    expect(err).to eq('')
   end
 
-  describe "Reads a key" do
-    command %w{mr config --project doThisTest.bob}
-    fixture_file '.mrmuranorc'
-    its(:stdout) { is_expected.to include('build')}
-    its(:stderr) { is_expected.to eq('')}
+  it "Reads a key" do
+    FileUtils.copy_file 'spec/fixtures/.mrmuranorc', File.join(@tmpdir, '.mrmuranorc'), :verbose => true
+    out, err, status = Open3.capture3("#{pref}mr config --project doThisTest.bob")
+    expect(status).to eq(0)
+    expect(out).to eq('')
+    expect(err).to eq('')
   end
 
-  describe "Removes a key" do
-    command %{mr config --project --unset doThisTest.bob}
-    fixture_file '.mrmuranorc'
-    its(:stdout) { is_expected.to eq('')}
-    its(:stderr) { is_expected.to eq('')}
-    it { is_expected.to match_fixture 'mrmuranorc_deleted_bob' }
-    #it {expect(read_temp('.mrmuranorc')).to eq('[test]')}
+  it "Removes a key" do
+    rcf = File.join(@tmpdir, '.mrmuranorc')
+    FileUtils.copy_file 'spec/fixtures/.mrmuranorc', rcf, :verbose => true
+    out, err, status = Open3.capture3(%{#{pref}mr config --project --unset doThisTest.bob})
+    expect(status).to eq(0)
+    expect(out).to eq('')
+    expect(err).to eq('')
+
+    afile = IO.read(rcf)
+    bfile = IO.read('spec/fixtures/.mrmuranorc')
+    expect(afile).to eq(bfile)
   end
 end
 
