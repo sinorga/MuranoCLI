@@ -1,6 +1,8 @@
+require 'MrMurano/Account'
 require 'MrMurano/Product'
 require 'MrMurano/hash'
 require 'yaml'
+require 'terminal-table'
 
 command 'product spec convert' do |c|
   c.syntax = %{mr product spec convert FILE}
@@ -69,27 +71,40 @@ command 'product spec pull' do |c|
   c.summary = %{Pull down the specification for a product}
 
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
+  c.option '--astable', %{Display as pretty table}
+  c.option '--aliasonly', 'Only return the aliases'
 
   c.action do |args, options|
     prd = MrMurano::Product.new
     ret = prd.info
 
-    resources = ret[:resources].map do |r|
-      r.delete(:rid)
-      Hash.transform_keys_to_strings(r)
-    end
+    output = ''
+    if options.aliasonly then
+      output = ret[:resources].map{|row| row[:alias]}.join(' ')
 
-    spec = { 'resources'=> resources }
+    elsif options.astable then
+      busy = ret[:resources].map{|r| [r[:alias], r[:format], r[:rid]]}
+      output = Terminal::Table.new :rows => busy, :headings => ['Alias', 'Format', 'RID']
+
+    else
+      resources = ret[:resources].map do |r|
+        r.delete(:rid)
+        Hash.transform_keys_to_strings(r)
+      end
+      spec = { 'resources'=> resources }
+      output = spec.to_yaml
+    end
 
     if options.output then
       File.open(options.output, 'w') do |io|
-        io << spec.to_yaml
+        io << output
       end
     else
-      puts spec.to_yaml
+      puts output
     end
   end
 end
 alias_command 'product spec', 'product spec pull'
+alias_command 'product spec list', 'product spec pull', '--astable'
 
 #  vim: set ai et sw=2 ts=2 :
