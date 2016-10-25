@@ -8,6 +8,8 @@ module MrMurano
   # There isn't an okami-shim for most of this, it maps right over to 1P-RPC.
   # Or better stated, that's all okami-shim is.
   class ProductResources < ProductBase
+    include SyncUpDown
+
     def initialize
       super
       @uriparts << :proxy
@@ -15,6 +17,8 @@ module MrMurano
       @uriparts << :rpc
       @uriparts << :process
       @model_rid = nil
+
+      @itemkey = :rid
     end
 
     ## The model RID for this product.
@@ -79,6 +83,8 @@ module MrMurano
       })
     end
 
+    ## Remove a resource by alias
+    # XXX might not need this.
     def remove_alias(aid)
       inf = info
       raise "Bad info" unless inf[:aliases].kind_of?(Hash)
@@ -93,6 +99,7 @@ module MrMurano
       {}
     end
 
+    ## Create a new resource in the prodcut
     def create(alias_id, format=:string)
       # create then map.
       rid = do_rpc({:id=>1,
@@ -112,8 +119,64 @@ module MrMurano
       })
     end
 
-    # XXX should this support the status/sync{up,down} system? Yes
-    include SyncUpDown
+    ## Upload a resource.
+    # this is for SyncUpDown
+    def upload(src, item)
+      # TODO: handle modify case.
+      create(item[:name], item[:format])
+    end
+
+    def localitems(from)
+      from = Pathname.new(from) unless from.kind_of? Pathname
+      if not from.exist? then
+        say_warning "Skipping missing #{from.to_s}"
+        return []
+      end
+      unless from.file? then
+        say_warning "Cannot read from #{from.to_s}"
+        return []
+      end
+
+      here = []
+      from.open {|io| here = YAML.load(io) }
+      here = [] if here == false
+
+      here.map{|i| Hash.transform_keys_to_symbols(i)}
+    end
+
+    def download(local, item)
+      # needs to append/merge with file
+      # for now, we'll read, modify, write
+      here = []
+      if local.exist? then
+        local.open('rb') {|io| here = YAML.load(io)}
+        here = [] if here == false
+      end
+      here.delete_if do |i|
+        Hash.transform_keys_to_symbols(i)[@itemkey] == item[@itemkey]
+      end
+      here << item.reject{|k,v| k==:synckey}
+      local.open('wb') do |io|
+        io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
+      end
+    end
+
+    def removelocal(dest, item)
+      # needs to append/merge with file
+      # for now, we'll read, modify, write
+      here = []
+      if local.exist? then
+        local.open('rb') {|io| here = YAML.load(io)}
+        here = [] if here == false
+      end
+      key = @itemkey.to_sym
+      here.delete_if do |it|
+        Hash.transform_keys_to_symbols(it)[key] == item[key]
+      end
+      local.open('wb') do|io|
+        io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
+      end
+    end
 
   end
 
