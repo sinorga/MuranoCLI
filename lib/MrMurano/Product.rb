@@ -16,6 +16,10 @@ module MrMurano
     include Http
     include Verbose
 
+    ## Generate an endpoint in Murano
+    # Uses the uriparts and path
+    # @param path String: any additional parts for the URI
+    # @return URI: The full URI for this enpoint.
     def endPoint(path='')
       parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
       s = parts.map{|v| v.to_s}.join('/')
@@ -104,6 +108,7 @@ module MrMurano
   ## Manage the resources on a Product
   #
   # There isn't an okami-shim for most of this, it maps right over to 1P-RPC.
+  # Or better stated, that's all okami-shim is.
   class ProductResources < ProductBase
     def initialize
       super
@@ -114,6 +119,7 @@ module MrMurano
       @model_rid = nil
     end
 
+    ## The model RID for this product.
     def model_rid
       return @model_rid unless @model_rid.nil?
       prd = Product.new
