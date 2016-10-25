@@ -123,6 +123,14 @@ RSpec.describe MrMurano::Product, "#product" do
         end
       end
     end
+
+    it "converts a fully featured exoline spec file" do
+      out = @prd.convert('spec/fixtures/product_spec_files/example.exoline.spec.yaml')
+      want = IO.read('spec/fixtures/product_spec_files/example.murano.spec.yaml')
+
+      expect(out).to eq(want)
+    end
+
     it "raises when not an exoline spec"
   end
 

@@ -1,0 +1,14 @@
+---
+resources:
+- alias: mystring
+- alias: temp
+  format: float
+- alias: led6
+  format: integer
+- alias: config
+  format: string
+  initial: '{"text": "555-555-1234", "email": "jeff@555.com"}'
+- alias: person
+  format: string
+  initial: '{"name":"John Doe"}'
+- alias: place
