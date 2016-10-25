@@ -20,8 +20,6 @@ command :status do |c|
     options.default :delete=>true, :create=>true, :update=>true, :diff=>false,
       :grouped => true
 
-    MrMurano.checkSAME(options)
-
     def fmtr(item)
       if item.has_key? :local_path then
         item[:local_path].relative_path_from(Pathname.pwd()).to_s
@@ -56,46 +54,10 @@ command :status do |c|
       end
     end
 
-    if options.endpoints then
-      sol = MrMurano::Endpoint.new
+    MrMurano::SyncRoot.each_filtered(options) do |name, type, klass|
+      sol = klass.new
       ret = sol.status(options)
-      gmerge(ret, 'A', options)
-    end
-
-    if options.modules then
-      sol = MrMurano::Library.new
-      ret = sol.status(options)
-      gmerge(ret, 'M', options)
-    end
-
-    if options.eventhandlers then
-      sol = MrMurano::EventHandler.new
-      ret = sol.status(options)
-      gmerge(ret, 'E', options)
-    end
-
-    if options.roles then
-      sol = MrMurano::Role.new
-      ret = sol.status(options)
-      gmerge(ret, 'R', options)
-    end
-
-    if options.users then
-      sol = MrMurano::User.new
-      ret = sol.status(options)
-      gmerge(ret, 'U', options)
-    end
-
-    if options.files then
-      sol = MrMurano::File.new
-      ret = sol.status(options)
-      gmerge(ret, 'S', options)
-    end
-
-    if options.spec then
-      sol = MrMurano::ProductResources.new
-      ret = sol.status(options)
-      gmerge(ret, 'P', options)
+      gmerge(ret, type, options)
     end
 
     pretty(@grouped, options) if options.grouped
