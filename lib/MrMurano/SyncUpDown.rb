@@ -25,13 +25,17 @@ module MrMurano
     #
     # @param itemkey String: The identifying key for this item
     def remove(itemkey)
+      raise "Forgotten implementation"
     end
 
     ## Upload local item to remote
     #
     # Children objects Must override this
     #
-    def upload(dest, item)
+    # @param src Pathname: Full path of where to upload from
+    # @param item Hash: The item details to upload
+    def upload(src, item)
+      raise "Forgotten implementation"
     end
 
     #
@@ -106,6 +110,7 @@ module MrMurano
     def download(local, item)
       if item[:bundled] then
         say_warning "Not downloading into bundled item #{synckey(item)}"
+        # FIXME don't use say_warning
         return
       end
       local.dirname.mkpath
@@ -142,7 +147,11 @@ module MrMurano
     ##
     # Get a list of local items.
     #
+    # Children should never need to override this.  Instead they should override
+    # #localitems
+    #
     # This collects items in the project and all bundles.
+    # @return Array: of Hashes of items
     def locallist()
       # so. if @locationbase/bundles exists
       #  gather and merge: @locationbase/bundles/*/@location
@@ -176,6 +185,10 @@ module MrMurano
 
     ##
     # Get a list of local items rooted at #from
+    #
+    # Children rarely need to override this. Only when the locallist is not a set
+    # of files in a directory will they need to override it.
+    #
     # @param from Pathname: Directory of items to scan
     # @return Array: of Hashes of item details
     def localitems(from)
