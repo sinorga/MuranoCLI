@@ -24,18 +24,25 @@ module MrMurano
   end
 
   class Product < ProductBase
+    ## Get info about the product
     def info
       get('/info')
     end
 
+    ## List enabled devices
     def list(offset=0, limit=50)
       get("/device/?offset=#{offset}&limit=#{limit}")
     end
 
+    ## Enable a serial number
+    # This creates the device and opens the activation window.
     def enable(sn)
       post("/device/#{sn.to_s}")
     end
 
+    ## Upload a spec file.
+    #
+    # Note that this will fail if any of the resources already exist.
     def update(specFile)
       specFile = Pathname.new(specFile) unless specFile.kind_of? Pathname
 
@@ -53,10 +60,40 @@ module MrMurano
       ret
     end
 
+    ## Write a value to an alias on a device
     def write(sn, values)
       post("/write/#{sn}", values)
     end
 
+    ## Converts an exoline style spec file into a Murano style one
+    def convert(specFile)
+      def convertit(fin)
+        specOut = {'resources'=>[]}
+        spec = YAML.load(fin)
+        if spec.has_key?('dataports') and spec['dataports'].kind_of?(Array) then
+          dps = spec['dataports'].map do |dp|
+            dp.delete_if{|k,v| k != 'alias' and k != 'format' and k != 'initial'}
+            dp['format'] = 'string' if dp['format'][0..5] == 'string'
+            dp
+          end
+          specOut['resources'] = dps
+        else
+          raise "No dataports section found, or not an array"
+        end
+        specOut
+      end
+
+      if specFile == '-' then
+        convertit(STDIN).to_yaml
+      else
+        specFile = Pathname.new(specFile) unless specFile.kind_of? Pathname
+        out = ''
+        specFile.open() do |fin|
+          out = convertit(fin).to_yaml
+        end
+        out
+      end
+    end
   end
 
   ## Manage the resources on a Product
@@ -153,6 +190,7 @@ module MrMurano
       })
     end
 
+    # XXX should this support the status/sync{up,down} system?
   end
 
   ##
