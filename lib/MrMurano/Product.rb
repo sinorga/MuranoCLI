@@ -66,25 +66,30 @@ module MrMurano
     end
 
     ## Converts an exoline style spec file into a Murano style one
-    def convert(specFile)
-      def convertit(fin)
-        specOut = {'resources'=>[]}
-        spec = YAML.load(fin)
-        if spec.has_key?('dataports') and spec['dataports'].kind_of?(Array) then
-          dps = spec['dataports'].map do |dp|
-            dp.delete_if{|k,v| k != 'alias' and k != 'format' and k != 'initial'}
-            dp['format'] = 'string' if dp['format'][0..5] == 'string'
-            dp
-          end
-          specOut['resources'] = dps
-        else
-          raise "No dataports section found, or not an array"
+    # @param fin IO: IO Stream to read from
+    # @return String: Converted yaml data
+    def convertit(fin)
+      specOut = {'resources'=>[]}
+      spec = YAML.load(fin)
+      if spec.has_key?('dataports') and spec['dataports'].kind_of?(Array) then
+        dps = spec['dataports'].map do |dp|
+          dp.delete_if{|k,v| k != 'alias' and k != 'format' and k != 'initial'}
+          dp['format'] = 'string' if dp['format'][0..5] == 'string'
+          dp
         end
-        specOut
+        specOut['resources'] = dps
+      else
+        raise "No dataports section found, or not an array"
       end
+      specOut
+    end
 
+    ## Converts an exoline style spec file into a Murano style one
+    # @param specFile String: Path to file or '-' for stdin 
+    # @return String: Converted yaml data
+    def convert(specFile)
       if specFile == '-' then
-        convertit(STDIN).to_yaml
+        convertit($stdin).to_yaml
       else
         specFile = Pathname.new(specFile) unless specFile.kind_of? Pathname
         out = ''

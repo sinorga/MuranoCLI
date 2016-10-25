@@ -110,7 +110,19 @@ RSpec.describe MrMurano::Product, "#product" do
       expect(out).to eq(want)
     end
 
-    it "can convert stdin"
+    it "can convert stdin" do
+      File.open('spec/fixtures/product_spec_files/gwe.exoline.spec.yaml') do |fin|
+        begin
+          $stdin = fin
+          out = @prd.convert('-')
+          want = IO.read('spec/fixtures/product_spec_files/gwe.murano.spec.yaml')
+
+          expect(out).to eq(want)
+        ensure
+          $stdin = STDIN
+        end
+      end
+    end
     it "raises when not an exoline spec"
   end
 
