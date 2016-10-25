@@ -74,7 +74,7 @@ module MrMurano
       if spec.has_key?('dataports') and spec['dataports'].kind_of?(Array) then
         dps = spec['dataports'].map do |dp|
           dp.delete_if{|k,v| k != 'alias' and k != 'format' and k != 'initial'}
-          dp['format'] = 'string' if dp['format'][0..5] == 'string'
+          dp['format'] = 'string' if (dp['format']||'')[0..5] == 'string'
           dp
         end
         specOut['resources'] = dps
