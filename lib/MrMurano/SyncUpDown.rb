@@ -5,6 +5,55 @@ require 'MrMurano/Config'
 require 'MrMurano/hash'
 
 module MrMurano
+  class SyncRoot
+    Syncable = Struct.new(:name, :class, :type, :bydefault) do
+    end
+
+    def self.add(name, klass, type=nil, bydefault=false)
+      @@syncset = [] unless defined?(@@syncset)
+      type = name.to_s[0].upcase if type.nil?
+      @@syncset << Syncable.new(name.to_s, klass, type, bydefault)
+    end
+
+    def self.reset()
+      @@syncset = []
+    end
+
+    def self.each(&block)
+      @@syncset.each{|a| yield a.name, a.type, a.class }
+    end
+
+    def self.each_filtered(opt, &block)
+      if not opt.kind_of?(Hash) then
+        opt = opt.__hash__
+      end
+      self.checkSAME(opt)
+      @@syncset.each do |a|
+        if opt[a.name.to_sym] or opt[a.type.to_sym] then
+          yield a.name, a.type, a.class
+        end
+      end
+    end
+
+    ## Adjust options based on all or none
+    # If none are selected, select the bydefault ones.
+    def self.checkSAME(opt)
+      if not opt.kind_of?(Hash) then
+        opt = opt.__hash__
+      end
+      if opt[:all] then
+        @@syncset.each {|a| opt[a.name.to_sym] = true }
+      else
+        any = @@syncset.select {|a| opt[a.name.to_sym] or opt[a.type.to_sym]}
+        if any.empty? then
+          @@syncset.select{|a| a.bydefault }.each{|a| opt[a.name.to_sym] = true}
+        end
+      end
+
+      nil
+    end
+  end
+
   module SyncUpDown
     #######################################################################
     # Methods that must be overridden
