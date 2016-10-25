@@ -9,12 +9,13 @@ command :status do |c|
   c.option '-e','--[no-]eventhandlers', %{Event Handlers}
   c.option '--[no-]roles', %{Roles}
   c.option '--[no-]users', %{Users}
+  c.option '-p','--[no-]spec', %{Product Specification}
 
   c.option '--[no-]asdown', %{Report as if syncdown instead of syncup}
   c.option '--[no-]diff', %{For modified items, show a diff}
   c.option '--[no-]grouped', %{Group all adds, deletes, and mods together}
   c.option '--[no-]showall', %{List unchanged as well}
-  
+
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true, :diff=>false,
       :grouped => true
@@ -54,7 +55,7 @@ command :status do |c|
         pretty(ret, options)
       end
     end
-    
+
     if options.endpoints then
       sol = MrMurano::Endpoint.new
       ret = sol.status(options)
@@ -89,6 +90,12 @@ command :status do |c|
       sol = MrMurano::File.new
       ret = sol.status(options)
       gmerge(ret, 'S', options)
+    end
+
+    if options.spec then
+      sol = MrMurano::ProductResources.new
+      ret = sol.status(options)
+      gmerge(ret, 'P', options)
     end
 
     pretty(@grouped, options) if options.grouped

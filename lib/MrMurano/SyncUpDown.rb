@@ -38,6 +38,15 @@ module MrMurano
       raise "Forgotten implementation"
     end
 
+    ##
+    # True if itemA and itemB are different
+    #
+    # Children objects must override this
+    #
+    def docmp(itemA, itemB)
+      true
+    end
+
     #
     #######################################################################
 
@@ -305,15 +314,6 @@ module MrMurano
           end
         end
       end
-    end
-
-    ##
-    # True if itemA and itemB are different
-    #
-    # Children objects should override this
-    #
-    def docmp(itemA, itemB)
-      true
     end
 
     ## Call external diff tool on item

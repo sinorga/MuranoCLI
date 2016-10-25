@@ -18,7 +18,7 @@ module MrMurano
       @uriparts << :process
       @model_rid = nil
 
-      @itemkey = :rid
+      @itemkey = :rid # this is the key that is the identifier used by murano
       @location = location
     end
 
@@ -145,6 +145,12 @@ module MrMurano
       create(item[:name], item[:format])
     end
 
+    ## Use alias for doing sync compares
+    # (The RID will change if destroyed and recreated.)
+    def synckey(item)
+      item[:alias]
+    end
+
     ## Get a local list of items from the single file
     def localitems(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
@@ -159,9 +165,13 @@ module MrMurano
 
       here = []
       from.open {|io| here = YAML.load(io) }
-      here = [] if here == false
+      return [] if here == false
 
-      here.map{|i| Hash.transform_keys_to_symbols(i)}
+      if here.kind_of?(Hash) and here.has_key?('resources') then
+        here['resources'].map{|i| Hash.transform_keys_to_symbols(i)}
+      else
+        []
+      end
     end
 
     def download(local, item)
@@ -196,6 +206,12 @@ module MrMurano
       local.open('wb') do|io|
         io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
       end
+    end
+
+    ##
+    # True if itemA and itemB are different
+    def docmp(itemA, itemB)
+      itemA[:alias] == itemB[:alias] and itemA[:format] == itemB[:format]
     end
 
   end
