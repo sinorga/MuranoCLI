@@ -23,7 +23,7 @@ module MrMurano
     end
 
     def self.each_option(&block)
-      @@syncset.each{|a| yield "-#{type.downcase}", "--[no-]#{a.name}", a.desc}
+      @@syncset.each{|a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc}
     end
 
     def self.each_filtered(opt, &block)

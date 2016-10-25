@@ -61,7 +61,14 @@ RSpec.describe MrMurano::SyncRoot do
       expect(@options).to eq({:user=>true})
     end
 
-  end
+    it "builds option params" do
+      ret=[]
+      MrMurano::SyncRoot.each_option do |s,l,d|
+        ret << [s,l,d]
+      end
+      expect(ret).to eq([["-u", "--[no-]user", "describe user"], ["-r", "--[no-]role", "describe role"]])
+    end
 
+  end
 end
 #  vim: set ai et sw=2 ts=2 :
