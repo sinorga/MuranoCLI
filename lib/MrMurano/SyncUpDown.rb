@@ -206,7 +206,23 @@ module MrMurano
     #######################################################################
     # Methods that provide the core status/syncup/syncdown
 
-    def syncup(options=Commander::Command::Options.new)
+    def elevate_hash(hsh)
+      if hsh.kind_of?(Hash) then
+        hsh = Hash.transform_keys_to_symbols(hsh)
+        hsh.define_singleton_method(:method_missing) do |mid,*args|
+          if mid.to_s.match(/^(.+)=$/) then
+            self[$1.to_sym] = args.first
+          else
+            self[mid]
+          end
+        end
+      end
+      hsh
+    end
+    private :elevate_hash
+
+    def syncup(options={})
+      options = elevate_hash(options)
       itemkey = @itemkey.to_sym
       options.asdown=false
       dt = status(options)
@@ -240,7 +256,8 @@ module MrMurano
       end
     end
 
-    def syncdown(options=Commander::Command::Options.new)
+    def syncdown(options={})
+      options = elevate_hash(options)
       options.asdown = true
       dt = status(options)
       into = @locationbase + @location ###
@@ -308,7 +325,8 @@ module MrMurano
       df
     end
 
-    def status(options=Commander::Command::Options.new)
+    def status(options={})
+      options = elevate_hash(options)
       there = list()
       here = locallist()
       itemkey = @itemkey.to_sym
