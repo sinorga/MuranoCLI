@@ -215,7 +215,7 @@ module MrMurano
     end
 
   end
-  SyncRoot.add('specs', ProductResources, 'P')
+  SyncRoot.add('specs', ProductResources, 'P', %{Product Specification})
 
 end
 #  vim: set ai et sw=2 ts=2 :

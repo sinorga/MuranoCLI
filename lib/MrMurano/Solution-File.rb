@@ -161,6 +161,6 @@ module MrMurano
     end
 
   end
-  SyncRoot.add('files', File, 'S', true)
+  SyncRoot.add('files', File, 'S', %{Static Files}, true)
 end
 #  vim: set ai et sw=2 ts=2 :

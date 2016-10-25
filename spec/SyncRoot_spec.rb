@@ -13,8 +13,8 @@ RSpec.describe MrMurano::SyncRoot do
     end
     class Role
     end
-    MrMurano::SyncRoot.add('user', User)
-    MrMurano::SyncRoot.add('role', Role)
+    MrMurano::SyncRoot.add('user', User, 'U', "describe user")
+    MrMurano::SyncRoot.add('role', Role, 'R', "describe role")
   end
 
   context "b" do
@@ -23,8 +23,8 @@ RSpec.describe MrMurano::SyncRoot do
       end
       class Role
       end
-      MrMurano::SyncRoot.add('user', User, 'U', true)
-      MrMurano::SyncRoot.add('role', Role)
+      MrMurano::SyncRoot.add('user', User, 'U', "describe user", true)
+      MrMurano::SyncRoot.add('role', Role, 'R', "describe role")
 
       @options = {}
       @options.define_singleton_method(:method_missing) do |mid,*args|

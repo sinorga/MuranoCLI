@@ -164,7 +164,7 @@ module MrMurano
       item[:name]
     end
   end
-  SyncRoot.add('modules', Library, 'M', true)
+  SyncRoot.add('modules', Library, 'M', %{Modules}, true)
 
   # …/eventhandler
   class EventHandler < ServiceBase
@@ -223,7 +223,7 @@ module MrMurano
       "#{item[:service]}_#{item[:event]}"
     end
   end
-  SyncRoot.add('eventhandlers', EventHandler, 'E', true)
+  SyncRoot.add('eventhandlers', EventHandler, 'E', %{Event Handlers}, true)
 
 end
 #  vim: set ai et sw=2 ts=2 :

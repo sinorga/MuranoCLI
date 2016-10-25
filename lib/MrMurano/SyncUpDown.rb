@@ -6,13 +6,12 @@ require 'MrMurano/hash'
 
 module MrMurano
   class SyncRoot
-    Syncable = Struct.new(:name, :class, :type, :bydefault) do
+    Syncable = Struct.new(:name, :class, :type, :desc, :bydefault) do
     end
 
-    def self.add(name, klass, type=nil, bydefault=false)
+    def self.add(name, klass, type, desc, bydefault=false)
       @@syncset = [] unless defined?(@@syncset)
-      type = name.to_s[0].upcase if type.nil?
-      @@syncset << Syncable.new(name.to_s, klass, type, bydefault)
+      @@syncset << Syncable.new(name.to_s, klass, type, desc, bydefault)
     end
 
     def self.reset()
@@ -21,6 +20,10 @@ module MrMurano
 
     def self.each(&block)
       @@syncset.each{|a| yield a.name, a.type, a.class }
+    end
+
+    def self.each_option(&block)
+      @@syncset.each{|a| yield "-#{type.downcase}", "--[no-]#{a.name}", a.desc}
     end
 
     def self.each_filtered(opt, &block)

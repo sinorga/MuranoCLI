@@ -102,7 +102,7 @@ module MrMurano
       @location = $cfg['location.roles']
     end
   end
-  SyncRoot.add('roles', Role, 'R')
+  SyncRoot.add('roles', Role, 'R', %{Roles})
 
   # …/user
   class User < UserBase
@@ -122,6 +122,6 @@ module MrMurano
       item[:email]
     end
   end
-  SyncRoot.add('users', User, 'U')
+  SyncRoot.add('users', User, 'U', %{Users})
 end
 #  vim: set ai et sw=2 ts=2 :
