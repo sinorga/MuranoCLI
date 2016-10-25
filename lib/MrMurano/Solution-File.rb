@@ -30,7 +30,7 @@ module MrMurano
           case resp
           when Net::HTTPSuccess
             if block_given? then
-              resp.read_body &block
+              resp.read_body(&block)
             else
               resp.read_body do |chunk|
                 $stdout.write chunk
@@ -161,5 +161,6 @@ module MrMurano
     end
 
   end
+  SyncRoot.add('files', File, 'S', true)
 end
 #  vim: set ai et sw=2 ts=2 :

@@ -164,6 +164,7 @@ module MrMurano
       item[:name]
     end
   end
+  SyncRoot.add('modules', Library, 'M', true)
 
   # …/eventhandler
   class EventHandler < ServiceBase
@@ -222,7 +223,7 @@ module MrMurano
       "#{item[:service]}_#{item[:event]}"
     end
   end
+  SyncRoot.add('eventhandlers', EventHandler, 'E', true)
 
-  # How do we enable product.id to flow into the eventhandler?
 end
 #  vim: set ai et sw=2 ts=2 :

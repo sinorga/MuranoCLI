@@ -110,5 +110,7 @@ module MrMurano
     end
 
   end
+
+  SyncRoot.add('endpoints', Endpoint, 'A', true)
 end
 #  vim: set ai et sw=2 ts=2 :
