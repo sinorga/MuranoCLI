@@ -131,7 +131,11 @@ RSpec.describe MrMurano::Product, "#product" do
       expect(out).to eq(want)
     end
 
-    it "raises when not an exoline spec"
+    it "raises when not an exoline spec" do
+      expect {
+        @prd.convert('spec/fixtures/product_spec_files/example.murano.spec.yaml')
+      }.to raise_exception('No dataports section found, or not an array')
+    end
   end
 
 end
