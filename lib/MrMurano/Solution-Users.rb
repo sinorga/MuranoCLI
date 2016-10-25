@@ -84,7 +84,6 @@ module MrMurano
         say_warning "Cannot read from #{from.to_s}"
         return []
       end
-      key = @itemkey.to_sym
 
       here = []
       from.open {|io| here = YAML.load(io) }
