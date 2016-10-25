@@ -85,7 +85,7 @@ module MrMurano
     end
 
     ## Converts an exoline style spec file into a Murano style one
-    # @param specFile String: Path to file or '-' for stdin 
+    # @param specFile String: Path to file or '-' for stdin
     # @return String: Converted yaml data
     def convert(specFile)
       if specFile == '-' then
