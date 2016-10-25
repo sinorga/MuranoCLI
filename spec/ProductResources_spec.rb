@@ -1,6 +1,6 @@
 require 'MrMurano/version'
 require 'MrMurano/Config'
-require 'MrMurano/Product'
+require 'MrMurano/Product-Resources'
 
 RSpec.describe MrMurano::ProductResources do
   before(:example) do
