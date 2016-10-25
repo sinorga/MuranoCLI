@@ -11,6 +11,8 @@ module MrMurano
       @pid = $cfg['product.id']
       raise "No Product ID!" if @pid.nil?
       @uriparts = [:product, @pid]
+      @locationbase = $cfg['location.base']
+      @location = nil
     end
 
     include Http

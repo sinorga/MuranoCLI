@@ -19,6 +19,25 @@ module MrMurano
       @model_rid = nil
 
       @itemkey = :rid
+      @location = location
+    end
+
+    ## Get the location of the product spec file
+    def location
+      # If location.specs is defined, then all spec files are assume to be relative
+      # to that and location.base, otherwise they're relative to only location.base
+      #
+      # If there is a p-<product.id>.spec key, then that is the file name.
+      # Otherwise use product.spec
+
+      name = $cfg['product.spec']
+      prid = $cfg['product.id']
+      name = $cfg["p-#{prid}.spec"] unless prid.nil? or $cfg["p-#{prid}.spec"].nil?
+
+      unless $cfg['location.specs'].nil? then
+        name = File.join($cfg['location.specs'], name)
+      end
+      name
     end
 
     ## The model RID for this product.
@@ -126,6 +145,7 @@ module MrMurano
       create(item[:name], item[:format])
     end
 
+    ## Get a local list of items from the single file
     def localitems(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
       if not from.exist? then
