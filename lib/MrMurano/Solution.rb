@@ -23,6 +23,10 @@ module MrMurano
     include Http
     include Verbose
 
+    ## Generate an endpoint in Murano
+    # Uses the uriparts and path
+    # @param path String: any additional parts for the URI
+    # @return URI: The full URI for this enpoint.
     def endPoint(path='')
       parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
       s = parts.map{|v| v.to_s}.join('/')
@@ -30,8 +34,45 @@ module MrMurano
     end
     # …
 
+    #######################################################################
+    # Methods that must be overridden
+
+    ##
+    # Get a list of remote items.
+    #
+    # Children objects Must override this
+    #
+    # @return Array: of Hashes of item details
+    def list()
+      []
+    end
+
+    ## Remove remote item
+    #
+    # Children objects Must override this
+    #
+    # @param itemkey String: The identifying key for this item
+    def remove(itemkey)
+    end
+
+    ## Upload local item to remote
+    #
+    # Children objects Must override this
+    #
+    def upload(dest, item)
+    end
+
+    #
+    #######################################################################
+
+    #######################################################################
+    # Methods that could be overriden
+
     ##
     # Compute a remote item hash from the local path
+    #
+    # Children objects should override this.
+    #
     # @param root Pathname: Root path for this resource type from config files
     # @param path Pathname: Path to local item
     # @return Hash: hash of the details for the remote item for this path
@@ -43,6 +84,9 @@ module MrMurano
 
     ##
     # Compute the local name from remote item details
+    #
+    # Children objects should override this or #tolocalpath
+    #
     # @param item Hash: listing details for the item.
     # @param itemkey Symbol: Key for look up.
     def tolocalname(item, itemkey)
@@ -54,6 +98,8 @@ module MrMurano
     #
     # If there is already a matching local item, some of its details are also in
     # the item hash.
+    #
+    # Children objects should override this or #tolocalname
     #
     # @param into Pathname: Root path for this resource type from config files
     # @param item Hash: listing details for the item.
@@ -67,6 +113,52 @@ module MrMurano
       name = name.relative_path_from(Pathname.new('/')) if name.absolute?
       into + name
     end
+
+    ## Get the key used to quickly compare two items
+    #
+    # Children objects should override this if synckey is not @itemkey
+    #
+    # @param item Hash: The item to get a key from
+    # @returns Object: The object to use a comparison key
+    def synckey(item)
+      key = @itemkey.to_sym
+      item[key]
+    end
+
+    ## Download an item into local
+    #
+    # Children objects should override this or implement #fetch()
+    #
+    # @param local Pathname: Full path of where to download to
+    # @param item Hash: The item to download
+    def download(local, item)
+      if item[:bundled] then
+        say_warning "Not downloading into bundled item #{synckey(item)}"
+        return
+      end
+      local.dirname.mkpath
+      id = item[@itemkey.to_sym]
+      local.open('wb') do |io|
+        fetch(id) do |chunk|
+          io.write chunk
+        end
+      end
+    end
+
+    ## Remove local reference of item
+    #
+    # Children objects should override this if move than just unlinking the local
+    # item.
+    #
+    # @param dest Pathname: Full path of item to be removed
+    # @param item Hash: Full details of item to be removed
+    def removelocal(dest, item)
+      dest.unlink
+    end
+
+    #
+    #######################################################################
+
 
     ##
     # So, for bundles this needs to look at all the places and build up the mered
@@ -112,6 +204,8 @@ module MrMurano
 
     ##
     # Get a list of local items rooted at #from
+    # @param from Pathname: Directory of items to scan
+    # @return Array: of Hashes of item details
     def localitems(from)
       from.children.map do |path|
         if path.directory? then
@@ -137,28 +231,8 @@ module MrMurano
       end.flatten.compact
     end
 
-    def synckey(item)
-      key = @itemkey.to_sym
-      item[key]
-    end
-
-    def download(local, item)
-      if item[:bundled] then
-        say_warning "Not downloading into bundled item #{synckey(item)}"
-        return
-      end
-      local.dirname.mkpath
-      id = item[@itemkey.to_sym]
-      local.open('wb') do |io|
-        fetch(id) do |chunk|
-          io.write chunk
-        end
-      end
-    end
-
-    def removelocal(dest, item)
-      dest.unlink
-    end
+    #######################################################################
+    # Methods that provide the core status/syncup/syncdown
 
     def syncup(options=Commander::Command::Options.new)
       itemkey = @itemkey.to_sym
@@ -194,8 +268,6 @@ module MrMurano
       end
     end
 
-    # FIXME this still needs the path passed in.
-    # Need to think some more on how syncdown works with bundles.
     def syncdown(options=Commander::Command::Options.new)
       options.asdown = true
       dt = status(options)
@@ -235,10 +307,17 @@ module MrMurano
 
     ##
     # True if itemA and itemB are different
+    #
+    # Children objects should override this
+    #
     def docmp(itemA, itemB)
       true
     end
 
+    ## Call external diff tool on item
+    # WARNING: This will download the remote item to do the diff.
+    # @param item Hash: The item to get a diff of
+    # @return String: The diff output
     def dodiff(item)
       tfp = Tempfile.new([tolocalname(item, @itemkey), '.lua'])
       df = ""
