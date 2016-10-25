@@ -44,7 +44,9 @@ module MrMurano
       return r if not r.kind_of?(Hash) or r[:status] != 'ok'
       r[:result]
     end
+    private :do_rpc
 
+    ## Get 1P info about the prodcut
     def info
       do_rpc({:id=>1,
               :procedure=>:info,
@@ -52,14 +54,24 @@ module MrMurano
       })
     end
 
-    ## 1P level listing. Not sure we actualy need this. (data is all in info)
-    def list
-      do_rpc({:id=>1,
-              :procedure=>:listing,
-              :arguments=>[model_rid, [:dataport], {:owned=>true}]
-      })
+    ## Return a list of the product resources as items
+    def list()
+      data = info()
+      ret = []
+      data[:aliases].each do |rid, aliases|
+        aliases.each do |al|
+          ret << {
+            :alias => al,
+            :name => al,
+            :rid => rid
+          }
+        end
+      end
+
+      ret
     end
 
+    ## Remove a resource by RID
     def remove(rid)
       do_rpc({:id=>1,
               :procedure=>:drop,

@@ -20,13 +20,15 @@ RSpec.describe MrMurano::ProductResources do
   end
 
   context "do_rpc" do
+    # Note, do_rpc is private.
     it "Accepts an object" do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
         to_return(body: [{
         :id=>1, :status=>"ok", :result=>{}
       }])
 
-      ret = @prd.do_rpc({:id=>1})
+      ret = nil
+      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
       expect(ret).to eq({})
     end
 
@@ -35,7 +37,8 @@ RSpec.describe MrMurano::ProductResources do
         to_return(body: [{:id=>1, :status=>"ok", :result=>{:one=>1}},
       {:id=>2, :status=>"ok", :result=>{:two=>2}}])
 
-      ret = @prd.do_rpc([{:id=>1}, {:id=>2}])
+      ret = nil
+      @prd.instance_eval{ ret = do_rpc([{:id=>1}, {:id=>2}]) }
       expect(ret).to eq({:one=>1})
       # yes it only returns first.
     end
@@ -44,7 +47,8 @@ RSpec.describe MrMurano::ProductResources do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
         to_return(body: {:not=>'an array'}.to_json)
 
-      ret = @prd.do_rpc({:id=>1})
+      ret = nil
+      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
       expect(ret).to eq({:not=>'an array'})
     end
 
@@ -52,7 +56,8 @@ RSpec.describe MrMurano::ProductResources do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
         to_return(body: [])
 
-      ret = @prd.do_rpc({:id=>1})
+      ret = nil
+      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
       expect(ret).to eq([])
     end
 
@@ -60,7 +65,8 @@ RSpec.describe MrMurano::ProductResources do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
         to_return(body: ["foo"])
 
-      ret = @prd.do_rpc({:id=>1})
+      ret = nil
+      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
       expect(ret).to eq("foo")
     end
 
@@ -68,7 +74,8 @@ RSpec.describe MrMurano::ProductResources do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
         to_return(body: [{:id=>1, :status=>'error'}])
 
-      ret = @prd.do_rpc({:id=>1})
+      ret = nil
+      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
       expect(ret).to eq({:id=>1, :status=>'error'})
     end
   end
@@ -90,12 +97,12 @@ RSpec.describe MrMurano::ProductResources do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
         with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
                     :calls=>[{:id=>1,
-                              :procedure=>"listing",
-                              :arguments=>["LLLLLLLLLL", ["dataport"],{:owned=>true}]} ]}).
-        to_return(body: [{:id=>1, :status=>"ok", :result=>{:dataport=>[]}}])
+                              :procedure=>"info",
+                              :arguments=>["LLLLLLLLLL", {}]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{:aliases=>{:abcdefg=>["bob"]}}}])
 
       ret = @prd.list
-      expect(ret).to eq({:dataport=>[]})
+      expect(ret).to eq([{:alias=>"bob", :name=>"bob", :rid=>:abcdefg}])
     end
   end
 
