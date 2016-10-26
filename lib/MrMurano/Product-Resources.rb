@@ -164,6 +164,12 @@ module MrMurano
       item[:alias]
     end
 
+    ##
+    #
+    def tolocalpath(into, item)
+      into
+    end
+
     ## Get a local list of items from the single file
     def localitems(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
