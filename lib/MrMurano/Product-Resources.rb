@@ -110,22 +110,6 @@ module MrMurano
       })
     end
 
-    ## Remove a resource by alias
-    # XXX might not need this.
-    def remove_alias(aid)
-      inf = info
-      raise "Bad info" unless inf[:aliases].kind_of?(Hash)
-      aliases = inf[:aliases].select{|k,v| v.include? aid}
-
-      raise "Unknown alias: #{aid}" if aliases.count == 0
-
-      aliases.each do |rid, aids|
-        remove(rid)
-      end
-
-      {}
-    end
-
     ## Create a new resource in the prodcut
     def create(alias_id, format=:string)
       # create then map.
