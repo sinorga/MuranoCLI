@@ -122,7 +122,7 @@ module MrMurano
     # @param item Hash: listing details for the item.
     # @param itemkey Symbol: Key for look up.
     def tolocalname(item, itemkey)
-      item[itemkey]
+      item[itemkey].to_s
     end
 
     ##
@@ -385,6 +385,7 @@ module MrMurano
       df
     end
 
+    ## Get status of things here verses there
     def status(options={})
       options = elevate_hash(options)
       there = list()
