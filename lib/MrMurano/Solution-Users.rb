@@ -21,7 +21,8 @@ module MrMurano
       delete('/' + id.to_s)
     end
 
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify)
       # Roles cannot be modified, so must delete and post.
       delete('/' + remote[@itemkey]) do |request, http|
         response = http.request(request)
@@ -112,7 +113,8 @@ module MrMurano
       @location = $cfg['location.users']
     end
 
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify)
       # TODO figure out APIs for updating users.
       say_warning "Updating Users isn't working currently."
       # post does work if the :password field is set.

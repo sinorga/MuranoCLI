@@ -80,7 +80,8 @@ module MrMurano
     #
     # @param src Pathname: Full path of where to upload from
     # @param item Hash: The item details to upload
-    def upload(src, item)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(src, item, modify)
       raise "Forgotten implementation"
     end
 
@@ -310,7 +311,7 @@ module MrMurano
         toadd.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            upload(item[:local_path], item.reject{|k,v| k==:local_path})
+            upload(item[:local_path], item.reject{|k,v| k==:local_path}, false)
           end
         end
       end
@@ -318,7 +319,7 @@ module MrMurano
         tomod.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
-            upload(item[:local_path], item.reject{|k,v| k==:local_path})
+            upload(item[:local_path], item.reject{|k,v| k==:local_path}, true)
           end
         end
       end

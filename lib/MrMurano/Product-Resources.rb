@@ -140,7 +140,8 @@ module MrMurano
 
     ## Upload a resource.
     # this is for SyncUpDown
-    def upload(src, item)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(src, item, modify)
       # TODO: handle modify case.
       create(item[:name], item[:format])
     end

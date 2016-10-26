@@ -184,7 +184,8 @@ module MrMurano
 
     ## Upload data for content item
     # TODO: add support for passing in IOStream
-    def upload(id, path)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(id, path, modify=false)
       path = Pathname.new(path) unless path.kind_of? Pathname
 
       mime = MIME::Types.type_for(path.to_s)[0] || MIME::Types["application/octet-stream"][0]

@@ -62,7 +62,8 @@ module MrMurano
 
     ##
     # Upload a file
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify)
       local = Pathname.new(local) unless local.kind_of? Pathname
 
       uri = endPoint('upload' + remote[:path])

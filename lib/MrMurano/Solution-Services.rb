@@ -47,7 +47,8 @@ module MrMurano
       delete('/'+name)
     end
 
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify=false)
       local = Pathname.new(local) unless local.kind_of? Pathname
       raise "no file" unless local.exist?
 
