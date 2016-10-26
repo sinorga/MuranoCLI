@@ -212,7 +212,7 @@ module MrMurano
       here.delete_if do |i|
         i[@itemkey] == item[@itemkey]
       end
-      here << item.reject{|k,v| k==:synckey or k==:rid}
+      here << item.reject{|k,v| k==:synckey or k==:rid or k==:name}
       here.map!{|i| Hash.transform_keys_to_strings(i)}
       local.open('wb') do |io|
         io << {'resources'=>here}.to_yaml
