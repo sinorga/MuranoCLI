@@ -27,9 +27,6 @@ module MrMurano
     end
 
     def self.each_filtered(opt, &block)
-      if not opt.kind_of?(Hash) then
-        opt = opt.__hash__
-      end
       self.checkSAME(opt)
       @@syncset.each do |a|
         if opt[a.name.to_sym] or opt[a.type.to_sym] then
@@ -41,9 +38,6 @@ module MrMurano
     ## Adjust options based on all or none
     # If none are selected, select the bydefault ones.
     def self.checkSAME(opt)
-      if not opt.kind_of?(Hash) then
-        opt = opt.__hash__
-      end
       if opt[:all] then
         @@syncset.each {|a| opt[a.name.to_sym] = true }
       else
