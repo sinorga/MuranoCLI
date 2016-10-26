@@ -142,7 +142,11 @@ module MrMurano
     # this is for SyncUpDown
     # @param modify Bool: True if item exists already and this is changing it
     def upload(src, item, modify)
-      # TODO: handle modify case.
+      if modify then
+        # this is usually a format change, which can only be set on create.
+        # So delete then create.
+        remove(item[:rid])
+      end
       create(item[:name], item[:format])
     end
 
