@@ -102,7 +102,7 @@ RSpec.describe MrMurano::ProductResources do
         to_return(body: [{:id=>1, :status=>"ok", :result=>{:aliases=>{:abcdefg=>["bob"]}}}])
 
       ret = @prd.list
-      expect(ret).to eq([{:alias=>"bob", :name=>"bob", :rid=>:abcdefg}])
+      expect(ret).to eq([{:alias=>"bob", :rid=>:abcdefg}])
     end
   end
 
