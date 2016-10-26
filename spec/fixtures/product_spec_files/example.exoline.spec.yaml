@@ -1,0 +1,116 @@
+
+# Example client specification file
+# Specification files are in YAML format (a superset of JSON
+# with more readable syntax and support for comments) and
+# look like this. They may contain comments that begin
+# with a # sign.
+
+# Device client model information
+device:
+    model: "myModel"
+    vendor: "myVendor"
+
+# list of dataports that must exist
+dataports:
+      # this the absolute minimum needed to specify a
+      # dataport.
+    - alias: mystring
+      # names are created, but not compared
+    - name: Temperature
+      # aliases, type, and format are created
+      # and compared
+      alias: temp
+      format: float
+      unit: °F
+    - name: LED Control
+      alias: led6
+      format: integer
+    - alias: config
+      # format should be string, and parseable JSON
+      format: string/json
+      # initial value (if no other value is read back)
+      initial: '{"text": "555-555-1234", "email": "jeff@555.com"}'
+    - alias: person
+      format: string/json
+      # JSON schema specified inline (http://json-schema.org/)
+      # format must be string/json to do validate
+      # you may also specify a string to reference schema in an
+      # external file. E.g. jsonschema: personschema.json
+      jsonschema: {"title": "Person Schema",
+                   "type": "object",
+                   "properties": {"name": {"type": "string"}},
+                   "required": ["name"]}
+      initial: '{"name":"John Doe"}'
+    - alias: place
+      # An description of the dataport.
+      description: 'This is a place I have been'
+      # Dataports are not public by default,
+      # but if you want to share one with the world
+      public: true
+
+    # any dataports not listed but found in the client
+    # are ignored. The spec command does not delete things.
+
+# list of script datarules that must exist
+scripts:
+    # by default, scripts are datarules with
+    # names and aliases set to the file name
+    - file: test/files/helloworld.lua
+    # you can also set them explicitly
+    - file: test/files/helloworld.lua
+      alias: greeting
+    # you can also place lua code inline
+    - alias: singleLineScript
+      code: debug('hello from inside lua!')
+    # multiline lua scripts should start with | and
+    # be indented inside the "code:" key.
+    - alias: multilineScript
+      code: |
+        for x=1,10 do
+            debug('hello from for loop ' .. x)
+        end
+    # simple templating for script aliases and
+    # content is also supported.
+    - file: test/files/convert.lua
+      # if <% id %> is embedded in aliases
+      # or script content, the --ids parameter must
+      # be passed in. The spec command then expects
+      # a script or dataport resource per id passed, substituting
+      # each ID for <% id %>. In this example, if the command was:
+      #
+      # $ exo spec mysensor sensorspec.yaml --ids=A,B
+      #
+      # ...then the spec command looks for *two* script datarules
+      # in mysensor, with aliases convertA.lua and convertB.lua.
+      # Additionally, any instances of <% id %> in the content of
+      # convert.lua are substituted with A and B before being
+      # written to each script datarule.
+      #
+      alias: convert<% id %>.lua
+
+# list of dispatches that must exist
+dispatches:
+    - alias: myDispatch
+      # email | http_get | http_post | http_put | sms | xmpp
+      method: email
+      recipient: support@exosite.com
+      message: hello from Exoline spec example!
+      subject: hello!
+      # may be an RID or alias
+      subscribe: mystring
+
+# list of simple datarules that must exist.
+# scripts may go here too, but it's better to
+# to put them under scripts (above)
+datarules:
+    - alias: highTemp
+      format: float
+      subscribe: temp
+      rule: {
+        "simple": {
+          "comparison": "gt",
+          "constant": 80,
+          "repeat": true
+        }
+      }
+

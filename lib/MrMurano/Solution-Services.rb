@@ -47,7 +47,8 @@ module MrMurano
       delete('/'+name)
     end
 
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify=false)
       local = Pathname.new(local) unless local.kind_of? Pathname
       raise "no file" unless local.exist?
 
@@ -164,6 +165,7 @@ module MrMurano
       item[:name]
     end
   end
+  SyncRoot.add('modules', Library, 'M', %{Modules}, true)
 
   # …/eventhandler
   class EventHandler < ServiceBase
@@ -222,7 +224,7 @@ module MrMurano
       "#{item[:service]}_#{item[:event]}"
     end
   end
+  SyncRoot.add('eventhandlers', EventHandler, 'E', %{Event Handlers}, true)
 
-  # How do we enable product.id to flow into the eventhandler?
 end
 #  vim: set ai et sw=2 ts=2 :

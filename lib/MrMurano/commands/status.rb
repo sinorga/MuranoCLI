@@ -3,23 +3,20 @@ command :status do |c|
   c.syntax = %{mr status [options]}
   c.description = %{Get the status of files}
   c.option '--all', 'Check everything'
-  c.option '-s','--[no-]files', %{Static Files}
-  c.option '-a','--[no-]endpoints', %{Endpoints}
-  c.option '-m','--[no-]modules', %{Modules}
-  c.option '-e','--[no-]eventhandlers', %{Event Handlers}
-  c.option '--[no-]roles', %{Roles}
-  c.option '--[no-]users', %{Users}
+
+  # Load options to control which things to status
+  MrMurano::SyncRoot.each_option do |s,l,d|
+    c.option s, l, d
+  end
 
   c.option '--[no-]asdown', %{Report as if syncdown instead of syncup}
   c.option '--[no-]diff', %{For modified items, show a diff}
   c.option '--[no-]grouped', %{Group all adds, deletes, and mods together}
   c.option '--[no-]showall', %{List unchanged as well}
-  
+
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true, :diff=>false,
       :grouped => true
-
-    MrMurano.checkSAME(options)
 
     def fmtr(item)
       if item.has_key? :local_path then
@@ -54,41 +51,11 @@ command :status do |c|
         pretty(ret, options)
       end
     end
-    
-    if options.endpoints then
-      sol = MrMurano::Endpoint.new
-      ret = sol.status(options)
-      gmerge(ret, 'A', options)
-    end
 
-    if options.modules then
-      sol = MrMurano::Library.new
+    MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
+      sol = klass.new
       ret = sol.status(options)
-      gmerge(ret, 'M', options)
-    end
-
-    if options.eventhandlers then
-      sol = MrMurano::EventHandler.new
-      ret = sol.status(options)
-      gmerge(ret, 'E', options)
-    end
-
-    if options.roles then
-      sol = MrMurano::Role.new
-      ret = sol.status(options)
-      gmerge(ret, 'R', options)
-    end
-
-    if options.users then
-      sol = MrMurano::User.new
-      ret = sol.status(options)
-      gmerge(ret, 'U', options)
-    end
-
-    if options.files then
-      sol = MrMurano::File.new
-      ret = sol.status(options)
-      gmerge(ret, 'S', options)
+      gmerge(ret, type, options)
     end
 
     pretty(@grouped, options) if options.grouped

@@ -11,11 +11,17 @@ module MrMurano
       @pid = $cfg['product.id']
       raise "No Product ID!" if @pid.nil?
       @uriparts = [:product, @pid]
+      @locationbase = $cfg['location.base']
+      @location = nil
     end
 
     include Http
     include Verbose
 
+    ## Generate an endpoint in Murano
+    # Uses the uriparts and path
+    # @param path String: any additional parts for the URI
+    # @return URI: The full URI for this enpoint.
     def endPoint(path='')
       parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
       s = parts.map{|v| v.to_s}.join('/')
@@ -24,18 +30,25 @@ module MrMurano
   end
 
   class Product < ProductBase
+    ## Get info about the product
     def info
       get('/info')
     end
 
+    ## List enabled devices
     def list(offset=0, limit=50)
       get("/device/?offset=#{offset}&limit=#{limit}")
     end
 
+    ## Enable a serial number
+    # This creates the device and opens the activation window.
     def enable(sn)
       post("/device/#{sn.to_s}")
     end
 
+    ## Upload a spec file.
+    #
+    # Note that this will fail if any of the resources already exist.
     def update(specFile)
       specFile = Pathname.new(specFile) unless specFile.kind_of? Pathname
 
@@ -53,10 +66,45 @@ module MrMurano
       ret
     end
 
+    ## Write a value to an alias on a device
     def write(sn, values)
       post("/write/#{sn}", values)
     end
 
+    ## Converts an exoline style spec file into a Murano style one
+    # @param fin IO: IO Stream to read from
+    # @return String: Converted yaml data
+    def convertit(fin)
+      specOut = {'resources'=>[]}
+      spec = YAML.load(fin)
+      if spec.has_key?('dataports') and spec['dataports'].kind_of?(Array) then
+        dps = spec['dataports'].map do |dp|
+          dp.delete_if{|k,v| k != 'alias' and k != 'format' and k != 'initial'}
+          dp['format'] = 'string' if (dp['format']||'')[0..5] == 'string'
+          dp
+        end
+        specOut['resources'] = dps
+      else
+        raise "No dataports section found, or not an array"
+      end
+      specOut
+    end
+
+    ## Converts an exoline style spec file into a Murano style one
+    # @param specFile String: Path to file or '-' for stdin
+    # @return String: Converted yaml data
+    def convert(specFile)
+      if specFile == '-' then
+        convertit($stdin).to_yaml
+      else
+        specFile = Pathname.new(specFile) unless specFile.kind_of? Pathname
+        out = ''
+        specFile.open() do |fin|
+          out = convertit(fin).to_yaml
+        end
+        out
+      end
+    end
   end
 
   ##
@@ -136,7 +184,8 @@ module MrMurano
 
     ## Upload data for content item
     # TODO: add support for passing in IOStream
-    def upload(id, path)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(id, path, modify=false)
       path = Pathname.new(path) unless path.kind_of? Pathname
 
       mime = MIME::Types.type_for(path.to_s)[0] || MIME::Types["application/octet-stream"][0]

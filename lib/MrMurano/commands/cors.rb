@@ -18,7 +18,8 @@ module MrMurano
     # Upload CORS
     # :local path to file to push
     # :remote hash of method and endpoint path (ignored for now)
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify=false)
       local = Pathname.new(local) unless local.kind_of? Pathname
       raise "no file" unless local.exist?
 

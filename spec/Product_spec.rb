@@ -1,4 +1,5 @@
 require 'MrMurano/version'
+require 'MrMurano/Config'
 require 'MrMurano/Product'
 
 RSpec.describe MrMurano::Product, "#product" do
@@ -99,6 +100,42 @@ RSpec.describe MrMurano::Product, "#product" do
 
     ret = @prd.write(42, {:temp=>78, :humid=>50})
     expect(ret).to eq({:temp=> "ok", :humid=> "ok"})
+  end
+
+  context "converting a specFile" do
+    it "can convert a file" do
+      out = @prd.convert('spec/fixtures/product_spec_files/gwe.exoline.spec.yaml')
+      want = IO.read('spec/fixtures/product_spec_files/gwe.murano.spec.yaml')
+
+      expect(out).to eq(want)
+    end
+
+    it "can convert stdin" do
+      File.open('spec/fixtures/product_spec_files/gwe.exoline.spec.yaml') do |fin|
+        begin
+          $stdin = fin
+          out = @prd.convert('-')
+          want = IO.read('spec/fixtures/product_spec_files/gwe.murano.spec.yaml')
+
+          expect(out).to eq(want)
+        ensure
+          $stdin = STDIN
+        end
+      end
+    end
+
+    it "converts a fully featured exoline spec file" do
+      out = @prd.convert('spec/fixtures/product_spec_files/example.exoline.spec.yaml')
+      want = IO.read('spec/fixtures/product_spec_files/example.murano.spec.yaml')
+
+      expect(out).to eq(want)
+    end
+
+    it "raises when not an exoline spec" do
+      expect {
+        @prd.convert('spec/fixtures/product_spec_files/example.murano.spec.yaml')
+      }.to raise_exception('No dataports section found, or not an array')
+    end
   end
 
 end
