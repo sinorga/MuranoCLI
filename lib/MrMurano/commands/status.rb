@@ -3,13 +3,11 @@ command :status do |c|
   c.syntax = %{mr status [options]}
   c.description = %{Get the status of files}
   c.option '--all', 'Check everything'
-  c.option '-s','--[no-]files', %{Static Files}
-  c.option '-a','--[no-]endpoints', %{Endpoints}
-  c.option '-m','--[no-]modules', %{Modules}
-  c.option '-e','--[no-]eventhandlers', %{Event Handlers}
-  c.option '--[no-]roles', %{Roles}
-  c.option '--[no-]users', %{Users}
-  c.option '-p','--[no-]spec', %{Product Specification}
+
+  # Load options to control which things to status
+  MrMurano::SyncRoot.each_option do |s,l,d|
+    c.option s, l, d
+  end
 
   c.option '--[no-]asdown', %{Report as if syncdown instead of syncup}
   c.option '--[no-]diff', %{For modified items, show a diff}
