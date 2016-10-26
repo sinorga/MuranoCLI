@@ -94,6 +94,14 @@ module MrMurano
       ret
     end
 
+    ## Fetch data from one resource
+    def fetch(rid)
+      do_rpc({:id=>1,
+              :procedure=>:info,
+              :arguments=>[rid, {}],
+      })
+    end
+
     ## Remove a resource by RID
     def remove(rid)
       do_rpc({:id=>1,
@@ -182,6 +190,9 @@ module MrMurano
     def download(local, item)
       # needs to append/merge with file
       # for now, we'll read, modify, write
+      data = fetch(item[:rid])
+      item[:format] = data[:description][:format]
+
       here = []
       if local.exist? then
         local.open('rb') {|io| here = YAML.load(io)}
