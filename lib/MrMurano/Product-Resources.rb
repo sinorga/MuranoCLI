@@ -85,7 +85,6 @@ module MrMurano
         aliases.each do |al|
           ret << {
             :alias => al,
-            :name => al,
             :rid => rid
           }
         end
@@ -112,6 +111,7 @@ module MrMurano
 
     ## Create a new resource in the prodcut
     def create(alias_id, format=:string)
+      raise "Alias cannot be nil" if alias_id.nil?
       # create then map.
       rid = do_rpc({:id=>1,
                   :procedure=>:create,
@@ -139,7 +139,8 @@ module MrMurano
         # So delete then create.
         remove(item[:rid])
       end
-      create(item[:name], item[:format])
+      r = create(item[:alias], item[:format])
+      raise "Create Failed: #{r}" unless r.nil?
     end
 
     ## Use alias for doing sync compares
@@ -194,9 +195,9 @@ module MrMurano
         end
       end
       here.delete_if do |i|
-        i[@itemkey] == item[@itemkey]
+        i[:alias] == item[:alias]
       end
-      here << item.reject{|k,v| k==:synckey or k==:rid or k==:name}
+      here << item.reject{|k,v| k==:synckey or k==:rid}
       here.map!{|i| Hash.transform_keys_to_strings(i)}
       local.open('wb') do |io|
         io << {'resources'=>here}.to_yaml
@@ -207,16 +208,21 @@ module MrMurano
       # needs to append/merge with file
       # for now, we'll read, modify, write
       here = []
-      if local.exist? then
-        local.open('rb') {|io| here = YAML.load(io)}
+      if dest.exist? then
+        dest.open('rb') {|io| here = YAML.load(io)}
         here = [] if here == false
+        if here.kind_of?(Hash) and here.has_key?('resources') then
+          here = here['resources'].map{|i| Hash.transform_keys_to_symbols(i)}
+        else
+          here = []
+        end
       end
-      key = @itemkey.to_sym
       here.delete_if do |it|
-        Hash.transform_keys_to_symbols(it)[key] == item[key]
+        it[:alias] == item[:alias]
       end
-      local.open('wb') do|io|
-        io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
+      here.map!{|i| Hash.transform_keys_to_strings(i)}
+      dest.open('wb') do|io|
+        io << {'resources'=>here}.to_yaml
       end
     end
 
