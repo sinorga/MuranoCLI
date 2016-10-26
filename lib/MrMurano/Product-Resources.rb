@@ -203,13 +203,19 @@ module MrMurano
       if local.exist? then
         local.open('rb') {|io| here = YAML.load(io)}
         here = [] if here == false
+        if here.kind_of?(Hash) and here.has_key?('resources') then
+          here = here['resources'].map{|i| Hash.transform_keys_to_symbols(i)}
+        else
+          here = []
+        end
       end
       here.delete_if do |i|
-        Hash.transform_keys_to_symbols(i)[@itemkey] == item[@itemkey]
+        i[@itemkey] == item[@itemkey]
       end
-      here << item.reject{|k,v| k==:synckey}
+      here << item.reject{|k,v| k==:synckey or k==:rid}
+      here.map!{|i| Hash.transform_keys_to_strings(i)}
       local.open('wb') do |io|
-        io.write here.map{|i| Hash.transform_keys_to_strings(i)}.to_yaml
+        io << {'resources'=>here}.to_yaml
       end
     end
 
