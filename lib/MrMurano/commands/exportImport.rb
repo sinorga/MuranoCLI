@@ -8,7 +8,7 @@ command 'config export' do |c|
   c.description = %{Export data to Solutionfiles
 
   This will write to the Solutionfile.json and .Solutionfile.secret used by the
-  exosite-cil tool.
+  exosite-cli tool.
 
   This also will merge all of the endpoints into a single 'routes.lua' file.
   }
