@@ -1,6 +1,6 @@
 Readme:
 	- Add more walk-thrus of common actions. (create new solution, …)
-	- Look into using VCR for testing.
+	- Look into using VCR for testing. @pri(low)
 
 Commands:
 	- Status will show {modules,eventhandlers} have changes when they don’t. @done(2016-09-23)
@@ -18,7 +18,7 @@ Endpoints:
 
 Files:
 	- Add ignore patterns to config
-	- Switch to mime-types v3
+	- Switch to mime-types v3 @pri(low)
 	- Figure out how to make the hexed-sha checksum faster. @done(2016-09-23)
 	- Fix upload. @done(2016-08-01)
 	- Files won't update, they always delete then add. @done(2016-07-28)
@@ -34,11 +34,15 @@ CORS:
 	- Get working with sync up/down.
 	- GET&PUT /cors data @done(2016-09-08)
 
+TSDB:
+	- Add support for new TSDB service.
+
 Timeseries:
 	- Add CSV output option. @done(2016-09-09)
 
 Product:
-	- Auto convert exoline spec files into murano spec files on upload?
+	- Auto convert exoline spec files into murano spec files on upload? @done(2016-10-27)
+	Not doing this. Convert is there if you need it.
 	- write alias command @done(2016-09-26)
 	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
 
