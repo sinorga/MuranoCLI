@@ -76,7 +76,7 @@ module MrMurano
     end
 
   end
-  SyncRoot.add('cors', Cors, 'C', %{CORS settings})
+  SyncRoot.add('cors', Cors, 'Z', %{CORS settings})
 end
 
 #  vim: set ai et sw=2 ts=2 :
