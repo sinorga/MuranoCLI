@@ -21,7 +21,11 @@ end
 
 command 'product spec push' do |c|
   c.syntax = %{mr product spec push [--file FILE]}
-  c.summary = %{Upload a new specification for a product}
+  c.summary = %{Upload a new specification for a product [Deprecated]}
+  c.description = %{Convert exoline spec file into Murano format
+
+This is deprecated.  Use `mr syncup --specs` instead.
+  }
 
   c.option '--file FILE', "The spec file to upload"
 

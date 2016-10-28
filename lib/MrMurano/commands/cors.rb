@@ -3,7 +3,7 @@ require 'MrMurano/Solution-Cors'
 
 command :cors do |c|
   c.syntax = %{mr cors [options]}
-  c.summary = %{Get or set the CORS for the solution. [Depercated]}
+  c.summary = %{Get or set the CORS for the solution. [Deprecated]}
   c.description = %{Get or set the CORS for the solution.
 
 This is deprecated.  Use `mr syncup --cors` or `mr syncdown --cors` instead.
