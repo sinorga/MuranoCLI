@@ -35,6 +35,7 @@ This is deprecated.  Use `mr syncup --specs` instead.
   # - $cfg['product.spec']
 
   c.action do |args, options|
+    say_warning "This is deprecated.  Use `mr syncup --specs` instead."
 
     file = $cfg['product.spec']
     prid = $cfg['product.id']
