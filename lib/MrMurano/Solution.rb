@@ -6,7 +6,6 @@ require 'MrMurano/SyncUpDown'
 
 module MrMurano
   class SolutionBase
-    # This might also be a valid ProductBase.
     def initialize
       @sid = $cfg['solution.id']
       raise "No solution!" if @sid.nil?
