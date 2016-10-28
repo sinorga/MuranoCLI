@@ -81,6 +81,7 @@ module MrMurano
       set('location.eventhandlers', 'eventhandlers', :defaults)
       set('location.roles', 'roles.yaml', :defaults)
       set('location.users', 'users.yaml', :defaults)
+      set('location.cors', 'cors.yaml', :defaults)
 
       set('files.default_page', 'index.html', :defaults)
 
