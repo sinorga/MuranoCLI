@@ -7,10 +7,15 @@ module MrMurano
         say msg
       end
     end
+
     def debug(msg)
       if $cfg['tool.debug'] then
         say msg
       end
+    end
+
+    def warning(msg)
+      say_warning msg
     end
   end
 end
