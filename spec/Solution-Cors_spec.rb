@@ -67,7 +67,7 @@ RSpec.describe MrMurano::Cors do
         ret << chunk
         expect(loops).to be <= 1
       end
-      expect(ret).to eq(cors.to_yaml)
+      expect(ret).to eq(Hash.transform_keys_to_strings(cors).to_yaml)
     end
   end
 
@@ -115,7 +115,7 @@ RSpec.describe MrMurano::Cors do
               :credentials=>true}
 
       Tempfile.open('cors.yaml') do |tio|
-        tio << cors.to_yaml
+        tio << Hash.transform_keys_to_strings(cors).to_yaml
         tio.close
 
         ret = @srv.localitems(tio.path)
