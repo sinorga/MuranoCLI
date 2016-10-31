@@ -37,7 +37,7 @@ RSpec.describe MrMurano::Config::ConfigFile do
   end
 
   it "loads a file" do
-      cf = MrMurano::Config::ConfigFile.new(:project, 'spec/testfiles/configfile')
+      cf = MrMurano::Config::ConfigFile.new(:project, 'spec/fixtures/configfile')
       cf.load
 
       expect(cf[:data]['solution']['id']).to eq('XXXXXXXXXX')

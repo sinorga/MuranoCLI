@@ -88,7 +88,7 @@ RSpec.describe MrMurano::Product, "#product" do
       to_return(body: rbody.to_json)
 
     # Open test file sepc.yaml
-    ret = @prd.update('spec/lightbulb.yaml')
+    ret = @prd.update('spec/fixtures/product_spec_files/lightbulb.yaml')
     expect(ret).to eq(rbody)
   end
 
