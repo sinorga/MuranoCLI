@@ -61,6 +61,10 @@ SolutionBase:
 	- Add the --curl verbose option. @done(2016-08-12)
 	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
 
+Windows:
+	- Need to test with http://rubyinstaller.org on Windows. @pri(high)
+	- Look into http://ocra.rubyforge.org for building an exec. @pri(high)
+
 Bundles:
 	- Revisit this idea. Its complexity may not be worth its value.
 	- Test syncdown behavor.
