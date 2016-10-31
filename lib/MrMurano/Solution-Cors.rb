@@ -18,11 +18,11 @@ module MrMurano
 
     def fetch(id=nil, &block)
       ret = get()
-      data = JSON.parse(ret[:cors])
+      data = JSON.parse(ret[:cors], @json_opts)
       # XXX cors is a JSON encoded string. That seems weird. keep an eye on this.
       if block_given? then
         yield data.to_yaml
-        yield nil
+        #yield nil
       else
         data
       end
