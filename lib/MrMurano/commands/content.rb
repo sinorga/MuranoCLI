@@ -1,3 +1,4 @@
+require 'MrMurano/Product'
 
 command 'content list' do |c|
   c.syntax = %{mr content list}
@@ -45,7 +46,7 @@ command 'content delete' do |c|
       say_error "Missing <content id>"
     else
       prd = MrMurano::ProductContent.new
-      pp prd.remove(args[0])
+      prd.outf prd.remove(args[0])
     end
   end
 end
@@ -72,10 +73,10 @@ command 'content upload' do |c|
 
       ret = prd.info(args[0])
       if ret.nil? then
-        pp prd.create(args[0], options.meta)
+        prd.outf prd.create(args[0], options.meta)
       end
 
-      pp prd.upload(args[0], args[1])
+      prd.outf prd.upload(args[0], args[1])
     end
   end
 end

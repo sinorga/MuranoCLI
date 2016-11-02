@@ -44,7 +44,7 @@ This is deprecated.  Use `mr syncup --specs` instead.
 
     if not file.nil? and FileTest.exist?(file) then
       prd = MrMurano::Product.new
-      pp prd.update(file)
+      prd.outf prd.update(file)
     else
       say_error "No spec file to push: #{file}"
     end
@@ -77,15 +77,15 @@ command 'product spec pull' do |c|
         Hash.transform_keys_to_strings(r)
       end
       spec = { 'resources'=> resources }
-      output = spec.to_yaml
+      output = spec
     end
 
     if options.output then
       File.open(options.output, 'w') do |io|
-        io << output
+        io << output.to_yaml
       end
     else
-      puts output
+      prd.outf output
     end
   end
 end

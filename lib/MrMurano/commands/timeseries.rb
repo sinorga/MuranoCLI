@@ -65,13 +65,10 @@ command 'timeseries write' do |c|
   c.option '--[no-]json', %{Display results as raw json}
   c.action do |args,options|
     options.defalts :json=>false
+    $cfg['tool.outformat'] = 'json' if options.json
     sol = MrMurano::Timeseries.new
     ret = sol.write args.join(' ')
-    if options.json then
-      puts ret.to_json
-    else
-      pp ret
-    end
+    sol.outf ret
   end
 end
 alias_command :tsw, 'timeseries write'
@@ -82,13 +79,10 @@ command 'timeseries command' do |c|
   c.option '--[no-]json', %{Display results as raw json}
   c.action do |args,options|
     options.defalts :json=>false
+    $cfg['tool.outformat'] = 'json' if options.json
     sol = MrMurano::Timeseries.new
     ret = sol.command args.join(' ')
-    if options.json then
-      puts ret.to_json
-    else
-      pp ret
-    end
+    sol.outf ret
   end
 end
 

@@ -53,6 +53,7 @@ module MrMurano
 
   class Account
     include Http
+    include Verbose
 
     def endPoint(path)
       URI('https://' + $cfg['net.host'] + '/api:1/' + path.to_s)

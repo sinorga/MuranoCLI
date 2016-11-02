@@ -7,7 +7,7 @@ module MrMurano
     end
 
     def keyinfo
-      ret = get("/#{scid}/call/info")
+      get("/#{scid}/call/info")
     end
 
     def listkeys
@@ -40,7 +40,7 @@ command 'keystore info' do |c|
   c.description = %{Show info about the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
-    pp sol.keyinfo
+    sol.outf sol.keyinfo
   end
 end
 
@@ -49,9 +49,7 @@ command 'keystore list' do |c|
   c.description = %{List all of the keys in the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
-    sol.listkeys.each do |key|
-      puts key
-    end
+    sol.outf sol.listkeys
   end
 end
 alias_command :keystore, 'keystore list'
@@ -62,7 +60,7 @@ command 'keystore get' do |c|
   c.action do |args,options|
     sol = MrMurano::Keystore.new
     ret = sol.getkey(args[0])
-    puts ret
+    sol.outf ret
   end
 end
 
@@ -104,10 +102,10 @@ See http://docs.exosite.com/murano/services/keystore/#command for current list.
       sol = MrMurano::Keystore.new
       ret = sol.command(args[1], args[0], args[2..-1])
       if ret.has_key?(:value) then
-        puts ret[:value]
+        sol.outf ret[:value]
       else
         say_error "#{ret[:code]}: #{ret.message}"
-        pp ret[:error] if ($cfg['tool.debug'] and ret.has_key?(:error))
+        sol.outf ret[:error] if ($cfg['tool.debug'] and ret.has_key?(:error))
       end
     end
   end

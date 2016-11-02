@@ -18,7 +18,7 @@ command 'solution delete' do |c|
 
     if $cfg['tool.debug'] then
       say "Matches found:"
-      pp ret
+      acc.outf ret
     end
 
     if ret.empty? then

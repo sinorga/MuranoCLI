@@ -68,7 +68,7 @@ CIK again.
     sn = args.first
 
     prd = MrMurano::ProductSerialNumber.new
-    pp prd.activate(sn)
+    prd.outf prd.activate(sn)
 
   end
 end
