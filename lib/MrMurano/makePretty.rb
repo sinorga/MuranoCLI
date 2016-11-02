@@ -1,14 +1,23 @@
 require 'date'
 require 'json'
-require 'rainbow/ext/string'
+require 'highline'
 
 module MrMurano
   module Pretties
+
+    HighLine::Style.new(:name=>:on_aliceblue, :code=>"\e[48;5;231m", :rgb=>[240, 248, 255])
+    PRETTIES_COLORSCHEME = HighLine::ColorScheme.new do |cs|
+      cs[:subject] = [:red, :on_aliceblue]
+      cs[:timestamp] = [:blue]
+      cs[:json] = [:magenta]
+    end
+    HighLine.color_scheme = PRETTIES_COLORSCHEME
+
     def self.makeJsonPretty(data, options)
       if options.pretty then
         ret = JSON.pretty_generate(data).to_s
-        ret[0] = ret[0].color(:magenta)
-        ret[-1] = ret[-1].color(:magenta)
+        ret[0] = HighLine.color(ret[0], :json)
+        ret[-1] = HighLine.color(ret[-1], :json)
         ret
       else
         data.to_json
@@ -17,8 +26,8 @@ module MrMurano
 
     def self.makePretty(line, options)
       out=''
-      out << "#{line[:type] || '--'} ".upcase.color(:red).background(:aliceblue)
-      out << "[#{line[:subject] || ''}]".color(:red).background(:aliceblue)
+      out << HighLine.color("#{line[:type] || '--'} ".upcase, :subject)
+      out << HighLine.color("[#{line[:subject] || ''}]", :subject)
       out << " "
       if line.has_key?(:timestamp) then
         if line[:timestamp].kind_of? Numeric then
@@ -33,7 +42,7 @@ module MrMurano
       else
         curtime = "<no timestamp>"
       end
-      out << curtime.color(:blue)
+      out << HighLine.color(curtime, :timestamp)
       out << ":\n"
       if line.has_key?(:data) then
         data = line[:data]
