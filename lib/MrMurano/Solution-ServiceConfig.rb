@@ -18,13 +18,31 @@ module MrMurano
     def scid_for_name(name)
       name = name.to_s unless name.kind_of? String
       scr = list().select{|i| i[:service] == name}.first
-      scid = scr[:id]
+      scr[:id]
     end
 
     def scid
       return @scid unless @scid.nil?
       @scid = scid_for_name(@serviceName)
     end
+
+    def info(id=scid)
+      get("/#{id}/info")
+    end
+
+    def logs(id=scid)
+      get("/#{id}/logs")
+    end
+
+    def call(op, post=nil, id=scid)
+      call = "/#{id.to_s}/call/#{op.to_s}"
+      if post.nil? then
+        get(call)
+      else
+        post(call, post)
+      end
+    end
+
   end
 
   class SC_Device < ServiceConfig
