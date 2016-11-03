@@ -18,6 +18,7 @@ module MrMurano
     def scid_for_name(name)
       name = name.to_s unless name.kind_of? String
       scr = list().select{|i| i[:service] == name}.first
+      return nil if scr.nil?
       scr[:id]
     end
 
@@ -46,7 +47,9 @@ module MrMurano
         data = {} if data.nil?
         put(call, data, &block)
       when :delete
-        put(call, &block)
+        delete(call, &block)
+      else
+        raise "Unknown method: #{meth}"
       end
     end
 
