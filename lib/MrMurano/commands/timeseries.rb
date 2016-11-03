@@ -25,6 +25,7 @@ end
 command 'timeseries query' do |c|
   c.syntax = %{mr timeseries query <query string>}
   c.description = %{Query the timeseries database}
+  c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
   c.option '--[no-]json', %{Display results as raw json}
   c.option '--[no-]csv', %{Display results as CSV}
 
@@ -32,29 +33,28 @@ command 'timeseries query' do |c|
     options.defalts :json=>false, :csv=>false
     sol = MrMurano::Timeseries.new
     ret = sol.query args.join(' ')
-    if options.json then
-      puts ret.to_json
 
-    elsif options.csv then
-      (ret[:results] or []).each do |res|
-        (res[:series] or []).each do |ser|
-          cols = ser[:columns] #.map{|h| "#{ser[:name]}.#{h}"}
-          CSV($stdout, :headers=>cols, :write_headers=>true) do |csv|
-            ser[:values].each{|v| csv << v}
-          end
-        end
-      end
+    $cfg['tool.outformat'] = 'json' if options.json
+    $cfg['tool.outformat'] = 'best csv' if options.csv
 
-    else
-      (ret[:results] or []).each do |res|
-        (res[:series] or []).each do |ser|
-          cols = ser[:columns]
-          table = Terminal::Table.new :title=>ser[:name], :headings=>cols, :rows=>ser[:values]
-          puts table
-        end
-      end
-      # If nothing displayed, Format wasn't what we expected, so do what?
+    io=nil
+    if options.output then
+      io = File.open(options.output, 'w')
     end
+
+    sol.outf(ret, io) do |dd, ios|
+      (ret[:results] or []).each do |res|
+        (res[:series] or []).each do |ser|
+          sol.tabularize({
+            :title=>ser[:name],
+            :headings=>ser[:columns],
+            :rows=>ser[:values]
+          }, ios)
+        end
+      end
+    end
+    io.close unless io.nil?
+
   end
 end
 alias_command :tsq, 'timeseries query'
