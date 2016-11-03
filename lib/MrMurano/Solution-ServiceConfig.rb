@@ -45,6 +45,34 @@ module MrMurano
 
   end
 
+  class Services < SolutionBase
+    def initialize
+      super
+      @uriparts << 'service'
+    end
+
+    def sid_for_name(name)
+      name = name.to_s unless name.kind_of? String
+      scr = list().select{|i| i[:alias] == name}.first
+      scr[:id]
+    end
+
+    def sid
+      return @sid unless @sid.nil?
+      @sid = sid_for_name(@serviceName)
+    end
+
+    def list
+      ret = get()
+      ret[:items]
+    end
+
+    def schema(id=sid)
+      get("/#{id}/schema")
+    end
+  end
+
+
   class SC_Device < ServiceConfig
     def initialize
       super
