@@ -56,37 +56,26 @@ command 'product spec pull' do |c|
   c.summary = %{Pull down the specification for a product}
 
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
-  c.option '--astable', %{Display as pretty table}
   c.option '--aliasonly', 'Only return the aliases'
 
   c.action do |args, options|
     prd = MrMurano::Product.new
     ret = prd.info
 
-    output = ''
-    if options.aliasonly then
-      output = ret[:resources].map{|row| row[:alias]}.join(' ')
-
-    elsif options.astable then
-      # TODO tabular
-      busy = ret[:resources].map{|r| [r[:alias], r[:format], r[:rid]]}
-      output = Terminal::Table.new :rows => busy, :headings => ['Alias', 'Format', 'RID']
-
-    else
-      resources = ret[:resources].map do |r|
-        r.delete(:rid)
-        Hash.transform_keys_to_strings(r)
-      end
-      spec = { 'resources'=> resources }
-      output = spec
-    end
-
+    io=nil
     if options.output then
-      File.open(options.output, 'w') do |io|
-        io << output.to_yaml
+      io = File.open(options.output, 'w')
+    end
+    prd.outf(ret, io) do |dd, ios|
+      if options.aliasonly then
+        ios.puts ret[:resources].map{|row| row[:alias]}.join(' ')
+
+      else
+        prd.tabularize({
+          :rows => ret[:resources].map{|r| [r[:alias], r[:format], r[:rid]]},
+          :headers => ['Alias', 'Format', 'RID']
+        }, ios)
       end
-    else
-      prd.outf output
     end
   end
 end

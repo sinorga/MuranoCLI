@@ -28,8 +28,7 @@ command 'content info' do |c|
     if args[0].nil? then
       prd.error "Missing <content id>"
     else
-      # TODO tabular
-      prd.info(args[0]).each{|line| say "#{args[0]} #{line.join(' ')}"}
+      prd.tabularize prd.info(args[0])
     end
   end
 end
