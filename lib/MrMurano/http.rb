@@ -111,8 +111,9 @@ module MrMurano
       end
     end
 
-    def get(path='', &block)
+    def get(path='', query=nil, &block)
       uri = endPoint(path)
+      uri.query = URI.encode_www_form(query) unless query.nil?
       workit(set_def_headers(Net::HTTP::Get.new(uri)), &block)
     end
 
