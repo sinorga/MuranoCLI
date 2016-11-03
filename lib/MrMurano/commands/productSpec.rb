@@ -66,10 +66,14 @@ command 'product spec pull' do |c|
     if options.output then
       io = File.open(options.output, 'w')
     end
-    prd.outf(ret, io) do |dd, ios|
-      if options.aliasonly then
-        ios.puts ret[:resources].map{|row| row[:alias]}.join(' ')
 
+    if options.aliasonly then
+      ret = ret[:resources].map{|row| row[:alias]}
+    end
+
+    prd.outf(ret, io) do |dd, ios|
+      if ret.kind_of? Array then
+        ios.puts ret.join(' ')
       else
         prd.tabularize({
           :rows => ret[:resources].map{|r| [r[:alias], r[:format], r[:rid]]},
@@ -77,6 +81,7 @@ command 'product spec pull' do |c|
         }, ios)
       end
     end
+    io.close unless io.nil?
   end
 end
 alias_command 'product spec', 'product spec pull'
