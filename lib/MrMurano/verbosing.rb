@@ -21,22 +21,32 @@ module MrMurano
       $stderr.puts HighLine.color(msg, :yellow)
     end
 
+    def error(msg)
+      $stderr.puts HighLine.color(msg, :red)
+    end
+
 
     ## Format and print the object
-    def outf(obj)
+    def outf(obj, ios=nil, &block)
       fmt = $cfg['tool.outformat']
+      ios = $stdout if ios.nil?
       case fmt
       when /yaml/i
-        $stdout.puts obj.to_yaml
+        ios.puts obj.to_yaml
       when /pp/
         pp obj
       when /json/i
-        $stdout.puts obj.to_json
-      else # aka plain.
-        if obj.kind_of?(Array) then
-          obj.each {|i| $stdout.puts i.to_s}
+        ios.puts obj.to_json
+      else # aka best.
+        # sometime ‘best’ is only know by the caller, so block.
+        if block_given? then
+          yield obj
         else
-          $stdout.puts obj.to_s
+          if obj.kind_of?(Array) then
+            obj.each {|i| ios.puts i.to_s}
+          else
+            ios.puts obj.to_s
+          end
         end
       end
     end
