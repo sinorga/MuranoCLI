@@ -6,6 +6,7 @@ require 'pathname'
 require 'yaml'
 require 'MrMurano/Config'
 require 'MrMurano/http'
+require 'MrMurano/verbosing'
 
 module MrMurano
   class Passwords
