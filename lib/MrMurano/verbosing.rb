@@ -40,7 +40,7 @@ module MrMurano
       else # aka best.
         # sometime ‘best’ is only know by the caller, so block.
         if block_given? then
-          yield obj
+          yield obj, ios
         else
           if obj.kind_of?(Array) then
             obj.each {|i| ios.puts i.to_s}
