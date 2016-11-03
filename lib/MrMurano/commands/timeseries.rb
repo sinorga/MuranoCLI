@@ -8,15 +8,15 @@ module MrMurano
     end
 
     def query(query)
-      post("/#{scid}/call/query", {:q=>query})
+      call(:query, :post, {:q=>query})
     end
 
     def write(writestr)
-      post("/#{scid}/call/write", { :query=>writestr })
+      call(:write, :post, { :query=>writestr })
     end
 
     def command(cmd)
-      post("/#{scid}/call/command", { :q=>cmd})
+      call(:command, :post, { :q=>cmd})
     end
 
   end

@@ -18,14 +18,87 @@ module MrMurano
     def scid_for_name(name)
       name = name.to_s unless name.kind_of? String
       scr = list().select{|i| i[:service] == name}.first
-      scid = scr[:id]
+      return nil if scr.nil?
+      scr[:id]
     end
 
     def scid
       return @scid unless @scid.nil?
       @scid = scid_for_name(@serviceName)
     end
+
+    def info(id=scid)
+      get("/#{id}/info")
+    end
+
+    def logs(id=scid)
+      get("/#{id}/logs")
+    end
+
+    def call(opid, meth=:get, data=nil, id=scid, &block)
+      call = "/#{id.to_s}/call/#{opid.to_s}"
+      case meth
+      when :get
+        get(call, data, &block)
+      when :post
+        data = {} if data.nil?
+        post(call, data, &block)
+      when :put
+        data = {} if data.nil?
+        put(call, data, &block)
+      when :delete
+        delete(call, &block)
+      else
+        raise "Unknown method: #{meth}"
+      end
+    end
+
   end
+
+  class Services < SolutionBase
+    def initialize
+      super
+      @uriparts << 'service'
+    end
+
+    def sid_for_name(name)
+      name = name.to_s unless name.kind_of? String
+      scr = list().select{|i| i[:alias] == name}.first
+      scr[:id]
+    end
+
+    def sid
+      return @sid unless @sid.nil?
+      @sid = sid_for_name(@serviceName)
+    end
+
+    def list
+      ret = get()
+      ret[:items]
+    end
+
+    def schema(id=sid)
+      # TODO: cache schema in user dir?
+      get("/#{id}/schema")
+    end
+
+    ## Get list of call operations from a schema
+    def callable(id=sid)
+      scm = schema(id)
+      calls = []
+      scm[:paths].each do |path, methods|
+        methods.each do |method, params|
+          if params.kind_of?(Hash) and
+              not params['x-internal-use'.to_sym] and
+              params.has_key?(:operationId) then
+            calls << [method, params[:operationId]]
+          end
+        end
+      end
+      calls
+    end
+  end
+
 
   class SC_Device < ServiceConfig
     def initialize
