@@ -42,7 +42,7 @@ the activation call within this time, it will need to be enabled again.
     elsif args.count > 0 then
       prd.enable(args[0])
     else
-      say_error "Missing a serial number to enable"
+      prd.error "Missing a serial number to enable"
     end
   end
 end
@@ -61,13 +61,13 @@ CIK again.
 }
 
   c.action do |args,options|
+    prd = MrMurano::ProductSerialNumber.new
     if args.count < 1 then
-      say_error "Serial number missing"
+      prd.error "Serial number missing"
       return
     end
     sn = args.first
 
-    prd = MrMurano::ProductSerialNumber.new
     prd.outf prd.activate(sn)
 
   end

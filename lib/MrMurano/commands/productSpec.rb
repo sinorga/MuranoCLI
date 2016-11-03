@@ -10,11 +10,11 @@ command 'product spec convert' do |c|
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
+    prd = MrMurano::Product.new
     if args.count == 0 then
-      say_error "Missing file"
+      prd.error "Missing file"
     else
-      prd = MrMurano::Product.new
-      puts prd.convert(args[0])
+      prd.outf prd.convert(args[0])
     end
   end
 end
@@ -35,7 +35,8 @@ This is deprecated.  Use `mr syncup --specs` instead.
   # - $cfg['product.spec']
 
   c.action do |args, options|
-    say_warning "This is deprecated.  Use `mr syncup --specs` instead."
+    prd = MrMurano::Product.new
+    prd.warning "This is deprecated.  Use `mr syncup --specs` instead."
 
     file = $cfg['product.spec']
     prid = $cfg['product.id']
@@ -43,10 +44,9 @@ This is deprecated.  Use `mr syncup --specs` instead.
     file = options.file unless options.file.nil?
 
     if not file.nil? and FileTest.exist?(file) then
-      prd = MrMurano::Product.new
       prd.outf prd.update(file)
     else
-      say_error "No spec file to push: #{file}"
+      prd.error "No spec file to push: #{file}"
     end
   end
 end
@@ -68,6 +68,7 @@ command 'product spec pull' do |c|
       output = ret[:resources].map{|row| row[:alias]}.join(' ')
 
     elsif options.astable then
+      # TODO tabular
       busy = ret[:resources].map{|r| [r[:alias], r[:format], r[:rid]]}
       output = Terminal::Table.new :rows => busy, :headings => ['Alias', 'Format', 'RID']
 

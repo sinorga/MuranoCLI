@@ -96,15 +96,15 @@ See http://docs.exosite.com/murano/services/keystore/#command for current list.
   c.example %{mr keystore command lpush mykey A B C}, %{Push three values onto list}
   c.example %{mr keystore command lrem mykey 0 B}, %{Remove all B values from list}
   c.action do |args,options|
+    sol = MrMurano::Keystore.new
     if args.count < 2 then
-      say_error "Not enough params"
+      sol.error "Not enough params"
     else
-      sol = MrMurano::Keystore.new
       ret = sol.command(args[1], args[0], args[2..-1])
       if ret.has_key?(:value) then
         sol.outf ret[:value]
       else
-        say_error "#{ret[:code]}: #{ret.message}"
+        sol.error "#{ret[:code]}: #{ret.message}"
         sol.outf ret[:error] if ($cfg['tool.debug'] and ret.has_key?(:error))
       end
     end

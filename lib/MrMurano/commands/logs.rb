@@ -38,7 +38,7 @@ command :logs do |c|
                                         :create_additions=>false})
                     puts MrMurano::Pretties::makePretty(js, options)
                   rescue
-                    say_error '=== JSON parse error, showing raw instead ==='
+                    sol.error '=== JSON parse error, showing raw instead ==='
                     puts m
                   end
                 end
@@ -68,7 +68,7 @@ command :logs do |c|
           end
         end
       else
-        say_error "Couldn't get logs: #{ret}"
+        sol.error "Couldn't get logs: #{ret}"
         break
       end
 
