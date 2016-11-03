@@ -36,8 +36,6 @@ module MrMurano
 
     def call(opid, meth=:get, data=nil, id=scid, &block)
       call = "/#{id.to_s}/call/#{opid.to_s}"
-      # FIXME: some gets will have query data.  So do this differently.
-
       case meth
       when :get
         get(call, data, &block)
@@ -87,7 +85,9 @@ module MrMurano
       calls = []
       scm[:paths].each do |path, methods|
         methods.each do |method, params|
-          if params.kind_of?(Hash) and params.has_key?(:operationId) then
+          if params.kind_of?(Hash) and
+              not params['x-internal-use'.to_sym] and
+              params.has_key?(:operationId) then
             calls << [method, params[:operationId]]
           end
         end
