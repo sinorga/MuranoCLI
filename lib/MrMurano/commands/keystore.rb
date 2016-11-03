@@ -7,29 +7,29 @@ module MrMurano
     end
 
     def keyinfo
-      get("/#{scid}/call/info")
+      call(:info)
     end
 
     def listkeys
-      ret = get("/#{scid}/call/list")
+      ret = call(:list)
       ret[:keys]
     end
 
     def getkey(key)
-      ret = post("/#{scid}/call/get", {:key=>key})
+      ret = call(:get, :post, {:key=>key})
       ret[:value]
     end
 
     def setkey(key, value)
-      post("/#{scid}/call/set", { :key=>key, :value=>value })
+      call(:set, :post, { :key=>key, :value=>value })
     end
 
     def delkey(key)
-      post("/#{scid}/call/delete", { :key=>key})
+      call(:delete, { :key=>key})
     end
 
     def command(key, cmd, args)
-      post("/#{scid}/call/command", {:key=>key, :command=>cmd, :args=>args})
+      call(:command, {:key=>key, :command=>cmd, :args=>args})
     end
 
   end
