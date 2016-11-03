@@ -14,7 +14,7 @@ module MrMurano
       end
 
       def query(query)
-        call(:query, :post, data)
+        call(:query, :post, query)
       end
 
       def listTags
@@ -112,6 +112,8 @@ Also, many date-time formats can be parsed and will be converted to microseconds
   c.option '--order_by ORDER', ['desc','asc'], %{Return results in ascending or descending time order}
   c.option '--aggregate FUNCS', %{Aggregation functions to apply}
 
+  c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
+
   c.action do |args, options|
     sol = MrMurano::ServiceConfigs::Tsdb.new
 
@@ -137,8 +139,16 @@ Also, many date-time formats can be parsed and will be converted to microseconds
       query[:end_time] = sol.str_to_timestamp(options.end_time)
     end
 
-    query[:relative_start] = options.relative_start unless options.relative_start.nil?
-    query[:relative_end] = options.relative_end unless options.relative_end.nil?
+    unless options.relative_start.nil? then
+      o = options.relative_start
+      o = "-#{o}" unless o[0] == '-'
+      query[:relative_start] = o
+    end
+    unless options.relative_end.nil? then
+      o = options.relative_end
+      o = "-#{o}" unless o[0] == '-'
+      query[:relative_end] = o
+    end
     query[:sampling_size] = options.sampling_size unless options.sampling_size.nil?
 
     query[:limit] = options.limit unless options.limit.nil?
@@ -151,7 +161,17 @@ Also, many date-time formats can be parsed and will be converted to microseconds
       query[:aggregate] = options.aggregate.split(',')
     end
 
-    sol.outf query
+    io=nil
+    if options.output then
+      io = File.open(options.output, 'w')
+    end
+    sol.outf sol.query(query) do |dd, ios|
+      sol.tabularize({
+        :headers=>dd[:columns],
+        :rows=>dd[:values]
+      }, ios)
+    end
+    io.close unless io.nil?
   end
 end
 
