@@ -19,6 +19,7 @@ require 'MrMurano/commands/solutionList'
 require 'MrMurano/commands/status'
 require 'MrMurano/commands/sync'
 require 'MrMurano/commands/timeseries'
+require 'MrMurano/commands/tsdb'
 
 require 'MrMurano/commands/completion'
 
