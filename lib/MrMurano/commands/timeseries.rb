@@ -47,7 +47,7 @@ command 'timeseries query' do |c|
         (res[:series] or []).each do |ser|
           sol.tabularize({
             :title=>ser[:name],
-            :headings=>ser[:columns],
+            :headers=>ser[:columns],
             :rows=>ser[:values]
           }, ios)
         end
