@@ -1,3 +1,4 @@
+require 'MrMurano/Solution-ServiceConfig'
 
 module MrMurano
   class Keystore < ServiceConfig
