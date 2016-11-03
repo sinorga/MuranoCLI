@@ -7,7 +7,7 @@ module MrMurano
     end
 
     def keyinfo
-      ret = get("/#{scid}/call/info")
+      get("/#{scid}/call/info")
     end
 
     def listkeys
@@ -40,7 +40,7 @@ command 'keystore info' do |c|
   c.description = %{Show info about the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
-    pp sol.keyinfo
+    sol.outf sol.keyinfo
   end
 end
 
@@ -49,9 +49,7 @@ command 'keystore list' do |c|
   c.description = %{List all of the keys in the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
-    sol.listkeys.each do |key|
-      puts key
-    end
+    sol.outf sol.listkeys
   end
 end
 alias_command :keystore, 'keystore list'
@@ -62,7 +60,7 @@ command 'keystore get' do |c|
   c.action do |args,options|
     sol = MrMurano::Keystore.new
     ret = sol.getkey(args[0])
-    puts ret
+    sol.outf ret
   end
 end
 
@@ -98,16 +96,16 @@ See http://docs.exosite.com/murano/services/keystore/#command for current list.
   c.example %{mr keystore command lpush mykey A B C}, %{Push three values onto list}
   c.example %{mr keystore command lrem mykey 0 B}, %{Remove all B values from list}
   c.action do |args,options|
+    sol = MrMurano::Keystore.new
     if args.count < 2 then
-      say_error "Not enough params"
+      sol.error "Not enough params"
     else
-      sol = MrMurano::Keystore.new
       ret = sol.command(args[1], args[0], args[2..-1])
       if ret.has_key?(:value) then
-        puts ret[:value]
+        sol.outf ret[:value]
       else
-        say_error "#{ret[:code]}: #{ret.message}"
-        pp ret[:error] if ($cfg['tool.debug'] and ret.has_key?(:error))
+        sol.error "#{ret[:code]}: #{ret.message}"
+        sol.outf ret[:error] if ($cfg['tool.debug'] and ret.has_key?(:error))
       end
     end
   end

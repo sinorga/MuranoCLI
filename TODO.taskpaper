@@ -3,8 +3,8 @@ Readme:
 	- Look into using VCR for testing. @pri(low)
 
 Commands:
-	- Errors and Warnings should get sent to STDERR
-	- Need a more consistent output format. 'pp' is still used in many places.
+	- Errors and Warnings should get sent to STDERR @done(2016-11-03)
+	- Need a more consistent output format. 'pp' is still used in many places. @done(2016-11-03)
 	Maybe have a tool setting for output format? json, yaml, pp, csv, table ?
 	- Do we need rainbow since highline does ANSI color too? @done(2016-11-02)
 	- Status will show {modules,eventhandlers} have changes when they don’t. @done(2016-09-23)

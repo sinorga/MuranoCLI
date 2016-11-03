@@ -17,11 +17,11 @@ This is deprecated.  Use `mr syncup --cors` or `mr syncdown --cors` instead.
     if options.file then
       #set
       data = sol.localitems(options.file)
-      pp sol.upload(options.file, data.first)
+      sol.outf sol.upload(options.file, data.first)
     else
       # get
       ret = sol.fetch()
-      puts ret.to_yaml
+      sol.outf ret
     end
   end
 

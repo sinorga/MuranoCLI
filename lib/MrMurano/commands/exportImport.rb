@@ -23,8 +23,9 @@ command 'config export' do |c|
     solsecret = Pathname.new($cfg['location.base'] + '.Solutionfile.secret')
 
     if not options.force and (solfile.exist? or solsecret.exist?) then
-      say_error "Solutionfile.json or .Solutionfile.secret already exist."
-      say "Use --force to overwrite"
+      sol = MrMurano::Solution.new
+      sol.error "Solutionfile.json or .Solutionfile.secret already exist."
+      sol.error "Use --force to overwrite"
     end
 
     solf = {
