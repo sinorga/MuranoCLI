@@ -11,6 +11,7 @@ require 'MrMurano/Solution-Services'
 require 'MrMurano/Solution-Users'
 require 'MrMurano/Solution-ServiceConfig'
 require 'MrMurano/Product'
+require 'MrMurano/Product-Resources'
 
 require 'MrMurano/commands'
 

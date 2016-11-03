@@ -1,54 +1,27 @@
-
-module MrMurano
-  class Cors < SolutionBase
-    def initialize
-      super
-      @uriparts << 'cors'
-      @location = $cfg['location.cors']
-    end
-
-    def fetch()
-      ret = get()
-      ret[:cors]
-    end
-
-    # TODO: fill out other metheds so this could be part of sync up/down.
-
-    ##
-    # Upload CORS
-    # :local path to file to push
-    # :remote hash of method and endpoint path (ignored for now)
-    def upload(local, remote)
-      local = Pathname.new(local) unless local.kind_of? Pathname
-      raise "no file" unless local.exist?
-
-      local.open do |io|
-        data = YAML.load(io)
-        put('', data)
-      end
-    end
-
-    def tolocalpath(into, item)
-      into
-    end
-  end
-end
+require 'yaml'
+require 'MrMurano/Solution-Cors'
 
 command :cors do |c|
   c.syntax = %{mr cors [options]}
-  c.description = %{Get or set the CORS for the solution.}
+  c.summary = %{Get or set the CORS for the solution. [Deprecated]}
+  c.description = %{Get or set the CORS for the solution.
+
+This is deprecated.  Use `mr syncup --cors` or `mr syncdown --cors` instead.
+  }
   c.option '-f','--file FILE', String, %{File to set CORS from}
 
   c.action do |args,options|
+    say_warning "This is deprecated.  Use `mr syncup --cors` or `mr syncdown --cors` instead."
     sol = MrMurano::Cors.new
 
     if options.file then
       #set
-      pp sol.upload(options.file, {})
+      data = sol.localitems(options.file)
+      sol.outf sol.upload(options.file, data.first)
     else
       # get
       ret = sol.fetch()
-      puts ret
+      sol.outf ret
     end
   end
 

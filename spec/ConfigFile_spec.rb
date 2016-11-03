@@ -20,7 +20,7 @@ RSpec.describe MrMurano::Config::ConfigFile do
   it ":internal does not write a file" do
     tmpfile = Dir.tmpdir + '/cfgtest' # This way because Tempfile.new creates.
     begin
-      cf = MrMurano::Config::ConfigFile.new(:internal, tmpfile)
+      MrMurano::Config::ConfigFile.new(:internal, tmpfile)
       expect(FileTest.exist?(tmpfile)).to be(false)
     ensure
       File.unlink(tmpfile) if FileTest.exist?(tmpfile)
@@ -29,7 +29,7 @@ RSpec.describe MrMurano::Config::ConfigFile do
   it ":defaults does not write a file" do
     tmpfile = Dir.tmpdir + '/cfgtest' # This way because Tempfile.new creates.
     begin
-      cf = MrMurano::Config::ConfigFile.new(:defaults, tmpfile)
+      MrMurano::Config::ConfigFile.new(:defaults, tmpfile)
       expect(FileTest.exist?(tmpfile)).to be(false)
     ensure
       File.unlink(tmpfile) if FileTest.exist?(tmpfile)
@@ -37,7 +37,7 @@ RSpec.describe MrMurano::Config::ConfigFile do
   end
 
   it "loads a file" do
-      cf = MrMurano::Config::ConfigFile.new(:project, 'spec/testfiles/configfile')
+      cf = MrMurano::Config::ConfigFile.new(:project, 'spec/fixtures/configfile')
       cf.load
 
       expect(cf[:data]['solution']['id']).to eq('XXXXXXXXXX')

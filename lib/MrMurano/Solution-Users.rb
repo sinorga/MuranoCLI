@@ -21,7 +21,8 @@ module MrMurano
       delete('/' + id.to_s)
     end
 
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify)
       # Roles cannot be modified, so must delete and post.
       delete('/' + remote[@itemkey]) do |request, http|
         response = http.request(request)
@@ -84,7 +85,6 @@ module MrMurano
         say_warning "Cannot read from #{from.to_s}"
         return []
       end
-      key = @itemkey.to_sym
 
       here = []
       from.open {|io| here = YAML.load(io) }
@@ -103,6 +103,7 @@ module MrMurano
       @location = $cfg['location.roles']
     end
   end
+  SyncRoot.add('roles', Role, 'R', %{Roles})
 
   # …/user
   class User < UserBase
@@ -112,7 +113,8 @@ module MrMurano
       @location = $cfg['location.users']
     end
 
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify)
       # TODO figure out APIs for updating users.
       say_warning "Updating Users isn't working currently."
       # post does work if the :password field is set.
@@ -122,5 +124,6 @@ module MrMurano
       item[:email]
     end
   end
+  SyncRoot.add('users', User, 'U', %{Users})
 end
 #  vim: set ai et sw=2 ts=2 :

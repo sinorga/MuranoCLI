@@ -30,7 +30,7 @@ module MrMurano
           case resp
           when Net::HTTPSuccess
             if block_given? then
-              resp.read_body &block
+              resp.read_body(&block)
             else
               resp.read_body do |chunk|
                 $stdout.write chunk
@@ -62,7 +62,8 @@ module MrMurano
 
     ##
     # Upload a file
-    def upload(local, remote)
+    # @param modify Bool: True if item exists already and this is changing it
+    def upload(local, remote, modify)
       local = Pathname.new(local) unless local.kind_of? Pathname
 
       uri = endPoint('upload' + remote[:path])
@@ -161,5 +162,6 @@ module MrMurano
     end
 
   end
+  SyncRoot.add('files', File, 'S', %{Static Files}, true)
 end
 #  vim: set ai et sw=2 ts=2 :

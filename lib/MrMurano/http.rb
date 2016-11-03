@@ -12,7 +12,7 @@ module MrMurano
     end
 
     def json_opts
-      return @json_opts unless @json_opts.nil?
+      return @json_opts unless not defined?(@json_opts) or @json_opts.nil?
       @json_opts = {
         :allow_nan => true,
         :symbolize_names => true,
@@ -38,7 +38,7 @@ module MrMurano
 
     def http
       uri = URI('https://' + $cfg['net.host'])
-      if @http.nil? then
+      if not defined?(@http) or @http.nil? then
         @http = Net::HTTP.new(uri.host, uri.port)
         @http.use_ssl = true
         @http.start
@@ -111,8 +111,9 @@ module MrMurano
       end
     end
 
-    def get(path='', &block)
+    def get(path='', query=nil, &block)
       uri = endPoint(path)
+      uri.query = URI.encode_www_form(query) unless query.nil?
       workit(set_def_headers(Net::HTTP::Get.new(uri)), &block)
     end
 

@@ -71,6 +71,7 @@ module MrMurano
       set('tool.verbose', false, :defaults)
       set('tool.debug', false, :defaults)
       set('tool.dry', false, :defaults)
+      set('tool.outformat', 'best', :defaults)
 
       set('net.host', 'bizapi.hosted.exosite.io', :defaults)
 
@@ -81,6 +82,7 @@ module MrMurano
       set('location.eventhandlers', 'eventhandlers', :defaults)
       set('location.roles', 'roles.yaml', :defaults)
       set('location.users', 'users.yaml', :defaults)
+      set('location.cors', 'cors.yaml', :defaults)
 
       set('files.default_page', 'index.html', :defaults)
 
@@ -244,7 +246,7 @@ module MrMurano
   # IF none of -same, then -same; else just the ones listed.
   def self.checkSAME(opt)
     unless opt.files or opt.endpoints or opt.modules or
-        opt.eventhandlers or opt.roles or opt.users then
+        opt.eventhandlers or opt.roles or opt.users or opt.spec then
       opt.files = true
       opt.endpoints = true
       opt.modules = true

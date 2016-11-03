@@ -6,6 +6,7 @@ require 'pathname'
 require 'yaml'
 require 'MrMurano/Config'
 require 'MrMurano/http'
+require 'MrMurano/verbosing'
 
 module MrMurano
   class Passwords
@@ -53,6 +54,7 @@ module MrMurano
 
   class Account
     include Http
+    include Verbose
 
     def endPoint(path)
       URI('https://' + $cfg['net.host'] + '/api:1/' + path.to_s)
@@ -62,7 +64,8 @@ module MrMurano
       host = $cfg['net.host']
       user = $cfg['user.name']
       if user.nil? then
-        user = ask("Account name: ")
+        say_error("No Murano user account found; please login")
+        user = ask("User name: ")
         $cfg.set('user.name', user, :user)
       end
       pff = $cfg.file_at('passwords', :user)
@@ -70,6 +73,7 @@ module MrMurano
       pf.load
       pws = pf.get(host, user)
       if pws.nil? then
+        say_error("Couldn't find password for #{user}")
         pws = ask("Password:  ") { |q| q.echo = "*" }
         pf.set(host, user, pws)
         pf.save

@@ -1,0 +1,21 @@
+---
+dataports:
+    - alias: engine_fetch
+      format: string/json
+    - alias: sensors_report
+      format: string/json
+    - alias: update_interval
+      format: string
+    - alias: device_info
+      format: string/json
+    - alias: usage_report
+      format: string/json
+    - alias: fetch_status
+      format: string/json
+    - alias: engine_report
+      format: string/json
+      jsonschema: {"title": "Person Schema",
+                   "type": "object",
+                   "properties": {"name": {"type": "string"}},
+                   "required": ["name"]}
+

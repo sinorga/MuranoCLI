@@ -1,6 +1,8 @@
+require 'MrMurano/Account'
 require 'MrMurano/Product'
 require 'MrMurano/hash'
 require 'yaml'
+require 'terminal-table'
 
 command 'product spec convert' do |c|
   c.syntax = %{mr product spec convert FILE}
@@ -8,38 +10,22 @@ command 'product spec convert' do |c|
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
+    prd = MrMurano::Product.new
     if args.count == 0 then
-      say_error "Missing file"
+      prd.error "Missing file"
     else
-
-      File.open(args[0]) do |fin|
-        spec = YAML.load(fin)
-        unless spec.has_key?('dataports') then
-          say_error "Not an exoline spec file"
-        else
-          dps = spec['dataports'].map do |dp|
-            dp.delete_if{|k,v| k != 'alias' and k != 'format' and k != 'initial'}
-            dp['format'] = 'string' if dp['format'][0..5] == 'string'
-            dp
-          end
-
-          spec = {'resource'=>dps}
-          if options.output then
-            File.open(options.output, 'w') do |io|
-              io << spec.to_yaml
-            end
-          else
-            puts spec.to_yaml
-          end
-        end
-      end
+      prd.outf prd.convert(args[0])
     end
   end
 end
 
 command 'product spec push' do |c|
   c.syntax = %{mr product spec push [--file FILE]}
-  c.summary = %{Upload a new specification for a product}
+  c.summary = %{Upload a new specification for a product [Deprecated]}
+  c.description = %{Convert exoline spec file into Murano format
+
+This is deprecated.  Use `mr syncup --specs` instead.
+  }
 
   c.option '--file FILE', "The spec file to upload"
 
@@ -49,6 +35,8 @@ command 'product spec push' do |c|
   # - $cfg['product.spec']
 
   c.action do |args, options|
+    prd = MrMurano::Product.new
+    prd.warning "This is deprecated.  Use `mr syncup --specs` instead."
 
     file = $cfg['product.spec']
     prid = $cfg['product.id']
@@ -56,10 +44,9 @@ command 'product spec push' do |c|
     file = options.file unless options.file.nil?
 
     if not file.nil? and FileTest.exist?(file) then
-      prd = MrMurano::Product.new
-      pp prd.update(file)
+      prd.outf prd.update(file)
     else
-      say_error "No spec file to push: #{file}"
+      prd.error "No spec file to push: #{file}"
     end
   end
 end
@@ -69,27 +56,35 @@ command 'product spec pull' do |c|
   c.summary = %{Pull down the specification for a product}
 
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
+  c.option '--aliasonly', 'Only return the aliases'
 
   c.action do |args, options|
     prd = MrMurano::Product.new
     ret = prd.info
 
-    resources = ret[:resources].map do |r|
-      r.delete(:rid)
-      Hash.transform_keys_to_strings(r)
-    end
-
-    spec = { 'resources'=> resources }
-
+    io=nil
     if options.output then
-      File.open(options.output, 'w') do |io|
-        io << spec.to_yaml
-      end
-    else
-      puts spec.to_yaml
+      io = File.open(options.output, 'w')
     end
+
+    if options.aliasonly then
+      ret = ret[:resources].map{|row| row[:alias]}
+    end
+
+    prd.outf(ret, io) do |dd, ios|
+      if ret.kind_of? Array then
+        ios.puts ret.join(' ')
+      else
+        prd.tabularize({
+          :rows => ret[:resources].map{|r| [r[:alias], r[:format], r[:rid]]},
+          :headers => ['Alias', 'Format', 'RID']
+        }, ios)
+      end
+    end
+    io.close unless io.nil?
   end
 end
 alias_command 'product spec', 'product spec pull'
+alias_command 'product spec list', 'product spec pull', '--astable'
 
 #  vim: set ai et sw=2 ts=2 :

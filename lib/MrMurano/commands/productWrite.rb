@@ -6,17 +6,19 @@ command 'product write' do |c|
 
   c.action do |args,options|
     sn = args.shift
+    prd = MrMurano::Product.new
     if (args.count % 2) != 0 then
-      say_error "Last alias is missing a value to write."
+      prd.error "Last alias is missing a value to write."
     else
       data = Hash[*args]
-      prd = MrMurano::Product.new
       ret = prd.write(sn, data)
-      ret.each_pair do |k,v|
-        if v == 'ok' then
-          say "#{k.to_s}: #{v}"
-        else
-          say_error "#{k.to_s}: #{v}"
+      prd.outf(ret) do |dd|
+        ret.each_pair do |k,v|
+          if v == 'ok' then
+            say "#{k.to_s}: #{v}"
+          else
+            prd.error "#{k.to_s}: #{v}"
+          end
         end
       end
     end

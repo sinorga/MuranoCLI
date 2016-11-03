@@ -67,7 +67,7 @@ RSpec.describe MrMurano::ProductContent, "#product_content" do
   end
 
   it "uploads content data" do
-    size = FileTest.size('spec/lightbulb.yaml')
+    size = FileTest.size('spec/fixtures/product_spec_files/lightbulb.yaml')
     stub_request(:post, @urlroot + "/testFor").
       with(headers: {'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'text/yaml',
@@ -75,7 +75,7 @@ RSpec.describe MrMurano::ProductContent, "#product_content" do
     }).
       to_return(status: 205)
 
-    ret = @prd.upload('testFor', 'spec/lightbulb.yaml')
+    ret = @prd.upload('testFor', 'spec/fixtures/product_spec_files/lightbulb.yaml')
     expect(ret).to eq({})
   end
 

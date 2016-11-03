@@ -1,0 +1,112 @@
+#compdef <%= program :name %>
+
+__<%= program :name %>_common_options=(
+<% for option in @options -%>
+  <%- if flatswitches(option).count > 1 -%>
+    {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>:"<%= optionDesc option %>"
+  <%- else -%>
+    "<%= flatswitches(option).first %><%= takesArg(option) %>:<%= optionDesc option %>"
+  <%- end -%>
+<% end %>
+)
+
+_<%= program :name %> () {
+    local curcontext="$curcontext" state line
+    typeset -A opt_args
+
+    # except this fails when a command only has one arg and then options.
+    _arguments -C \
+        ':command:->command' \
+        '*::options:->options'
+    #echo "\n=$curcontext=$state=$words=\n"
+    case $state in
+        (command)
+          local -a list
+          list=(
+          <%- for name, subs in cmdTree -%>
+            <%- cmd = subs["\0cmd"] -%>
+            <%- if cmd.nil? -%>
+              <%= name %>:'  '
+            <%-else-%>
+              <%= name %>:'<%= cmd.summary || cmd.description.lines[0] -%>'
+            <%-end-%>
+          <%-end-%>
+          )
+          _describe -t firstArg 'firstArg' list
+          _describe -t options 'global options' __<%= program :name %>_common_options
+          ;;
+        (options)
+          case $line[1] in
+          <%- for name, subs in cmdTree -%>
+            (<%= name %>)
+              __<%=program :name%>-<%= name %>
+            ;;
+          <%-end-%>
+          esac
+          ;;
+    esac
+}
+
+<%- for  name, subs in cmdTree -%>
+  <%- command = subs["\0cmd"]; subs = subs.reject{|k,_| k == "\0cmd"} -%>
+__<%=program :name%>-<%= name %> () {
+	local curcontext="$curcontext" state line
+	typeset -A opt_args
+
+	_arguments -C \
+		':command:->command' \
+		'*::options:->options'
+
+	case $state in
+		(command)
+      <%- unless subs.empty? -%>
+      local -a subcommands
+      subcommands=(
+      <%- for sname, ssubs in subs -%>
+        <%- command = ssubs["\0cmd"] -%>
+        <%- if command.nil? then -%>
+          <%=sname%>:''
+        <%-else-%>
+          <%=sname%>:'<%= command.summary || command.description.lines[0] -%>'
+        <%-end-%>
+      <%-end-%>
+      )
+			_describe -t commands 'subcommand' subcommands
+      <%-end-%>
+      _describe -t options 'global options' __<%= program :name %>_common_options
+      <%- unless command.nil? or command.options.empty? then -%>
+      _arguments \
+        <%- for option in command.options -%>
+          <%- if flatswitches(option).count > 1 -%>
+            {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :" \
+          <%- else -%>
+            "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :" \
+          <%- end -%>
+        <%- end -%>
+      <%- end %>
+    ;;
+    (options)
+      case $line[1] in
+      <%- for sname, ssubs in subs -%>
+        <%- command = ssubs["\0cmd"]; subs = ssubs.reject{|k,_| k == "\0cmd"} -%>
+        (<%=sname%>)
+        _describe -t options 'global options' __<%= program :name %>_common_options
+        <%- unless command.nil? or command.options.empty? then -%>
+          _arguments \
+          <%- for option in command.options -%>
+            <%- if flatswitches(option).count > 1 -%>
+              {<%= flatswitches(option).join(',') %>}<%= takesArg(option) %>"[<%= optionDesc option %>]: :" \
+            <%- else -%>
+              "<%= flatswitches(option).first %><%= takesArg(option) %>[<%= optionDesc option %>]: :" \
+            <%- end -%>
+          <%- end -%>
+        <%- end %>
+        ;;
+      <%-end-%>
+      esac
+    ;;
+  esac
+}
+<%- end -%>
+
+#  vim: set ai et sw=2 ts=2 :

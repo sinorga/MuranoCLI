@@ -4,8 +4,7 @@
 Icon
 *.sw[a-z]
 cookies
-.jiraProject
-.rpjProject
+.jiramulerc
 tags
 
 xcuserdata

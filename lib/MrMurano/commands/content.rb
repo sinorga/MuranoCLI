@@ -1,3 +1,4 @@
+require 'MrMurano/Product'
 
 command 'content list' do |c|
   c.syntax = %{mr content list}
@@ -9,7 +10,7 @@ command 'content list' do |c|
   }
   c.action do |args, options|
     prd = MrMurano::ProductContent.new
-    prd.list.each{|item| say item}
+    prd.outf prd.list
   end
 end
 alias_command :content, 'content list'
@@ -23,11 +24,11 @@ command 'content info' do |c|
   HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
   }
   c.action do |args, options|
+    prd = MrMurano::ProductContent.new
     if args[0].nil? then
-      say_error "Missing <content id>"
+      prd.error "Missing <content id>"
     else
-      prd = MrMurano::ProductContent.new
-      prd.info(args[0]).each{|line| say "#{args[0]} #{line.join(' ')}"}
+      prd.tabularize prd.info(args[0])
     end
   end
 end
@@ -41,11 +42,11 @@ command 'content delete' do |c|
   HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
   }
   c.action do |args, options|
+    prd = MrMurano::ProductContent.new
     if args[0].nil? then
-      say_error "Missing <content id>"
+      prd.error "Missing <content id>"
     else
-      prd = MrMurano::ProductContent.new
-      pp prd.remove(args[0])
+      prd.outf prd.remove(args[0])
     end
   end
 end
@@ -62,20 +63,20 @@ command 'content upload' do |c|
 
   c.action do |args, options|
     options.defaults :meta=>' '
+    prd = MrMurano::ProductContent.new
 
     if args[0].nil? then
-      say_error "Missing <content id>"
+      prd.error "Missing <content id>"
     elsif args[1].nil? then
-      say_error "Missing <file>"
+      prd.error "Missing <file>"
     else
-      prd = MrMurano::ProductContent.new
 
       ret = prd.info(args[0])
       if ret.nil? then
-        pp prd.create(args[0], options.meta)
+        prd.outf prd.create(args[0], options.meta)
       end
 
-      pp prd.upload(args[0], args[1])
+      prd.outf prd.upload(args[0], args[1])
     end
   end
 end
@@ -90,10 +91,10 @@ command 'content download' do |c|
   }
   c.option '-o','--output FILE',%{save to this file}
   c.action do |args, options|
+    prd = MrMurano::ProductContent.new
     if args[0].nil? then
-      say_error "Missing <content id>"
+      prd.error "Missing <content id>"
     else
-      prd = MrMurano::ProductContent.new
 
       if options.output.nil? then
         prd.download(args[0]) # to stdout
