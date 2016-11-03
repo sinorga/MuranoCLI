@@ -32,7 +32,7 @@ module MrMurano
       ios = $stdout if ios.nil?
       case fmt
       when /yaml/i
-        ios.puts obj.to_yaml
+        ios.puts Hash.transform_keys_to_strings(obj).to_yaml
       when /pp/
         pp obj
       when /json/i
