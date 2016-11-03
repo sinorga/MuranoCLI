@@ -68,7 +68,22 @@ module MrMurano
     end
 
     def schema(id=sid)
+      # TODO: cache schema in user dir?
       get("/#{id}/schema")
+    end
+
+    ## Get list of call operations from a schema
+    def callable(id=sid)
+      scm = schema(id)
+      calls = []
+      scm[:paths].each do |path, methods|
+        methods.each do |method, params|
+          if params.kind_of?(Hash) and params.has_key?(:operationId) then
+            calls << [method, params[:operationId]]
+          end
+        end
+      end
+      calls
     end
   end
 
