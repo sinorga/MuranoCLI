@@ -34,12 +34,21 @@ module MrMurano
       get("/#{id}/logs")
     end
 
-    def call(op, post=nil, id=scid)
-      call = "/#{id.to_s}/call/#{op.to_s}"
-      if post.nil? then
-        get(call)
-      else
-        post(call, post)
+    def call(opid, meth=:get, data=nil, id=scid, &block)
+      call = "/#{id.to_s}/call/#{opid.to_s}"
+      # FIXME: some gets will have query data.  So do this differently.
+
+      case meth
+      when :get
+        get(call, data, &block)
+      when :post
+        data = {} if data.nil?
+        post(call, data, &block)
+      when :put
+        data = {} if data.nil?
+        put(call, data, &block)
+      when :delete
+        put(call, &block)
       end
     end
 

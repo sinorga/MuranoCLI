@@ -8,15 +8,15 @@ module MrMurano
     end
 
     def query(query)
-      call(:query, {:q=>query})
+      call(:query, :post, {:q=>query})
     end
 
     def write(writestr)
-      call(:write, { :query=>writestr })
+      call(:write, :post, { :query=>writestr })
     end
 
     def command(cmd)
-      call(:command, { :q=>cmd})
+      call(:command, :post, { :q=>cmd})
     end
 
   end
