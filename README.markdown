@@ -5,6 +5,9 @@
 
 Do more from the command line with [Murano](https://exosite.com/platform/)
 
+MrMurano works around the idea of syncing, much like rsync.  Files from your working
+directory are synced up (or down) from Murano.
+
 ## Usage
 
 ### To start from an existing project in Murano
@@ -26,11 +29,13 @@ running in Murano. Here is the list.
 - Set it: `mr config business.id ZZZZZZZZZ`
 - Create a product: `mr product create myawesomeproduct`
 - Save the result: `mr config product.id YYYYYYYYY`
-- Define the product: `mr product spec push --file prd.spec`
+- Set the product definition: `mr config product.spec prd.spec`
+- Add the aliases to spec/prd.spec
+- Sync the product definition up: `mr syncup -V --specs`
 - Create a solution: `mr solution create myawesomesolution`
 - Save the result: `mr config solution.id XXXXXX`
 - Sync solution code up: `mr syncup -V`
-- Assign the prodcut to the solution: `mr assign set`
+- Assign the product to the solution: `mr assign set`
 
 Do stuff, see what changed: `mr status` or `mr diff`.
 Then deploy with `mr syncup`
