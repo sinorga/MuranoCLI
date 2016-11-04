@@ -33,10 +33,12 @@ module MrMurano
       name = $cfg['product.spec']
       prid = $cfg['product.id']
       name = $cfg["p-#{prid}.spec"] unless prid.nil? or $cfg["p-#{prid}.spec"].nil?
+      raise "No spec file named" if name.nil?
 
       unless $cfg['location.specs'].nil? then
-        name = File.join($cfg['location.specs'], name)
+        name = ::File.join($cfg['location.specs'], name)
       end
+      debug " spec file name => #{name}"
       name
     end
 
