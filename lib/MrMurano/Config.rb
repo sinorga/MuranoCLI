@@ -83,6 +83,7 @@ module MrMurano
       set('location.roles', 'roles.yaml', :defaults)
       set('location.users', 'users.yaml', :defaults)
       set('location.cors', 'cors.yaml', :defaults)
+      set('location.specs', 'specs', :defaults)
 
       set('files.default_page', 'index.html', :defaults)
 
