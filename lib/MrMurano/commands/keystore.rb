@@ -26,11 +26,11 @@ module MrMurano
     end
 
     def delkey(key)
-      call(:delete, { :key=>key})
+      call(:delete, :post, {:key=>key})
     end
 
     def command(key, cmd, args)
-      call(:command, {:key=>key, :command=>cmd, :args=>args})
+      call(:command, :post, {:key=>key, :command=>cmd, :args=>args})
     end
 
   end
