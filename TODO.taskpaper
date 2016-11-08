@@ -18,6 +18,9 @@ Account:
 
 Endpoints:
 	- Add support for multiple endpoints in one file (maybe) @pri(low)
+	The main complexity is supporting both one-per and multiple.
+	The main reason for this is a form of support for exosite-cli.
+	It is likely just better to make a breakout method as part of import.
 	- Add directory support like in modules @done(2016-07-26)
 
 Files:
@@ -45,6 +48,9 @@ Timeseries:
 	- Add CSV output option. @done(2016-09-09)
 
 Product:
+	- Support multiple products.
+	Think about how this would work.  There is the syncing of the resoruces, and then
+	some of the commands that use product.id.
 	- Auto convert exoline spec files into murano spec files on upload? @done(2016-10-27)
 	Not doing this. Convert is there if you need it.
 	- write alias command @done(2016-09-26)

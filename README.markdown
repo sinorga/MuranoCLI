@@ -5,6 +5,10 @@
 
 Do more from the command line with [Murano](https://exosite.com/platform/)
 
+MrMurano is the command-line tool that interacts with Murano and makes different
+tasks easier. MrMurano makes it easy to deploy code to a solution, import many
+product definitions at once, set up endpoints and APIs, and more. 
+
 MrMurano works around the idea of syncing, much like rsync.  Files from your working
 directory are synced up (or down) from Murano.
 
