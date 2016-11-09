@@ -29,7 +29,7 @@ command 'product list' do |c|
     end
 
     acc.outf(data, io) do |dd, ios|
-      if dd.kind_of? Array then
+      if options.idonly then
         ios.puts dd.join(' ')
       else
         acc.tabularize({
