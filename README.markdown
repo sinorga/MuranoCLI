@@ -34,7 +34,7 @@ running in Murano. Here is the list.
 - Create a product: `mr product create myawesomeproduct`
 - Save the result: `mr config product.id YYYYYYYYY`
 - Set the product definition: `mr config product.spec prd.spec`
-- Add the aliases to spec/prd.spec
+- Add resource aliases to specs/prd.spec
 - Sync the product definition up: `mr syncup -V --specs`
 - Create a solution: `mr solution create myawesomesolution`
 - Save the result: `mr config solution.id XXXXXX`
