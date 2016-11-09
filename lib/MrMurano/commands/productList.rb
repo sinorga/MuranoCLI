@@ -29,10 +29,14 @@ command 'product list' do |c|
     end
 
     acc.outf(data, io) do |dd, ios|
-      acc.tabularize({
-        :headers=>headers.map{|h| h.to_s},
-        :rows=>dd
-      }, ios)
+      if dd.kind_of? Array then
+        ios.puts dd.join(' ')
+      else
+        acc.tabularize({
+          :headers=>headers.map{|h| h.to_s},
+          :rows=>dd
+        }, ios)
+      end
     end
     io.close unless io.nil?
 
