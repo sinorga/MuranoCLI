@@ -72,11 +72,11 @@ command 'product spec pull' do |c|
     end
 
     prd.outf(ret, io) do |dd, ios|
-      if ret.kind_of? Array then
-        ios.puts ret.join(' ')
+      if dd.kind_of? Array then
+        ios.puts dd.join(' ')
       else
         prd.tabularize({
-          :rows => ret[:resources].map{|r| [r[:alias], r[:format], r[:rid]]},
+          :rows => dd[:resources].map{|r| [r[:alias], r[:format], r[:rid]]},
           :headers => ['Alias', 'Format', 'RID']
         }, ios)
       end
