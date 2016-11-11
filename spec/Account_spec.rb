@@ -45,13 +45,28 @@ RSpec.describe MrMurano::Account do
     expect { @acc.products }.to raise_error("Missing Bussiness ID")
   end
 
-  it "creates product"
+  it "creates product" do
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/product/").
+      with(:body => {:label=>'ONe', :type=>'onepModel'}).
+      to_return(body: "" )
+
+    ret = @acc.new_product("ONe")
+    expect(ret).to eq({})
+  end
+
   it "creates product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     expect { @acc.new_product("ONe") }.to raise_error("Missing Bussiness ID")
   end
 
-  it "deletes product"
+  it "deletes product" do
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/product/ONe").
+      to_return(body: "" )
+
+    ret = @acc.delete_product("ONe")
+    expect(ret).to eq({})
+  end
+
   it "deletes product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     expect { @acc.delete_product("ONe") }.to raise_error("Missing Bussiness ID")
