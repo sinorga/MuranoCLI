@@ -73,19 +73,52 @@ RSpec.describe MrMurano::Account do
   end
 
 
-  it "lists solutions"
+  it "lists solutions" do
+    sollist = [{"bizid"=>"XYZxyz",
+                "type"=>"dataApi",
+                "domain"=>"two.apps.exosite.io",
+                "apiId"=>"abc",
+                "sid"=>"def"},
+               {"bizid"=>"XYZxyz",
+                "type"=>"dataApi",
+                "domain"=>"one.apps.exosite.io",
+                "apiId"=>"ghi",
+                "sid"=>"jkl"}]
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      to_return(body: sollist )
+
+    ret = @acc.solutions
+    expect(ret).to eq(sollist)
+  end
+
   it "lists solutions; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     expect { @acc.solutions }.to raise_error("Missing Bussiness ID")
   end
 
-  it "creates solution"
+  it "creates solution" do
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      with(:body => {:label=>'one', :type=>'dataApi'}).
+      to_return(body: "" )
+
+    ret = @acc.new_solution("one")
+    expect(ret).to eq({})
+  end
+  # TODO; check case
+
   it "creates solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     expect { @acc.new_solution("one") }.to raise_error("Missing Bussiness ID")
   end
 
-  it "deletes solution"
+  it "deletes solution" do
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/one").
+      to_return(body: "" )
+
+    ret = @acc.delete_solution("one")
+    expect(ret).to eq({})
+  end
+
   it "deletes solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     expect { @acc.delete_solution("one") }.to raise_error("Missing Bussiness ID")
