@@ -104,7 +104,10 @@ RSpec.describe MrMurano::Account do
     ret = @acc.new_solution("one")
     expect(ret).to eq({})
   end
-  # TODO; check case
+
+  it "creates solution; with upper case" do
+    expect { @acc.new_solution("ONe") }.to raise_error("Solution name must be lowercase")
+  end
 
   it "creates solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
