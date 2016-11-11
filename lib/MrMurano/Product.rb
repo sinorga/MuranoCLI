@@ -29,6 +29,38 @@ module MrMurano
     end
   end
 
+  module ProductOnePlatformRpcShim
+    ## The model RID for this product.
+    def model_rid
+      return @model_rid unless @model_rid.nil?
+      prd = Product.new
+      data = prd.info
+      if data.kind_of?(Hash) and data.has_key?(:modelrid) then
+        @model_rid = data[:modelrid]
+      else
+        raise "Bad info; #{data}"
+      end
+      @model_rid
+    end
+
+    ## Do a 1P RPC call
+    #
+    # While this will take an array of calls, don't. Only pass one.
+    def do_rpc(calls)
+      calls = [calls] unless calls.kind_of?(Array)
+      r = post('', {
+        :auth=>{:client_id=>model_rid},
+        :calls=>calls
+      })
+      return r if not r.kind_of?(Array) or r.count < 1
+      r = r[0]
+      return r if not r.kind_of?(Hash) or r[:status] != 'ok'
+      r[:result]
+    end
+    private :do_rpc
+
+  end
+
   class Product < ProductBase
     ## Get info about the product
     def info
