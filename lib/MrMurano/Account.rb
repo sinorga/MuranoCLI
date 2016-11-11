@@ -140,6 +140,7 @@ module MrMurano
     ## Create a new solution
     def new_solution(name, type='dataApi')
       raise "Missing Bussiness ID" if $cfg['business.id'].nil?
+      raise "Solution name must be lowercase" unless name.downcase!.nil?
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
     end
 
