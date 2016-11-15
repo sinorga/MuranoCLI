@@ -3,6 +3,12 @@ Readme:
 	- Look into using VCR for testing. @pri(low)
 
 Commands:
+	- Init command.
+	- Empty sub-commands should return help.
+	There are a bunch of empty sub-commands that prefix another layer. Such as
+	assign, content, product, and others.  Those should be impemented as a ‘help’
+	only command.  That is they should return help like the plain `mr` command, but
+	just for their sub-section of things
 	- Errors and Warnings should get sent to STDERR @done(2016-11-03)
 	- Need a more consistent output format. 'pp' is still used in many places. @done(2016-11-03)
 	Maybe have a tool setting for output format? json, yaml, pp, csv, table ?
