@@ -48,6 +48,9 @@ CORS:
 	- GET&PUT /cors data @done(2016-09-08)
 
 TSDB:
+	- For query, if no metrics on cmdline, then do listMetrics and use all.
+	well, the first 1000 or whatever we get from a single call to listMetrics
+	- Query should handle tags prefixed with @ to match write.
 	- Add support for new TSDB service. @pri(high) @done(2016-11-03)
 
 Timeseries:
@@ -66,6 +69,8 @@ Service Device:
 	- When listing and bussiness.id is missing, gracefully fall back to --idonly @done(2016-09-12)
 
 Config:
+	- Add config tool.default_sync to set which things sync{up,down} by default
+	It is internally hardcoded to be -s, -a, -m, -e right now.
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
