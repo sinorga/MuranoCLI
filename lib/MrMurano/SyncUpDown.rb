@@ -5,6 +5,7 @@ require 'MrMurano/Config'
 require 'MrMurano/hash'
 
 module MrMurano
+  ## Track what things are syncable.
   class SyncRoot
     Syncable = Struct.new(:name, :class, :type, :desc, :bydefault) do
     end
@@ -258,16 +259,18 @@ module MrMurano
           path
         end
       end.flatten.compact.reject do |path|
+        # TODO: These globs should be in $cfg.
         path.fnmatch('*_test.lua') or path.basename.fnmatch('.*')
       end.select do |path|
+        # TODO: These globs should be in $cfg.
         path.extname == '.lua'
       end.map do |path|
-        # sometimes this is a name, sometimes it is an item.
-        # do I want to keep that? NO.
-        name = toRemoteItem(from, path)
-        unless name.nil? then
-          name[:local_path] = path
-          name
+        item = toRemoteItem(from, path)
+        if item.kind_of?(Array) then
+          item.compact.map{|i| i[:local_path] = path; i}
+        elsif not item.nil? then
+          item[:local_path] = path
+          item
         end
       end.flatten.compact
     end
@@ -368,19 +371,31 @@ module MrMurano
     # @param item Hash: The item to get a diff of
     # @return String: The diff output
     def dodiff(item)
-      tfp = Tempfile.new([tolocalname(item, @itemkey), '.lua'])
+      trmt = Tempfile.new([tolocalname(item, @itemkey)+'_remote_', '.lua'])
+      tlcl = Tempfile.new([tolocalname(item, @itemkey)+'_local_', '.lua'])
+      if item.has_key? :script then
+        Pathname.new(tlcl.path).open('wb') do |io|
+          io << item[:script]
+        end
+      else
+        Pathname.new(tlcl.path).open('wb') do |io|
+          io << item[:local_path].read
+        end
+      end
       df = ""
       begin
-        download(Pathname.new(tfp.path), item)
+        download(Pathname.new(trmt.path), item)
 
         cmd = $cfg['diff.cmd'].shellsplit
-        cmd << tfp.path
-        cmd << item[:local_path].to_s
+        cmd << trmt.path
+        cmd << tlcl.path
 
         IO.popen(cmd) {|io| df = io.read }
       ensure
-        tfp.close
-        tfp.unlink
+        trmt.close
+        trmt.unlink
+        tlcl.close
+        tlcl.unlink
       end
       df
     end

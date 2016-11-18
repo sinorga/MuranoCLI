@@ -45,10 +45,12 @@ module MrMurano
       raise "no file" unless local.exist?
 
       # we assume these are small enough to slurp.
-      script = local.read
+      unless remote.has_key? :script then
+        script = local.read
+        remote[:script] = script
+      end
       limitkeys = [:method, :path, :script, @itemkey]
       remote = remote.select{|k,v| limitkeys.include? k }
-      remote[:script] = script
 #      post('', remote)
       if remote.has_key? @itemkey then
         put('/' + remote[@itemkey], remote) do |request, http|
@@ -84,16 +86,30 @@ module MrMurano
     end
 
     def toRemoteItem(from, path)
-      # read first line of file and get method/path from it?
+      # Path could be have multiple endpoints in side, so a loop.
+      items = []
       path = Pathname.new(path) unless path.kind_of? Pathname
-      aheader = path.readlines().first
-      md = /--#ENDPOINT (\S+) (.*)/.match(aheader)
-      if md.nil? then
-        rp = path.relative_path_from(Pathname.new(Dir.pwd))
-        say_warning "Not an Endpoint: #{rp.to_s}"
-        return nil
+      cur = nil
+      lineno=0
+      path.readlines().each do |line|
+        md = /--#ENDPOINT (\S+) (.*)/.match(line)
+        if not md.nil? then
+          # header line.
+          cur[:line_end] = lineno unless cur.nil?
+          items << cur unless cur.nil?
+          cur = {:method=>md[1],
+                 :path=>md[2],
+                 :local_path=>path,
+                 :line=>lineno,
+                 :script=>line}
+        elsif not cur.nil? and not cur[:script].nil? then
+          cur[:script] << line
+        end
+        lineno += 1
       end
-      {:method=>md[1], :path=>md[2]}
+      cur[:line_end] = lineno unless cur.nil?
+      items << cur unless cur.nil?
+      items
     end
 
     def synckey(item)
