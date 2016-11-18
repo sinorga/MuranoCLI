@@ -114,15 +114,29 @@ EOF
 This also allows for keeping private things in a seperate config file and having
 the shared things checked into source control.
 
-### Keystore
+### Direct Service Access
 
-To aid with debugging, MrMurano has direct access to a solution's Keystore service.
+To aid with debugging, MrMurano has direct access to some of the services in a
+solution.
 
-To see all of the keys in the current solution: `mr keystore`
+Currently these are:
+- Keystore: `mr keystore`
+- Timeseries: `mr timeseries`
+- TSDB: `mr tsdb`
 
-### Timeseries
+### Output Format
 
-To aid with debugging, MrMurano has direct access to a solution's Timeseries service.
+Many sub-commands respect the `outformat` setting.  This lets you switch the output
+between YAML, JSON, Ruby, CSV, and pretty tables.  Not all formats work with all
+commands.
+
+```
+mr tsdb product list
+mr tsdb product list -c outformat=csv
+mr tsdb product list -c outformat=json
+mr tsdb product list -c outformat=yaml
+mr tsdb product list -c outformat=pp
+```
 
 ### Product Content Area
 
@@ -191,19 +205,4 @@ modules/util.lua
 spec
 spec/cico.murano.spec
 ```
-
-
-### Bundles
-
-MrMuanro allows adding bundles of resources to your project.
-
-A Bundle is a group of modules, endpoints, and static files.
-
-Bundles live in the 'bundle' directory.  Each bundle is a directory that matches
-the layout of a project. (with directories for endpoints, modules, files, etc)
-
-The items in bundles are layered by sorting the bundle names. Then your project's
-items are layered on top.  This builds the list of what is synced.  It also allows
-you to override things that are in a bundle from you project.
-
 
