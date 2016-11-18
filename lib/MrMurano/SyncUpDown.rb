@@ -262,12 +262,12 @@ module MrMurano
       end.select do |path|
         path.extname == '.lua'
       end.map do |path|
-        # sometimes this is a name, sometimes it is an item.
-        # do I want to keep that? NO.
-        name = toRemoteItem(from, path)
-        unless name.nil? then
-          name[:local_path] = path
-          name
+        item = toRemoteItem(from, path)
+        if item.kind_of?(Array) then
+          item.compact.map{|i| i[:local_path] = path; i}
+        elsif not item.nil? then
+          item[:local_path] = path
+          item
         end
       end.flatten.compact
     end
