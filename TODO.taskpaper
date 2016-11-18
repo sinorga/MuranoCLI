@@ -23,9 +23,7 @@ Account:
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
-	- Add support for multiple endpoints in one file (maybe) @pri(high)
-	The main complexity is supporting both one-per and multiple.
-	The main reason for this is a form of support for exosite-cli.
+	- Add support for multiple endpoints in one file @pri(high) @done(2016-11-18)
 	- Add directory support like in modules @done(2016-07-26)
 
 Files:
