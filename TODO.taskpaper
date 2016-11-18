@@ -23,10 +23,9 @@ Account:
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
-	- Add support for multiple endpoints in one file (maybe) @pri(low)
+	- Add support for multiple endpoints in one file (maybe) @pri(high)
 	The main complexity is supporting both one-per and multiple.
 	The main reason for this is a form of support for exosite-cli.
-	It is likely just better to make a breakout method as part of import.
 	- Add directory support like in modules @done(2016-07-26)
 
 Files:
@@ -74,6 +73,9 @@ Config:
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
+
+SyncUpDown:
+	- Document the hash keys for an item. @pri(high)
 
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
