@@ -45,10 +45,12 @@ module MrMurano
       raise "no file" unless local.exist?
 
       # we assume these are small enough to slurp.
-      script = local.read
+      unless remote.has_key? :script then
+        script = local.read
+        remote[:script] = script
+      end
       limitkeys = [:method, :path, :script, @itemkey]
       remote = remote.select{|k,v| limitkeys.include? k }
-      remote[:script] = script
 #      post('', remote)
       if remote.has_key? @itemkey then
         put('/' + remote[@itemkey], remote) do |request, http|
