@@ -76,6 +76,7 @@ Config:
 
 SyncUpDown:
 	- Document the hash keys for an item. @pri(high)
+	Also consider turning that hash into a Struct
 
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
