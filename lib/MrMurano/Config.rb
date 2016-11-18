@@ -39,7 +39,7 @@ module MrMurano
     CFG_PRVT_NAME = '.mrmuranorc.private'.freeze # Going away.
     CFG_DIR_NAME = '.mrmurano'.freeze
     CFG_ALTRC_NAME = '.mrmurano/config'.freeze
-    CFG_SYS_NAME = '/etc/mrmuranorc'.freeze
+    CFG_SYS_NAME = '/etc/mrmuranorc'.freeze # Going away.
 
     def initialize
       @paths = []
