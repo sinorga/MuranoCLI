@@ -64,7 +64,10 @@ module MrMurano
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
-      @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
+      if Pathname.new(CFG_SYS_NAME).exist? then
+        say_warning "!!! Using #{CFG_SYS_NAME} is deprecated"
+        @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
+      end
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
