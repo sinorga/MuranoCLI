@@ -75,9 +75,11 @@ Config:
 SyncUpDown:
 	- Document the hash keys for an item. @pri(high)
 	Also consider turning that hash into a Struct
+	- Allow specifying local files to limit actions to.
 
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
+	This might break some things.
 	- Errors from the server should be displayed prettier. @done(2016-09-26)
 	- JSON parse should use symbols for keys. @done(2016-09-01)
 	- Add the --curl verbose option. @done(2016-08-12)
