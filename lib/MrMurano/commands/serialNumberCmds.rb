@@ -1,6 +1,18 @@
 require 'MrMurano/Product'
 require 'terminal-table'
 
+command :sn do |c|
+  c.syntax = %{mr sn}
+  c.summary = %{About Serial Numbers}
+  c.description = %{The sn sub-commands allow for managing the identifiers (or Serial Numbers) on
+a product.}
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
 command 'sn list' do |c|
   c.syntax = %{mr sn list [options]}
   c.summary = %{List serial numbers for a product}
@@ -18,7 +30,6 @@ command 'sn list' do |c|
     say table
   end
 end
-alias_command :sn, 'sn list'
 
 command 'sn enable' do |c|
   c.syntax = %{mr sn enable [<sn>|--file <sns>]}

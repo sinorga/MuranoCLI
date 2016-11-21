@@ -22,6 +22,19 @@ module MrMurano
   end
 end
 
+command :timeseries do |c|
+  c.syntax = %{mr timeseries}
+  c.summary = %{About Timeseries}
+  c.description = %{The timeseries sub-commands let you interact directly with the Timeseries
+instance in a solution.  This allows for easier debugging, being able to
+quickly try out different queries or write test data.}
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
 command 'timeseries query' do |c|
   c.syntax = %{mr timeseries query <query string>}
   c.description = %{Query the timeseries database}

@@ -36,6 +36,18 @@ module MrMurano
   end
 end
 
+command :keystore do |c|
+  c.syntax = %{mr keystore}
+  c.summary = %{About Keystore}
+  c.description = %{The Keystore sub-commands let you interact directly with the Keystore instance
+in a solution.  This allows for easier debugging, being able to quickly get and
+set data.  As well as calling any of the other supported REDIS commands.}
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
 command 'keystore info' do |c|
   c.syntax = %{mr keystore info}
   c.description = %{Show info about the Keystore}
@@ -53,7 +65,6 @@ command 'keystore list' do |c|
     sol.outf sol.listkeys
   end
 end
-alias_command :keystore, 'keystore list'
 
 command 'keystore get' do |c|
   c.syntax = %{mr keystore get <key>}

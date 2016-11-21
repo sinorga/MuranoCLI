@@ -1,5 +1,6 @@
 require 'date'
 require 'MrMurano/Solution-ServiceConfig'
+require 'MrMurano/SubCmdGroupContext'
 
 module MrMurano
   module ServiceConfigs
@@ -211,6 +212,19 @@ command 'tsdb list metrics' do |c|
     ret = sol.listMetrics
     # TODO: handle looping if :next != nil
     sol.outf ret[:metrics]
+  end
+end
+
+command :tsdb do |c|
+  c.syntax = %{mr tsdb}
+  c.summary = %{About TSDB}
+  c.description = %{The tsdb sub-commands let you interact directly with the TSDB instance in a
+solution.  This allows for easier debugging, being able to quickly try out
+different queries or write test data.}
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end
 
