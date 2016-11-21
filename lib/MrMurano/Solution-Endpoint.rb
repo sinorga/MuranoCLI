@@ -53,7 +53,7 @@ module MrMurano
         script = local.read
         remote[:script] = script
       end
-      limitkeys = [:method, :path, :script, @itemkey]
+      limitkeys = [:method, :path, :script, :content_type, @itemkey]
       remote = remote.select{|k,v| limitkeys.include? k }
 #      post('', remote)
       if remote.has_key? @itemkey then
