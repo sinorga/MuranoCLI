@@ -4,11 +4,14 @@ command 'assign list' do |c|
   c.syntax = 'mr assign list [options]'
   c.description = 'List the products that are assigned'
   c.option '--idonly', 'Only return the ids'
+
   c.action do |args, options|
     sol = MrMurano::SC_Device.new
 
     trigs = sol.showTriggers()
-    if options.idonly or $cfg['business.id'].nil? then
+    options.idonly = true if $cfg['business.id'].nil?
+
+    if options.idonly then
       say trigs.join(' ')
     else
       acc = MrMurano::Account.new
@@ -17,8 +20,8 @@ command 'assign list' do |c|
       if products.empty? then
         say trigs.join(' ')
       else
-        busy = products.map{|r| [r[:label], r[:type], r[:pid], r[:modelId]]}
-        table = Terminal::Table.new :rows => busy, :headings => ['Label', 'Type', 'PID', 'ModelID']
+        busy = products.map{|r| [r[:label], r[:modelId]]}
+        table = Terminal::Table.new :rows => busy, :headings => ['Label', 'ModelID']
         say table
       end
     end

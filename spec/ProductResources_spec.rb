@@ -8,6 +8,7 @@ RSpec.describe MrMurano::ProductResources do
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
+    $cfg['product.spec'] = 'XYZ.yaml'
 
     @prd = MrMurano::ProductResources.new
     allow(@prd).to receive(:token).and_return("TTTTTTTTTT")
@@ -17,6 +18,37 @@ RSpec.describe MrMurano::ProductResources do
   it "initializes" do
     uri = @prd.endPoint('')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process")
+  end
+
+  context "location" do
+    it "Gets a product.spec, with location.specs" do
+      loc = @prd.location
+      expect(loc).to eq("specs/XYZ.yaml")
+    end
+    it "Gets a product.spec, without location.specs" do
+      $cfg.set('location.specs', nil, :defaults)
+      loc = @prd.location
+      expect(loc).to eq("XYZ.yaml")
+    end
+
+    it "Gets a p-FOO.spec, with location.specs" do
+      $cfg['p-XYZ.spec'] = 'magical.file'
+      loc = @prd.location
+      expect(loc).to eq("specs/magical.file")
+    end
+
+    it "Gets a p-FOO.spec, without location.specs" do
+      $cfg['p-XYZ.spec'] = 'magical.file'
+      $cfg.set('location.specs', nil, :defaults)
+      loc = @prd.location
+      expect(loc).to eq("magical.file")
+    end
+
+    it "raises when no spec name" do
+      $cfg['product.spec'] = nil
+      $cfg['product.id'] = nil
+      expect { @prd.location }.to raise_error("No spec file named; run `mr config prodcut.spec <specfile>`")
+    end
   end
 
   context "do_rpc" do

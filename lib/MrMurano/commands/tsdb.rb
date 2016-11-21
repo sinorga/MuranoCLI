@@ -1,5 +1,6 @@
 require 'date'
 require 'MrMurano/Solution-ServiceConfig'
+require 'MrMurano/SubCmdGroupContext'
 
 module MrMurano
   module ServiceConfigs
@@ -50,6 +51,7 @@ Also, many date-time formats can be parsed and will be converted to microseconds
   }
   c.option '--when TIMESTAMP', %{When this data happened. (defaults to now)}
   # TODO: add option to take data from STDIN.
+  c.example 'mr tsdb write hum=45 lux=12765 @sn=44', %{Write two metrics (hum and lux) with a tag (sn)}
 
   c.action do |args, options|
     sol = MrMurano::ServiceConfigs::Tsdb.new
@@ -80,15 +82,13 @@ Also, many date-time formats can be parsed and will be converted to microseconds
 end
 
 command 'tsdb query' do |c|
-  c.syntax = %{mr tsdb query [options] }
+  c.syntax = %{mr tsdb query [options] <metric>|@<tag=value> …}
   c.summary = %{query data}
-  c.description =%{
-
-  list metrics to return
-  list tag=value to match
-
+  c.description =%{Query data from the TSDB.
 
 FUNCS is a comma seperated list of the aggregate functions.
+Currently: avg, min, max, count, sum.  For string metrics, only count.
+
 FILL is null, none, any integer, previous
 
 DURATION is an integer with time unit to indicate relative time before now.
@@ -114,6 +114,16 @@ Also, many date-time formats can be parsed and will be converted to microseconds
 
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
+  c.example 'mr tsdb query hum', 'Get all hum metric entries'
+  c.example 'mr tsdb query hum @sn=45', 'Get all hum metric entries for tag sn=45'
+  c.example 'mr tsdb query hum --limit 1', 'Get just the most recent entry'
+  c.example 'mr tsdb query hum --relative_start 1h', 'Get last hour of hum entries'
+  c.example 'mr tsdb query hum --relative_start -1h', 'Get last hour of hum entries'
+  c.example 'mr tsdb query hum --relative_start 2h --relative_end 1h', 'Get hum entries of two hours ago, but not the last hours'
+  c.example 'mr tsdb query hum --sampling_size 30m', 'Get one hum entry from each 30 minute chunk of time'
+  c.example 'mr tsdb query hum --sampling_size 30m --aggregate avg', 'Get average hum entry from each 30 minute chunk of time'
+
+
   c.action do |args, options|
     sol = MrMurano::ServiceConfigs::Tsdb.new
 
@@ -124,6 +134,7 @@ Also, many date-time formats can be parsed and will be converted to microseconds
       if arg =~ /=/ then
         # a tag.
         k,v = arg.split('=', 2)
+        k = k[1..-1] if k[0] == '@'
         tags[k] = v
       else
         metrics << arg
@@ -131,6 +142,11 @@ Also, many date-time formats can be parsed and will be converted to microseconds
     end
     query[:tags] = tags unless tags.empty?
     query[:metrics] = metrics unless metrics.empty?
+
+    # A query without any metrics is invalid.  So if the user didn't provide any,
+    # look up all of them (well, frist however many) and use that list.
+    ret = sol.listMetrics
+    query[:metrics] = ret[:metrics]
 
     unless options.start_time.nil? then
       query[:start_time] = sol.str_to_timestamp(options.start_time)
@@ -196,6 +212,19 @@ command 'tsdb list metrics' do |c|
     ret = sol.listMetrics
     # TODO: handle looping if :next != nil
     sol.outf ret[:metrics]
+  end
+end
+
+command :tsdb do |c|
+  c.syntax = %{mr tsdb}
+  c.summary = %{About TSDB}
+  c.description = %{The tsdb sub-commands let you interact directly with the TSDB instance in a
+solution.  This allows for easier debugging, being able to quickly try out
+different queries or write test data.}
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end
 

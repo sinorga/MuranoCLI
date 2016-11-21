@@ -39,7 +39,7 @@ module MrMurano
     CFG_PRVT_NAME = '.mrmuranorc.private'.freeze # Going away.
     CFG_DIR_NAME = '.mrmurano'.freeze
     CFG_ALTRC_NAME = '.mrmurano/config'.freeze
-    CFG_SYS_NAME = '/etc/mrmuranorc'.freeze
+    CFG_SYS_NAME = '/etc/mrmuranorc'.freeze # Going away.
 
     def initialize
       @paths = []
@@ -64,7 +64,10 @@ module MrMurano
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
-      @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
+      if Pathname.new(CFG_SYS_NAME).exist? then
+        say_warning "!!! Using #{CFG_SYS_NAME} is deprecated"
+        @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
+      end
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
@@ -83,6 +86,7 @@ module MrMurano
       set('location.roles', 'roles.yaml', :defaults)
       set('location.users', 'users.yaml', :defaults)
       set('location.cors', 'cors.yaml', :defaults)
+      set('location.specs', 'specs', :defaults)
 
       set('files.default_page', 'index.html', :defaults)
 
