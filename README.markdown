@@ -206,3 +206,9 @@ spec
 spec/cico.murano.spec
 ```
 
+## Developing
+
+MrMurano uses git flow for managing branches.
+
+MrMurano also uses [bunder](http://bundler.io).
+
