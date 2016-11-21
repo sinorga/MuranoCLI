@@ -142,6 +142,11 @@ Also, many date-time formats can be parsed and will be converted to microseconds
     query[:tags] = tags unless tags.empty?
     query[:metrics] = metrics unless metrics.empty?
 
+    # A query without any metrics is invalid.  So if the user didn't provide any,
+    # look up all of them (well, frist however many) and use that list.
+    ret = sol.listMetrics
+    query[:metrics] = ret[:metrics]
+
     unless options.start_time.nil? then
       query[:start_time] = sol.str_to_timestamp(options.start_time)
     end
