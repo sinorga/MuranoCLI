@@ -41,6 +41,5 @@ command 'solution list' do |c|
     io.close unless io.nil?
   end
 end
-alias_command :solution, 'solution list'
 
 #  vim: set ai et sw=2 ts=2 :

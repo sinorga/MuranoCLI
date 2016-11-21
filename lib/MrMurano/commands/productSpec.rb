@@ -4,6 +4,17 @@ require 'MrMurano/hash'
 require 'yaml'
 require 'terminal-table'
 
+command 'product spec' do |c|
+  c.syntax = %{mr product spec}
+  c.summary = %{About Product Specs}
+  c.description = %{Some utility for working with prodcut specification files.}
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
 command 'product spec convert' do |c|
   c.syntax = %{mr product spec convert FILE}
   c.summary = %{Convert exoline spec file into Murano format}
@@ -84,7 +95,6 @@ command 'product spec pull' do |c|
     io.close unless io.nil?
   end
 end
-alias_command 'product spec', 'product spec pull'
 alias_command 'product spec list', 'product spec pull', '--astable'
 
 #  vim: set ai et sw=2 ts=2 :

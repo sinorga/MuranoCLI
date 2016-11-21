@@ -1,5 +1,19 @@
 require 'MrMurano/Product'
 
+command :content do |c|
+  c.syntax = %{mr content}
+  c.summary = %{About Content Area}
+  c.description = %{This set of commands let you interact with the content area for a product.
+
+This is where OTA data can be stored so that devices can easily download it.
+}
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
 command 'content list' do |c|
   c.syntax = %{mr content list}
   c.summary = %{List downloadable content for a product}
@@ -13,7 +27,6 @@ command 'content list' do |c|
     prd.outf prd.list
   end
 end
-alias_command :content, 'content list'
 
 command 'content info' do |c|
   c.syntax = %{mr content info <content id>}
