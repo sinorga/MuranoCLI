@@ -214,4 +214,25 @@ command 'tsdb list metrics' do |c|
   end
 end
 
+command :tsdb do |c|
+  c.syntax = %{mr tsdb}
+  c.summary = %{About TSDB}
+  c.description = %{A bit more detail about TSDB from MrMurano}
+
+  runner = ::Commander::Runner.instance
+  cmds = runner.instance_variable_get(:@commands).select{|n,_| n.to_s =~ /^tsdb /}
+  c.instance_variable_set(:@commands, cmds)
+  als = runner.instance_variable_get(:@aliases).select{|n,_| n.to_s =~ /^tsdb /}
+  c.instance_variable_set(:@aliases, als)
+
+  c.action do |args, options|
+    hf = program(:help_formatter).new(c)
+    # XXX Don't use ProgramContext.  Make a new context and a new help template for
+    # the sub-command groups.
+    pc = Commander::HelpFormatter::ProgramContext.new(c).get_binding
+    say hf.template(:help).result(pc)
+  end
+
+end
+
 #  vim: set ai et sw=2 ts=2 :
