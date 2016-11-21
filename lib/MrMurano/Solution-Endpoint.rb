@@ -16,11 +16,15 @@ module MrMurano
     ##
     # This gets all data about all endpoints
     def list
-      get()
+      get().map do |item|
+        item[:content_type] = 'application/json' if item[:content_type].empty?
+        item
+      end
     end
 
     def fetch(id)
       ret = get('/' + id.to_s)
+      ret[:content_type] = 'application/json' if ret[:content_type].empty?
       aheader = (ret[:script].lines.first or "").chomp
       dheader = /^--#ENDPOINT (?i:#{ret[:method]}) #{ret[:path]}$/
       rheader = %{--#ENDPOINT #{ret[:method]} #{ret[:path]}\n}
@@ -92,13 +96,14 @@ module MrMurano
       cur = nil
       lineno=0
       path.readlines().each do |line|
-        md = /--#ENDPOINT (\S+) (.*)/.match(line)
+        md = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/.match(line)
         if not md.nil? then
           # header line.
           cur[:line_end] = lineno unless cur.nil?
           items << cur unless cur.nil?
-          cur = {:method=>md[1],
-                 :path=>md[2],
+          cur = {:method=>md[:method],
+                 :path=>md[:path],
+                 :content_type=> (md[:ctype] or 'application/json'),
                  :local_path=>path,
                  :line=>lineno,
                  :script=>line}
@@ -123,7 +128,7 @@ module MrMurano
       if itemB[:script].nil? and itemB[:local_path] then
         itemB[:script] = itemB[:local_path].read
       end
-      return itemA[:script] != itemB[:script]
+      return (itemA[:script] != itemB[:script] or itemA[:content_type] != itemB[:content_type])
     end
 
   end
