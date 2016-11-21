@@ -133,6 +133,7 @@ Also, many date-time formats can be parsed and will be converted to microseconds
       if arg =~ /=/ then
         # a tag.
         k,v = arg.split('=', 2)
+        k = k[1..-1] if k[0] == '@'
         tags[k] = v
       else
         metrics << arg

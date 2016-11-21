@@ -47,7 +47,7 @@ CORS:
 TSDB:
 	- For query, if no metrics on cmdline, then do listMetrics and use all.
 	well, the first 1000 or whatever we get from a single call to listMetrics
-	- Query should handle tags prefixed with @ to match write.
+	- Query should handle tags prefixed with @ to match write. @done(2016-11-21)
 	- Add support for new TSDB service. @pri(high) @done(2016-11-03)
 
 Timeseries:
