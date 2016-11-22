@@ -16,14 +16,19 @@ module MrMurano
     ##
     # This gets all data about all endpoints
     def list
-      get()
+      get().map do |item|
+        item[:content_type] = 'application/json' if item[:content_type].empty?
+        item
+      end
     end
 
     def fetch(id)
       ret = get('/' + id.to_s)
+      ret[:content_type] = 'application/json' if ret[:content_type].empty?
+      # TODO: add content_type to header if not application/json
       aheader = (ret[:script].lines.first or "").chomp
       dheader = /^--#ENDPOINT (?i:#{ret[:method]}) #{ret[:path]}$/
-      rheader = %{--#ENDPOINT #{ret[:method]} #{ret[:path]}\n}
+      rheader = %{--#ENDPOINT #{ret[:method].upcase} #{ret[:path]}\n}
       if block_given? then
         yield rheader unless dheader =~ aheader
         yield ret[:script]
@@ -45,10 +50,12 @@ module MrMurano
       raise "no file" unless local.exist?
 
       # we assume these are small enough to slurp.
-      script = local.read
-      limitkeys = [:method, :path, :script, @itemkey]
+      unless remote.has_key? :script then
+        script = local.read
+        remote[:script] = script
+      end
+      limitkeys = [:method, :path, :script, :content_type, @itemkey]
       remote = remote.select{|k,v| limitkeys.include? k }
-      remote[:script] = script
 #      post('', remote)
       if remote.has_key? @itemkey then
         put('/' + remote[@itemkey], remote) do |request, http|
@@ -84,16 +91,31 @@ module MrMurano
     end
 
     def toRemoteItem(from, path)
-      # read first line of file and get method/path from it?
+      # Path could be have multiple endpoints in side, so a loop.
+      items = []
       path = Pathname.new(path) unless path.kind_of? Pathname
-      aheader = path.readlines().first
-      md = /--#ENDPOINT (\S+) (.*)/.match(aheader)
-      if md.nil? then
-        rp = path.relative_path_from(Pathname.new(Dir.pwd))
-        say_warning "Not an Endpoint: #{rp.to_s}"
-        return nil
+      cur = nil
+      lineno=0
+      path.readlines().each do |line|
+        md = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/.match(line)
+        if not md.nil? then
+          # header line.
+          cur[:line_end] = lineno unless cur.nil?
+          items << cur unless cur.nil?
+          cur = {:method=>md[:method],
+                 :path=>md[:path],
+                 :content_type=> (md[:ctype] or 'application/json'),
+                 :local_path=>path,
+                 :line=>lineno,
+                 :script=>line}
+        elsif not cur.nil? and not cur[:script].nil? then
+          cur[:script] << line
+        end
+        lineno += 1
       end
-      {:method=>md[1], :path=>md[2]}
+      cur[:line_end] = lineno unless cur.nil?
+      items << cur unless cur.nil?
+      items
     end
 
     def synckey(item)
@@ -107,7 +129,7 @@ module MrMurano
       if itemB[:script].nil? and itemB[:local_path] then
         itemB[:script] = itemB[:local_path].read
       end
-      return itemA[:script] != itemB[:script]
+      return (itemA[:script] != itemB[:script] or itemA[:content_type] != itemB[:content_type])
     end
 
   end

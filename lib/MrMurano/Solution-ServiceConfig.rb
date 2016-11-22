@@ -37,6 +37,7 @@ module MrMurano
 
     def call(opid, meth=:get, data=nil, id=scid, &block)
       call = "/#{id.to_s}/call/#{opid.to_s}"
+      debug "Will call: #{call}"
       case meth
       when :get
         get(call, data, &block)

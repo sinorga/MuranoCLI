@@ -25,9 +25,18 @@ task :gitpush do
     sh %{git push --tags}
 end
 
-#task :gempush do
-#    sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
-#end
+task :gempush do
+    sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
+end
+
+task :gemit do 
+    mrt=Bundler::GemHelper.gemspec.version
+    sh %{git checkout v#{mrt}}
+    Rake::Task[:build].invoke
+    Rake::Task[:bob].invoke
+    Rake::Task[:gempush].invoke
+    sh %{git checkout develop}
+end
 
 desc "Prints a cmd to test this in another directory"
 task :testwith do

@@ -20,7 +20,11 @@ command :status do |c|
 
     def fmtr(item)
       if item.has_key? :local_path then
-        item[:local_path].relative_path_from(Pathname.pwd()).to_s
+        lp = item[:local_path].relative_path_from(Pathname.pwd()).to_s
+        if item.has_key?(:line) and item[:line] > 0 then
+          return "#{lp}:#{item[:line]}"
+        end
+        lp
       else
         item[:synckey]
       end

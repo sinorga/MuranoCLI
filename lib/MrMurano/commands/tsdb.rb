@@ -1,5 +1,6 @@
 require 'date'
 require 'MrMurano/Solution-ServiceConfig'
+require 'MrMurano/SubCmdGroupContext'
 
 module MrMurano
   module ServiceConfigs
@@ -133,6 +134,7 @@ Also, many date-time formats can be parsed and will be converted to microseconds
       if arg =~ /=/ then
         # a tag.
         k,v = arg.split('=', 2)
+        k = k[1..-1] if k[0] == '@'
         tags[k] = v
       else
         metrics << arg
@@ -140,6 +142,11 @@ Also, many date-time formats can be parsed and will be converted to microseconds
     end
     query[:tags] = tags unless tags.empty?
     query[:metrics] = metrics unless metrics.empty?
+
+    # A query without any metrics is invalid.  So if the user didn't provide any,
+    # look up all of them (well, frist however many) and use that list.
+    ret = sol.listMetrics
+    query[:metrics] = ret[:metrics]
 
     unless options.start_time.nil? then
       query[:start_time] = sol.str_to_timestamp(options.start_time)
@@ -187,12 +194,30 @@ end
 command 'tsdb list tags' do |c|
   c.syntax = %{mr tsdb list tags [options]}
   c.summary = %{List tags}
+  c.option '--values', %{Also return the known tag values}
 
   c.action do |args, options|
+    options.default :values=>false
+
     sol = MrMurano::ServiceConfigs::Tsdb.new
     ret = sol.listTags
     # TODO: handle looping if :next != nil
-    sol.outf ret[:tags].keys
+
+    if options.values then
+      sol.outf(ret[:tags]) do |dd, ios|
+        data={}
+        data[:headers] = dd.keys
+        data[:rows] = dd.keys.map{|k| dd[k]}
+        len = data[:rows].map{|i| i.length}.max
+        data[:rows].each{|r| r.fill(nil, r.length, len - r.length)}
+        data[:rows] = data[:rows].transpose
+        sol.tabularize(data, ios)
+      end
+    else
+      sol.outf ret[:tags].keys
+    end
+
+
   end
 end
 
@@ -205,6 +230,19 @@ command 'tsdb list metrics' do |c|
     ret = sol.listMetrics
     # TODO: handle looping if :next != nil
     sol.outf ret[:metrics]
+  end
+end
+
+command :tsdb do |c|
+  c.syntax = %{mr tsdb}
+  c.summary = %{About TSDB}
+  c.description = %{The tsdb sub-commands let you interact directly with the TSDB instance in a
+solution.  This allows for easier debugging, being able to quickly try out
+different queries or write test data.}
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end
 

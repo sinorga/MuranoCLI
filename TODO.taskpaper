@@ -3,6 +3,12 @@ Readme:
 	- Look into using VCR for testing. @pri(low)
 
 Commands:
+	- Init command.
+	- Empty sub-commands should return help. @done(2016-11-21)
+	There are a bunch of empty sub-commands that prefix another layer. Such as
+	assign, content, product, and others.  Those should be impemented as a ‘help’
+	only command.  That is they should return help like the plain `mr` command, but
+	just for their sub-section of things
 	- Errors and Warnings should get sent to STDERR @done(2016-11-03)
 	- Need a more consistent output format. 'pp' is still used in many places. @done(2016-11-03)
 	Maybe have a tool setting for output format? json, yaml, pp, csv, table ?
@@ -17,10 +23,8 @@ Account:
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
-	- Add support for multiple endpoints in one file (maybe) @pri(low)
-	The main complexity is supporting both one-per and multiple.
-	The main reason for this is a form of support for exosite-cli.
-	It is likely just better to make a breakout method as part of import.
+	- In fetch(); add content_type to script header if not application/json
+	- Add support for multiple endpoints in one file @pri(high) @done(2016-11-18)
 	- Add directory support like in modules @done(2016-07-26)
 
 Files:
@@ -42,6 +46,9 @@ CORS:
 	- GET&PUT /cors data @done(2016-09-08)
 
 TSDB:
+	- For query, if no metrics on cmdline, then do listMetrics and use all. @done(2016-11-21)
+	well, the first 1000 or whatever we get from a single call to listMetrics
+	- Query should handle tags prefixed with @ to match write. @done(2016-11-21)
 	- Add support for new TSDB service. @pri(high) @done(2016-11-03)
 
 Timeseries:
@@ -60,12 +67,23 @@ Service Device:
 	- When listing and bussiness.id is missing, gracefully fall back to --idonly @done(2016-09-12)
 
 Config:
+	- Add config tool.default_sync to set which things sync{up,down} by default
+	It is internally hardcoded to be -s, -a, -m, -e right now.
+	- Store passwords in system Keychain on system that have a Keychain.
+	mac OS does, various Linux desktops have a couple differnet ones.  Not sure about
+	Windows.
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
 
+SyncUpDown:
+	- Document the hash keys for an item. @pri(high)
+	Also consider turning that hash into a Struct
+	- Allow specifying local files to limit actions to.
+
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
+	This might break some things.
 	- Errors from the server should be displayed prettier. @done(2016-09-26)
 	- JSON parse should use symbols for keys. @done(2016-09-01)
 	- Add the --curl verbose option. @done(2016-08-12)
