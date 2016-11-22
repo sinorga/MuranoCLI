@@ -1,8 +1,8 @@
 require 'MrMurano/Product'
 
-command 'product write' do |c|
-  c.syntax = %{mr product write <sn> <alias> <value> ([<alias> <value>]…)}
-  c.summary = %{Write values into the product}
+command 'product device write' do |c|
+  c.syntax = %{mr product device write <identifier> <alias> <value> ([<alias> <value>]…)}
+  c.summary = %{Write values into a device}
 
   c.action do |args,options|
     sn = args.shift
