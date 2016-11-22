@@ -85,15 +85,39 @@ module MrMurano
     def twee(sn)
       inf = info(sn)
 
-      info_calls = inf[:aliases].keys.map do |rid|
+      aliases = inf[:aliases].keys
+      # information for all
+      info_calls = aliases.map do |rid|
         {:procedure=>:info, :arguments=>[rid, {}]}
       end
 
       limitkeys = [:basic, :description, :usage, :children, :storage]
 
       isubs = do_mrpc(info_calls, sn_rid(sn))
-      inf[:children] = isubs.map{|i| i[:result].select{|k,v| limitkeys.include? k} }
+      children = isubs.map{|i| i[:result].select{|k,v| limitkeys.include? k} }
 
+      # most current value
+      read_calls = aliases.map do |rid|
+        {:procedure=>:read, :arguments=>[rid, {}]}
+      end
+      ivalues = do_mrpc(read_calls, sn_rid(sn))
+
+      rez = aliases.zip(children, ivalues).map do |d|
+        dinf = d[1]
+        dinf[:rid] = d[0]
+        dinf[:alias] = inf[:aliases][d[0]].first
+
+        iv = d[2]
+        if iv.has_key?(:result) and iv[:result].count > 0 and iv[:result][0].count > 1 then
+          dinf[:value] = iv[:result][0][1]
+        else
+          dinf[:value] = nil
+        end
+
+        dinf
+      end
+
+      inf[:children] = rez
       inf.select!{|k,v| limitkeys.include? k }
       inf
     end
