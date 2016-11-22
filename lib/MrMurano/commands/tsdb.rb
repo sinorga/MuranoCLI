@@ -194,12 +194,30 @@ end
 command 'tsdb list tags' do |c|
   c.syntax = %{mr tsdb list tags [options]}
   c.summary = %{List tags}
+  c.option '--values', %{Also return the known tag values}
 
   c.action do |args, options|
+    options.default :values=>false
+
     sol = MrMurano::ServiceConfigs::Tsdb.new
     ret = sol.listTags
     # TODO: handle looping if :next != nil
-    sol.outf ret[:tags].keys
+
+    if options.values then
+      sol.outf(ret[:tags]) do |dd, ios|
+        data={}
+        data[:headers] = dd.keys
+        data[:rows] = dd.keys.map{|k| dd[k]}
+        len = data[:rows].map{|i| i.length}.max
+        data[:rows].each{|r| r.fill(nil, r.length, len - r.length)}
+        data[:rows] = data[:rows].transpose
+        sol.tabularize(data, ios)
+      end
+    else
+      sol.outf ret[:tags].keys
+    end
+
+
   end
 end
 
