@@ -17,3 +17,7 @@ group :test do
   gem 'webmock', '~> 2.1.0'
 end
 
+group :windows do
+  gem 'ocra', '~> 1.3.6'
+end
+
