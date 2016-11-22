@@ -46,10 +46,10 @@ module MrMurano
     ## Do a 1P RPC call
     #
     # While this will take an array of calls, don't. Only pass one.
-    def do_rpc(calls)
+    def do_rpc(calls, cid=model_rid)
       calls = [calls] unless calls.kind_of?(Array)
       r = post('', {
-        :auth=>{:client_id=>model_rid},
+        :auth=>{:client_id=>cid},
         :calls=>calls
       })
       return r if not r.kind_of?(Array) or r.count < 1
@@ -58,6 +58,15 @@ module MrMurano
       r[:result]
     end
     private :do_rpc
+
+    ## Do many 1P RPC calls
+    def do_mrpc(calls, cid=model_rid)
+      calls = [calls] unless calls.kind_of?(Array)
+      post('', {
+        :auth=>{:client_id=>cid},
+        :calls=>calls
+      })
+    end
 
   end
 
