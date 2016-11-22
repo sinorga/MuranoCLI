@@ -27,7 +27,7 @@ module MrMurano
       ret[:content_type] = 'application/json' if ret[:content_type].empty?
       aheader = (ret[:script].lines.first or "").chomp
       dheader = /^--#ENDPOINT (?i:#{ret[:method]}) #{ret[:path]}$/
-      rheader = %{--#ENDPOINT #{ret[:method]} #{ret[:path]}\n}
+      rheader = %{--#ENDPOINT #{ret[:method].upcase} #{ret[:path]}\n}
       if block_given? then
         yield rheader unless dheader =~ aheader
         yield ret[:script]
