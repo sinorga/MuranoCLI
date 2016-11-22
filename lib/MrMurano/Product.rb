@@ -62,6 +62,8 @@ module MrMurano
     ## Do many 1P RPC calls
     def do_mrpc(calls, cid=model_rid)
       calls = [calls] unless calls.kind_of?(Array)
+      maxid = ((calls.max_by{|c| c[:id] or 0 }[:id]) or 0)
+      calls.map!{|c| c[:id] = (maxid += 1) unless c.has_key?(:id); c}
       post('', {
         :auth=>{:client_id=>cid},
         :calls=>calls
