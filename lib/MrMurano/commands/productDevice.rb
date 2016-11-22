@@ -1,6 +1,14 @@
 require 'MrMurano/Product-1P-Device'
 
 command 'product device' do |c|
+  c.syntax = %{mr product device}
+  c.summary = %{Interact with a device in a product}
+  c.description = %{}
+
+  c.action do |a,o|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
 end
 
 command 'product device read' do |c|
