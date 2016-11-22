@@ -32,6 +32,7 @@ command 'product device twee' do |c|
 
 
   c.action do |args,options|
+    options.default :width=>HighLine::SystemExtensions.terminal_size[0]
     snid = args.shift
     prd = MrMurano::Product1PDevice.new
     data = prd.twee(snid)
@@ -46,7 +47,7 @@ command 'product device twee' do |c|
         [ (child[:description][:name] or child[:alias]),
           child[:description][:format],
           child[:basic][:modified],
-          (child[:value] or "").to_s[0..22]
+          (child[:value] or "").to_s[0..22] # TODO adjust based on terminal width
         ]
       end
       prd.tabularize(data, ios)
