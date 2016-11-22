@@ -23,6 +23,7 @@ Account:
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
+	- In fetch(); add content_type to script header if not application/json
 	- Add support for multiple endpoints in one file @pri(high) @done(2016-11-18)
 	- Add directory support like in modules @done(2016-07-26)
 
