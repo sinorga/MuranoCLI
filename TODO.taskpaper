@@ -68,6 +68,9 @@ Service Device:
 Config:
 	- Add config tool.default_sync to set which things sync{up,down} by default
 	It is internally hardcoded to be -s, -a, -m, -e right now.
+	- Store passwords in system Keychain on system that have a Keychain.
+	mac OS does, various Linux desktops have a couple differnet ones.  Not sure about
+	Windows.
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
