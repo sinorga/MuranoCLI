@@ -55,6 +55,7 @@ Timeseries:
 	- Add CSV output option. @done(2016-09-09)
 
 Product:
+	- Add option for progress bar when uploading content files.
 	- Support multiple products.
 	Think about how this would work.  There is the syncing of the resoruces, and then
 	some of the commands that use product.id.
