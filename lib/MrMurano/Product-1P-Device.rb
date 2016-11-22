@@ -14,6 +14,8 @@ module MrMurano
       @sn_rid = nil
     end
 
+    ## Get the internal protocol identifier for a device
+    # +sn+:: Identifier for a device
     def sn_rid(sn)
       return @sn_rid unless @sn_rid.nil?
       prd = Product.new()
@@ -33,6 +35,8 @@ module MrMurano
       @sn_rid
     end
 
+    ## Get information about a device
+    # +sn+:: Identifier for a device
     def info(sn)
       do_rpc({:id=>1,
               :procedure=>:info,
@@ -40,6 +44,8 @@ module MrMurano
       }, sn_rid(sn))
     end
 
+    ## List resources on a device
+    # +sn+:: Identifier for a device
     def list(sn)
       data = info(sn)
       dt = {}
@@ -54,17 +60,36 @@ module MrMurano
       }, sn_rid(sn))
     end
 
+    ## Read the last value for resources on a device
+    # +sn+:: Identifier for a device
+    # +aliases+:: Array of resource names
     def read(sn, aliases)
       aliases = [aliases] unless aliases.kind_of? Array
-      idx=0
       calls = aliases.map do |a|
-        idx+=1
-        {:id=>idx,
+        {
          :procedure=>:read,
          :arguments=>[ {:alias=>a}, {} ]
         }
       end
       do_mrpc(calls, sn_rid(sn)).map{|i| i[:result].first[1]}
+    end
+
+    ## Get a tree of info for a device and its resources.
+    # +sn+:: Identifier for a device
+    def twee(sn)
+      inf = info(sn)
+
+      info_calls = inf[:aliases].keys.map do |rid|
+        {:procedure=>:info, :arguments=>[rid, {}]}
+      end
+
+      limitkeys = [:basic, :description, :usage, :children, :storage]
+
+      isubs = do_mrpc(info_calls, sn_rid(sn))
+      inf[:children] = isubs.map{|i| i[:result].select{|k,v| limitkeys.include? k} }
+
+      inf.select!{|k,v| limitkeys.include? k }
+      inf
     end
 
   end
