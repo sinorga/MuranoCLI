@@ -71,7 +71,13 @@ module MrMurano
          :arguments=>[ {:alias=>a}, {} ]
         }
       end
-      do_mrpc(calls, sn_rid(sn)).map{|i| i[:result].first[1]}
+      do_mrpc(calls, sn_rid(sn)).map do |i|
+        if i.has_key?(:result) and i[:result].count > 0 and i[:result][0].count > 1 then
+          i[:result][0][1]
+        else
+          nil
+        end
+      end
     end
 
     ## Get a tree of info for a device and its resources.
