@@ -36,21 +36,20 @@ command 'product device twee' do |c|
     prd = MrMurano::Product1PDevice.new
     data = prd.twee(snid)
 
-    # TODO build highline style template for output
-
     io=nil
     io = File.open(options.output, 'w') if options.output
     prd.outf(data, io) do |dd,ios|
-      # Best output is pretty.
-      say "#{snid} #{dd[:description][:name]} #{dd[:basic][:status]}"
-      dd[:children].each do |child|
-        name = child[:description][:name] or child[:alias]
-        value = child[:value]
-        if value.kind_of? String and value.length > 12 then
-          value = value[0..12]
-        end
-        say " ├─#{name} #{child[:description][:format]} #{value or ''} (#{child[:basic][:modified]})"
+      data={}
+      data[:title] = "#{snid} #{dd[:description][:name]} #{dd[:basic][:status]}"
+      data[:headers] = [:Resource, :Format, :Modified, :Value]
+      data[:rows] = dd[:children].map do |child|
+        [ (child[:description][:name] or child[:alias]),
+          child[:description][:format],
+          child[:basic][:modified],
+          (child[:value] or "").to_s[0..22]
+        ]
       end
+      prd.tabularize(data, ios)
     end
     io.close unless io.nil?
   end
