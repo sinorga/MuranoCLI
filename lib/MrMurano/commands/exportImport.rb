@@ -1,6 +1,8 @@
 require 'pathname'
 require 'json'
+require 'yaml'
 require 'fileutils'
+require 'MrMurano::Account'
 
 command 'config export' do |c|
   c.syntax = %{mr config export}
@@ -94,8 +96,12 @@ command 'config import' do |c|
   c.options '--[no-]move', %{Move files into expected places if needed}
 
   c.action do |args, options|
+    options.default :move=>true
+
     solfile = ($cfg['location.base'] + 'Solutionfile.json')
     solsecret = ($cfg['location.base'] + '.Solutionfile.secret')
+
+    acc = MrMurano::Account.new
 
     if solfile.exist? then
       # Is in JSON, which as a subset of YAML, so use YAML parser
@@ -104,35 +110,67 @@ command 'config import' do |c|
         $cfg.set('location.files', sf['assets']) if sf.has_key? 'assets'
         $cfg.set('location.files', sf['file_dir']) if sf.has_key? 'file_dir'
         $cfg.set('files.default_page', sf['default_page']) if sf.has_key? 'default_page'
+
         # look at :routes/:custom_api if in a subdir, set location.endpoints
         # Otherwise to move it
         routes = (sf['custom_api'] or sf['routes'] or '')
         if routes == '' then
-          say "No endpoints to import"
+          acc.verbose "No endpoints to import"
         elsif File.dirname(routes) == '.' then
-          say_warning "Routes file #{File.basename(routes)} not in endpoints directory"
+          acc.warning "Routes file #{File.basename(routes)} not in endpoints directory"
           if options.move then
-            say_warning "Moving it to #{$cfg['location.endpoints']}"
+            acc.warning "Moving it to #{$cfg['location.endpoints']}"
             File.mkpath $cfg['location.endpoints']
             File.rename(routes, File.join($cfg['location.endpoints'], File.basename(routes)))
           end
         else
           # Otherwise just use the location they already have
-          $cfg.set('location.solution', File.dirname(routes))
+          routeDir = File.dirname(routes)
+          acc.verbose "For endpoints using #{routeDir}"
+          if $cfg['location.endpoints'] != routeDir then
+            $cfg.set('location.endpoints', routeDir)
+          end
         end
 
-        # TODO: if has :cors, export it
+        # if has :cors, export it
+        if sf.has_key?('cors') then
+          acc.verbose "Exporting CORS to #{$cfg['location.cors']}"
+          File.open($cfg['location.cors'], 'w') do |cio|
+            cio << sf['cors'].to_yaml
+          end
+        end
 
-        # TODO: scan modules for common sub-dir. Set if found. Otherwise warn.
+        # scan modules for common sub-dir. Set if found. Otherwise warn.
         modules = (sf['modules'] or {})
-        modDir = modules.values.map{|p| File.dirname(p)}.uniq
+        modDir = modules.values.map{|p| p.split(/\\\//).first}.uniq
+        acc.debug "modDir => #{modDir}"
         if modDir.count == 1 then
-          $cfg.set('location.modules', modDir.first) unless $cfg['location.modules'] == modDir.first
+          modDir = modDir.first
+          acc.verbose "For modules using #{modDir}"
+          if $cfg['location.modules'] != modDir then
+            $cfg.set('location.modules', modDir)
+          end
+        #elsif options.move then
         else
+          acc.error "Modules in multiple directories! #{modDir.join(', ')}"
+          acc.error "Please combine into #{$cfg['location.modules']}"
         end
 
-        # TODO: scan eventhandlers for common sub-dir. Set if found. Otherwise warn.
-        #eventhandlers = (sf['event_handler'] or sf['services'] or {})
+        # scan eventhandlers for common sub-dir. Set if found. Otherwise warn.
+        eventhandlers = (sf['event_handler'] or sf['services'] or {})
+        evd = eventhandlers.values.map{|e| e.values}.flatten.map{|p| p.split(/\\\//).first}.uniq
+        acc.debug "evd => #{evd}"
+        if eventhandlers.count == 1 then
+          evd = evd.first
+          acc.verbose "For eventhandlers using #{evd}"
+          if $cfg['location.eventhandlers'] != evd then
+            $cfg.set('location.eventhandlers', evd)
+          end
+        #elsif options.move then
+        else
+          acc.error "Event Handlers in multiple directories! #{evd.join(', ')}"
+          acc.error "Please combine into #{$cfg['location.eventhandlers']}"
+        end
 
       end
     end
