@@ -75,7 +75,7 @@ command 'content upload' do |c|
   c.option '--meta STRING', %{Add extra meta info to the content item}
 
   c.action do |args, options|
-    options.defaults :meta=>' '
+    options.default :meta=>' '
     prd = MrMurano::ProductContent.new
 
     if args[0].nil? then

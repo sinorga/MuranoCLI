@@ -17,7 +17,7 @@ command 'config export' do |c|
   c.option '--[no-]merge', "Merge endpoints into a single routes.lua file"
 
   c.action do |args, options|
-    options.defaults :merge => true
+    options.default :merge => true
 
     solfile = Pathname.new($cfg['location.base'] + 'Solutionfile.json')
     solsecret = Pathname.new($cfg['location.base'] + '.Solutionfile.secret')

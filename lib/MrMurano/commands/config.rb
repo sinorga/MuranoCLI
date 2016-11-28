@@ -32,7 +32,7 @@ command :config do |c|
     elsif args.count == 0 then
       say_error "Need a config key"
     elsif args.count == 1 and not options.unset then
-      options.defaults :system=>false, :user=>false, :project=>false,
+      options.default :system=>false, :user=>false, :project=>false,
         :specified=>false, :env=>false
 
       # For read, if no scopes, than all. Otherwise just those specified
@@ -47,7 +47,7 @@ command :config do |c|
       say $cfg.get(args[0], scopes)
     else
 
-      options.defaults :system=>false, :user=>false, :project=>true,
+      options.default :system=>false, :user=>false, :project=>true,
         :specified=>false, :env=>false
       # For write, if scope is specified, only write to that scope.
       scope = :project
