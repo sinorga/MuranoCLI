@@ -97,7 +97,7 @@ command 'config import' do |c|
   c.option '--[no-]move', %{Move files into expected places if needed}
 
   c.action do |args, options|
-    options.default :move=>true
+    options.default :move=>false
 
     solfile = ($cfg['location.base'] + 'Solutionfile.json')
     solsecret = ($cfg['location.base'] + '.Solutionfile.secret')
@@ -142,56 +142,56 @@ command 'config import' do |c|
           end
         end
 
+        def update_or_move(paths, cfgkey, what, move, acc=MrMurano::Account.new)
+          ok = true
+          crd = Dir.common_root(paths)
+          acc.debug "crd => #{crd}"
+          if crd.empty? then
+            if move then
+              maxd = Dir.max_depth(paths) - 1
+              if maxd > 2 then
+                acc.error "Some #{what} are in directories too deep."
+                acc.error "Please move them manually to #{$cfg[cfgkey]}"
+                ok=false
+              else
+                # Since we might have multiple files in mulitple dirs.
+                # We want to move the groups
+                src = Dir.common_dirs(paths)
+                acc.warning "Moving #{src} to #{$cfg[cfgkey]}"
+                FileUtils.mkpath($cfg[cfgkey], fuopts)
+                FileUtils.mv(src, $cfg[cfgkey], fuopts)
+              end
+            else
+              acc.error "#{what.capitalize} in multiple directories! #{crd.join(', ')}"
+              acc.error "Please move them manually into #{$cfg[cfgkey]}"
+              ok=false
+            end
+          else
+            maxd = Dir.max_depth(paths) - crd.count
+            if maxd > 2 then
+              acc.error "Some #{what} are in directories too deep."
+              acc.error "Please move them manually to #{$cfg[cfgkey]}"
+              ok=false
+            else
+              crd = File.join(crd)
+              acc.verbose "For #{what} using #{crd}"
+              if $cfg[cfgkey] != crd then
+                $cfg.set(cfgkey, crd)
+              end
+            end
+          end
+          ok
+        end
+
         # scan modules for common sub-dir. Set if found. Otherwise warn.
         modules = (sf['modules'] or {})
-        modDir = Dir.common_root(modules.values)
-        acc.debug "modDir => #{modDir}"
-        if modDir.empty? then
-          if options.move then
-            # Since we might have multiple files in mulitple dirs.
-            # We want to move the groups
-            src = Dir.common_dirs(modules.values)
-            acc.warning "Moving #{src} to #{$cfg['location.modules']}"
-            FileUtils.mkpath($cfg['location.modules'], fuopts)
-            FileUtils.mv(src, $cfg['location.modules'], fuopts)
-          else
-            acc.error "Modules in multiple directories! #{modDir.join(', ')}"
-            acc.error "Please combine into #{$cfg['location.modules']}"
-            # TODO set status code to !0, but keep going.
-          end
-        else
-          modDir = File.join(modDir)
-          acc.verbose "For modules using #{modDir}"
-          if $cfg['location.modules'] != modDir then
-            $cfg.set('location.modules', modDir)
-          end
-        end
+        update_or_move(modules.values, 'location.modules', 'modules', options.move)
 
         # scan eventhandlers for common sub-dir. Set if found. Otherwise warn.
         eventhandlers = (sf['event_handler'] or sf['services'] or {})
-        evd = Dir.common_root(eventhandlers.values.map{|e| e.values}.flatten)
-        acc.debug "evd => #{evd}"
-        if evd.empty? then
-          if options.move then
-            # Since we might have multiple files in mulitple dirs.
-            # We want to move the groups
-            src = Dir.common_dirs(eventhandlers.values.map{|e| e.values}.flatten)
-            acc.warning "Moving #{src} to #{$cfg['location.eventhandlers']}"
-            FileUtils.mkpath($cfg['location.eventhandlers'], fuopts)
-            FileUtils.mv(src, $cfg['location.eventhandlers'], fuopts)
-            # TODO: Need to add header to each file.
-          else
-            acc.error "Event Handlers in multiple directories! #{evd.join(', ')}"
-            acc.error "Please combine into #{$cfg['location.eventhandlers']}"
-            # TODO set status code to !0, but keep going.
-          end
-        else
-          evd = File.join(evd)
-          acc.verbose "For eventhandlers using #{evd}"
-          if $cfg['location.eventhandlers'] != evd then
-            $cfg.set('location.eventhandlers', evd)
-          end
-        end
+        evd = eventhandlers.values.map{|e| e.values}.flatten
+        update_or_move(evd, 'location.eventhandlers', 'eventhandlers', options.move)
+        # TODO: add header to each eventhandler
 
       end
     end
