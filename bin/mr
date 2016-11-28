@@ -8,6 +8,8 @@ require 'pp'
 require 'dotenv'
 Dotenv.load
 
+Signal.trap('INT', 'EXIT') # Don't drop traces on ^C
+
 program :version, MrMurano::VERSION
 program :description, %{Manage a Solution and Product in Exosite's Murano}
 
