@@ -1,4 +1,17 @@
 
+## Get the root-most common directories from paths
+def Dir.common_dirs(paths)
+  paths = paths.map do |p|
+    if p.kind_of? Array then
+      p
+    else
+      p.to_s.split(File::SEPARATOR)
+    end
+  end
+
+  paths.map{|p| p.first}.uniq
+end
+
 ## Get the deepest common root directory for all paths
 def Dir.common_root(paths, root=[])
   paths = paths.map do |p|

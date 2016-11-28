@@ -103,6 +103,7 @@ command 'config import' do |c|
     solsecret = ($cfg['location.base'] + '.Solutionfile.secret')
 
     acc = MrMurano::Account.new
+    fuopts = {:noop=>$cfg['tool.dry'], :verbose=>$cfg['tool.verbose']}
 
     if solfile.exist? then
       # Is in JSON, which as a subset of YAML, so use YAML parser
@@ -121,8 +122,8 @@ command 'config import' do |c|
           acc.warning "Routes file #{File.basename(routes)} not in endpoints directory"
           if options.move then
             acc.warning "Moving it to #{$cfg['location.endpoints']}"
-            FileUtils.mkpath $cfg['location.endpoints']
-            FileUtils.mv(routes, File.join($cfg['location.endpoints'], File.basename(routes)))
+            FileUtils.mkpath($cfg['location.endpoints'], fuopts)
+            FileUtils.mv(routes, File.join($cfg['location.endpoints'], File.basename(routes)), fuopts)
           end
         else
           # Otherwise just use the location they already have
@@ -146,9 +147,18 @@ command 'config import' do |c|
         modDir = Dir.common_root(modules.values)
         acc.debug "modDir => #{modDir}"
         if modDir.empty? then
-          # TODO if options.move
-          acc.error "Modules in multiple directories! #{modDir.join(', ')}"
-          acc.error "Please combine into #{$cfg['location.modules']}"
+          if options.move then
+            # Since we might have multiple files in mulitple dirs.
+            # We want to move the groups
+            src = Dir.common_dirs(modules.values)
+            acc.warning "Moving #{src} to #{$cfg['location.modules']}"
+            FileUtils.mkpath($cfg['location.modules'], fuopts)
+            FileUtils.mv(src, $cfg['location.modules'], fuopts)
+          else
+            acc.error "Modules in multiple directories! #{modDir.join(', ')}"
+            acc.error "Please combine into #{$cfg['location.modules']}"
+            # TODO set status code to !0, but keep going.
+          end
         else
           modDir = File.join(modDir)
           acc.verbose "For modules using #{modDir}"
@@ -159,13 +169,21 @@ command 'config import' do |c|
 
         # scan eventhandlers for common sub-dir. Set if found. Otherwise warn.
         eventhandlers = (sf['event_handler'] or sf['services'] or {})
-        #evd = eventhandlers.values.map{|e| e.values}.flatten.map{|p| p.split(/[\\\/]/).first}.uniq
         evd = Dir.common_root(eventhandlers.values.map{|e| e.values}.flatten)
         acc.debug "evd => #{evd}"
         if evd.empty? then
-          # TODO if options.move
-          acc.error "Event Handlers in multiple directories! #{evd.join(', ')}"
-          acc.error "Please combine into #{$cfg['location.eventhandlers']}"
+          if options.move then
+            # Since we might have multiple files in mulitple dirs.
+            # We want to move the groups
+            src = Dir.common_dirs(eventhandlers.values.map{|e| e.values}.flatten)
+            acc.warning "Moving #{src} to #{$cfg['location.eventhandlers']}"
+            FileUtils.mkpath($cfg['location.eventhandlers'], fuopts)
+            FileUtils.mv(src, $cfg['location.eventhandlers'], fuopts)
+          else
+            acc.error "Event Handlers in multiple directories! #{evd.join(', ')}"
+            acc.error "Please combine into #{$cfg['location.eventhandlers']}"
+            # TODO set status code to !0, but keep going.
+          end
         else
           evd = File.join(evd)
           acc.verbose "For eventhandlers using #{evd}"
@@ -173,7 +191,6 @@ command 'config import' do |c|
             $cfg.set('location.eventhandlers', evd)
           end
         end
-
 
       end
     end
