@@ -8,14 +8,14 @@ command :init do |c|
 
   c.option '--force', %{Override existing business, solution, or product ids}
   c.option '--[no-]mkdirs', %{Create default directories}
-  c.option '--[no-]import', %{If Solutionfile present, import it first.}
-
 
   c.action do |args, options|
-    options.default :force=>false
+    options.default :force=>false, :mkdirs=>true
 
-    # TODO: Add Solutionfile import check here
-
+    if ($cfg['location.base'] + 'Solutionfile.json').exist? then
+      y=ask("A Solutionfile.json exists, Do you want exit and run `mr config import` instead? [yN]")
+      exit 0 unless y =~ /^n/i
+    end
 
 
     # If they have never logged in, then asking for the business.id will also ask
