@@ -12,7 +12,7 @@ command :init do |c|
   c.action do |args, options|
     options.default :force=>false, :mkdirs=>true
 
-    if ($cfg['location.base'] + 'Solutionfile.json').exist? then
+    if not options.force and ($cfg['location.base'] + 'Solutionfile.json').exist? then
       y=ask("A Solutionfile.json exists, Do you want exit and run `mr config import` instead? [yN]")
       exit 0 unless y =~ /^n/i
     end
