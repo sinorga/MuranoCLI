@@ -1,6 +1,9 @@
 require 'pathname'
 require 'json'
+require 'yaml'
 require 'fileutils'
+require 'MrMurano/dir'
+require 'MrMurano/Account'
 
 command 'config export' do |c|
   c.syntax = %{mr config export}
@@ -17,7 +20,7 @@ command 'config export' do |c|
   c.option '--[no-]merge', "Merge endpoints into a single routes.lua file"
 
   c.action do |args, options|
-    options.defaults :merge => true
+    options.default :merge => true
 
     solfile = Pathname.new($cfg['location.base'] + 'Solutionfile.json')
     solsecret = Pathname.new($cfg['location.base'] + '.Solutionfile.secret')
@@ -91,9 +94,16 @@ command 'config import' do |c|
   by the exosite-cli tool.
   }
 
+  c.option '--[no-]move', %{Move files into expected places if needed}
+
   c.action do |args, options|
+    options.default :move=>true
+
     solfile = ($cfg['location.base'] + 'Solutionfile.json')
     solsecret = ($cfg['location.base'] + '.Solutionfile.secret')
+
+    acc = MrMurano::Account.new
+    fuopts = {:noop=>$cfg['tool.dry'], :verbose=>$cfg['tool.verbose']}
 
     if solfile.exist? then
       # Is in JSON, which as a subset of YAML, so use YAML parser
@@ -102,6 +112,83 @@ command 'config import' do |c|
         $cfg.set('location.files', sf['assets']) if sf.has_key? 'assets'
         $cfg.set('location.files', sf['file_dir']) if sf.has_key? 'file_dir'
         $cfg.set('files.default_page', sf['default_page']) if sf.has_key? 'default_page'
+
+        # look at :routes/:custom_api if in a subdir, set location.endpoints
+        # Otherwise to move it
+        routes = (sf['custom_api'] or sf['routes'] or '')
+        if routes == '' then
+          acc.verbose "No endpoints to import"
+        elsif File.dirname(routes) == '.' then
+          acc.warning "Routes file #{File.basename(routes)} not in endpoints directory"
+          if options.move then
+            acc.warning "Moving it to #{$cfg['location.endpoints']}"
+            FileUtils.mkpath($cfg['location.endpoints'], fuopts)
+            FileUtils.mv(routes, File.join($cfg['location.endpoints'], File.basename(routes)), fuopts)
+          end
+        else
+          # Otherwise just use the location they already have
+          routeDir = File.dirname(routes)
+          acc.verbose "For endpoints using #{routeDir}"
+          if $cfg['location.endpoints'] != routeDir then
+            $cfg.set('location.endpoints', routeDir)
+          end
+        end
+
+        # if has :cors, export it
+        if sf.has_key?('cors') then
+          acc.verbose "Exporting CORS to #{$cfg['location.cors']}"
+          File.open($cfg['location.cors'], 'w') do |cio|
+            cio << sf['cors'].to_yaml
+          end
+        end
+
+        def update_or_stop(paths, cfgkey, what, acc=MrMurano::Account.new)
+          crd = Dir.common_root(paths)
+          acc.debug "crd => #{crd}"
+          if crd.empty? then
+            acc.error "#{what.capitalize} in multiple directories! #{crd.join(', ')}"
+            acc.error "Please move them manually into #{$cfg[cfgkey]}"
+            exit(1)
+          else
+            maxd = Dir.max_depth(paths) - crd.count
+            if maxd > 2 then
+              acc.error "Some #{what} are in directories too deep."
+              acc.error "Please move them manually to #{$cfg[cfgkey]}"
+              exit(1)
+            else
+              crd = File.join(crd)
+              acc.verbose "For #{what} using #{crd}"
+              if $cfg[cfgkey] != crd then
+                $cfg.set(cfgkey, crd)
+              end
+            end
+          end
+        end
+
+        # scan modules for common sub-dir. Set if found. Otherwise warn.
+        modules = (sf['modules'] or {})
+        update_or_stop(modules.values, 'location.modules', 'modules')
+
+        # scan eventhandlers for common sub-dir. Set if found. Otherwise warn.
+        eventhandlers = (sf['event_handler'] or sf['services'] or {})
+        evd = eventhandlers.values.map{|e| e.values}.flatten
+        update_or_stop(evd, 'location.eventhandlers', 'eventhandlers')
+
+        # add header to each eventhandler
+        eventhandlers.each do |service, events|
+          events.each do |event, path|
+            # open path, if no header, add it
+            data = IO.readlines(path)
+            dheader = "--#EVENT #{service} #{event}"
+            aheader = (data.first or "").chomp
+            if aheader != dheader then
+              acc.verbose "Adding event header to #{path}"
+              data.insert(0, dheader)
+              File.open(path, 'w'){|eio| eio.puts(data)} unless $cfg['tool.dry']
+            end
+          end
+        end
+
       end
     end
 
@@ -133,7 +220,7 @@ command 'config import' do |c|
     end
 
     say "Configuration items have been imported."
-    say "Use `mr syncdown` get get all endpoints, modules, and event handlers"
+    #say "Use `mr syncdown` get get all endpoints, modules, and event handlers"
   end
 
 end

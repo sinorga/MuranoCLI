@@ -4,7 +4,7 @@ command :domain do |c|
   c.summary = %{Print the domain for this solution}
   c.option '--[no-]raw', %{Don't add scheme}
   c.action do |args,options|
-    options.defaults :raw=>true
+    options.default :raw=>true
     sol = MrMurano::Solution.new
     ret = sol.info()
     if options.raw then
