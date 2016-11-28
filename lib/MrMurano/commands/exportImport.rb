@@ -97,7 +97,7 @@ command 'config import' do |c|
   c.option '--[no-]move', %{Move files into expected places if needed}
 
   c.action do |args, options|
-    options.default :move=>false
+    options.default :move=>true
 
     solfile = ($cfg['location.base'] + 'Solutionfile.json')
     solsecret = ($cfg['location.base'] + '.Solutionfile.secret')
@@ -142,36 +142,19 @@ command 'config import' do |c|
           end
         end
 
-        def update_or_move(paths, cfgkey, what, move, acc=MrMurano::Account.new)
-          ok = true
+        def update_or_stop(paths, cfgkey, what, acc=MrMurano::Account.new)
           crd = Dir.common_root(paths)
           acc.debug "crd => #{crd}"
           if crd.empty? then
-            if move then
-              maxd = Dir.max_depth(paths) - 1
-              if maxd > 2 then
-                acc.error "Some #{what} are in directories too deep."
-                acc.error "Please move them manually to #{$cfg[cfgkey]}"
-                ok=false
-              else
-                # Since we might have multiple files in mulitple dirs.
-                # We want to move the groups
-                src = Dir.common_dirs(paths)
-                acc.warning "Moving #{src} to #{$cfg[cfgkey]}"
-                FileUtils.mkpath($cfg[cfgkey], fuopts)
-                FileUtils.mv(src, $cfg[cfgkey], fuopts)
-              end
-            else
-              acc.error "#{what.capitalize} in multiple directories! #{crd.join(', ')}"
-              acc.error "Please move them manually into #{$cfg[cfgkey]}"
-              ok=false
-            end
+            acc.error "#{what.capitalize} in multiple directories! #{crd.join(', ')}"
+            acc.error "Please move them manually into #{$cfg[cfgkey]}"
+            exit(1)
           else
             maxd = Dir.max_depth(paths) - crd.count
             if maxd > 2 then
               acc.error "Some #{what} are in directories too deep."
               acc.error "Please move them manually to #{$cfg[cfgkey]}"
-              ok=false
+              exit(1)
             else
               crd = File.join(crd)
               acc.verbose "For #{what} using #{crd}"
@@ -180,18 +163,16 @@ command 'config import' do |c|
               end
             end
           end
-          ok
         end
 
         # scan modules for common sub-dir. Set if found. Otherwise warn.
         modules = (sf['modules'] or {})
-        update_or_move(modules.values, 'location.modules', 'modules', options.move)
+        update_or_stop(modules.values, 'location.modules', 'modules')
 
         # scan eventhandlers for common sub-dir. Set if found. Otherwise warn.
         eventhandlers = (sf['event_handler'] or sf['services'] or {})
         evd = eventhandlers.values.map{|e| e.values}.flatten
-        update_or_move(evd, 'location.eventhandlers', 'eventhandlers', options.move)
-        # TODO: add header to each eventhandler
+        update_or_stop(evd, 'location.eventhandlers', 'eventhandlers')
 
       end
     end
