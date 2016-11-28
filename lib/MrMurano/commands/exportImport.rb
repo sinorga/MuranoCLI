@@ -174,6 +174,21 @@ command 'config import' do |c|
         evd = eventhandlers.values.map{|e| e.values}.flatten
         update_or_stop(evd, 'location.eventhandlers', 'eventhandlers')
 
+        # add header to each eventhandler
+        eventhandlers.each do |service, events|
+          events.each do |event, path|
+            # open path, if no header, add it
+            data = IO.readlines(path)
+            dheader = "--#EVENT #{service} #{event}"
+            aheader = (data.first or "").chomp
+            if aheader != dheader then
+              acc.verbose "Adding event header to #{path}"
+              data.insert(0, dheader)
+              File.open(path, 'w'){|eio| eio.puts(data)} unless $cfg['tool.dry']
+            end
+          end
+        end
+
       end
     end
 
