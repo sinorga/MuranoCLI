@@ -2,7 +2,8 @@ require 'pathname'
 require 'json'
 require 'yaml'
 require 'fileutils'
-require 'MrMurano::Account'
+require 'MrMurano/dir'
+require 'MrMurano/Account'
 
 command 'config export' do |c|
   c.syntax = %{mr config export}
@@ -93,7 +94,7 @@ command 'config import' do |c|
   by the exosite-cli tool.
   }
 
-  c.options '--[no-]move', %{Move files into expected places if needed}
+  c.option '--[no-]move', %{Move files into expected places if needed}
 
   c.action do |args, options|
     options.default :move=>true
@@ -120,8 +121,8 @@ command 'config import' do |c|
           acc.warning "Routes file #{File.basename(routes)} not in endpoints directory"
           if options.move then
             acc.warning "Moving it to #{$cfg['location.endpoints']}"
-            File.mkpath $cfg['location.endpoints']
-            File.rename(routes, File.join($cfg['location.endpoints'], File.basename(routes)))
+            FileUtils.mkpath $cfg['location.endpoints']
+            FileUtils.mv(routes, File.join($cfg['location.endpoints'], File.basename(routes)))
           end
         else
           # Otherwise just use the location they already have
@@ -142,35 +143,37 @@ command 'config import' do |c|
 
         # scan modules for common sub-dir. Set if found. Otherwise warn.
         modules = (sf['modules'] or {})
-        modDir = modules.values.map{|p| p.split(/\\\//).first}.uniq
+        modDir = Dir.common_root(modules.values)
         acc.debug "modDir => #{modDir}"
-        if modDir.count == 1 then
-          modDir = modDir.first
+        if modDir.empty? then
+          # TODO if options.move
+          acc.error "Modules in multiple directories! #{modDir.join(', ')}"
+          acc.error "Please combine into #{$cfg['location.modules']}"
+        else
+          modDir = File.join(modDir)
           acc.verbose "For modules using #{modDir}"
           if $cfg['location.modules'] != modDir then
             $cfg.set('location.modules', modDir)
           end
-        #elsif options.move then
-        else
-          acc.error "Modules in multiple directories! #{modDir.join(', ')}"
-          acc.error "Please combine into #{$cfg['location.modules']}"
         end
 
         # scan eventhandlers for common sub-dir. Set if found. Otherwise warn.
         eventhandlers = (sf['event_handler'] or sf['services'] or {})
-        evd = eventhandlers.values.map{|e| e.values}.flatten.map{|p| p.split(/\\\//).first}.uniq
+        #evd = eventhandlers.values.map{|e| e.values}.flatten.map{|p| p.split(/[\\\/]/).first}.uniq
+        evd = Dir.common_root(eventhandlers.values.map{|e| e.values}.flatten)
         acc.debug "evd => #{evd}"
-        if eventhandlers.count == 1 then
-          evd = evd.first
+        if evd.empty? then
+          # TODO if options.move
+          acc.error "Event Handlers in multiple directories! #{evd.join(', ')}"
+          acc.error "Please combine into #{$cfg['location.eventhandlers']}"
+        else
+          evd = File.join(evd)
           acc.verbose "For eventhandlers using #{evd}"
           if $cfg['location.eventhandlers'] != evd then
             $cfg.set('location.eventhandlers', evd)
           end
-        #elsif options.move then
-        else
-          acc.error "Event Handlers in multiple directories! #{evd.join(', ')}"
-          acc.error "Please combine into #{$cfg['location.eventhandlers']}"
         end
+
 
       end
     end
