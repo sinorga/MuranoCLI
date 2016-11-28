@@ -13,7 +13,7 @@ command :init do |c|
   c.action do |args, options|
     options.default :force=>false
 
-    # TODO: Add Solutionfile inport check here
+    # TODO: Add Solutionfile import check here
 
 
 
@@ -35,8 +35,8 @@ command :init do |c|
       else
         choose do |menu|
           menu.prompt = "Select which Business to use:"
-          menu.select_by = :index_or_name
-          bizz.each do |b|
+          menu.flow = :columns_across
+          bizz.sort{|a,b| a[:name]<=>b[:name]}.each do |b|
             menu.choice(b[:name]) do
               $cfg.set('business.id', b[:bizid], :project)
             end
@@ -44,6 +44,7 @@ command :init do |c|
         end
       end
     end
+    puts '' # blank line
 
     # 2. Get Solution id
     if not options.force and not $cfg['solution.id'].nil? then
@@ -57,15 +58,16 @@ command :init do |c|
       else
         choose do |menu|
           menu.prompt = "Select which Solution to use:"
-          menu.select_by = :index_or_name
-          solz.each do |s|
-            menu.choice(s[:domain]) do
+          menu.flow = :columns_across
+          solz.sort{|a,b| a[:domain]<=>b[:domain]}.each do |s|
+            menu.choice(s[:domain].sub(/\..*$/,'')) do
               $cfg.set('solution.id', s[:apiId], :project)
             end
           end
         end
       end
     end
+    puts '' # blank line
 
     # 3. Get Product id
     if not options.force and not $cfg['product.id'].nil? then
@@ -79,8 +81,8 @@ command :init do |c|
       else
         choose do |menu|
           menu.prompt = "Select which Product to use:"
-          menu.select_by = :index_or_name
-          podz.each do |p|
+          menu.flow = :columns_across
+          podz.sort{|a,b| a[:label]<=>b[:label]}.each do |p|
             menu.choice(p[:label]) do
               $cfg.set('product.id', p[:modelId], :project)
             end
