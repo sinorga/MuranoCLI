@@ -46,6 +46,8 @@ module MrMurano
     ## Do a 1P RPC call
     #
     # While this will take an array of calls, don't. Only pass one.
+    # This only returns the result of the first call. Results from other calls are
+    # dropped.
     def do_rpc(calls, cid=model_rid)
       calls = [calls] unless calls.kind_of?(Array)
       r = post('', {
@@ -69,6 +71,7 @@ module MrMurano
         :calls=>calls
       })
     end
+    private :do_mrpc
 
   end
 
