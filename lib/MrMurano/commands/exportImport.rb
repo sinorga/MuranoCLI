@@ -91,6 +91,8 @@ command 'config import' do |c|
   by the exosite-cli tool.
   }
 
+  c.options '--[no-]move', %{Move files into expected places if needed}
+
   c.action do |args, options|
     solfile = ($cfg['location.base'] + 'Solutionfile.json')
     solsecret = ($cfg['location.base'] + '.Solutionfile.secret')
@@ -102,6 +104,36 @@ command 'config import' do |c|
         $cfg.set('location.files', sf['assets']) if sf.has_key? 'assets'
         $cfg.set('location.files', sf['file_dir']) if sf.has_key? 'file_dir'
         $cfg.set('files.default_page', sf['default_page']) if sf.has_key? 'default_page'
+        # look at :routes/:custom_api if in a subdir, set location.endpoints
+        # Otherwise to move it
+        routes = (sf['custom_api'] or sf['routes'] or '')
+        if routes == '' then
+          say "No endpoints to import"
+        elsif File.dirname(routes) == '.' then
+          say_warning "Routes file #{File.basename(routes)} not in endpoints directory"
+          if options.move then
+            say_warning "Moving it to #{$cfg['location.endpoints']}"
+            File.mkpath $cfg['location.endpoints']
+            File.rename(routes, File.join($cfg['location.endpoints'], File.basename(routes)))
+          end
+        else
+          # Otherwise just use the location they already have
+          $cfg.set('location.solution', File.dirname(routes))
+        end
+
+        # TODO: if has :cors, export it
+
+        # TODO: scan modules for common sub-dir. Set if found. Otherwise warn.
+        modules = (sf['modules'] or {})
+        modDir = modules.values.map{|p| File.dirname(p)}.uniq
+        if modDir.count == 1 then
+          $cfg.set('location.modules', modDir.first) unless $cfg['location.modules'] == modDir.first
+        else
+        end
+
+        # TODO: scan eventhandlers for common sub-dir. Set if found. Otherwise warn.
+        #eventhandlers = (sf['event_handler'] or sf['services'] or {})
+
       end
     end
 
@@ -133,7 +165,7 @@ command 'config import' do |c|
     end
 
     say "Configuration items have been imported."
-    say "Use `mr syncdown` get get all endpoints, modules, and event handlers"
+    #say "Use `mr syncdown` get get all endpoints, modules, and event handlers"
   end
 
 end

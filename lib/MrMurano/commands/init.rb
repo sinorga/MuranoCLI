@@ -8,6 +8,7 @@ command :init do |c|
 
   c.option '--force', %{Override existing business, solution, or product ids}
   c.option '--[no-]mkdirs', %{Create default directories}
+  c.option '--[no-]import', %{If Solutionfile present, import it first.}
 
 
   c.action do |args, options|
