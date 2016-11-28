@@ -179,6 +179,7 @@ command 'config import' do |c|
             acc.warning "Moving #{src} to #{$cfg['location.eventhandlers']}"
             FileUtils.mkpath($cfg['location.eventhandlers'], fuopts)
             FileUtils.mv(src, $cfg['location.eventhandlers'], fuopts)
+            # TODO: Need to add header to each file.
           else
             acc.error "Event Handlers in multiple directories! #{evd.join(', ')}"
             acc.error "Please combine into #{$cfg['location.eventhandlers']}"
