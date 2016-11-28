@@ -51,66 +51,6 @@ RSpec.describe MrMurano::ProductResources do
     end
   end
 
-  context "do_rpc" do
-    # Note, do_rpc is private.
-    it "Accepts an object" do
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
-        to_return(body: [{
-        :id=>1, :status=>"ok", :result=>{}
-      }])
-
-      ret = nil
-      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
-      expect(ret).to eq({})
-    end
-
-    it "Accepts an Array" do
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
-        to_return(body: [{:id=>1, :status=>"ok", :result=>{:one=>1}},
-      {:id=>2, :status=>"ok", :result=>{:two=>2}}])
-
-      ret = nil
-      @prd.instance_eval{ ret = do_rpc([{:id=>1}, {:id=>2}]) }
-      expect(ret).to eq({:one=>1})
-      # yes it only returns first.
-    end
-
-    it "returns res if not Array" do
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
-        to_return(body: {:not=>'an array'}.to_json)
-
-      ret = nil
-      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
-      expect(ret).to eq({:not=>'an array'})
-    end
-
-    it "returns res if count less than 1" do
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
-        to_return(body: [])
-
-      ret = nil
-      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
-      expect(ret).to eq([])
-    end
-
-    it "returns res[0] if not Hash" do
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
-        to_return(body: ["foo"])
-
-      ret = nil
-      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
-      expect(ret).to eq("foo")
-    end
-
-    it "returns res[0] if not status ok" do
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
-        to_return(body: [{:id=>1, :status=>'error'}])
-
-      ret = nil
-      @prd.instance_eval{ ret = do_rpc({:id=>1}) }
-      expect(ret).to eq({:id=>1, :status=>'error'})
-    end
-  end
 
   context "queries" do
     it "gets info" do
