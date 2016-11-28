@@ -93,6 +93,21 @@ command :init do |c|
     puts ''
     say "Ok, In business ID: #{$cfg['business.id']} using Solution ID: #{$cfg['solution.id']} with Product ID: #{$cfg['product.id']}"
 
+    if options.mkdirs then
+      %w{
+        location.files
+        location.endpoints
+        location.modules
+        location.eventhandlers
+        location.specs
+      }.each do |cfgi|
+        path = $cfg[cfgi]
+        path = Pathname.new(path) unless path.kind_of? Pathname
+        path.mkpath unless path.exist?
+      end
+      say "Default directories created"
+    end
+
   end
 end
 
