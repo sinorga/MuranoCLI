@@ -3,7 +3,7 @@ Readme:
 	- Look into using VCR for testing. @pri(low)
 
 Commands:
-	- Init command.
+	- Init command. @done(2016-11-28)
 	- Empty sub-commands should return help. @done(2016-11-21)
 	There are a bunch of empty sub-commands that prefix another layer. Such as
 	assign, content, product, and others.  Those should be impemented as a ‘help’
