@@ -3,7 +3,7 @@ Readme:
 	- Look into using VCR for testing. @pri(low)
 
 Commands:
-	- Init command.
+	- Init command. @done(2016-11-28)
 	- Empty sub-commands should return help. @done(2016-11-21)
 	There are a bunch of empty sub-commands that prefix another layer. Such as
 	assign, content, product, and others.  Those should be impemented as a ‘help’
@@ -23,6 +23,7 @@ Account:
 	- Netrc library (or the netrc format) doesn't allow '#' in passwords. @done(2016-08-10)
 
 Endpoints:
+	- In fetch(); add content_type to script header if not application/json
 	- Add support for multiple endpoints in one file @pri(high) @done(2016-11-18)
 	- Add directory support like in modules @done(2016-07-26)
 
@@ -54,6 +55,7 @@ Timeseries:
 	- Add CSV output option. @done(2016-09-09)
 
 Product:
+	- Add option for progress bar when uploading content files.
 	- Support multiple products.
 	Think about how this would work.  There is the syncing of the resoruces, and then
 	some of the commands that use product.id.
@@ -68,6 +70,9 @@ Service Device:
 Config:
 	- Add config tool.default_sync to set which things sync{up,down} by default
 	It is internally hardcoded to be -s, -a, -m, -e right now.
+	- Store passwords in system Keychain on system that have a Keychain.
+	mac OS does, various Linux desktops have a couple differnet ones.  Not sure about
+	Windows.
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)

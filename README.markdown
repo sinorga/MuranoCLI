@@ -212,3 +212,12 @@ MrMurano uses git flow for managing branches.
 
 MrMurano also uses [bunder](http://bundler.io).
 
+## Windows
+
+The MrMurano gem will install on Windows.
+
+You can install Ruby on Windows with [RubyInstaller](http://rubyinstaller.org).
+You might run into a [known SSL cert issue](http://guides.rubygems.org/ssl-certificate-update/).
+If so follow the steps there to update the certs.
+
+
