@@ -70,7 +70,7 @@ RSpec.describe MrMurano::ProductContent, "#product_content" do
     size = FileTest.size('spec/fixtures/product_spec_files/lightbulb.yaml')
     stub_request(:post, @urlroot + "/testFor").
       with(headers: {'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'text/yaml',
+                      'Content-Type'=>/text\/(x-)?yaml/,
                       'Content-Length' => size
     }).
       to_return(status: 205)
