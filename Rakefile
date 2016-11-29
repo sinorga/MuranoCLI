@@ -41,7 +41,7 @@ end
 task :wexe do
     # Need to find all dlls, because ocra isn't finding them for some reason.
     gemdir = `gem env gemdir`  # XXX can we get that without running commands?
-    gemdlls = Dir[File.join(gemdir, '**', '*.so')]
+    gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
     sh %{ocra bin/mr #{gemdlls.join(' ')}}
 end
 
@@ -51,6 +51,7 @@ task :testwith do
     puts "ruby -I#{pwd}/lib #{pwd}/bin/mr "
 end
 
+desc 'Run RSpec'
 task :test do
     sh %{rspec}
 end
