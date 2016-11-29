@@ -38,6 +38,13 @@ task :gemit do
     sh %{git checkout develop}
 end
 
+task :wexe do
+    # Need to find all dlls, because ocra isn't finding them for some reason.
+    gemdir = `gem env gemdir`  # XXX can we get that without running commands?
+    gemdlls = Dir[File.join(gemdir, '**', '*.so')]
+    sh %{ocra bin/mr #{gemdlls.join(' ')}}
+end
+
 desc "Prints a cmd to test this in another directory"
 task :testwith do
     pwd=Dir.pwd.sub(Dir.home, '~')
