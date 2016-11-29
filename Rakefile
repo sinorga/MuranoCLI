@@ -29,7 +29,7 @@ task :gempush do
     sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
 end
 
-task :gemit do 
+task :gemit do
     mrt=Bundler::GemHelper.gemspec.version
     sh %{git checkout v#{mrt}}
     Rake::Task[:build].invoke
