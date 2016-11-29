@@ -9,9 +9,9 @@ RSpec.describe MrMurano::Passwords, "#pwd" do
       pwd = MrMurano::Passwords.new( tmpfile )
       pwd.save
 
-      expect( FileTest.exists?(tmpfile) )
+      expect( FileTest.exist?(tmpfile) )
     ensure
-      File.unlink(tmpfile) if File.exists? tmpfile
+      File.unlink(tmpfile) if File.exist? tmpfile
     end
   end
 
@@ -21,9 +21,9 @@ RSpec.describe MrMurano::Passwords, "#pwd" do
       pwd = MrMurano::Passwords.new( tmpfile )
       pwd.save
 
-      expect( FileTest.exists?(tmpfile) )
+      expect( FileTest.exist?(tmpfile) )
     ensure
-      File.unlink(tmpfile) if File.exists? tmpfile
+      File.unlink(tmpfile) if File.exist? tmpfile
     end
   end
 
