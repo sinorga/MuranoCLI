@@ -31,6 +31,21 @@ RSpec.describe 'mr config' do
     expect(status).to eq(0)
     expect(out).to eq('')
     expect(err).to eq('')
+
+    afile = IO.read(File.join(@tmpdir, '.mrmuranorc'))
+    bfile = IO.read(File.join(@testdir, 'spec','fixtures','mrmuranorc_tool_bob'))
+    expect(afile).to eq(bfile)
+  end
+
+  it "Sets a user key" do
+    out, err, status = Open3.capture3("#{pref}mr config bob build --user")
+    expect(status).to eq(0)
+    expect(out).to eq('')
+    expect(err).to eq('')
+
+    afile = IO.read(File.join(ENV['HOME'], '.mrmuranorc'))
+    bfile = IO.read(File.join(@testdir, 'spec','fixtures','mrmuranorc_tool_bob'))
+    expect(afile).to eq(bfile)
   end
 
   it "Reads a key" do
@@ -56,6 +71,9 @@ RSpec.describe 'mr config' do
     bfile = IO.read(File.join(@testdir, 'spec','fixtures','mrmuranorc_deleted_bob'))
     expect(afile).to eq(bfile)
   end
+
+
+
 end
 
 #  vim: set ai et sw=2 ts=2 :
