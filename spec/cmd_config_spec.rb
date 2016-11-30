@@ -4,11 +4,18 @@ require 'fileutils'
 
 RSpec.describe 'mr config' do
 
-  pref = "ruby -Ilib bin/"
+  pref = "ruby -I#{File.join(Dir.pwd, 'lib')} #{File.join(Dir.pwd,'bin/')}"
   around(:example) do |ex|
-    Dir.mktmpdir do |dir|
-      @tmpdir = dir
-      ex.run
+    @testdir = Dir.pwd
+    Dir.mktmpdir do |hdir|
+      ENV['HOME'] = hdir
+      Dir.chdir(hdir) do
+        @tmpdir = File.join(hdir, 'project')
+        Dir.mkdir(@tmpdir)
+        Dir.chdir(@tmpdir) do
+          ex.run
+        end
+      end
     end
   end
 
@@ -27,23 +34,26 @@ RSpec.describe 'mr config' do
   end
 
   it "Reads a key" do
-    FileUtils.copy_file 'spec/fixtures/.mrmuranorc', File.join(@tmpdir, '.mrmuranorc'), :verbose => true
+    FileUtils.copy_file(File.join(@testdir, 'spec','fixtures','.mrmuranorc'),
+                        File.join(@tmpdir, '.mrmuranorc'),
+                        :verbose => true)
     out, err, status = Open3.capture3("#{pref}mr config --project doThisTest.bob")
     expect(status).to eq(0)
-    expect(out).to eq('')
+    expect(out).to eq("build\n")
     expect(err).to eq('')
   end
 
   it "Removes a key" do
     rcf = File.join(@tmpdir, '.mrmuranorc')
-    FileUtils.copy_file 'spec/fixtures/.mrmuranorc', rcf, :verbose => true
+    tcf = File.join(@testdir, 'spec','fixtures','.mrmuranorc')
+    FileUtils.copy_file(tcf, rcf, :verbose => true)
     out, err, status = Open3.capture3(%{#{pref}mr config --project --unset doThisTest.bob})
     expect(status).to eq(0)
     expect(out).to eq('')
     expect(err).to eq('')
 
     afile = IO.read(rcf)
-    bfile = IO.read('spec/fixtures/.mrmuranorc')
+    bfile = IO.read(File.join(@testdir, 'spec','fixtures','mrmuranorc_deleted_bob'))
     expect(afile).to eq(bfile)
   end
 end
