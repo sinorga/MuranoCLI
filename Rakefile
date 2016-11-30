@@ -45,7 +45,7 @@ task :testwith do
 end
 
 task :test do
-    sh %{rspec}
+    sh %{rspec --format html --out results.html --format progress}
 end
 
 #  vim: set sw=4 ts=4 :
