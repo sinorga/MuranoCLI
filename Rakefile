@@ -45,7 +45,8 @@ task :testwith do
 end
 
 task :test do
-    sh %{rspec --format html --out results.html --format progress}
+    Dir.mkdir("report")
+    sh %{rspec --format html --out report/index.html --format progress}
 end
 
 #  vim: set sw=4 ts=4 :
