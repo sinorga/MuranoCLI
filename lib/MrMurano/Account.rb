@@ -105,6 +105,7 @@ module MrMurano
           @@token = token[:token]
         else
           showHttpError(request, response)
+          error "Check to see if username and password are correct."
           @@token = nil
           raise response
         end
