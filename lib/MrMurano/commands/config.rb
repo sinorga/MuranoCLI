@@ -47,7 +47,7 @@ command :config do |c|
       say $cfg.get(args[0], scopes)
     else
 
-      options.default :system=>false, :user=>false, :project=>true,
+      options.default :system=>false, :user=>false, :project=>false,
         :specified=>false, :env=>false
       # For write, if scope is specified, only write to that scope.
       scope = :project
