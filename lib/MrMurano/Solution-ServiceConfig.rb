@@ -36,6 +36,7 @@ module MrMurano
     end
 
     def call(opid, meth=:get, data=nil, id=scid, &block)
+      raise "Service '#{@serviceName}' not enabled for this Solution" if id.nil?
       call = "/#{id.to_s}/call/#{opid.to_s}"
       debug "Will call: #{call}"
       case meth

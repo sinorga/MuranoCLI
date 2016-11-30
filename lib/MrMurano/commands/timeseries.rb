@@ -1,4 +1,5 @@
 require 'csv'
+require 'MrMurano/Solution-ServiceConfig'
 
 module MrMurano
   class Timeseries < ServiceConfig
