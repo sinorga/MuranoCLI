@@ -1,10 +1,13 @@
-require 'tmpdir'
-require 'open3'
 require 'fileutils'
+require 'open3'
+require 'pathname'
+require 'tmpdir'
 
 RSpec.describe 'mr init' do
 
-  pref = "ruby -I#{File.join(Dir.pwd, 'lib')} #{File.join(Dir.pwd,'bin/')}"
+  pwd = Pathname.new(Dir.pwd).realpath
+  pref = "ruby -I#{(pwd+'lib').to_s} #{(pwd+'bin').to_s}/"
+
   around(:example) do |ex|
     @testdir = Dir.pwd
     Dir.mktmpdir do |hdir|
