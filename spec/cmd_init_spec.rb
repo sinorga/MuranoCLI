@@ -1,37 +1,10 @@
 require 'fileutils'
 require 'open3'
 require 'pathname'
-require 'shellwords'
-require 'timeout'
-require 'tmpdir'
+require 'cmd_common'
 
 RSpec.describe 'mr init' do
-
-  def capcmd(*args)
-    args = [args] unless args.kind_of? Array
-    args.flatten!
-    args[0] = @testdir + 'bin' + args[0]
-    args.unshift("ruby", "-I#{(@testdir+'lib').to_s}")
-    cmd = Shellwords.join(args)
-    #pp cmd
-    cmd
-  end
-
-  around(:example) do |ex|
-    @testdir = Pathname.new(Dir.pwd).realpath
-    Dir.mktmpdir do |hdir|
-      ENV['HOME'] = hdir
-      Dir.chdir(hdir) do
-        @tmpdir = File.join(hdir, 'project')
-        Dir.mkdir(@tmpdir)
-        Dir.chdir(@tmpdir) do
-          Timeout::timeout(10) do
-            ex.run
-          end
-        end
-      end
-    end
-  end
+  include_context "CI_CMD"
 
   it "Won't init in HOME (gracefully)" do
     # this is in the project dir. Want to be in HOME
