@@ -45,7 +45,7 @@ task :testwith do
 end
 
 task :test do
-    Dir.mkdir("report")
+    Dir.mkdir("report") unless File.directory?("report")
     sh %{rspec --format html --out report/index.html --format progress}
 end
 
