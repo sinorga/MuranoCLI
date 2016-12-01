@@ -42,6 +42,7 @@ task :wexe do
     # Need to find all dlls, because ocra isn't finding them for some reason.
     gemdir = `gem env gemdir`.chomp  # XXX can we get that without running commands?
     gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
+    ENV['RUBYLIB'] = 'lib'
     sh %{ocra bin/mr #{gemdlls.join(' ')}}
 end
 
