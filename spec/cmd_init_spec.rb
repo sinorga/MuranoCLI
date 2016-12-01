@@ -6,11 +6,10 @@ require 'tmpdir'
 
 RSpec.describe 'mr init' do
 
-  $realpwd = Pathname.new(Dir.pwd).realpath
   def capcmd(*args)
     args = [args] unless args.kind_of? Array
     args.flatten!
-    args[0] = $realpwd + 'bin' + args[0]
+    args[0] = @testdir + 'bin' + args[0]
     args.unshift("ruby", "-I#{($realpwd+'lib').to_s}")
     cmd = Shellwords.join(args)
     #pp cmd
@@ -18,7 +17,7 @@ RSpec.describe 'mr init' do
   end
 
   around(:example) do |ex|
-    @testdir = Dir.pwd
+    @testdir = Pathname.new(Dir.pwd).realpath
     Dir.mktmpdir do |hdir|
       ENV['HOME'] = hdir
       Dir.chdir(hdir) do
