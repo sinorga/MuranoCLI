@@ -53,7 +53,8 @@ end
 
 desc 'Run RSpec'
 task :test do
-    sh %{rspec}
+    Dir.mkdir("report") unless File.directory?("report")
+    sh %{rspec --format html --out report/index.html --format progress}
 end
 
 #  vim: set sw=4 ts=4 :

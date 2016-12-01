@@ -11,6 +11,12 @@ command :init do |c|
 
   c.action do |args, options|
     options.default :force=>false, :mkdirs=>true
+    acc = MrMurano::Account.new
+
+    if Pathname.new(Dir.pwd).realpath == Pathname.new(Dir.home).realpath then
+      acc.error "Cannot init a project in your HOME directory."
+      exit 2
+    end
 
     if not options.force and ($cfg['location.base'] + 'Solutionfile.json').exist? then
       y=ask("A Solutionfile.json exists, Do you want exit and run `mr config import` instead? [yN]")
@@ -20,8 +26,6 @@ command :init do |c|
 
     # If they have never logged in, then asking for the business.id will also ask
     # for their username and password.
-    acc = MrMurano::Account.new
-
 
     # 1. Get business id
     if not options.force and not $cfg['business.id'].nil? then
