@@ -38,9 +38,10 @@ task :gemit do
     sh %{git checkout develop}
 end
 
-task :wexe do
+task :wexe => ['mr.exe']
+file 'mr.exe' do
     # Need to find all dlls, because ocra isn't finding them for some reason.
-    gemdir = `gem env gemdir`.chomp  # XXX can we get that without running commands?
+    gemdir = `gem env gemdir`.chomp
     gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
     ENV['RUBYLIB'] = 'lib'
     sh %{ocra bin/mr #{gemdlls.join(' ')}}
@@ -56,6 +57,13 @@ desc 'Run RSpec'
 task :test do
     Dir.mkdir("report") unless File.directory?("report")
     sh %{rspec --format html --out report/index.html --format progress}
+end
+
+task :mr_exe_test => ['mr.exe'] do
+    Dir.mkdir("report") unless File.directory?("report")
+    ENV['CI_MR_EXE'] = '1'
+    files = Dir[File.join('spec', 'cmd_*_spec.rb')]
+    sh %{rspec --format html --out report/mr_exe.html --format progress #{files.join(' ')}}
 end
 
 #  vim: set sw=4 ts=4 :
