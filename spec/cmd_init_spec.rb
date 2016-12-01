@@ -10,7 +10,7 @@ RSpec.describe 'mr init' do
     args = [args] unless args.kind_of? Array
     args.flatten!
     args[0] = @testdir + 'bin' + args[0]
-    args.unshift("ruby", "-I#{($realpwd+'lib').to_s}")
+    args.unshift("ruby", "-I#{(@testdir+'lib').to_s}")
     cmd = Shellwords.join(args)
     #pp cmd
     cmd
