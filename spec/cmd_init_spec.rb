@@ -2,6 +2,7 @@ require 'fileutils'
 require 'open3'
 require 'pathname'
 require 'shellwords'
+require 'timeout'
 require 'tmpdir'
 
 RSpec.describe 'mr init' do
@@ -24,7 +25,9 @@ RSpec.describe 'mr init' do
         @tmpdir = File.join(hdir, 'project')
         Dir.mkdir(@tmpdir)
         Dir.chdir(@tmpdir) do
-          ex.run
+          Timeout::timeout(10) do
+            ex.run
+          end
         end
       end
     end
