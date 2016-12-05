@@ -65,6 +65,7 @@ module MrMurano
       return [] if here == false
 
       here[:id] = 'cors'
+      here[:local_path] = from
       [ Hash.transform_keys_to_symbols(here) ]
     end
 

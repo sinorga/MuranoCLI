@@ -100,7 +100,7 @@ module MrMurano
         :sha1=>Digest::SHA1.file(local_path.to_s).hexdigest,
         :updated_at=>time.to_datetime.iso8601(3)
       }
-      cacheFile = $cfg.file_at("cache.#{self.class.to_s}.yaml")
+      cacheFile = $cfg.file_at("cache.#{self.class.to_s.gsub(/\W+/,'_')}.yaml")
       if cacheFile.file? then
         cacheFile.open('r+') do |io|
           cache = YAML.load(io)
@@ -120,7 +120,7 @@ module MrMurano
 
     def cachedUpdateTimeFor(local_path)
       cksm = Digest::SHA1.file(local_path.to_s).hexdigest
-      cacheFile = $cfg.file_at("cache.#{self.class.to_s}.yaml")
+      cacheFile = $cfg.file_at("cache.#{self.class.to_s.gsub(/\W+/,'_')}.yaml")
       return nil unless cacheFile.file?
       ret = nil
       cacheFile.open('r') do |io|

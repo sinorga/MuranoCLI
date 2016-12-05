@@ -29,7 +29,7 @@ task :gempush do
     sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
 end
 
-task :gemit do 
+task :gemit do
     mrt=Bundler::GemHelper.gemspec.version
     sh %{git checkout v#{mrt}}
     Rake::Task[:build].invoke
@@ -38,14 +38,23 @@ task :gemit do
     sh %{git checkout develop}
 end
 
+task :wexe do
+    # Need to find all dlls, because ocra isn't finding them for some reason.
+    gemdir = `gem env gemdir`.chomp  # XXX can we get that without running commands?
+    gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
+    sh %{ocra bin/mr #{gemdlls.join(' ')}}
+end
+
 desc "Prints a cmd to test this in another directory"
 task :testwith do
     pwd=Dir.pwd.sub(Dir.home, '~')
     puts "ruby -I#{pwd}/lib #{pwd}/bin/mr "
 end
 
+desc 'Run RSpec'
 task :test do
-    sh %{rspec}
+    Dir.mkdir("report") unless File.directory?("report")
+    sh %{rspec --format html --out report/index.html --format progress}
 end
 
 #  vim: set sw=4 ts=4 :

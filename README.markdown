@@ -208,7 +208,8 @@ spec/cico.murano.spec
 
 ## Developing
 
-MrMurano uses git flow for managing branches.
+MrMurano uses [git flow](https://github.com/nvie/gitflow#getting-started) for
+[managing branches](http://nvie.com/posts/a-successful-git-branching-model/).
 
 MrMurano also uses [bunder](http://bundler.io).
 

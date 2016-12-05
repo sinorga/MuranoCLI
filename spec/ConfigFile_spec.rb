@@ -9,9 +9,11 @@ RSpec.describe MrMurano::Config::ConfigFile do
       cf = MrMurano::Config::ConfigFile.new(:user, tmpfile)
       cf.write
 
-      expect( FileTest.exist?(tmpfile) )
-      expect(FileTest.world_readable?(tmpfile)).to be(nil)
-      expect(FileTest.world_writable?(tmpfile)).to be(nil)
+      expect(FileTest.exist?(tmpfile))
+      unless Gem.win_platform? then
+        expect(FileTest.world_readable?(tmpfile)).to be(nil)
+        expect(FileTest.world_writable?(tmpfile)).to be(nil)
+      end
     ensure
       File.unlink(tmpfile) unless tmpfile.nil?
     end

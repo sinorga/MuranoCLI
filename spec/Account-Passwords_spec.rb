@@ -9,9 +9,9 @@ RSpec.describe MrMurano::Passwords, "#pwd" do
       pwd = MrMurano::Passwords.new( tmpfile )
       pwd.save
 
-      expect( FileTest.exists?(tmpfile) )
+      expect( FileTest.exist?(tmpfile) )
     ensure
-      File.unlink(tmpfile) if File.exists? tmpfile
+      File.unlink(tmpfile) if File.exist? tmpfile
     end
   end
 
@@ -21,9 +21,9 @@ RSpec.describe MrMurano::Passwords, "#pwd" do
       pwd = MrMurano::Passwords.new( tmpfile )
       pwd.save
 
-      expect( FileTest.exists?(tmpfile) )
+      expect( FileTest.exist?(tmpfile) )
     ensure
-      File.unlink(tmpfile) if File.exists? tmpfile
+      File.unlink(tmpfile) if File.exist? tmpfile
     end
   end
 
@@ -118,6 +118,39 @@ this.is.a.host:
     end
   end
 
+  it "Uses ENV instead" do
+    Tempfile.open('test') do |tf|
+      tf << %{---
+this.is.a.host:
+  user: password
+}
+      tf.close
+
+      ENV['MR_PASSWORD'] = 'a test!'
+      pwd = MrMurano::Passwords.new( tf.path )
+      pwd.load
+      ps = pwd.get('this.is.a.host', 'user')
+      expect(ps).to eq('a test!')
+      ENV['MR_PASSWORD'] = nil
+    end
+  end
+
+  it "Uses ENV instead, even with empty file" do
+    Tempfile.open('test') do |tf|
+      tf.close
+
+      ENV['MR_PASSWORD'] = 'a test!'
+      pwd = MrMurano::Passwords.new( tf.path )
+      pwd.load
+      ps = pwd.get('this.is.a.host', 'user')
+      expect(ps).to eq('a test!')
+      ENV['MR_PASSWORD'] = nil
+
+      data = IO.read(tf.path)
+      expect(data).to eq('')
+
+    end
+  end
 
 end
 

@@ -119,7 +119,7 @@ RSpec.describe MrMurano::Cors do
         tio.close
 
         ret = @srv.localitems(tio.path)
-        expect(ret).to eq([cors.merge({:id=>'cors'})])
+        expect(ret).to eq([cors.merge({:id=>'cors', :local_path=>Pathname.new(tio.path)})])
       end
     end
 

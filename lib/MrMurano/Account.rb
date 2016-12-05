@@ -44,6 +44,7 @@ module MrMurano
       return
     end
     def get(host, user)
+      return ENV['MR_PASSWORD'] unless ENV['MR_PASSWORD'].nil?
       return nil unless @data.kind_of? Hash
       return nil unless @data.has_key? host
       return nil unless @data[host].kind_of? Hash
@@ -105,6 +106,7 @@ module MrMurano
           @@token = token[:token]
         else
           showHttpError(request, response)
+          error "Check to see if username and password are correct."
           @@token = nil
           raise response
         end
