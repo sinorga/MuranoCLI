@@ -50,10 +50,7 @@ module MrMurano
     # dropped.
     def do_rpc(calls, cid=model_rid)
       calls = [calls] unless calls.kind_of?(Array)
-      r = post('', {
-        :auth=>{:client_id=>cid},
-        :calls=>calls
-      })
+      r = do_mrpc(calls, cid)
       return r if not r.kind_of?(Array) or r.count < 1
       r = r[0]
       return r if not r.kind_of?(Hash) or r[:status] != 'ok'
