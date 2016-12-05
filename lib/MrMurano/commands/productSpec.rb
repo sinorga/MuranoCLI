@@ -95,6 +95,6 @@ command 'product spec pull' do |c|
     io.close unless io.nil?
   end
 end
-alias_command 'product spec list', 'product spec pull', '--astable'
+alias_command 'product spec list', 'product spec pull'
 
 #  vim: set ai et sw=2 ts=2 :
