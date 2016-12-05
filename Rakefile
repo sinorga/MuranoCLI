@@ -16,13 +16,20 @@ task :echo do
     puts "= #{Bundler::GemHelper.gemspec.version} ="
 end
 
-desc "Push only develop, master, and tags to origin"
-task :gitpush do
-    sh %{git checkout develop}
-    sh %{git push}
-    sh %{git checkout master}
-    sh %{git push}
-    sh %{git push --tags}
+namespace :git do
+    desc "Push only develop, master, and tags to origin"
+    task :origin do
+        sh %{git push origin develop}
+        sh %{git push origin master}
+        sh %{git push origin --tags}
+    end
+
+    desc "Push only develop, master, and tags to upstream"
+    task :upstream do
+        sh %{git push upstream develop}
+        sh %{git push upstream master}
+        sh %{git push upstream --tags}
+    end
 end
 
 task :gempush do
