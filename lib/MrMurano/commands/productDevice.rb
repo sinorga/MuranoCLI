@@ -64,4 +64,20 @@ command 'product device twee' do |c|
   end
 end
 
+command 'product device delete' do |c|
+  c.syntax = %{mr product device delete <identifier>}
+  c.summary = %{Delete a device}
+
+  c.action do |args,options|
+    snid = args.shift
+    prd = MrMurano::Product1PDevice.new
+
+    ret = prd.remove(snid)
+    prd.outf ret unless ret.empty?
+  end
+end
+
+# XXX cannot call this here, since 'sn list' doesn't exist yet.
+#alias_command 'product device list', 'sn list'
+
 #  vim: set ai et sw=2 ts=2 :

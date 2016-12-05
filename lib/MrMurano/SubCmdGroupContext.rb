@@ -33,6 +33,10 @@ module MrMurano
       @aliases.include? name.to_s
     end
 
+    def command(name)
+      @commands[name.to_s]
+    end
+
     def get_help
       hf = @runner.program(:help_formatter).new(self)
       pc = Commander::HelpFormatter::ProgramContext.new(self).get_binding
