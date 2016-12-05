@@ -80,6 +80,33 @@ module MrMurano
       end
     end
 
+    ## Completely remove an identifier from the product
+    # +sn+:: Identifier for a device
+    def remove(sn)
+      # First drop it from the 1P database
+      do_rpc({:id=>1, :procedure=>:drop, :arguments=>[sn_rid(sn)]})
+      # Then remove it from the provisioning databases
+      psn = ProductSerialNumber.new
+      psn.remove_sn(sn)
+    end
+
+    ## Rename a device
+    # +sn+:: Identifier for a device
+    # +newname+:: The new name of the device
+    def rename(sn, newname, rid=nil)
+      newname = sn if newname.nil?
+      rid = sn_rid(sn) if rid.nil?
+      verbose "Setting name of #{sn} to #{newname}"
+      debug "  Via RID: #{rid}"
+      do_rpc({
+        :procedure=>:update,
+        :arguments=>[
+          rid,
+          {:name=>newname}
+        ]
+      })
+    end
+
     ## Get a tree of info for a device and its resources.
     # +sn+:: Identifier for a device
     def twee(sn)
