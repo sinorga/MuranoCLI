@@ -52,7 +52,7 @@ end
 task :test => [:rspec]
 
 if Gem.win_platform? then
-    file 'mr.exe' do
+    file 'mr.exe' => Dir['lib/MrMurano/**/*.rb'] do
         # Need to find all dlls, because ocra isn't finding them for some reason.
         gemdir = `gem env gemdir`.chomp
         gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
