@@ -1,20 +1,8 @@
 require 'MrMurano/Product'
 require 'terminal-table'
 
-command :sn do |c|
-  c.syntax = %{mr sn}
-  c.summary = %{About Serial Numbers}
-  c.description = %{The sn sub-commands allow for managing the identifiers (or Serial Numbers) on
-a product.}
-
-  c.action do |args, options|
-    ::Commander::UI.enable_paging
-    say MrMurano::SubCmdGroupHelp.new(c).get_help
-  end
-end
-
-command 'sn list' do |c|
-  c.syntax = %{mr sn list [options]}
+command 'product device list' do |c|
+  c.syntax = %{mr product device list [options]}
   c.summary = %{List serial numbers for a product}
 
   c.option '--offset NUMBER', Integer, %{Offset to start listing at}
@@ -31,8 +19,8 @@ command 'sn list' do |c|
   end
 end
 
-command 'sn enable' do |c|
-  c.syntax = %{mr sn enable [<sn>|--file <sns>]}
+command 'product device enable' do |c|
+  c.syntax = %{mr product device enable [<sn>|--file <sns>]}
   c.summary = %{Enable a serial number; Creates device in Murano}
   c.description = %{Enables serial numbers, creating the digial shadow in Murano.
 
@@ -58,8 +46,8 @@ the activation call within this time, it will need to be enabled again.
   end
 end
 
-command 'sn activate' do |c|
-  c.syntax = %{mr sn activate <sn>}
+command 'product device activate' do |c|
+  c.syntax = %{mr product device activate <sn>}
   c.summary = %{Activate a serial number, retriving its CIK}
   c.description = %{Activates a serial number.
 
@@ -83,4 +71,9 @@ CIK again.
 
   end
 end
+
+alias_command 'sn list', 'product device list'
+alias_command 'sn enable', 'product device enable'
+alias_command 'sn activate', 'product device activate'
+
 #  vim: set ai et sw=2 ts=2 :
