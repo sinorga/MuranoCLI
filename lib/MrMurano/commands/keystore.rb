@@ -33,6 +33,10 @@ module MrMurano
       call(:command, :post, {:key=>key, :command=>cmd, :args=>args})
     end
 
+    def clearall()
+      call(:clear, :post, {})
+    end
+
   end
 end
 
@@ -45,6 +49,15 @@ set data.  As well as calling any of the other supported REDIS commands.}
   c.action do |args, options|
     ::Commander::UI.enable_paging
     say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
+command 'keystore clearAll' do |c|
+  c.syntax = %{mr keystore clearAll}
+  c.description = %{Delete all keys in the keystore}
+  c.action do |args,options|
+    sol = MrMurano::Keystore.new
+    sol.clearall
   end
 end
 
