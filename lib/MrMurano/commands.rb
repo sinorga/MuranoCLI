@@ -1,5 +1,6 @@
 require 'MrMurano/commands/account'
 require 'MrMurano/commands/assign'
+require 'MrMurano/commands/businessList'
 require 'MrMurano/commands/config'
 require 'MrMurano/commands/content'
 require 'MrMurano/commands/cors'

@@ -1,5 +1,4 @@
 require 'MrMurano/Account'
-require 'terminal-table'
 
 command 'product list' do |c|
   c.syntax = %{mr product list [options]}
