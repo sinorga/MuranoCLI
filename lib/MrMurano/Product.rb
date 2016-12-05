@@ -283,7 +283,6 @@ module MrMurano
     end
   end
 
-  ## TODO: Determine which of these are expected to be used.
   class ProductSerialNumber < ProductBase
     def initialize
       super
@@ -345,7 +344,8 @@ module MrMurano
     end
 
     def remove_sn(sn)
-      postf('/', {:sn=>sn, :delete=>true})
+      #postf('/', {:sn=>sn, :delete=>true})
+      delete("/#{sn}")
     end
 
     def ranges

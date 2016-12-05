@@ -80,6 +80,14 @@ module MrMurano
       end
     end
 
+    def remove(sn)
+      # First drop it from the 1P database
+      do_rpc({:id=>1, :procedure=>:drop, :arguments=>[sn_rid(sn)]})
+      # Then remove it from the provisioning databases
+      psn = ProductSerialNumber.new
+      psn.remove_sn(sn)
+    end
+
     ## Get a tree of info for a device and its resources.
     # +sn+:: Identifier for a device
     def twee(sn)
