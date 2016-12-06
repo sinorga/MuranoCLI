@@ -1,4 +1,4 @@
 module MrMurano
-  VERSION = '1.10.1'.freeze
+  VERSION = '1.10.2.pre'.freeze
 end
 
