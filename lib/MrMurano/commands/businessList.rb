@@ -1,15 +1,15 @@
 require 'MrMurano/Account'
 
-command 'product list' do |c|
-  c.syntax = %{mr product list [options]}
-  c.description = %{List products}
+command 'business list' do |c|
+  c.syntax = %{mr business list [options]}
+  c.description = %{List businesses}
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
     acc = MrMurano::Account.new
-    data = acc.products
+    data = acc.businesses
 
     io=nil
     if options.output then
@@ -17,11 +17,11 @@ command 'product list' do |c|
     end
 
     if options.idonly then
-      headers = [:modelId]
+      headers = [:bizid]
       data = data.map{|row| [row[:modelId]]}
     elsif not options.all then
-      headers = [:label, :modelId]
-      data = data.map{|r| [r[:label], r[:modelId]]}
+      headers = [:bizid, :role, :name]
+      data = data.map{|r| [r[:bizid], r[:role], r[:name]]}
     else
       headers = data[0].keys
       data = data.map{|r| headers.map{|h| r[h]}}

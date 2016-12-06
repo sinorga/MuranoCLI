@@ -1,0 +1,9 @@
+--#ENDPOINT POST /testpoint/{service}/{call}
+-- this function allows remote calls to your services
+if request.headers["authorization"] == "<%= uuid %>" then
+  local fn = _G[request.parameters.service][request.parameters.call]
+  response.message = fn(request.body)
+else
+  response.code = 401
+  response.message = "invalid authorization header"
+end

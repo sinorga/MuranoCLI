@@ -15,4 +15,3 @@ require 'MrMurano/Product-1P-Device'
 require 'MrMurano/Product-Resources'
 
 require 'MrMurano/commands'
-
