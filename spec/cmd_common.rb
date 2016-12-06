@@ -14,7 +14,7 @@ RSpec.shared_context "CI_CMD" do
       args[0] = @testdir + (args[0] + '.exe')
     end
     cmd = Shellwords.join(args)
-    #pp cmd
+    pp cmd
     cmd
   end
 
