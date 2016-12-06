@@ -260,7 +260,7 @@ module MrMurano
         end
       end.flatten.compact.reject do |path|
         # TODO: These globs should be in $cfg.
-        path.fnmatch('*_test.lua') or path.basename.fnmatch('.*')
+        path.fnmatch('*_test.lua') or path.fnmatch('*_spec.lua') or path.basename.fnmatch('.*')
       end.select do |path|
         # TODO: These globs should be in $cfg.
         path.extname == '.lua'
