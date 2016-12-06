@@ -11,6 +11,8 @@ module MrMurano
       super
       @uriparts << 'endpoint'
       @location = $cfg['location.endpoints']
+
+      @match_header = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/
     end
 
     ##
@@ -25,18 +27,35 @@ module MrMurano
     def fetch(id)
       ret = get('/' + id.to_s)
       ret[:content_type] = 'application/json' if ret[:content_type].empty?
-      # TODO: add content_type to header if not application/json
-      aheader = (ret[:script].lines.first or "").chomp
-      dheader = /^--#ENDPOINT (?i:#{ret[:method]}) #{ret[:path]}$/
-      rheader = %{--#ENDPOINT #{ret[:method].upcase} #{ret[:path]}\n}
+
+      script = ret[:script].lines.map{|l|l.chomp}
+
+      aheader = (script.first or "")
+
+      rh = ['--#ENDPOINT', ret[:method].upcase, ret[:path]]
+      rh << ret[:content_type] if ret[:content_type] != 'application/json'
+      rheader = rh.join(' ')
+
+      # if header is missing add it.
+      # If header is wrong, replace it.
+
+      md = @match_header.match(aheader)
+      if md.nil? then
+        # header missing.
+        script.unshift rheader
+      elsif md[:method] != ret[:method] or
+            md[:path] != ret[:path] or
+            md[:content_type] != ret[:content_type] then
+        # header is wrong.
+        script[0] = rheader
+      end
+      # otherwise current header is good.
+
+
       if block_given? then
-        yield rheader unless dheader =~ aheader
-        yield ret[:script]
+        yield script.join("\n")
       else
-        res = ''
-        res << rheader unless dheader =~ aheader
-        res << ret[:script]
-        res
+        script.join("\n")
       end
     end
 
@@ -97,7 +116,7 @@ module MrMurano
       cur = nil
       lineno=0
       path.readlines().each do |line|
-        md = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/.match(line)
+        md = @match_header.match(line)
         if not md.nil? then
           # header line.
           cur[:line_end] = lineno unless cur.nil?
