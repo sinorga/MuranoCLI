@@ -20,7 +20,7 @@ RSpec.shared_context "CI_CMD" do
     else
       cmd = Shellwords.join(args)
     end
-    pp cmd
+    #pp cmd
     cmd
   end
 
