@@ -44,7 +44,7 @@ RSpec.describe MrMurano::Mock, "#mock" do
       path = @mock.get_testpoint_path()
       removed = @mock.remove_testpoint()
       expect(removed).to be(true)
-      expect(File.exists?(path)).to be(false)
+      expect(File.exist?(path)).to be(false)
     end
   end
 
