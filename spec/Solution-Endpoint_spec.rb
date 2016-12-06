@@ -18,42 +18,178 @@ RSpec.describe MrMurano::Endpoint do
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/")
   end
 
-  it "lists" do
-    body = [{:id=>"9K0",
-             :method=>"websocket",
-             :path=>"/api/v1/bar",
-             :content_type=>"application/json",
-             :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n\n",
-             },
-             {:id=>"B76",
-              :method=>"websocket",
-              :path=>"/api/v1/foo/{id}",
-              :content_type=>"application/json",
-              :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
-             }]
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
+  context "lists" do
+    it "same content_type" do
+      body = [{:id=>"9K0",
+               :method=>"websocket",
+               :path=>"/api/v1/bar",
+               :content_type=>"application/json",
+               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n\n",
+      },
+      {:id=>"B76",
+       :method=>"websocket",
+       :path=>"/api/v1/foo/{id}",
+       :content_type=>"application/json",
+       :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
+      }]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
 
-    ret = @srv.list()
-    expect(ret).to eq(body)
+      ret = @srv.list()
+      expect(ret).to eq(body)
+    end
+
+    it "missing headers" do
+      body = [{:id=>"9K0",
+               :method=>"websocket",
+               :path=>"/api/v1/bar",
+               :content_type=>"application/json",
+               :script=>"response.message = \"HI\"\n\n",
+      },
+      {:id=>"B76",
+       :method=>"websocket",
+       :path=>"/api/v1/foo/{id}",
+       :content_type=>"application/json",
+       :script=> "response.message = \"HI\"\n\n-- BOB WAS HERE\n",
+      }]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.list()
+      expect(ret).to eq(body)
+    end
+
+    it "not default content_type" do
+      body = [{:id=>"9K0",
+               :method=>"websocket",
+               :path=>"/api/v1/bar",
+               :content_type=>"text/csv",
+               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar text/csv\nresponse.message = \"HI\"\n\n",
+      },
+      {:id=>"B76",
+       :method=>"websocket",
+       :path=>"/api/v1/foo/{id}",
+       :content_type=>"image/png",
+       :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id} image/png\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
+      }]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.list()
+      expect(ret).to eq(body)
+    end
+
+    it "mismatched content_type header" do
+      body = [{:id=>"9K0",
+               :method=>"websocket",
+               :path=>"/api/v1/bar",
+               :content_type=>"text/csv",
+               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n\n",
+      },
+      {:id=>"B76",
+       :method=>"websocket",
+       :path=>"/api/v1/foo/{id}",
+       :content_type=>"image/png",
+       :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
+      }]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.list()
+      expect(ret).to eq(body)
+    end
+
   end
 
-  it "fetches" do
-    body = {:id=>"9K0",
-             :method=>"websocket",
-             :path=>"/api/v1/bar",
-             :content_type=>"application/json",
-             :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n",
-             }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
 
-    ret = @srv.fetch('9K0')
-    expect(ret).to eq(body[:script])
+  context "fetches" do
+    it "fetches" do
+      body = {:id=>"9K0",
+              :method=>"websocket",
+              :path=>"/api/v1/bar",
+              :content_type=>"application/json",
+              :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n",
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.fetch('9K0')
+      expect(ret).to eq(body[:script])
+    end
+
+    it "missing headers" do
+      body = {:id=>"9K0",
+              :method=>"websocket",
+              :path=>"/api/v1/bar",
+              :content_type=>"application/json",
+              :script=>"response.message = \"HI\"\n",
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.fetch('9K0')
+      expect(ret).to eq("--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n")
+    end
+
+    it "not default content_type" do
+      body = {:id=>"9K0",
+              :method=>"websocket",
+              :path=>"/api/v1/bar",
+              :content_type=>"text/csv",
+              :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar text/csv\nresponse.message = \"HI\"\n",
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.fetch('9K0')
+      expect(ret).to eq(body[:script])
+    end
+
+    it "missing content_type header" do
+      body = {:id=>"9K0",
+              :method=>"websocket",
+              :path=>"/api/v1/bar",
+              :content_type=>"text/csv",
+              :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n",
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.fetch('9K0')
+      expect(ret).to eq("--#ENDPOINT WEBSOCKET /api/v1/bar text/csv\nresponse.message = \"HI\"\n")
+    end
+
+    it "mismatched content_type header" do
+      body = {:id=>"9K0",
+              :method=>"websocket",
+              :path=>"/api/v1/bar",
+              :content_type=>"text/csv",
+              :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar image/png\nresponse.message = \"HI\"\n",
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.fetch('9K0')
+      expect(ret).to eq("--#ENDPOINT WEBSOCKET /api/v1/bar text/csv\nresponse.message = \"HI\"\n")
+    end
   end
 
   it "removes" do

@@ -22,6 +22,7 @@ module MrMurano
         if item[:content_type].nil? or item[:content_type].empty? then
           item[:content_type] = 'application/json'
         end
+        # XXX should this update the script header?
         item
       end
     end
