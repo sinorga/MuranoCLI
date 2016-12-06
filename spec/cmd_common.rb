@@ -7,13 +7,19 @@ RSpec.shared_context "CI_CMD" do
   def capcmd(*args)
     args = [args] unless args.kind_of? Array
     args.flatten!
+    testdir = File.realpath(@testdir.to_s)
     if ENV['CI_MR_EXE'].nil? then
-      args[0] = @testdir + 'bin' + args[0]
-      args.unshift("ruby", "-I#{(@testdir+'lib').to_s}")
+      args[0] = File.join(testdir, 'bin', args[0])
+      args.unshift("ruby", "-I#{File.join(testdir, 'lib')}")
     else
-      args[0] = @testdir + (args[0] + '.exe')
+      args[0] = File.join(testdir, (args[0] + '.exe'))
     end
-    cmd = Shellwords.join(args)
+
+    if Gem.win_platform? then
+      cmd = args.map{|i| if i =~ / / then %{"#{i}"} else i end}.join(' ')
+    else
+      cmd = Shellwords.join(args)
+    end
     pp cmd
     cmd
   end
