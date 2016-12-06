@@ -4,7 +4,6 @@ require 'MrMurano/hash'
 require 'MrMurano/http'
 require 'MrMurano/Config'
 require 'MrMurano/Account'
-require 'MrMurano/Mock'
 require 'MrMurano/Solution'
 require 'MrMurano/Solution-Endpoint'
 require 'MrMurano/Solution-File'
@@ -16,4 +15,3 @@ require 'MrMurano/Product-1P-Device'
 require 'MrMurano/Product-Resources'
 
 require 'MrMurano/commands'
-
