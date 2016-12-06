@@ -90,23 +90,6 @@ module MrMurano
       psn.remove_sn(sn)
     end
 
-    ## Rename a device
-    # +sn+:: Identifier for a device
-    # +newname+:: The new name of the device
-    def rename(sn, newname, rid=nil)
-      newname = sn if newname.nil?
-      rid = sn_rid(sn) if rid.nil?
-      verbose "Setting name of #{sn} to #{newname}"
-      debug "  Via RID: #{rid}"
-      do_rpc({
-        :procedure=>:update,
-        :arguments=>[
-          rid,
-          {:name=>newname}
-        ]
-      })
-    end
-
     ## Get a tree of info for a device and its resources.
     # +sn+:: Identifier for a device
     def twee(sn)
