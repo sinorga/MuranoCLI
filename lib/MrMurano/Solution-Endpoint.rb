@@ -19,7 +19,9 @@ module MrMurano
     # This gets all data about all endpoints
     def list
       get().map do |item|
-        item[:content_type] = 'application/json' if item[:content_type].empty?
+        if item[:content_type].nil? or item[:content_type].empty? then
+          item[:content_type] = 'application/json'
+        end
         item
       end
     end
@@ -51,11 +53,11 @@ module MrMurano
       end
       # otherwise current header is good.
 
-
+      script = script.join("\n") + "\n"
       if block_given? then
-        yield script.join("\n")
+        yield script
       else
-        script.join("\n")
+        script
       end
     end
 
