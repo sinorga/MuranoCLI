@@ -3,19 +3,16 @@ require 'securerandom'
 
 module MrMurano
   class Mock
-    attr_accessor :uuid
+    attr_accessor :uuid, :testpoint_file
 
     def initialize
-      @testpoint_file = 'testpoint.post.lua'
-      @endpoints = $cfg['location.endpoints']
-      @filename = %{#{$cfg['location.endpoints']}/#{@testpoint_file}}
-      @testpointfile = Pathname.new(@filename)
     end
 
     def show
-      if @testpointfile.exist? then
+      file = Pathname.new(get_testpoint_path)
+      if file.exist? then
         authorization = %{if request.headers["authorization"] == "}
-        @testpointfile.open('rb') do |io|
+        file.open('rb') do |io|
           io.each_line do |line|
             auth_line = line.include?(authorization)
             if auth_line then
@@ -30,8 +27,13 @@ module MrMurano
 
     def get_mock_template
       path = get_mock_template_path()
-      testpoint_mock = Pathname.new(path)
       return ::File.read(path)
+    end
+
+    def get_testpoint_path
+      file_name = 'testpoint.post.lua'
+      path = %{#{$cfg['location.endpoints']}/#{file_name}}
+      return path
     end
 
     def get_mock_template_path
@@ -42,15 +44,17 @@ module MrMurano
       uuid = SecureRandom.uuid
       template = ERB.new(get_mock_template)
       endpoint = template.result(binding)
-      @testpointfile.open('wb') do |io|
+
+      Pathname.new(get_testpoint_path).open('wb') do |io|
         io << endpoint
       end
       return uuid
     end
 
     def remove_testpoint
-      if @testpointfile.exist? then
-        @testpointfile.unlink
+      file = Pathname.new(get_testpoint_path)
+      if file.exist? then
+        file.unlink
         return true
       end
       return false
