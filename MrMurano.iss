@@ -15,6 +15,7 @@ Source: "mr.exe"; DestDir: "{app}\bin"
 Source: "LICENSE.txt"; DestDir: "{app}"
 Source: "ReadMe.txt"; DestDir: "{app}"; Flags: isreadme
 
+; http://www.jrsoftware.org/ishelp/
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; http://stackoverflow.com/questions/3304463/how-do-i-modify-the-path-environment-variable-when-running-an-inno-setup-install/3431379
