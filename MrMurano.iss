@@ -4,7 +4,7 @@ AppVersion={%MRVERSION}
 DefaultDirName={pf}\MrMurano
 DefaultGroupName=MrMurano
 ChangesEnvironment=yes
-OutputBaseFileName=MrMurano-{%MRVERSION}-Setup
+OutputBaseFileName=MrMuranoSetup
 
 [Files]
 Source: "mr.exe"; DestDir: "{app}\bin"

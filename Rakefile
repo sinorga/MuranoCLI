@@ -77,9 +77,14 @@ if Gem.win_platform? then
     end
     task :test => [:mr_exe_test]
 
-    task :inno => ['mr.exe', 'README.markdown'] do
-        ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version
-        sh %{C:\\Program Files (x86)\\Inno Setup 5\\iscc MrMurano.iss}
+    installerName = "Output/MrMurano-#{Bundler::GemHelper.gemspec.version.to_s}-Setup.exe"
+    task :inno => [installerName]
+    file "Output/MrMuranoSetup.exe" => ['mr.exe', 'README.markdown'] do
+        ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version.to_s
+        sh %{"C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MrMurano.iss}
+    end
+    file installerName => ['Output/MrMuranoSetup.exe'] do |t|
+        FileUtils.move t.prerequisites.first, t.name, :verbose=>true
     end
 end
 
