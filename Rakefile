@@ -58,6 +58,14 @@ task :rspec do
 end
 task :test => [:rspec]
 
+file "ReadMe.txt" => ['README.markdown'] do |t|
+    File.open(t.prerequisites.first) do |rio|
+        File.open(t.name, 'w') do |wio|
+            wio << rio.read.gsub(/\n/,"\r\n")
+        end
+    end
+end
+
 if Gem.win_platform? then
     file 'mr.exe' => Dir['lib/MrMurano/**/*.rb'] do
         # Need to find all dlls, because ocra isn't finding them for some reason.
@@ -78,8 +86,11 @@ if Gem.win_platform? then
     task :test => [:mr_exe_test]
 
     installerName = "Output/MrMurano-#{Bundler::GemHelper.gemspec.version.to_s}-Setup.exe"
+
+    desc "Build a Windows installer for MrMurano"
     task :inno => [installerName]
-    file "Output/MrMuranoSetup.exe" => ['mr.exe', 'README.markdown'] do
+
+    file "Output/MrMuranoSetup.exe" => ['mr.exe', 'ReadMe.txt'] do
         ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version.to_s
         sh %{"C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MrMurano.iss}
     end

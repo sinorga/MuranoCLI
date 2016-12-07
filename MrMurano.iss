@@ -13,7 +13,7 @@ LicenseFile=LICENSE.txt
 [Files]
 Source: "mr.exe"; DestDir: "{app}\bin"
 Source: "LICENSE.txt"; DestDir: "{app}"
-Source: "README.markdown"; DestDir: "{app}"; Flags: isreadme
+Source: "ReadMe.txt"; DestDir: "{app}"; Flags: isreadme
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -23,7 +23,7 @@ Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environmen
     ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}\bin"; \
     Check: NeedsAddPath('{app}\bin')
 
-
+;;; Not working.
 [Code]
 
 function NeedsAddPath(Param: string): boolean;
