@@ -1,9 +1,10 @@
 [Setup]
 AppName=MrMurano
-AppVersion=1.10.1
+AppVersion={%MRVERSION}
 DefaultDirName={pf}\MrMurano
 DefaultGroupName=MrMurano
 ChangesEnvironment=yes
+OutputBaseFileName=MrMurano-{%MRVERSION}-Setup
 
 [Files]
 Source: "mr.exe"; DestDir: "{app}\bin"
@@ -15,7 +16,7 @@ Source: "README.markdown"; DestDir: "{app}"; Flags: isreadme
 [Registry]
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
     ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}\bin"; \
-    Check: NeedsAddPath("{app}\bin")
+    Check: NeedsAddPath('{app}\bin')
 
 
 [Code]

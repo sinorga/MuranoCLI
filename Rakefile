@@ -77,9 +77,9 @@ if Gem.win_platform? then
     end
     task :test => [:mr_exe_test]
 
-
-    task :inno do
-        sh %{C:\Program Files (x86)\Inno Setup 5\iscc MrMurano.iss}
+    task :inno => ['mr.exe', 'README.markdown'] do
+        ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version
+        sh %{C:\\Program Files (x86)\\Inno Setup 5\\iscc MrMurano.iss}
     end
 end
 
