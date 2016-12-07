@@ -5,9 +5,14 @@ DefaultDirName={pf}\MrMurano
 DefaultGroupName=MrMurano
 ChangesEnvironment=yes
 OutputBaseFileName=MrMuranoSetup
+AppPublisher=Exosite
+AppPublisherURL=http://exosite.com/
+AppCopyright=Copyright (C) 2016 Exosite
+LicenseFile=LICENSE.txt
 
 [Files]
 Source: "mr.exe"; DestDir: "{app}\bin"
+Source: "LICENSE.txt"; DestDir: "{app}"
 Source: "README.markdown"; DestDir: "{app}"; Flags: isreadme
 
 
