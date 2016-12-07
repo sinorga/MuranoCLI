@@ -32,17 +32,28 @@ namespace :git do
     end
 end
 
-task :gempush do
-    sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
-end
-
 task :gemit do
     mrt=Bundler::GemHelper.gemspec.version
     sh %{git checkout v#{mrt}}
     Rake::Task[:build].invoke
     Rake::Task[:bob].invoke
-    Rake::Task[:gempush].invoke
+    Rake::Task['push::gem'].invoke
     sh %{git checkout develop}
+end
+
+namespace :push do
+    task :gem do
+        sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
+    end
+
+    task :github do
+        # POST https://<upload_url>/repos/:owner/:repo/releases/:id/assets?name=foo.zip
+        # api.github.com
+        # :owner => exosite
+        # :repo => MrMurano
+        # :id => ?
+        # :name = MrMurano-#{Bundler::GemHelper.gemspec.version}.gem
+    end
 end
 
 desc "Prints a cmd to test this in another directory"
