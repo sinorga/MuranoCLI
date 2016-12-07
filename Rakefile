@@ -76,6 +76,11 @@ if Gem.win_platform? then
         sh %{rspec --format html --out report/mr_exe.html --format progress #{files.join(' ')}}
     end
     task :test => [:mr_exe_test]
+
+
+    task :inno do
+        sh %{C:\Program Files (x86)\Inno Setup 5\iscc MrMurano.iss}
+    end
 end
 
 #  vim: set sw=4 ts=4 :
