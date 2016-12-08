@@ -57,9 +57,10 @@ module MrMurano
 
       pst = remote.merge ({
         :solution_id => $cfg['solution.id'],
-        :script => script
+        :script => script,
+        :alias=>[$cfg['solution.id'], remote[:service], remote[:event]].join('_'),
+        :name=>[remote[:service], remote[:event]].join('_')
       })
-
       # try put, if 404, then post.
       put(mkalias(remote), pst) do |request, http|
         response = http.request(request)
