@@ -34,6 +34,8 @@ module MrMurano
     end
 
     def fetch(name)
+      raise "Missing name!" if name.nil?
+      raise "Empty name!" if name.empty?
       ret = get('/'+name)
       if block_given? then
         yield ret[:script]
