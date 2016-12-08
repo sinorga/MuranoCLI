@@ -10,7 +10,7 @@ module MrMurano
   ##
   # Things that servers do that is common.
   class ServiceBase < SolutionBase
-    # not quite sure why this is needed, but…
+
     def mkalias(name)
       case name
       when String
@@ -60,7 +60,7 @@ module MrMurano
       pst = remote.merge ({
         :solution_id => $cfg['solution.id'],
         :script => script,
-        :alias=>[$cfg['solution.id'], remote[:service], remote[:event]].join('_'),
+        :alias=>mkalias(remote),
         :name=>[remote[:service], remote[:event]].join('_')
       })
       # try put, if 404, then post.
