@@ -47,12 +47,12 @@ namespace :push do
     end
 
     task :github do
-        # POST https://<upload_url>/repos/:owner/:repo/releases/:id/assets?name=foo.zip
-        # api.github.com
-        # :owner => exosite
-        # :repo => MrMurano
-        # :id => ?
-        # :name = MrMurano-#{Bundler::GemHelper.gemspec.version}.gem
+        tag = "v#{Bundler::GemHelper.gemspec.version}"
+        gem = "pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem"
+        # Create Release
+        sh %{github-release release --user tadpol --repo MrMurano --tag #{tag} }
+        # upload gem
+        sh %{github-release upload --user tadpol --repo MrMurano --tag #{tag} --file #{gem}}
     end
 end
 
