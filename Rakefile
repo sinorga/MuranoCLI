@@ -17,7 +17,9 @@ task :unbob do
 end
 
 task :echo do
-    puts "= #{Bundler::GemHelper.gemspec.version} ="
+    puts tagName
+    puts gemName
+    puts builtGem
 end
 
 namespace :git do
@@ -58,8 +60,11 @@ namespace :push do
             # ENV['GITHUB_USER'] set by CI.
             ENV['GITHUB_REPO'] = 'MrMurano'
             # Create Release
-            # XXX call info to see if it exists.
-            sh %{github-release release --tag #{tagName}}
+            sh %{github-release info --tag #{tagName}} do |ok, res|
+                if not ok then
+                    sh %{github-release release --tag #{tagName}}
+                end
+            end
         end
 
         desc 'Push gem up to Github Releases'
