@@ -172,6 +172,11 @@ module MrMurano
       end
       local.dirname.mkpath
       id = item[@itemkey.to_sym]
+      if id.nil? then
+        debug "!!! Missing '#{@itemkey}', using :id instead!"
+        debug ":id => #{item[:id]}"
+        id = item[:id]
+      end
       local.open('wb') do |io|
         fetch(id) do |chunk|
           io.write chunk
