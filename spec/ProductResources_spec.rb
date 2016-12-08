@@ -47,7 +47,7 @@ RSpec.describe MrMurano::ProductResources do
     it "raises when no spec name" do
       $cfg['product.spec'] = nil
       $cfg['product.id'] = nil
-      expect { @prd.location }.to raise_error("No spec file named; run `mr config prodcut.spec <specfile>`")
+      expect { @prd.location }.to raise_error("No spec file named; run `mr config product.spec <specfile>`")
     end
   end
 
