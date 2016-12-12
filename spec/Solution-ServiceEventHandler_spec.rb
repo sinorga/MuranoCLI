@@ -102,7 +102,7 @@ end
   end
 
   it "uploads over old version" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/XYZ_debug").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/XYZ_data_datapoint").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: "")
@@ -116,8 +116,8 @@ end
       tio.close
 
       ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :name=>"debug",
-                                   :alias=>"XYZ_debug",
+                                   :service=>'data',
+                                   :event=>'datapoint',
                                    :solution_id=>"XYZ",
       })
       expect(ret)
@@ -125,7 +125,7 @@ end
   end
 
   it "uploads when nothing is there" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/XYZ_debug").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/XYZ_device_datapoint").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(status: 404)
@@ -143,8 +143,6 @@ end
       tio.close
 
       ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :name=>"debug",
-                                   :alias=>"XYZ_debug",
                                    :solution_id=>"XYZ",
                                    :service=>"device",
                                    :event=>"datapoint",
