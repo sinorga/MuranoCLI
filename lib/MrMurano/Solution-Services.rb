@@ -11,21 +11,12 @@ module MrMurano
   # Things that servers do that is common.
   class ServiceBase < SolutionBase
 
-    def mkalias(name)
-      case name
-      when String
-        "/#{$cfg['solution.id']}_#{name}"
-      when Hash
-        if name.has_key? :name then
-          "/#{$cfg['solution.id']}_#{name[:name]}"
-        elsif name.has_key? :service and name.has_key? :event then
-          "/#{$cfg['solution.id']}_#{name[:service]}_#{name[:event]}"
-        else
-          raise "unknown keys. #{name}"
-        end
-      else
-        raise "unknown type. #{name}"
-      end
+    def mkalias(remote)
+      raise "Needs to be implemented in child"
+    end
+
+    def mkname(remote)
+      raise "Needs to be implemented in child"
     end
 
     def list
@@ -61,10 +52,11 @@ module MrMurano
         :solution_id => $cfg['solution.id'],
         :script => script,
         :alias=>mkalias(remote),
-        :name=>[remote[:service], remote[:event]].join('_')
+        :name=>mkname(remote),
       })
+      debug "f: #{local} >> #{pst.reject{|k,_| k==:script}.to_json}"
       # try put, if 404, then post.
-      put(mkalias(remote), pst) do |request, http|
+      put('/'+mkalias(remote), pst) do |request, http|
         response = http.request(request)
         case response
         when Net::HTTPSuccess
@@ -165,6 +157,21 @@ module MrMurano
       "#{name}.lua"
     end
 
+    def mkalias(remote)
+      if remote.has_key? :name then
+        [$cfg['solution.id'], remote[:name]].join('_')
+      else
+        raise "Missing parts! #{remote.to_json}"
+      end
+    end
+
+    def mkname(remote)
+      if remote.has_key? :name then
+        remote[:name]
+      else
+        raise "Missing parts! #{remote.to_json}"
+      end
+    end
 
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
@@ -184,6 +191,22 @@ module MrMurano
       @uriparts << 'eventhandler'
       @itemkey = :alias
       @location = $cfg['location.eventhandlers']
+    end
+
+    def mkalias(remote)
+      if remote.has_key? :service and remote.has_key? :event then
+        [$cfg['solution.id'], remote[:service], remote[:event]].join('_')
+      else
+        raise "Missing parts! #{remote.to_json}"
+      end
+    end
+
+    def mkname(remote)
+      if remote.has_key? :service and remote.has_key? :event then
+        [remote[:service], remote[:event]].join('_')
+      else
+        raise "Missing parts! #{remote.to_json}"
+      end
     end
 
     def list
