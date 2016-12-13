@@ -246,6 +246,17 @@ module MrMurano
     end
 
     ##
+    # Returns array of globs to search for files
+    def searchFor
+      %w{*.lua */*.lua}
+    end
+
+    ## Returns array of globs of files to ignore
+    def ignoring
+      %w{*_test.lua *_spec.lua .*}
+    end
+
+    ##
     # Get a list of local items rooted at #from
     #
     # Children rarely need to override this. Only when the locallist is not a set
@@ -254,16 +265,10 @@ module MrMurano
     # @param from Pathname: Directory of items to scan
     # @return Array: of Hashes of item details
     def localitems(from)
-
-      # Dir[*%w{modules/*.lua modules/*/*.lua}].flatten.compact.reject{|p| ignores.any?{|i| File.fnmatch(i,p)}}
-
       searchIn = from.to_s
-      searchFor = %w{*.lua */*.lua}
-      ignoring = %w{*_test.lua *_spec.lua .*}
-
       sf = searchFor.map{|i| ::File.join(searchIn, i)}
       Dir[*sf].flatten.compact.reject do |p|
-        ignoring.any? do |i|
+        ::File.directory?(p) or ignoring.any? do |i|
           ::File.fnmatch(i,p)
         end
       end.map do |path|

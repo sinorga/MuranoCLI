@@ -104,6 +104,14 @@ module MrMurano
       delete('/' + id.to_s)
     end
 
+    def searchFor
+      $cfg['endpoints.searchFor'].split
+    end
+
+    def ignoring
+      $cfg['endpoints.ignore'].split
+    end
+
     def tolocalname(item, key)
       name = ''
       name << item[:path].split('/').reject{|i|i.empty?}.join('-')

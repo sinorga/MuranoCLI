@@ -90,8 +90,18 @@ module MrMurano
       set('location.specs', 'specs', :defaults)
 
       set('files.default_page', 'index.html', :defaults)
+      set('files.searchFor', '**/*', :defaults)
+      set('files.ignore', '', :defaults)
 
+      set('endpoints.searchFor', '*.lua */*.lua', :defaults)
+      set('endpoints.ignore', '*_test.lua *_spec.lua .*', :defaults)
+
+      set('eventhandler.searchFor', '*.lua */*.lua', :defaults)
+      set('eventhandler.ignore', '*_test.lua *_spec.lua .*', :defaults)
       set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
+
+      set('modules.searchFor', '*.lua */*.lua', :defaults)
+      set('modules.ignore', '*_test.lua *_spec.lua .*', :defaults)
 
       set('diff.cmd', 'diff -u', :defaults)
     end
