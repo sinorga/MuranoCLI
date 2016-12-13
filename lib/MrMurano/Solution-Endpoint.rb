@@ -109,7 +109,7 @@ module MrMurano
     end
 
     def ignoring
-      $cfg['endpoints.ignore'].split
+      $cfg['endpoints.ignoring'].split
     end
 
     def tolocalname(item, key)
