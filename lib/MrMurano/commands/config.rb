@@ -16,7 +16,6 @@ command :config do |c|
     'mr config diff.cmd --unset'
 
 
-  c.option '--system', 'Use only the system config file. (/etc/mrmuranorc)'
   c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
   c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
   c.option '--env', 'Use only the config file from $MR_CONFIGFILE'
@@ -32,12 +31,11 @@ command :config do |c|
     elsif args.count == 0 then
       say_error "Need a config key"
     elsif args.count == 1 and not options.unset then
-      options.default :system=>false, :user=>false, :project=>false,
+      options.default :user=>false, :project=>false,
         :specified=>false, :env=>false
 
       # For read, if no scopes, than all. Otherwise just those specified
       scopes = []
-      scopes << :system if options.system
       scopes << :user if options.user
       scopes << :project if options.project
       scopes << :env if options.env
@@ -47,11 +45,10 @@ command :config do |c|
       say $cfg.get(args[0], scopes)
     else
 
-      options.default :system=>false, :user=>false, :project=>false,
+      options.default :user=>false, :project=>false,
         :specified=>false, :env=>false
       # For write, if scope is specified, only write to that scope.
       scope = :project
-      scope = :system if options.system
       scope = :user if options.user
       scope = :project if options.project
       scope = :env if options.env
