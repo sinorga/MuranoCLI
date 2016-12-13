@@ -149,7 +149,7 @@ module MrMurano
       $cfg['files.searchFor'].split
     end
     def ignoring
-      $cfg['files.ignore'].split
+      $cfg['files.ignoring'].split
     end
 
 #    def localitems(from)

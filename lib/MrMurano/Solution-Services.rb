@@ -174,11 +174,11 @@ module MrMurano
     end
 
     def searchFor
-      ($cfg['modules.searchFor'] or '*.lua */*.lua').split
+      $cfg['modules.searchFor'].split
     end
 
     def ignoring
-      ($cfg['modules.ignore'] or '*_test.lua *_spec.lua .*').split
+      $cfg['modules.ignoring'].split
     end
 
     def toRemoteItem(from, path)
@@ -218,11 +218,11 @@ module MrMurano
     end
 
     def searchFor
-      ($cfg['eventhandler.searchFor'] or '*.lua */*.lua').split
+      $cfg['eventhandler.searchFor'].split
     end
 
     def ignoring
-      ($cfg['eventhandler.ignore'] or '*_test.lua *_spec.lua .*').split
+      $cfg['eventhandler.ignoring'].split
     end
 
     def list
