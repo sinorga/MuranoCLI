@@ -173,6 +173,14 @@ module MrMurano
       end
     end
 
+    def searchFor
+      $cfg['modules.searchFor'].split
+    end
+
+    def ignoring
+      $cfg['modules.ignoring'].split
+    end
+
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
       {:name => name}
@@ -207,6 +215,14 @@ module MrMurano
       else
         raise "Missing parts! #{remote.to_json}"
       end
+    end
+
+    def searchFor
+      $cfg['eventhandler.searchFor'].split
+    end
+
+    def ignoring
+      $cfg['eventhandler.ignoring'].split
     end
 
     def list
