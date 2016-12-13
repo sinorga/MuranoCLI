@@ -254,22 +254,20 @@ module MrMurano
     # @param from Pathname: Directory of items to scan
     # @return Array: of Hashes of item details
     def localitems(from)
-      from.children.map do |path|
-        if path.directory? then
-          # TODO: look for definition. ( ?.rockspec? ?mr.modules? ?mr.manifest? )
-          # Lacking definition, find all *.lua but not *_test.lua
-          # This specifically and intentionally only goes one level deep.
-          path.children
-        else
-          path
+
+      # Dir[*%w{modules/*.lua modules/*/*.lua}].flatten.compact.reject{|p| ignores.any?{|i| File.fnmatch(i,p)}}
+
+      searchIn = from.to_s
+      searchFor = %w{*.lua */*.lua}
+      ignoring = %w{*_test.lua *_spec.lua .*}
+
+      sf = searchFor.map{|i| ::File.join(searchIn, i)}
+      Dir[*sf].flatten.compact.reject do |p|
+        ignoring.any? do |i|
+          ::File.fnmatch(i,p)
         end
-      end.flatten.compact.reject do |path|
-        # TODO: These globs should be in $cfg.
-        path.fnmatch('*_test.lua') or path.fnmatch('*_spec.lua') or path.basename.fnmatch('.*')
-      end.select do |path|
-        # TODO: These globs should be in $cfg.
-        path.extname == '.lua'
       end.map do |path|
+        path = Pathname.new(path)
         item = toRemoteItem(from, path)
         if item.kind_of?(Array) then
           item.compact.map{|i| i[:local_path] = path; i}
