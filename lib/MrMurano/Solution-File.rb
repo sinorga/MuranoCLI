@@ -152,8 +152,9 @@ module MrMurano
       end
       raise "Not a directory: #{from.to_s}" unless from.directory?
 
+      ignoring = ($cfg['files.ignore'] or '').split
       Pathname.glob(from.to_s + '/**/*').reject do |path|
-        path.directory?
+        path.directory? or ignoring.any?{|i| ::File.fnmatch(i,path)}
       end.map do |path|
         name = toRemoteItem(from, path)
         name[:local_path] = path
