@@ -11,13 +11,18 @@ module MrMurano
       super
       @uriparts << 'endpoint'
       @location = $cfg['location.endpoints']
+
+      @match_header = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/
     end
 
     ##
     # This gets all data about all endpoints
     def list
       get().map do |item|
-        item[:content_type] = 'application/json' if item[:content_type].empty?
+        if item[:content_type].nil? or item[:content_type].empty? then
+          item[:content_type] = 'application/json'
+        end
+        # XXX should this update the script header?
         item
       end
     end
@@ -25,18 +30,35 @@ module MrMurano
     def fetch(id)
       ret = get('/' + id.to_s)
       ret[:content_type] = 'application/json' if ret[:content_type].empty?
-      # TODO: add content_type to header if not application/json
-      aheader = (ret[:script].lines.first or "").chomp
-      dheader = /^--#ENDPOINT (?i:#{ret[:method]}) #{ret[:path]}$/
-      rheader = %{--#ENDPOINT #{ret[:method].upcase} #{ret[:path]}\n}
+
+      script = ret[:script].lines.map{|l|l.chomp}
+
+      aheader = (script.first or "")
+
+      rh = ['--#ENDPOINT', ret[:method].upcase, ret[:path]]
+      rh << ret[:content_type] if ret[:content_type] != 'application/json'
+      rheader = rh.join(' ')
+
+      # if header is missing add it.
+      # If header is wrong, replace it.
+
+      md = @match_header.match(aheader)
+      if md.nil? then
+        # header missing.
+        script.unshift rheader
+      elsif md[:method] != ret[:method] or
+            md[:path] != ret[:path] or
+            md[:content_type] != ret[:content_type] then
+        # header is wrong.
+        script[0] = rheader
+      end
+      # otherwise current header is good.
+
+      script = script.join("\n") + "\n"
       if block_given? then
-        yield rheader unless dheader =~ aheader
-        yield ret[:script]
+        yield script
       else
-        res = ''
-        res << rheader unless dheader =~ aheader
-        res << ret[:script]
-        res
+        script
       end
     end
 
@@ -82,6 +104,14 @@ module MrMurano
       delete('/' + id.to_s)
     end
 
+    def searchFor
+      $cfg['endpoints.searchFor'].split
+    end
+
+    def ignoring
+      $cfg['endpoints.ignore'].split
+    end
+
     def tolocalname(item, key)
       name = ''
       name << item[:path].split('/').reject{|i|i.empty?}.join('-')
@@ -97,7 +127,7 @@ module MrMurano
       cur = nil
       lineno=0
       path.readlines().each do |line|
-        md = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/.match(line)
+        md = @match_header.match(line)
         if not md.nil? then
           # header line.
           cur[:line_end] = lineno unless cur.nil?

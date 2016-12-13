@@ -213,6 +213,8 @@ MrMurano uses [git flow](https://github.com/nvie/gitflow#getting-started) for
 
 MrMurano also uses [bundler](http://bundler.io).
 
+When submitting pull requests, please do them against the develop branch.
+
 ## Windows
 
 The MrMurano gem will install on Windows.

@@ -1,34 +1,10 @@
 require 'fileutils'
 require 'open3'
 require 'pathname'
-require 'shellwords'
-require 'tmpdir'
+require 'cmd_common'
 
 RSpec.describe 'mr config' do
-
-  def capcmd(*args)
-    args = [args] unless args.kind_of? Array
-    args.flatten!
-    args[0] = @testdir + 'bin' + args[0]
-    args.unshift("ruby", "-I#{(@testdir+'lib').to_s}")
-    cmd = Shellwords.join(args)
-    #pp cmd
-    cmd
-  end
-
-  around(:example) do |ex|
-    @testdir = Pathname.new(Dir.pwd).realpath
-    Dir.mktmpdir do |hdir|
-      ENV['HOME'] = hdir
-      Dir.chdir(hdir) do
-        @tmpdir = File.join(hdir, 'project')
-        Dir.mkdir(@tmpdir)
-        Dir.chdir(@tmpdir) do
-          ex.run
-        end
-      end
-    end
-  end
+  include_context "CI_CMD"
 
   it "Needs a key" do
     out, err, status = Open3.capture3(capcmd('mr', "config"))
