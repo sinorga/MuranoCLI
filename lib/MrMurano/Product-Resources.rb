@@ -173,6 +173,7 @@ module MrMurano
       end
       here << item.reject{|k,v| k==:synckey or k==:rid}
       here.map!{|i| Hash.transform_keys_to_strings(i)}
+      local.dirname.mkpath
       local.open('wb') do |io|
         io << {'resources'=>here}.to_yaml
       end
