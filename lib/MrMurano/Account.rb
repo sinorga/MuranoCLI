@@ -119,35 +119,35 @@ module MrMurano
     end
 
     def products
-      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
+      raise "Missing Business ID" if $cfg['business.id'].nil?
       get('business/' + $cfg['business.id'] + '/product/')
     end
 
     ## Create a new product in the current business
     def new_product(name, type='onepModel')
-      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
+      raise "Missing Business ID" if $cfg['business.id'].nil?
       post('business/' + $cfg['business.id'] + '/product/', {:label=>name, :type=>type})
     end
 
     def delete_product(modelId)
-      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
+      raise "Missing Business ID" if $cfg['business.id'].nil?
       delete('business/' + $cfg['business.id'] + '/product/' + modelId)
     end
 
     def solutions
-      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
+      raise "Missing Business ID" if $cfg['business.id'].nil?
       get('business/' + $cfg['business.id'] + '/solution/')
     end
 
     ## Create a new solution
     def new_solution(name, type='dataApi')
-      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
+      raise "Missing Business ID" if $cfg['business.id'].nil?
       raise "Solution name must be lowercase" if name.match(/[A-Z]/)
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
     end
 
     def delete_solution(apiId)
-      raise "Missing Bussiness ID" if $cfg['business.id'].nil?
+      raise "Missing Business ID" if $cfg['business.id'].nil?
       delete('business/' + $cfg['business.id'] + '/solution/' + apiId)
     end
 
