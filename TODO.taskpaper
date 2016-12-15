@@ -65,7 +65,7 @@ Product:
 	- Need to add way to set the product ID on a device eventhandler. @done(2016-08-01)
 
 Service Device:
-	- When listing and bussiness.id is missing, gracefully fall back to --idonly @done(2016-09-12)
+	- When listing and business.id is missing, gracefully fall back to --idonly @done(2016-09-12)
 
 Config:
 	- Add config tool.default_sync to set which things sync{up,down} by default
