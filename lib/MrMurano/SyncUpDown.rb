@@ -240,6 +240,8 @@ module MrMurano
         bitems = localitems(@locationbase + @location)
         # use synckey for quicker merging.
         bitems.each { |b| items[synckey(b)] = b }
+      else
+        warning "Skipping missing location #{@locationbase + @location}"
       end
 
       items.values
@@ -265,6 +267,7 @@ module MrMurano
     # @param from Pathname: Directory of items to scan
     # @return Array: of Hashes of item details
     def localitems(from)
+      debug "#{self.class.to_s}: Getting local items from: #{from}"
       searchIn = from.to_s
       sf = searchFor.map{|i| ::File.join(searchIn, i)}
       Dir[*sf].flatten.compact.reject do |p|
