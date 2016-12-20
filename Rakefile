@@ -61,7 +61,7 @@ namespace :push do
         task :makeRelease do
             # ENV['GITHUB_TOKEN'] set by CI.
             # ENV['GITHUB_USER'] set by CI.
-            ENV['GITHUB_REPO'] = 'MrMurano'
+            # ENV['GITHUB_REPO'] set by CI
             # Create Release
             sh %{github-release info --tag #{tagName}} do |ok, res|
                 if not ok then
@@ -74,9 +74,9 @@ namespace :push do
         task :gem => [:makeRelease] do
             # ENV['GITHUB_TOKEN'] set by CI.
             # ENV['GITHUB_USER'] set by CI.
-            ENV['GITHUB_REPO'] = 'MrMurano'
+            # ENV['GITHUB_REPO'] set by CI
             # upload gem
-            sh %{github-release upload --tag #{tag} --name #{gemName} --file #{builtGem}}
+            sh %{github-release upload --tag #{tagName} --name #{gemName} --file #{builtGem}}
         end
     end
 end
@@ -138,6 +138,11 @@ if Gem.win_platform? then
         namespace :github do
             desc "Push Windows installer to Github Releases"
             task :inno => [:makeRelease, installerName] do
+                # ENV['GITHUB_TOKEN'] set by CI.
+                # ENV['GITHUB_USER'] set by CI.
+                # ENV['GITHUB_REPO'] set by CI
+                iname = File.basename(installerName)
+                r %{github-release upload --tag #{tagName} --name #{iname} --file #{installerName}}
             end
         end
     end
