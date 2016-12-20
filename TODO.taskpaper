@@ -28,7 +28,7 @@ Endpoints:
 	- Add directory support like in modules @done(2016-07-26)
 
 Files:
-	- Add ignore patterns to config
+	- Add ignore patterns to config @done(2016-12-20)
 	- Switch to mime-types v3 @pri(low)
 	- Figure out how to make the hexed-sha checksum faster. @done(2016-09-23)
 	- Fix upload. @done(2016-08-01)
@@ -73,6 +73,13 @@ Config:
 	- Store passwords in system Keychain on system that have a Keychain.
 	mac OS does, various Linux desktops have a couple differnet ones.  Not sure about
 	Windows.
+	MacOS: https://github.com/xli/mac-keychain
+	Windows8+: https://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh465069.aspx
+	Linux: https://en.wikipedia.org/wiki/GNOME_Keyring
+	       https://en.wikipedia.org/wiki/KWallet
+
+	Plus things like 1Password, LastPass, KeePass, and others.
+
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
