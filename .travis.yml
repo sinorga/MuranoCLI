@@ -1,13 +1,14 @@
 language: ruby
 rvm:
-    - 2.0
-    - 2.2
+  - 2.0
+  - 2.2
 
 before_deploy: "rake build"
 deploy:
   provider: releases
   api_key:
     secure: oB28IBHoSQVgP0PtP1uc+cRMBNhqHCCfCCV+sLNspjCGJeIjhZ4lmLcMYSy8l0+TBWxmXl6VIQd6GbyEezbB5daA4+pxY/An0OpM649t29+QuMCK8iXrD8/HXfaUzY2CP5RP47GoC/5xyCwqv3EEUjFPEGhUb5hYc74kfe3nwBmhKliHFQpZvuDE0EHWTgcEOep+kf7O+3cVf7vJVddz+Vj05t1s6VCwhBQsbUvOV4/Jv7nhHa7q0UGoY9M7sTNpwgawFeMwqvtXxl8sVbiHPLm+u6vikSbVnSdyi7wlVAoe+DSkzmnVHYzMd/t1Io7kEiLEAyDyrlJPJYS+XTMqxQ/KUDJNhf/N2IJMW2vPA+6TjpxCqcdY4QwkLNb7JfFWgQb9X4UksAEQU24W6110+zPUGmbg37eM80OrsadTWy65IQbLJ0sFFhm8vu/e2i/3LadYscw6A0Tyc1JXgGfGKd0nqyAyKGLcSBw1+dwwzkyKNHWFAaLy5hAEKv2qZdVNrTtcLhJtuxv8VUuevd3gfT6FLOIN/XAyg71mSvC2BA12vzM6KkTPNIaSmUITDgEplT5cs5h8PZ4eRghpmnT2EA3k0O3p14Ng3eeACMImJYQRKWmU/yVWVo69VVH0GRfm5SWb6xlDLFXt/Mii1MPx9ruhC232wdRACoep18w1qUY=
+  file_glob: true
   file: "pkg/MrMurano-*.gem"
   skip_cleanup: true
   on:
@@ -15,3 +16,4 @@ deploy:
     tags: true
     rvm: 2.2
 
+#  vim: set et sw=2 ts=2 :
