@@ -7,15 +7,22 @@ command 'product device list' do |c|
 
   c.option '--offset NUMBER', Integer, %{Offset to start listing at}
   c.option '--limit NUMBER', Integer, %{How many devices to return}
+  c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args,options|
     options.default :offset=>0, :limit=>50
 
     prd = MrMurano::Product.new
+    io=nil
+    io = File.open(options.output, 'w') if options.output
     data = prd.list(options.offset, options.limit)
-    busy = data.map{|row| [row[:sn], row[:status], row[:rid]]}
-    table = Terminal::Table.new :rows => busy, :headings => ['SN', 'Status', 'RID']
-    say table
+    prd.outf(data, nil) do |dd,ios|
+      dt={}
+      dt[:headers] = [:SN, :Status, :RID]
+      dt[:rows] = data.map{|row| [row[:sn], row[:status], row[:rid]]}
+      prd.tabularize(dt, ios)
+    end
+    io.close unless io.nil?
   end
 end
 

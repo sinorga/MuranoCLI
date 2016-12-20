@@ -9,7 +9,7 @@ MrMurano is the command-line tool that interacts with Murano and makes different
 tasks easier. MrMurano makes it easy to deploy code to a solution, import many
 product definitions at once, set up endpoints and APIs, and more.
 
-MrMurano works around the idea of syncing, much like rsync.  Files from your working
+MrMurano works around the idea of syncing, much like rsync.  Files from your project
 directory are synced up (or down) from Murano.
 
 ## Usage
@@ -29,12 +29,11 @@ Then deploy with `mr syncup`
 There are a few steps and pieces to getting a solution with a product up and
 running in Murano. Here is the list.
 
-- Pick a bussiness: `mr account --business`
+- Pick a business: `mr account --business`
 - Set it: `mr config business.id ZZZZZZZZZ`
 - Create a product: `mr product create myawesomeproduct`
 - Save the result: `mr config product.id YYYYYYYYY`
-- Set the product definition: `mr config product.spec prd.spec`
-- Add resource aliases to specs/prd.spec
+- Add resource aliases to specs/resources.yaml
 - Sync the product definition up: `mr syncup -V --specs`
 - Create a solution: `mr solution create myawesomesolution`
 - Save the result: `mr config solution.id XXXXXX`

@@ -111,7 +111,7 @@ module MrMurano
 
     ## Write a value to an alias on a device
     def write(sn, values)
-      post("/write/#{sn}", values)
+      post("/write/#{sn}", values) unless $cfg['tool.dry']
     end
 
     ## Converts an exoline style spec file into a Murano style one

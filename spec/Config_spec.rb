@@ -246,6 +246,10 @@ bob = test
   end
 
   context "Can find the project directory by .mrmuranorc but not sub .git/" do
+    #
+    # /home/work/project/
+    # /home/work/project/.mrmuranorc
+    # /home/work/project/some/.git
     before(:example) do
       @tmpdir = Dir.tmpdir
       path = '/home/work/project/some/where'
@@ -285,14 +289,17 @@ bob = test
     end
   end
 
-  context "Can find the project directory by .mrmurano/ but not sub .git/" do
+  context "Can find the project directory by .mrmuranorc but not parent .git/" do
+    # /home/work/project/
+    # /home/work/project/.git
+    # /home/work/project/some/.mrmuranorc
     before(:example) do
       @tmpdir = Dir.tmpdir
       path = '/home/work/project/some/where'
       @projectDir = @tmpdir + '/home/work/project'
       FileUtils.mkpath(@tmpdir + path)
-      FileUtils.mkpath(@projectDir + '/.mrmurano')
-      FileUtils.mkpath(@projectDir + '/some/.git')
+      FileUtils.touch(@projectDir + '/some/.mrmuranorc')
+      FileUtils.mkpath(@projectDir + '/.git')
 
       # Set ENV to override output of Dir.home
       ENV['HOME'] = @tmpdir + '/home'
@@ -309,6 +316,8 @@ bob = test
         # Follow symlinks to get the paths comparable.
         locbase = cfg.get('location.base', :defaults).realdirpath
         wkd = Pathname.new(@projectDir).realdirpath
+        # This will correctly assume that this project dir with .git is the
+        # location.base
         expect(locbase).to eq(wkd)
       end
     end
@@ -319,11 +328,12 @@ bob = test
         cfg.load
         # Follow symlinks to get the paths comparable.
         locbase = cfg.get('location.base', :defaults).realdirpath
-        wkd = Pathname.new(@projectDir).realdirpath
+        wkd = Pathname.new(@projectDir+'/some').realdirpath
         expect(locbase).to eq(wkd)
       end
     end
   end
+
 end
 
 #  vim: set ai et sw=2 ts=2 :

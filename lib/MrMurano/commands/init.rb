@@ -12,6 +12,7 @@ command :init do |c|
   c.action do |args, options|
     options.default :force=>false, :mkdirs=>true
     acc = MrMurano::Account.new
+    puts ''
 
     if Pathname.new(Dir.pwd).realpath == Pathname.new(Dir.home).realpath then
       acc.error "Cannot init a project in your HOME directory."
@@ -23,6 +24,8 @@ command :init do |c|
       exit 0 unless y =~ /^n/i
     end
 
+    say "Found project base directory at #{$cfg['location.base'].to_s}"
+    puts ''
 
     # If they have never logged in, then asking for the business.id will also ask
     # for their username and password.
@@ -101,6 +104,8 @@ command :init do |c|
     say "Ok, In business ID: #{$cfg['business.id']} using Solution ID: #{$cfg['solution.id']} with Product ID: #{$cfg['product.id']}"
 
     if options.mkdirs then
+      base = $cfg['location.base']
+      base = Pathname.new(base) unless base.kind_of? Pathname
       %w{
         location.files
         location.endpoints
@@ -110,6 +115,7 @@ command :init do |c|
       }.each do |cfgi|
         path = $cfg[cfgi]
         path = Pathname.new(path) unless path.kind_of? Pathname
+        path = base + path
         path.mkpath unless path.exist?
       end
       say "Default directories created"
