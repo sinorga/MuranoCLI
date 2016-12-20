@@ -33,8 +33,7 @@ running in Murano. Here is the list.
 - Set it: `mr config business.id ZZZZZZZZZ`
 - Create a product: `mr product create myawesomeproduct`
 - Save the result: `mr config product.id YYYYYYYYY`
-- Set the product definition: `mr config product.spec prd.spec`
-- Add resource aliases to specs/prd.spec
+- Add resource aliases to specs/resources.yaml
 - Sync the product definition up: `mr syncup -V --specs`
 - Create a solution: `mr solution create myawesomesolution`
 - Save the result: `mr config solution.id XXXXXX`
