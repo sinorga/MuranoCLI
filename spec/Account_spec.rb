@@ -19,7 +19,7 @@ RSpec.describe MrMurano::Account do
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/")
   end
 
-  it "lists bussiness" do
+  it "lists business" do
     bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
                        {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
@@ -42,7 +42,7 @@ RSpec.describe MrMurano::Account do
 
   it "lists products; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.products }.to raise_error("Missing Bussiness ID")
+    expect { @acc.products }.to raise_error("Missing Business ID")
   end
 
   it "creates product" do
@@ -56,7 +56,7 @@ RSpec.describe MrMurano::Account do
 
   it "creates product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.new_product("ONe") }.to raise_error("Missing Bussiness ID")
+    expect { @acc.new_product("ONe") }.to raise_error("Missing Business ID")
   end
 
   it "deletes product" do
@@ -69,7 +69,7 @@ RSpec.describe MrMurano::Account do
 
   it "deletes product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.delete_product("ONe") }.to raise_error("Missing Bussiness ID")
+    expect { @acc.delete_product("ONe") }.to raise_error("Missing Business ID")
   end
 
 
@@ -93,7 +93,7 @@ RSpec.describe MrMurano::Account do
 
   it "lists solutions; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.solutions }.to raise_error("Missing Bussiness ID")
+    expect { @acc.solutions }.to raise_error("Missing Business ID")
   end
 
   it "creates solution" do
@@ -111,7 +111,7 @@ RSpec.describe MrMurano::Account do
 
   it "creates solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.new_solution("one") }.to raise_error("Missing Bussiness ID")
+    expect { @acc.new_solution("one") }.to raise_error("Missing Business ID")
   end
 
   it "deletes solution" do
@@ -124,7 +124,7 @@ RSpec.describe MrMurano::Account do
 
   it "deletes solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.delete_solution("one") }.to raise_error("Missing Bussiness ID")
+    expect { @acc.delete_solution("one") }.to raise_error("Missing Business ID")
   end
 
 end

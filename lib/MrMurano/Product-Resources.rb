@@ -132,6 +132,7 @@ module MrMurano
     ## Get a local list of items from the single file
     def localitems(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
+      debug "#{self.class.to_s}: Getting local items from: #{from}"
       if not from.exist? then
         say_warning "Skipping missing #{from.to_s}"
         return []
@@ -173,6 +174,7 @@ module MrMurano
       end
       here << item.reject{|k,v| k==:synckey or k==:rid}
       here.map!{|i| Hash.transform_keys_to_strings(i)}
+      local.dirname.mkpath
       local.open('wb') do |io|
         io << {'resources'=>here}.to_yaml
       end

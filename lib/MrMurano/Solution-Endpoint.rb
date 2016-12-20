@@ -48,7 +48,7 @@ module MrMurano
         script.unshift rheader
       elsif md[:method] != ret[:method] or
             md[:path] != ret[:path] or
-            md[:content_type] != ret[:content_type] then
+            md[:ctype] != ret[:content_type] then
         # header is wrong.
         script[0] = rheader
       end

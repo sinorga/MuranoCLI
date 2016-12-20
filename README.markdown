@@ -29,7 +29,7 @@ Then deploy with `mr syncup`
 There are a few steps and pieces to getting a solution with a product up and
 running in Murano. Here is the list.
 
-- Pick a bussiness: `mr account --business`
+- Pick a business: `mr account --business`
 - Set it: `mr config business.id ZZZZZZZZZ`
 - Create a product: `mr product create myawesomeproduct`
 - Save the result: `mr config product.id YYYYYYYYY`

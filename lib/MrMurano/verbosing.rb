@@ -27,6 +27,10 @@ module MrMurano
       $stderr.puts HighLine.color(msg, :red)
     end
 
+    ## Output tabular data
+    # +data+:: Data to write. Preferably a Hash with :headers and :rows
+    # +ios+:: Output stream to write to, if nil, then use $stdout
+    # Output is either a nice visual table or CSV.
     def tabularize(data, ios=nil)
       fmt = $cfg['tool.outformat']
       ios = $stdout if ios.nil?
@@ -59,6 +63,7 @@ module MrMurano
     end
 
     ## Format and print the object
+    # Handles many of the raw 'unpolished' formats.
     def outf(obj, ios=nil, &block)
       fmt = $cfg['tool.outformat']
       ios = $stdout if ios.nil?

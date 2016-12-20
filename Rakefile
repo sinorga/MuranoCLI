@@ -30,6 +30,9 @@ namespace :git do
         sh %{git push upstream master}
         sh %{git push upstream --tags}
     end
+
+    desc "Push to origin and upstream"
+    task :all => [:origin, :upstream]
 end
 
 task :gempush do

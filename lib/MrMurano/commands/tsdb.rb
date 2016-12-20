@@ -184,6 +184,26 @@ Also, many date-time formats can be parsed and will be converted to microseconds
       io = File.open(options.output, 'w')
     end
     sol.outf sol.query(query) do |dd, ios|
+      # If aggregated, then we need to break up the columns. since each is now a
+      # hash of the aggregated functions
+      unless options.aggregate.nil? then
+        dd[:values].map! do |row|
+          row.map do |value|
+            if value.kind_of? Hash then
+              query[:aggregate].map{|qa| value[qa.to_sym]}
+            else
+              value
+            end
+          end.flatten
+        end
+        dd[:columns].map! do |col|
+          if col == 'time' then
+            col
+          else
+            query[:aggregate].map{|qa| "#{col}.#{qa.to_s}"}
+          end
+        end.flatten!
+      end
       sol.tabularize({
         :headers=>dd[:columns],
         :rows=>dd[:values]

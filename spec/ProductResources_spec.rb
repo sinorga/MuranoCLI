@@ -44,10 +44,10 @@ RSpec.describe MrMurano::ProductResources do
       expect(loc).to eq("magical.file")
     end
 
-    it "raises when no spec name" do
+    it "Uses default spec file name" do
       $cfg['product.spec'] = nil
       $cfg['product.id'] = nil
-      expect { @prd.location }.to raise_error("No spec file named; run `mr config product.spec <specfile>`")
+      expect(@prd.location).to eq('specs/resources.yaml')
     end
   end
 
