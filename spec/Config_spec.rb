@@ -59,6 +59,25 @@ RSpec.describe MrMurano::Config do
       end
     end
 
+    it "Sets a user value" do
+      Dir.chdir(@projectDir) do
+        cfg = MrMurano::Config.new
+        cfg.load
+
+        cfg.set('bob.test', 'twelve', :user)
+
+        expect(cfg['bob.test']).to eq('twelve')
+        expect(cfg.get('bob.test', :user)).to eq('twelve')
+
+        expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+
+        #reload
+        cfg = MrMurano::Config.new
+        cfg.load
+        expect(cfg.get('bob.test', :user)).to eq('twelve')
+      end
+    end
+
     it "loads from a specific file" do
       Dir.chdir(@projectDir) do
         File.open(@projectDir + '/foo.cfg', 'w') do |io|
@@ -334,6 +353,77 @@ bob = test
     end
   end
 
+  context "When pwd is $HOME:" do
+    before(:example) do
+      @tmpdir = Dir.tmpdir
+      @projectDir = @tmpdir + '/home/work/project'
+      FileUtils.mkpath(@projectDir)
+      # Set ENV to override output of Dir.home
+      ENV['HOME'] = @tmpdir + '/home'
+    end
+
+    after(:example) do
+      FileUtils.remove_dir(@tmpdir + '/home', true) if FileTest.exist? @tmpdir
+    end
+
+    it "Sets a user value" do
+      Dir.chdir(ENV['HOME']) do
+        cfg = MrMurano::Config.new
+        cfg.load
+
+        cfg.set('bob.test', 'twelve', :user)
+
+        expect(cfg['bob.test']).to eq('twelve')
+        expect(cfg.get('bob.test', :user)).to eq('twelve')
+
+        expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+
+        #reload
+        cfg = MrMurano::Config.new
+        cfg.load
+        expect(cfg.get('bob.test', :user)).to eq('twelve')
+      end
+    end
+
+    it "Sets project values" do # This should write
+      Dir.chdir(ENV['HOME']) do
+        cfg = MrMurano::Config.new
+        cfg.load
+
+        cfg.set('bob.test', 'twelve', :project)
+
+        expect(cfg['bob.test']).to eq('twelve')
+        expect(cfg.get('bob.test', :project)).to eq('twelve')
+
+        expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+
+        #reload
+        cfg = MrMurano::Config.new
+        cfg.load
+        expect(cfg.get('bob.test', :project)).to eq('twelve')
+      end
+    end
+
+    it "write a project value and reads it as a user value" do
+      Dir.chdir(ENV['HOME']) do
+        cfg = MrMurano::Config.new
+        cfg.load
+
+        cfg.set('bob.test', 'twelve', :project)
+
+        expect(cfg['bob.test']).to eq('twelve')
+        # :user won't have the new value until it is loaded again
+        expect(cfg.get('bob.test', :project)).to eq('twelve')
+
+        expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+
+        #reload
+        cfg = MrMurano::Config.new
+        cfg.load
+        expect(cfg.get('bob.test', :user)).to eq('twelve')
+      end
+    end
+  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
