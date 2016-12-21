@@ -2,18 +2,24 @@ require "bundler/gem_tasks"
 
 task :default => [:test]
 
+tagName = "v#{Bundler::GemHelper.gemspec.version}"
+gemName = "MrMurano-#{Bundler::GemHelper.gemspec.version}.gem"
+builtGem = "pkg/#{gemName}"
+
 desc "Install gem in user dir"
 task :bob do
-    sh %{gem install --user-install pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
+    sh %{gem install --user-install #{builtGem}}
 end
 
 desc "Uninstall from user dir"
 task :unbob do
-    sh %{gem uninstall --user-install pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
+    sh %{gem uninstall --user-install #{builtGem}}
 end
 
 task :echo do
-    puts "= #{Bundler::GemHelper.gemspec.version} ="
+    puts tagName
+    puts gemName
+    puts builtGem
 end
 
 namespace :git do
@@ -35,17 +41,44 @@ namespace :git do
     task :all => [:origin, :upstream]
 end
 
-task :gempush do
-    sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
-end
-
 task :gemit do
     mrt=Bundler::GemHelper.gemspec.version
     sh %{git checkout v#{mrt}}
     Rake::Task[:build].invoke
     Rake::Task[:bob].invoke
-    Rake::Task[:gempush].invoke
+    Rake::Task['push::gem'].invoke
     sh %{git checkout develop}
+end
+
+namespace :push do
+    desc 'Push gem up to RubyGems'
+    task :gem do
+        sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
+    end
+
+    namespace :github do
+        desc "Make a release in Github"
+        task :makeRelease do
+            # ENV['GITHUB_TOKEN'] set by CI.
+            # ENV['GITHUB_USER'] set by CI.
+            # ENV['GITHUB_REPO'] set by CI
+            # Create Release
+            sh %{github-release info --tag #{tagName}} do |ok, res|
+                if not ok then
+                    sh %{github-release release --tag #{tagName}}
+                end
+            end
+        end
+
+        desc 'Push gem up to Github Releases'
+        task :gem => [:makeRelease, :build] do
+            # ENV['GITHUB_TOKEN'] set by CI.
+            # ENV['GITHUB_USER'] set by CI.
+            # ENV['GITHUB_REPO'] set by CI
+            # upload gem
+            sh %{github-release upload --tag #{tagName} --name #{gemName} --file #{builtGem}}
+        end
+    end
 end
 
 desc "Prints a cmd to test this in another directory"
@@ -99,6 +132,19 @@ if Gem.win_platform? then
     end
     file installerName => ['Output/MrMuranoSetup.exe'] do |t|
         FileUtils.move t.prerequisites.first, t.name, :verbose=>true
+    end
+
+    namespace :push do
+        namespace :github do
+            desc "Push Windows installer to Github Releases"
+            task :inno => [:makeRelease, installerName] do
+                # ENV['GITHUB_TOKEN'] set by CI.
+                # ENV['GITHUB_USER'] set by CI.
+                # ENV['GITHUB_REPO'] set by CI
+                iname = File.basename(installerName)
+                sh %{github-release upload --tag #{tagName} --name #{iname} --file #{installerName}}
+            end
+        end
     end
 end
 
