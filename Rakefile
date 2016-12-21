@@ -142,7 +142,7 @@ if Gem.win_platform? then
                 # ENV['GITHUB_USER'] set by CI.
                 # ENV['GITHUB_REPO'] set by CI
                 iname = File.basename(installerName)
-                r %{github-release upload --tag #{tagName} --name #{iname} --file #{installerName}}
+                sh %{github-release upload --tag #{tagName} --name #{iname} --file #{installerName}}
             end
         end
     end
