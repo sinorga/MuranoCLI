@@ -46,14 +46,14 @@ task :gemit do
     sh %{git checkout v#{mrt}}
     Rake::Task[:build].invoke
     Rake::Task[:bob].invoke
-    Rake::Task['push::gem'].invoke
+    Rake::Task['push:gem'].invoke
     sh %{git checkout develop}
 end
 
 namespace :push do
     desc 'Push gem up to RubyGems'
     task :gem do
-        sh %{gem push pkg/MrMurano-#{Bundler::GemHelper.gemspec.version}.gem}
+        sh %{gem push #{builtGem}}
     end
 
     namespace :github do
