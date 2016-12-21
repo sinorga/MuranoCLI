@@ -246,25 +246,6 @@ module MrMurano
 
   end
 
-  ##
-  # IF none of -same, then -same; else just the ones listed.
-  def self.checkSAME(opt)
-    unless opt.files or opt.endpoints or opt.modules or
-        opt.eventhandlers or opt.roles or opt.users or opt.spec then
-      opt.files = true
-      opt.endpoints = true
-      opt.modules = true
-      opt.eventhandlers = true
-    end
-    if opt.all then
-      opt.files = true
-      opt.endpoints = true
-      opt.modules = true
-      opt.eventhandlers = true
-      opt.roles = true
-      opt.users = true
-    end
-  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
