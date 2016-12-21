@@ -54,6 +54,8 @@ module MrMurano
       unless @projectDir.nil? then
         @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
         fixModes(@projectDir + CFG_DIR_NAME)
+      else
+        @paths << ConfigFile.new(:project, Pathname.new(Dir.home) + CFG_FILE_NAME)
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
