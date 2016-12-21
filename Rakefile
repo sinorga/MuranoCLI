@@ -71,7 +71,7 @@ namespace :push do
         end
 
         desc 'Push gem up to Github Releases'
-        task :gem => [:makeRelease] do
+        task :gem => [:makeRelease, :build] do
             # ENV['GITHUB_TOKEN'] set by CI.
             # ENV['GITHUB_USER'] set by CI.
             # ENV['GITHUB_REPO'] set by CI
