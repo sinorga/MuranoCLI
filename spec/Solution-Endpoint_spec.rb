@@ -308,6 +308,30 @@ RSpec.describe MrMurano::Endpoint do
     end
   end
 
+  context "Lookup functions" do
+    it "gets local name" do
+      ret = @srv.tolocalname({ :method=>'get', :path=>'one/two/three' }, nil)
+      expect(ret).to eq('one-two-three.get.lua')
+    end
+
+    it "gets synckey" do
+      ret = @srv.synckey({ :method=>'get', :path=>'one/two/three' })
+      expect(ret).to eq("GET_one/two/three")
+    end
+
+    it "gets searchfor" do
+      $cfg['endpoints.searchFor'] = %{a b c/**/d/*.bob}
+      ret = @srv.searchFor
+      expect(ret).to eq(["a", "b", "c/**/d/*.bob"])
+    end
+
+    it "gets ignoring" do
+      $cfg['endpoints.ignoring'] = %{a b c/**/d/*.bob}
+      ret = @srv.ignoring
+      expect(ret).to eq(["a", "b", "c/**/d/*.bob"])
+    end
+  end
+
   # TODO: status tests
 
 end
