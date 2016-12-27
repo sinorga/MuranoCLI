@@ -332,7 +332,110 @@ RSpec.describe MrMurano::Endpoint do
     end
   end
 
-  # TODO: status tests
+  context "toRemoteItem" do
+    it "reads one" do
+      Tempfile.open("foo") do |tio|
+        tio << %{--#ENDPOINT GET /one/two
+        return request
+
+        }.gsub(/^\s+/,'')
+        tio.close
+
+        ret = @srv.toRemoteItem(nil, tio.path)
+        e = {:method=>"GET",
+             :path=>"/one/two",
+             :content_type=>"application/json",
+             :local_path=>Pathname.new(tio.path),
+             :line=>0,
+             :script=>"--#ENDPOINT GET /one/two\nreturn request\n",
+             :line_end=>2
+        }
+        expect(ret).to eq([e])
+      end
+    end
+
+    it "reads many" do
+      Tempfile.open("foo") do |tio|
+        tio << %{--#ENDPOINT GET /one/two
+        return request
+        --#ENDPOINT PUT /one/two
+        return request
+
+        --#ENDPOINT DELETE /three/two
+        return request
+        }.gsub(/^\s+/,'')
+        tio.close
+
+        ret = @srv.toRemoteItem(nil, tio.path)
+
+        expect(ret).to eq([
+          {
+            :method=>"GET",
+            :path=>"/one/two",
+            :content_type=>"application/json",
+            :local_path=>Pathname.new(tio.path),
+            :line=>0,
+            :script=>"--#ENDPOINT GET /one/two\nreturn request\n",
+            :line_end=>2
+          },
+          {
+            :method=>"PUT",
+            :path=>"/one/two",
+            :content_type=>"application/json",
+            :local_path=>Pathname.new(tio.path),
+            :line=>2,
+            :script=>"--#ENDPOINT PUT /one/two\nreturn request\n",
+            :line_end=>4
+          },
+          {
+            :method=>"DELETE",
+            :path=>"/three/two",
+            :content_type=>"application/json",
+            :local_path=>Pathname.new(tio.path),
+            :line=>4,
+            :script=>"--#ENDPOINT DELETE /three/two\nreturn request\n",
+            :line_end=>6
+          }
+        ])
+      end
+    end
+
+    it "skips all when no header found" do
+      Tempfile.open("foo") do |tio|
+        tio << %{
+        return request
+
+        }.gsub(/^\s+/,'')
+        tio.close
+
+        ret = @srv.toRemoteItem(nil, tio.path)
+        expect(ret).to eq([])
+      end
+    end
+
+    it "skips junk at begining" do
+      Tempfile.open("foo") do |tio|
+        tio << %{
+        return flex
+        --#ENDPOINT GET /one/two
+        return request
+
+        }.gsub(/^\s+/,'')
+        tio.close
+
+        ret = @srv.toRemoteItem(nil, tio.path)
+        e = {:method=>"GET",
+             :path=>"/one/two",
+             :content_type=>"application/json",
+             :local_path=>Pathname.new(tio.path),
+             :line=>1,
+             :script=>"--#ENDPOINT GET /one/two\nreturn request\n",
+             :line_end=>3
+        }
+        expect(ret).to eq([e])
+      end
+    end
+  end
 
 end
 #  vim: set ai et sw=2 ts=2 :
