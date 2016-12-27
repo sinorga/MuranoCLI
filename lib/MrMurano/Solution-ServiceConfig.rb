@@ -57,6 +57,14 @@ module MrMurano
 
   end
 
+  ## This is only used for debugging and deciphering APIs.
+  #
+  # There was once a plan for using this to automagically map commands into
+  # services by reading their schema.  That plan had too much magic and was too
+  # fragile for real use.
+  #
+  # A much better UI/UX happens with human intervention.
+  #
   class Services < SolutionBase
     def initialize
       super
@@ -102,6 +110,7 @@ module MrMurano
   end
 
 
+  # Device config interface for the assign commands.
   class SC_Device < ServiceConfig
     def initialize
       super
