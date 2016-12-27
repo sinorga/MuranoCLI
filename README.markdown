@@ -105,7 +105,7 @@ cat >> .mrmurano.prod <<EOF
 id=CCCCCCCC
 EOF
 
-cat >> .env <<EOF
+cat > .env <<EOF
 MR_CONFIGFILE=.mrmurano.dev
 EOF
 ```
