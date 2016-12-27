@@ -209,7 +209,35 @@ end
     end
   end
 
-  # TODO: status tests
+  context "Lookup functions" do
+    it "gets local name" do
+      ret = @srv.tolocalname({ :name=>"bob" }, nil)
+      expect(ret).to eq('bob.lua')
+    end
+
+    it "gets synckey" do
+      ret = @srv.synckey({ :service=>'device', :event=>'datapoint' })
+      expect(ret).to eq("device_datapoint")
+    end
+
+    it "gets searchfor" do
+      $cfg['eventhandler.searchFor'] = %{a b c/**/d/*.bob}
+      ret = @srv.searchFor
+      expect(ret).to eq(["a", "b", "c/**/d/*.bob"])
+    end
+
+    it "gets ignoring" do
+      $cfg['eventhandler.ignoring'] = %{a b c/**/d/*.bob}
+      ret = @srv.ignoring
+      expect(ret).to eq(["a", "b", "c/**/d/*.bob"])
+    end
+  end
+
+  context "toRemoteItem" do
+    it "reads one"
+    it "skips all when no header found"
+    it "skips junk at begining"
+  end
 
 end
 #  vim: set ai et sw=2 ts=2 :
