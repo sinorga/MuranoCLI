@@ -1,7 +1,10 @@
 require 'MrMurano/version'
+require 'MrMurano/Config'
 require 'MrMurano/Product'
+require '_workspace'
 
 RSpec.describe MrMurano::ProductContent, "#product_content" do
+  include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
@@ -67,15 +70,16 @@ RSpec.describe MrMurano::ProductContent, "#product_content" do
   end
 
   it "uploads content data" do
-    size = FileTest.size('spec/fixtures/product_spec_files/lightbulb.yaml')
+    pth = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
+    size = FileTest.size(pth.to_path)
     stub_request(:post, @urlroot + "/testFor").
       with(headers: {'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>/text\/(x-)?yaml/,
                       'Content-Length' => size
-    }).
+      }).
       to_return(status: 205)
 
-    ret = @prd.upload('testFor', 'spec/fixtures/product_spec_files/lightbulb.yaml')
+    ret = @prd.upload('testFor', pth.to_path)
     expect(ret).to eq({})
   end
 

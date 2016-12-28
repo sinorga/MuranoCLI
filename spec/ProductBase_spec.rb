@@ -1,7 +1,9 @@
 require 'MrMurano/version'
 require 'MrMurano/Product'
+require '_workspace'
 
 RSpec.describe MrMurano::ProductBase, "#product_base" do
+  include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load

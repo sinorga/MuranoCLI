@@ -1,133 +1,107 @@
 require 'MrMurano/version'
 require 'MrMurano/Config'
+require '_workspace'
 require 'tempfile'
 require 'erb'
 
 RSpec.describe MrMurano::Config do
+
   context "Basics " do
-    before(:example) do
-      @specdir = Dir.pwd
-      @tmpdir = Dir.tmpdir
-      @projectDir = @tmpdir + '/home/work/project'
-      FileUtils.mkpath(@projectDir)
-      # Set ENV to override output of Dir.home
-      ENV['HOME'] = @tmpdir + '/home'
-    end
-
-    after(:example) do
-      FileUtils.remove_dir(@tmpdir + '/home', true) if FileTest.exist? @tmpdir
-    end
-
+    include_context "WORKSPACE"
     it "Sets defaults" do
-      Dir.chdir(@projectDir) do
-        cfg = MrMurano::Config.new
-        cfg.load
-        # Don't check for all of them, just a few.
-        expect(cfg['files.default_page']).to eq('index.html')
-        expect(cfg.get('files.default_page', :defaults)).to eq('index.html')
-        expect(cfg['tool.debug']).to eq(false)
-        expect(cfg.get('tool.debug', :defaults)).to eq(false)
-      end
+      cfg = MrMurano::Config.new
+      cfg.load
+      # Don't check for all of them, just a few.
+      expect(cfg['files.default_page']).to eq('index.html')
+      expect(cfg.get('files.default_page', :defaults)).to eq('index.html')
+      expect(cfg['tool.debug']).to eq(false)
+      expect(cfg.get('tool.debug', :defaults)).to eq(false)
     end
 
     it "Sets internal values" do
-      Dir.chdir(@projectDir) do
-        cfg = MrMurano::Config.new
-        cfg.load
+      cfg = MrMurano::Config.new
+      cfg.load
 
-        cfg['bob.test'] = 'twelve'
+      cfg['bob.test'] = 'twelve'
 
-        expect(cfg['bob.test']).to eq('twelve')
-        expect(cfg.get('bob.test', :internal)).to eq('twelve')
-      end
+      expect(cfg['bob.test']).to eq('twelve')
+      expect(cfg.get('bob.test', :internal)).to eq('twelve')
     end
 
     it "Sets tool values" do
-      Dir.chdir(@projectDir) do
-        cfg = MrMurano::Config.new
-        cfg.load
+      cfg = MrMurano::Config.new
+      cfg.load
 
-        cfg['test'] = 'twelve'
+      cfg['test'] = 'twelve'
 
-        expect(cfg['tool.test']).to eq('twelve')
-        expect(cfg.get('tool.test', :internal)).to eq('twelve')
-      end
+      expect(cfg['tool.test']).to eq('twelve')
+      expect(cfg.get('tool.test', :internal)).to eq('twelve')
     end
 
     it "Sets project values" do # This should write
-      Dir.chdir(@projectDir) do
-        cfg = MrMurano::Config.new
-        cfg.load
+      cfg = MrMurano::Config.new
+      cfg.load
 
-        cfg.set('bob.test', 'twelve', :project)
+      cfg.set('bob.test', 'twelve', :project)
 
-        expect(cfg['bob.test']).to eq('twelve')
-        expect(cfg.get('bob.test', :project)).to eq('twelve')
+      expect(cfg['bob.test']).to eq('twelve')
+      expect(cfg.get('bob.test', :project)).to eq('twelve')
 
-        expect(FileTest.exist?(@projectDir + '.mrmuranorc'))
+      expect(FileTest.exist?(@projectDir + '.mrmuranorc'))
 
-        #reload
-        cfg = MrMurano::Config.new
-        cfg.load
-        expect(cfg.get('bob.test', :project)).to eq('twelve')
-      end
+      #reload
+      cfg = MrMurano::Config.new
+      cfg.load
+      expect(cfg.get('bob.test', :project)).to eq('twelve')
     end
 
     it "Sets a user value" do
-      Dir.chdir(@projectDir) do
-        cfg = MrMurano::Config.new
-        cfg.load
+      cfg = MrMurano::Config.new
+      cfg.load
 
-        cfg.set('bob.test', 'twelve', :user)
+      cfg.set('bob.test', 'twelve', :user)
 
-        expect(cfg['bob.test']).to eq('twelve')
-        expect(cfg.get('bob.test', :user)).to eq('twelve')
+      expect(cfg['bob.test']).to eq('twelve')
+      expect(cfg.get('bob.test', :user)).to eq('twelve')
 
-        expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+      expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
 
-        #reload
-        cfg = MrMurano::Config.new
-        cfg.load
-        expect(cfg.get('bob.test', :user)).to eq('twelve')
-      end
+      #reload
+      cfg = MrMurano::Config.new
+      cfg.load
+      expect(cfg.get('bob.test', :user)).to eq('twelve')
     end
 
     it "loads from a specific file" do
-      Dir.chdir(@projectDir) do
-        File.open(@projectDir + '/foo.cfg', 'w') do |io|
-          io << %{[test]
+      File.open(@projectDir + '/foo.cfg', 'w') do |io|
+        io << %{[test]
             bob = test
-          }.gsub(/^\s\+/,'')
-        end
-
-        cfg = MrMurano::Config.new
-        cfg.load
-        cfg.load_specific(@projectDir + '/foo.cfg')
-
-        expect(cfg['test.bob']).to eq('test')
+        }.gsub(/^\s\+/,'')
       end
+
+      cfg = MrMurano::Config.new
+      cfg.load
+      cfg.load_specific(@projectDir + '/foo.cfg')
+
+      expect(cfg['test.bob']).to eq('test')
     end
 
     it "returns a path to a file in project mrmurano dir" do
-      Dir.chdir(@projectDir) do
-        cfg = MrMurano::Config.new
-        cfg.load
-        path = cfg.file_at('testfile').realdirpath
-        want = Pathname.new(@projectDir + '/.mrmurano/testfile').realdirpath
+      cfg = MrMurano::Config.new
+      cfg.load
+      path = cfg.file_at('testfile').realdirpath
+      want = Pathname.new(@projectDir + '/.mrmurano/testfile').realdirpath
 
-        expect(path).to eq(want)
-      end
+      expect(path).to eq(want)
     end
 
     it "returns a path to a file in user mrmurano dir" do
-      Dir.chdir(@projectDir) do
-        cfg = MrMurano::Config.new
-        cfg.load
-        path = cfg.file_at('testfile', :user).realdirpath
-        want = Pathname.new(Dir.home + '/.mrmurano/testfile').realdirpath
+      cfg = MrMurano::Config.new
+      cfg.load
+      path = cfg.file_at('testfile', :user).realdirpath
+      want = Pathname.new(Dir.home + '/.mrmurano/testfile').realdirpath
 
-        expect(path).to eq(want)
-      end
+      expect(path).to eq(want)
     end
 
     context "ENV['MR_CONFIGFILE']" do
@@ -161,17 +135,15 @@ RSpec.describe MrMurano::Config do
     end
 
     it "dumps" do
-      Dir.chdir(@projectDir) do
-        cfg = MrMurano::Config.new
-        cfg.load
-        ret = cfg.dump
+      cfg = MrMurano::Config.new
+      cfg.load
+      ret = cfg.dump
 
-        rawwant = IO.read(File.join(@specdir, 'spec','fixtures','dumped_config'))
-        template = ERB.new(rawwant)
-        want = template.result(binding)
+      rawwant = IO.read(File.join(@testdir.to_path, 'spec','fixtures','dumped_config'))
+      template = ERB.new(rawwant)
+      want = template.result(binding)
 
-        expect(ret).to eq(want)
-      end
+      expect(ret).to eq(want)
     end
   end
 

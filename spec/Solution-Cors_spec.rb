@@ -2,8 +2,10 @@ require 'MrMurano/version'
 require 'MrMurano/Solution-Cors'
 require 'tempfile'
 require 'yaml'
+require '_workspace'
 
 RSpec.describe MrMurano::Cors do
+  include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load

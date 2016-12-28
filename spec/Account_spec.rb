@@ -1,8 +1,10 @@
 require 'MrMurano/version'
 require 'MrMurano/Config'
 require 'MrMurano/Account'
+require '_workspace'
 
 RSpec.describe MrMurano::Account do
+    include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load

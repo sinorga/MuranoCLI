@@ -1,8 +1,10 @@
 require 'MrMurano/version'
 require 'MrMurano/Solution-Endpoint'
 require 'tempfile'
+require '_workspace'
 
 RSpec.describe MrMurano::Endpoint do
+  include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
