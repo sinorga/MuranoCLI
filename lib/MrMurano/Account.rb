@@ -113,6 +113,10 @@ module MrMurano
       @@token
     end
 
+    def token_reset(value=nil)
+      @@token = value
+    end
+
     def businesses
       get('user/' + $cfg['user.name'] + '/membership/')
     end
