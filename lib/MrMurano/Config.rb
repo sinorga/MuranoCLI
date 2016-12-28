@@ -112,8 +112,8 @@ module MrMurano
       result=nil
       fileNames=[CFG_FILE_NAME, CFG_ALTRC_NAME]
       dirNames=[CFG_DIR_NAME]
-      home = Pathname.new(Dir.home)
-      pwd = Pathname.new(Dir.pwd)
+      home = Pathname.new(Dir.home).realpath
+      pwd = Pathname.new(Dir.pwd).realpath
       return nil if home == pwd
       pwd.dirname.ascend do |i|
         break unless result.nil?
