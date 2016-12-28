@@ -35,6 +35,13 @@ RSpec.describe MrMurano::Mock, "#mock" do
       expect(File.exist?(path)).to be(false)
   end
 
+  it "can remove the missing testpoint file" do
+      path = @mock.get_testpoint_path()
+      removed = @mock.remove_testpoint()
+      expect(removed).to be(false)
+      expect(File.exist?(path)).to be(false)
+  end
+
   it "cannot show the UUID if there's no testpoint file" do
       @mock.create_testpoint()
       @mock.show()

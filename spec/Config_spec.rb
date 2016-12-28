@@ -86,22 +86,48 @@ RSpec.describe MrMurano::Config do
       expect(cfg['test.bob']).to eq('test')
     end
 
-    it "returns a path to a file in project mrmurano dir" do
-      cfg = MrMurano::Config.new
-      cfg.load
-      path = cfg.file_at('testfile').realdirpath
-      want = Pathname.new(@projectDir + '/.mrmurano/testfile').realdirpath
+    context "returns a path to a file in" do
+      it "project mrmurano dir" do
+        cfg = MrMurano::Config.new
+        cfg.load
+        path = cfg.file_at('testfile').realdirpath
+        want = Pathname.new(@projectDir + '/.mrmurano/testfile').realdirpath
 
-      expect(path).to eq(want)
-    end
+        expect(path).to eq(want)
+      end
 
-    it "returns a path to a file in user mrmurano dir" do
-      cfg = MrMurano::Config.new
-      cfg.load
-      path = cfg.file_at('testfile', :user).realdirpath
-      want = Pathname.new(Dir.home + '/.mrmurano/testfile').realdirpath
+      it "user mrmurano dir" do
+        cfg = MrMurano::Config.new
+        cfg.load
+        path = cfg.file_at('testfile', :user).realdirpath
+        want = Pathname.new(Dir.home + '/.mrmurano/testfile').realdirpath
 
-      expect(path).to eq(want)
+        expect(path).to eq(want)
+      end
+
+      it "internal" do
+        cfg = MrMurano::Config.new
+        cfg.load
+        path = cfg.file_at('testfile', :internal)
+
+        expect(path).to eq(nil)
+      end
+
+      it "specified" do
+        cfg = MrMurano::Config.new
+        cfg.load
+        path = cfg.file_at('testfile', :specified)
+
+        expect(path).to eq(nil)
+      end
+
+      it "defaults" do
+        cfg = MrMurano::Config.new
+        cfg.load
+        path = cfg.file_at('testfile', :defaults)
+
+        expect(path).to eq(nil)
+      end
     end
 
     context "ENV['MR_CONFIGFILE']" do
@@ -144,6 +170,24 @@ RSpec.describe MrMurano::Config do
       want = template.result(binding)
 
       expect(ret).to eq(want)
+    end
+
+    context "fixing permissions" do
+      it "fixes a directory" do
+        Dir.mkdir('test')
+        cfg = MrMurano::Config.new
+        cfg.fixModes(Pathname.new('test'))
+        expect(FileTest.world_readable? 'test').to be_nil
+        expect(FileTest.world_writable? 'test').to be_nil
+      end
+
+      it "fixes a file" do
+        FileUtils.touch('test')
+        cfg = MrMurano::Config.new
+        cfg.fixModes(Pathname.new('test'))
+        expect(FileTest.world_readable? 'test').to be_nil
+        expect(FileTest.world_writable? 'test').to be_nil
+      end
     end
   end
 
