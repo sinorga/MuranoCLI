@@ -234,9 +234,62 @@ end
   end
 
   context "toRemoteItem" do
-    it "reads one"
-    it "skips all when no header found"
-    it "skips junk at begining"
+    before(:example) do
+      allow(@srv).to receive(:warning)
+    end
+
+    it "reads one" do
+      Tempfile.open('foo') do |tio|
+        tio << %{--#EVENT device datapoint
+        -- do something.
+        Tsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}
+        }.gsub(/^\s+/,'')
+        tio.close
+
+        ret = @srv.toRemoteItem(nil, tio.path)
+        expect(ret).to eq({:service=>'device',
+                           :event=>'datapoint',
+                           :line=>0,
+                           :line_end=>3,
+                           :local_path=>Pathname.new(tio.path),
+                           :script=>%{--#EVENT device datapoint\n-- do something.\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
+        })
+      end
+    end
+
+    it "skips all when no header found" do
+      Tempfile.open('foo') do |tio|
+        tio << %{
+        -- do something.
+        Tsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}
+        }.gsub(/^\s+/,'')
+        tio.close
+
+        ret = @srv.toRemoteItem(nil, tio.path)
+        expect(ret).to eq(nil)
+      end
+    end
+
+    it "skips junk at begining" do
+      Tempfile.open('foo') do |tio|
+        tio << %{
+        -- do something.
+        --#EVENT device datapoint
+        Tsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}
+        }.gsub(/^\s+/,'')
+        tio.close
+
+        ret = @srv.toRemoteItem(nil, tio.path)
+        expect(ret).to eq({:service=>'device',
+                           :event=>'datapoint',
+                           :line=>1,
+                           :line_end=>3,
+                           :local_path=>Pathname.new(tio.path),
+                           :script=>%{--#EVENT device datapoint\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
+        })
+      end
+    end
+
   end
 
 end
