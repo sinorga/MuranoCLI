@@ -1,10 +1,12 @@
 require 'MrMurano/version'
 require 'MrMurano/Config'
 require 'tempfile'
+require 'erb'
 
 RSpec.describe MrMurano::Config do
   context "Basics " do
     before(:example) do
+      @specdir = Dir.pwd
       @tmpdir = Dir.tmpdir
       @projectDir = @tmpdir + '/home/work/project'
       FileUtils.mkpath(@projectDir)
@@ -143,6 +145,20 @@ bob = test
         cfg.load
         expect(cfg['coffee.hot']).to eq('yes')
         expect(cfg.get('coffee.hot', :env)).to eq('yes')
+      end
+    end
+
+    it "dumps" do
+      Dir.chdir(@projectDir) do
+        cfg = MrMurano::Config.new
+        cfg.load
+        ret = cfg.dump
+
+        rawwant = IO.read(File.join(@specdir, 'spec','fixtures','dumped_config'))
+        template = ERB.new(rawwant)
+        want = template.result(binding)
+
+        expect(ret).to eq(want)
       end
     end
   end

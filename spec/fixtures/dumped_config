@@ -1,0 +1,44 @@
+[tool]
+verbose = false
+debug = false
+dry = false
+fullerror = false
+outformat = best
+
+[net]
+host = bizapi.hosted.exosite.io
+
+[location]
+base = <%= File.realpath(@projectDir) %>
+files = files
+endpoints = endpoints
+modules = modules
+eventhandlers = eventhandlers
+roles = roles.yaml
+users = users.yaml
+cors = cors.yaml
+specs = specs
+
+[files]
+default_page = index.html
+searchFor = **/*
+ignoring = 
+
+[endpoints]
+searchFor = *.lua */*.lua
+ignoring = *_test.lua *_spec.lua .*
+
+[eventhandler]
+searchFor = *.lua */*.lua
+ignoring = *_test.lua *_spec.lua .*
+skiplist = websocket webservice device.service_call
+
+[modules]
+searchFor = *.lua */*.lua
+ignoring = *_test.lua *_spec.lua .*
+
+[product]
+spec = resources.yaml
+
+[diff]
+cmd = diff -u
