@@ -42,6 +42,18 @@ RSpec.describe MrMurano::Config do
       end
     end
 
+    it "Sets tool values" do
+      Dir.chdir(@projectDir) do
+        cfg = MrMurano::Config.new
+        cfg.load
+
+        cfg['test'] = 'twelve'
+
+        expect(cfg['tool.test']).to eq('twelve')
+        expect(cfg.get('tool.test', :internal)).to eq('twelve')
+      end
+    end
+
     it "Sets project values" do # This should write
       Dir.chdir(@projectDir) do
         cfg = MrMurano::Config.new
@@ -84,8 +96,8 @@ RSpec.describe MrMurano::Config do
       Dir.chdir(@projectDir) do
         File.open(@projectDir + '/foo.cfg', 'w') do |io|
           io << %{[test]
-bob = test
-          }
+            bob = test
+          }.gsub(/^\s\+/,'')
         end
 
         cfg = MrMurano::Config.new
@@ -123,8 +135,8 @@ bob = test
         ENV['MR_CONFIGFILE'] = @tmpdir + '/home/test.config'
         File.open(@tmpdir + '/home/test.config', 'w') do |io|
           io << %{[test]
-bob = test
-          }
+            bob = test
+          }.gsub(/^\s\+/,'')
         end
 
         cfg = MrMurano::Config.new
