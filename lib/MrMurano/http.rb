@@ -87,7 +87,8 @@ module MrMurano
       else
         resp << jsn
       end
-      say_error resp
+      # assuming verbosing was included.
+      error resp
     end
 
     def workit(request, &block)
