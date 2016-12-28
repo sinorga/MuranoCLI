@@ -217,8 +217,7 @@ module MrMurano
               end
             end
           else
-            showHttpError(request, response)
-            raise resp
+            showHttpError(request, resp)
           end
         end
         nil
@@ -329,7 +328,6 @@ module MrMurano
         return response.body
       else
         showHttpError(request, response)
-        raise response
       end
     end
 
