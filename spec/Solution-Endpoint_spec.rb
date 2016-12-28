@@ -107,6 +107,51 @@ RSpec.describe MrMurano::Endpoint do
       expect(ret).to eq(body)
     end
 
+    it "returns empty content type" do
+      body = [{:id=>"9K0",
+               :method=>"websocket",
+               :path=>"/api/v1/bar",
+               :content_type=>"",
+               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n\n",
+      },
+      {:id=>"B76",
+       :method=>"websocket",
+       :path=>"/api/v1/foo/{id}",
+       :content_type=>"image/png",
+       :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
+      }]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.list()
+      body.first.merge!({:content_type=>'application/json'})
+      expect(ret).to eq(body)
+    end
+
+    it "returns missing content type" do
+      body = [{:id=>"9K0",
+               :method=>"websocket",
+               :path=>"/api/v1/bar",
+               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n\n",
+      },
+      {:id=>"B76",
+       :method=>"websocket",
+       :path=>"/api/v1/foo/{id}",
+       :content_type=>"image/png",
+       :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
+      }]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = @srv.list()
+      body.first.merge!({:content_type=>'application/json'})
+      expect(ret).to eq(body)
+    end
+
   end
 
 
@@ -124,6 +169,25 @@ RSpec.describe MrMurano::Endpoint do
                         to_return(body: body.to_json)
 
       ret = @srv.fetch('9K0')
+      expect(ret).to eq(body[:script])
+    end
+
+    it "yields" do
+      body = {:id=>"9K0",
+              :method=>"websocket",
+              :path=>"/api/v1/bar",
+              :content_type=>"application/json",
+              :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n",
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
+
+      ret = nil
+      @srv.fetch('9K0') do |sc|
+        ret = sc
+      end
       expect(ret).to eq(body[:script])
     end
 
@@ -202,48 +266,45 @@ RSpec.describe MrMurano::Endpoint do
     expect(ret).to eq({})
   end
 
-  it "uploads over old version" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: "")
-
-    Tempfile.open('foo') do |tio|
-      tio << %{-- lua code is here
-    function foo(bar)
-      return bar + 1
+  context "uploads" do
+    around(:example) do |ex|
+      Tempfile.open('foo') do |tio|
+        tio << %{-- lua code is here
+          function foo(bar)
+            return bar + 1
+          end
+        }
+        tio.close
+        @tio_ = tio
+        ex.run
+      end
     end
-      }
-      tio.close
 
-      ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :method=>"websocket",
-                                   :path=>"/api/v1/bar",
-                                   :content_type=>"application/json",
-      }, true)
-      expect(ret)
+    it "over old version" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: "")
+
+        ret = @srv.upload(@tio_.path, {:id=>"9K0",
+                                     :method=>"websocket",
+                                     :path=>"/api/v1/bar",
+                                     :content_type=>"application/json",
+        }, true)
+        expect(ret)
     end
-  end
 
-  it "uploads when nothing is there" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(status: 404)
-    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: "")
+    it "when nothing is there" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(status: 404)
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: "")
 
-    Tempfile.open('foo') do |tio|
-      tio << %{-- lua code is here
-    function foo(bar)
-      return bar + 1
-    end
-      }
-      tio.close
-
-      ret = @srv.upload(tio.path, {:id=>"9K0",
+      ret = @srv.upload(@tio_.path, {:id=>"9K0",
                                    :method=>"websocket",
                                    :path=>"/api/v1/bar",
                                    :content_type=>"application/json",
@@ -251,6 +312,32 @@ RSpec.describe MrMurano::Endpoint do
       expect(ret)
     end
 
+    it "without an itemkey" do
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: "")
+
+      ret = @srv.upload(@tio_.path, {:method=>"websocket",
+                                   :path=>"/api/v1/bar",
+                                   :content_type=>"application/json",
+      }, false)
+      expect(ret)
+    end
+
+    it "Handles others errors" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(status: 502, body: "{}")
+
+      ret = @srv.upload(@tio_.path, {:id=>"9K0",
+                                   :method=>"websocket",
+                                   :path=>"/api/v1/bar",
+                                   :content_type=>"application/json",
+      }, true)
+      expect(ret)
+    end
   end
 
   context "compares" do
