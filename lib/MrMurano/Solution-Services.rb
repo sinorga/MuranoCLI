@@ -127,6 +127,7 @@ module MrMurano
       ret = nil
       cacheFile.open('r') do |io|
         cache = YAML.load(io)
+        return nil unless cache
         if cache.has_key?(local_path.to_s) then
           entry = cache[local_path.to_s]
           debug("For #{local_path}:")
