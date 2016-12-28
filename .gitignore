@@ -12,6 +12,7 @@ xcuserdata
 Pods/
 pkg/
 report/
+coverage/
 
 .mrmurano/
 .mrmuranorc
