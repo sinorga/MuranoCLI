@@ -333,6 +333,7 @@ RSpec.describe MrMurano::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(status: 502, body: "{}")
 
+      expect(@srv).to receive(:error).and_return(nil)
       ret = @srv.upload(@tio_.path, {:id=>"9K0",
                                    :method=>"websocket",
                                    :path=>"/api/v1/bar",

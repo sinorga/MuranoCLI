@@ -64,6 +64,32 @@ RSpec.describe MrMurano::EventHandler do
     expect(ret).to eq(body[:script])
   end
 
+  it "fetches, with header into block" do
+    body = {:id=>"9K0",
+             :name=>"debug",
+             :alias=>"XYZ_debug",
+             :solution_id=>"XYZ",
+             :service=>"device",
+             :event=>"datapoint",
+             :created_at=>"2016-07-07T19:16:19.479Z",
+             :updated_at=>"2016-09-12T13:26:55.868Z",
+             :script=>%{--#EVENT device datapoint
+             -- lua code is here
+    function foo(bar)
+      return bar + 1
+    end
+    }
+    }
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
+      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                      'Content-Type'=>'application/json'}).
+      to_return(body: body.to_json)
+
+    ret = nil
+    @srv.fetch('9K0') { |sc| ret = sc }
+    expect(ret).to eq(body[:script])
+  end
+
   it "fetches, without header" do
     body = {:id=>"9K0",
              :name=>"debug",
@@ -232,6 +258,30 @@ end
       $cfg['eventhandler.ignoring'] = %{a b c/**/d/*.bob}
       ret = @srv.ignoring
       expect(ret).to eq(["a", "b", "c/**/d/*.bob"])
+    end
+
+    it "raises on alias without service" do
+      expect {
+        @srv.mkname( {:event=>'bob'} )
+      }.to raise_error %{Missing parts! {"event":"bob"}}
+    end
+
+    it "raises on alias without event" do
+      expect {
+        @srv.mkalias( {:service=>'bob'} )
+      }.to raise_error %{Missing parts! {"service":"bob"}}
+    end
+
+    it "raises on name without service" do
+      expect {
+        @srv.mkalias( {:event=>'bob'} )
+      }.to raise_error %{Missing parts! {"event":"bob"}}
+    end
+
+    it "raises on name without event" do
+      expect {
+        @srv.mkname( {:service=>'bob'} )
+      }.to raise_error %{Missing parts! {"service":"bob"}}
     end
   end
 
