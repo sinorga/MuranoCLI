@@ -92,77 +92,133 @@ RSpec.describe MrMurano::Library do
     expect(ret).to eq({})
   end
 
-  it "uploads over old version" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: "")
+  context "uploads" do
+    it "over old version" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: "")
 
-    Tempfile.open('foo') do |tio|
-      tio << %{-- lua code is here
-    function foo(bar)
-      return bar + 1
+      Tempfile.open('foo') do |tio|
+        tio << %{-- lua code is here
+          function foo(bar)
+            return bar + 1
+          end
+        }
+        tio.close
+
+        ret = @srv.upload(tio.path, {:id=>"9K0",
+                                     :name=>"debug",
+                                     :alias=>"XYZ_debug",
+                                     :solution_id=>"XYZ",
+        })
+        expect(ret)
+      end
     end
-      }
-      tio.close
 
-      ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :name=>"debug",
-                                   :alias=>"XYZ_debug",
-                                   :solution_id=>"XYZ",
-      })
-      expect(ret)
+    it "when nothing is there" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(status: 404)
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: "")
+
+      Tempfile.open('foo') do |tio|
+        tio << %{-- lua code is here
+          function foo(bar)
+            return bar + 1
+          end
+        }
+        tio.close
+
+        ret = @srv.upload(tio.path, {:id=>"9K0",
+                                     :name=>"debug",
+                                     :alias=>"XYZ_debug",
+                                     :solution_id=>"XYZ",
+        })
+        expect(ret)
+      end
     end
-  end
 
-  it "uploads when nothing is there" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(status: 404)
-    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: "")
+    it "shows other errors" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(status: 418, body: %{{"teapot":true}})
 
-    Tempfile.open('foo') do |tio|
-      tio << %{-- lua code is here
-    function foo(bar)
-      return bar + 1
+      Tempfile.open('foo') do |tio|
+        tio << %{-- lua code is here
+          function foo(bar)
+            return bar + 1
+          end
+        }
+        tio.close
+
+        expect(@srv).to receive(:error).and_return(nil)
+        ret = @srv.upload(tio.path, {:id=>"9K0",
+                                     :name=>"debug",
+                                     :alias=>"XYZ_debug",
+                                     :solution_id=>"XYZ",
+        })
+        expect(ret)
+      end
     end
-      }
-      tio.close
 
-      ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :name=>"debug",
-                                   :alias=>"XYZ_debug",
-                                   :solution_id=>"XYZ",
-      })
-      expect(ret)
+    it "over old version; replacing cache miss" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: "")
+
+      Tempfile.open('foo') do |tio|
+        tio << %{-- lua code is here
+          function foo(bar)
+            return bar + 1
+          end
+        }
+        tio.close
+
+        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        FileUtils.touch(cacheFile.to_path)
+        ret = @srv.upload(tio.path, {:id=>"9K0",
+                                     :name=>"debug",
+                                     :alias=>"XYZ_debug",
+                                     :solution_id=>"XYZ",
+        })
+        expect(ret)
+      end
     end
-  end
 
-  it "uploads shows other errors" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(status: 418, body: %{{"teapot":true}})
+    it "over old version; replacing cache hit" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: "")
 
-    Tempfile.open('foo') do |tio|
-      tio << %{-- lua code is here
-        function foo(bar)
-          return bar + 1
+      Tempfile.open('foo') do |tio|
+        tio << %{-- lua code is here
+          function foo(bar)
+            return bar + 1
+          end
+        }
+        tio.close
+
+        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile.open('w') do |cfio|
+          cfio << {tio.path=>{:sha1=>"6",
+                              :updated_at=>Time.now.getutc.to_datetime.iso8601(3)}
+          }.to_yaml
         end
-      }
-      tio.close
-
-      expect(@srv).to receive(:error).and_return(nil)
-      ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :name=>"debug",
-                                   :alias=>"XYZ_debug",
-                                   :solution_id=>"XYZ",
-      })
-      expect(ret)
+        ret = @srv.upload(tio.path, {:id=>"9K0",
+                                     :name=>"debug",
+                                     :alias=>"XYZ_debug",
+                                     :solution_id=>"XYZ",
+        })
+        expect(ret)
+      end
     end
   end
 
