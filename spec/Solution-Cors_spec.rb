@@ -99,7 +99,7 @@ RSpec.describe MrMurano::Cors do
     end
 
     it "return empty if not a file" do
-      Dir.tmpdir do |td|
+      Dir.mktmpdir do |td|
         tp = File.join(td, 'cors.yaml')
         Dir.mkdir( tp ) # not a file
         allow(@srv).to receive(:warning)
@@ -130,5 +130,30 @@ RSpec.describe MrMurano::Cors do
     expect(ret).to eq(nil)
   end
 
+  it "tolocalpath is into" do
+    ret = @srv.tolocalpath('a/path/', {:id=>'cors'})
+    expect(ret).to eq('a/path/')
+  end
+
+  context "compares" do
+    before(:example) do
+      @iA = {:origin=>true,
+             :methods=>['HEAD','GET'],
+             :headers=>['Content-Type'],
+             }
+      @iB = {:origin=>true,
+             :methods=>['HEAD','GET'],
+             :headers=>['Content-Type'],
+             }
+    end
+    it "equal" do
+      ret = @srv.docmp(@iA,@iB)
+      expect(ret).to eq(false)
+    end
+    it "different" do
+      ret = @srv.docmp(@iA,@iB.merge({:foo=>:bar}))
+      expect(ret).to eq(true)
+    end
+  end
 end
 #  vim: set ai et sw=2 ts=2 :
