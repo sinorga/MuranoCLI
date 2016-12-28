@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/MrMurano.svg)](https://badge.fury.io/rb/MrMurano)
 [![Build Status](https://travis-ci.org/tadpol/MrMurano.svg?branch=master)](https://travis-ci.org/tadpol/MrMurano)
+[![Inline docs](http://inch-ci.org/github/exosite/MrMurano)](http://inch-ci.org/github/exosite/MrMurano.svg?branch=master)
 
 Do more from the command line with [Murano](https://exosite.com/platform/)
 
