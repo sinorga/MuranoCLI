@@ -106,6 +106,7 @@ module MrMurano
       if cacheFile.file? then
         cacheFile.open('r+') do |io|
           cache = YAML.load(io)
+          cache = {} unless cache
           io.rewind
           cache[local_path.to_s] = entry
           io << cache.to_yaml
