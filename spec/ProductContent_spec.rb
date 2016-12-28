@@ -27,6 +27,26 @@ RSpec.describe MrMurano::ProductContent, "#product_content" do
     expect(ret).to eq([])
   end
 
+  it "lists something" do
+    stub_request(:get, @urlroot + "/").
+      with(headers: {'Authorization'=>'token TTTTTTTTTT',
+                      'Content-Type'=>'application/json'}).
+      to_return(body: "one\ntwo\nthree\n")
+
+    ret = @prd.list
+    expect(ret).to eq(['one','two','three'])
+  end
+
+  it "lists something for identifier" do
+    stub_request(:get, @urlroot + "/?sn=12").
+      with(headers: {'Authorization'=>'token TTTTTTTTTT',
+                      'Content-Type'=>'application/json'}).
+      to_return(body: "one\ntwo\nthree\n")
+
+    ret = @prd.list_for('12')
+    expect(ret).to eq(['one','two','three'])
+  end
+
   it "creates an item" do
     stub_request(:post, @urlroot + "/").
       with(headers: {'Authorization'=>'token TTTTTTTTTT',
@@ -59,6 +79,16 @@ RSpec.describe MrMurano::ProductContent, "#product_content" do
     expect(ret).to eq([['text/plain','42','123456789','test meta','false']])
   end
 
+  it "gets info for missing content" do
+    stub_request(:get, @urlroot + "/testFor").
+      with(headers: {'Authorization'=>'token TTTTTTTTTT',
+                      'Content-Type'=>'application/json'}).
+      to_return(status: 404, body: "")
+
+    ret = @prd.info("testFor")
+    expect(ret).to be_nil
+  end
+
   it "removes content" do
     stub_request(:delete, @urlroot + "/testFor").
       with(headers: {'Authorization'=>'token TTTTTTTTTT',
@@ -83,15 +113,46 @@ RSpec.describe MrMurano::ProductContent, "#product_content" do
     expect(ret).to eq({})
   end
 
-  it "downloads content" do
-    stub_request(:get, @urlroot + "/testFor?download=true").
-      with(headers: {'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: "short and sweet")
+  context "downloads content" do
+    it "to block" do
+      stub_request(:get, @urlroot + "/testFor?download=true").
+        with(headers: {'Authorization'=>'token TTTTTTTTTT',
+                       'Content-Type'=>'application/json'}).
+                       to_return(body: "short and sweet")
 
-    data = ""
-    @prd.download('testFor') {|chunk| data << chunk}
-    expect(data).to eq("short and sweet")
+      data = ""
+      @prd.download('testFor') {|chunk| data << chunk}
+      expect(data).to eq("short and sweet")
+    end
+
+    it "to stdout" do
+      stub_request(:get, @urlroot + "/testFor?download=true").
+        with(headers: {'Authorization'=>'token TTTTTTTTTT',
+                       'Content-Type'=>'application/json'}).
+                       to_return(body: "short and sweet")
+
+      begin
+        old_stdout = $stdout
+        $stdout = StringIO.new('','w')
+        @prd.download('testFor')
+        expect($stdout.string).to eq("short and sweet")
+      ensure
+        $stdout = old_stdout
+      end
+    end
+
+    it "but error" do
+      stub_request(:get, @urlroot + "/testFor?download=true").
+        with(headers: {'Authorization'=>'token TTTTTTTTTT',
+                       'Content-Type'=>'application/json'}).
+                       to_return(status:404, body: "{}")
+
+      data = ""
+      expect(@prd).to receive(:error).once
+      @prd.download('testFor') {|chunk| data << chunk}
+      expect(data).to eq("")
+
+    end
   end
 
 end
