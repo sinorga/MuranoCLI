@@ -205,7 +205,7 @@ module MrMurano
     ##
     # True if itemA and itemB are different
     def docmp(itemA, itemB)
-      itemA[:alias] == itemB[:alias] and itemA[:format] == itemB[:format]
+      itemA[:alias] != itemB[:alias] or itemA[:format] != itemB[:format]
     end
 
   end
