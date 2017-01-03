@@ -1,6 +1,7 @@
 require 'MrMurano/version'
 require 'MrMurano/Config'
 require 'MrMurano/Account'
+require 'highline/import'
 require '_workspace'
 
 RSpec.describe MrMurano::Account, "token" do
@@ -20,9 +21,48 @@ RSpec.describe MrMurano::Account, "token" do
   end
 
   context "Get login info" do
-    it "Asks for nothing"
-    it "Asks for user name"
-    it "Asks for password"
+    before(:example) do
+      @pswd = instance_double("MrMurano::Passwords")
+      allow(@pswd).to receive(:load).and_return(nil)
+      allow(@pswd).to receive(:save).and_return(nil)
+      allow(MrMurano::Passwords).to receive(:new).and_return(@pswd)
+    end
+
+    it "Asks for nothing" do
+      $cfg['user.name'] = "bob"
+      expect(@pswd).to receive(:get).once.and_return("built")
+
+      ret = @acc._loginInfo
+      expect(ret).to eq({
+        :email => "bob", :password=>"built"
+      })
+    end
+
+    it "Asks for user name" do
+      $cfg['user.name'] = nil
+      expect($terminal).to receive(:ask).once.and_return('bob')
+      expect(@acc).to receive(:error).once
+      expect($cfg).to receive(:set).with('user.name', 'bob', :user).once.and_call_original
+      expect(@pswd).to receive(:get).once.and_return("built")
+
+      ret = @acc._loginInfo
+      expect(ret).to eq({
+        :email => "bob", :password=>"built"
+      })
+    end
+
+    it "Asks for password" do
+      $cfg['user.name'] = "bob"
+      expect(@pswd).to receive(:get).with('bizapi.hosted.exosite.io','bob').once.and_return(nil)
+      expect(@acc).to receive(:error).once
+      expect($terminal).to receive(:ask).once.and_return('dog')
+      expect(@pswd).to receive(:set).once.with('bizapi.hosted.exosite.io','bob','dog')
+
+      ret = @acc._loginInfo
+      expect(ret).to eq({
+        :email => "bob", :password=>"dog"
+      })
+    end
   end
 
   context "token" do
