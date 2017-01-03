@@ -177,16 +177,26 @@ RSpec.describe MrMurano::Config do
         Dir.mkdir('test')
         cfg = MrMurano::Config.new
         cfg.fixModes(Pathname.new('test'))
-        expect(FileTest.world_readable? 'test').to be_nil
-        expect(FileTest.world_writable? 'test').to be_nil
+        if Gem.win_platform? then
+          expect(FileTest.world_readable? 'test').to eq(493)
+          expect(FileTest.world_writable? 'test').to be_nil
+        else
+          expect(FileTest.world_readable? 'test').to be_nil
+          expect(FileTest.world_writable? 'test').to be_nil
+        end
       end
 
       it "fixes a file" do
         FileUtils.touch('test')
         cfg = MrMurano::Config.new
         cfg.fixModes(Pathname.new('test'))
-        expect(FileTest.world_readable? 'test').to be_nil
-        expect(FileTest.world_writable? 'test').to be_nil
+        if Gem.win_platform? then
+          expect(FileTest.world_readable? 'test').to eq(420)
+          expect(FileTest.world_writable? 'test').to be_nil
+        else
+          expect(FileTest.world_readable? 'test').to be_nil
+          expect(FileTest.world_writable? 'test').to be_nil
+        end
       end
     end
   end
