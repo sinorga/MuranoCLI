@@ -65,7 +65,7 @@ module MrMurano
       host = $cfg['net.host']
       user = $cfg['user.name']
       if user.nil? then
-        say_error("No Murano user account found; please login")
+        error("No Murano user account found; please login")
         user = ask("User name: ")
         $cfg.set('user.name', user, :user)
       end
@@ -74,7 +74,7 @@ module MrMurano
       pf.load
       pws = pf.get(host, user)
       if pws.nil? then
-        say_error("Couldn't find password for #{user}")
+        error("Couldn't find password for #{user}")
         pws = ask("Password:  ") { |q| q.echo = "*" }
         pf.set(host, user, pws)
         pf.save
