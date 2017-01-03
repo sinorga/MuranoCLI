@@ -114,7 +114,7 @@ module MrMurano
         remove(item[:rid])
       end
       r = create(item[:alias], item[:format])
-      raise "Create Failed: #{r}" unless r.nil?
+      raise "Create Failed: #{r}" unless r.empty?
     end
 
     ## Use alias for doing sync compares
