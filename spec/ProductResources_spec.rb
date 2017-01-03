@@ -291,10 +291,44 @@ RSpec.describe MrMurano::ProductResources do
     end
 
     it "when nothing is there" do
+      frid = "FFFFFFFFFF"
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"info",
+                              :arguments=>[frid, {}]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{:description=>{:format=>'integer'}}}])
+
+      @prd.download(@spec_path, {:rid=>frid, :alias=>'state'})
+
+      data = nil
+      @spec_path.open{|io| data = YAML.load(io)}
+      expect(data).to eq({"resources"=>[{"alias"=>"state", "format"=>"integer"}]})
     end
 
-    it "merging into existing file"
-      #FileUtils.copy(@lb.to_path, @spec_path)
+    it "merging into existing file" do
+      FileUtils.copy(@lb.to_path, @spec_path)
+      frid = "FFFFFFFFFF"
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"info",
+                              :arguments=>[frid, {}]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{:description=>{:format=>'integer'}}}])
+
+      @prd.download(@spec_path, {:rid=>frid, :alias=>'state'})
+      #FileUtils.copy_stream(@spec_path, $stdout)
+      #expect(FileUtils.cmp(@spec_path.to_path, @lb.to_path)).to be true
+
+      data = nil
+      @spec_path.open{|io| data = YAML.load(io)}
+      expect(data).to eq({"resources"=>[
+        {"alias"=>"temperature", "format"=>"float", "initial"=>0},
+        {"alias"=>"uptime", "format"=>"integer", "initial"=>0},
+        {"alias"=>"humidity", "format"=>"float", "initial"=>0},
+        {"alias"=>"state", "format"=>"integer"}
+      ]})
+    end
 
   end
 
