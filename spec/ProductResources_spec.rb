@@ -121,6 +121,52 @@ RSpec.describe MrMurano::ProductResources do
     end
   end
 
+  context "compares" do
+    before(:example) do
+      @iA = {:alias=>"data",
+             :format=>"string",
+             }
+      @iB = {:alias=>"data",
+             :format=>"string",
+             }
+    end
+    it "same" do
+      ret = @prd.docmp(@iA, @iB)
+      expect(ret).to eq(false)
+    end
+    
+    it "different alias" do
+      iA = @iA.merge({:alias=>"bob"})
+      ret = @prd.docmp(iA, @iB)
+      expect(ret).to eq(true)
+    end
+
+    it "different format" do
+      iA = @iA.merge({:format=>"integer"})
+      ret = @prd.docmp(iA, @iB)
+      expect(ret).to eq(true)
+    end
+  end
+
+
+  context "Lookup functions" do
+    it "gets local name" do
+      ret = @prd.tolocalname({ :method=>'get', :path=>'one/two/three' }, nil)
+      expect(ret).to eq('')
+    end
+
+    it "gets synckey" do
+      ret = @prd.synckey({ :alias=>'get' })
+      expect(ret).to eq("get")
+    end
+
+    it "tolocalpath is into" do
+      ret = @prd.tolocalpath('a/path/', {:id=>'cors'})
+      expect(ret).to eq('a/path/')
+    end
+
+  end
+
 end
 
 #  vim: set ai et sw=2 ts=2 :
