@@ -78,6 +78,18 @@ RSpec.describe MrMurano::ProductResources do
       ret = @prd.list
       expect(ret).to eq([{:alias=>"bob", :rid=>:abcdefg}])
     end
+
+    it "gets item" do
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"info",
+                              :arguments=>["FFFFFFFFFF", {}]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{:comments=>[]}}])
+
+      ret = @prd.fetch("FFFFFFFFFF")
+      expect(ret).to eq({:comments=>[]})
+    end
   end
 
   context "Modifying" do
@@ -121,6 +133,67 @@ RSpec.describe MrMurano::ProductResources do
     end
   end
 
+  context "uploads" do
+    it "replacing" do
+      frid = "ffffffffffffffffffffffffffffffffffffffff"
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"drop",
+                              :arguments=>[frid]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"create",
+                              :arguments=>["dataport",{
+                                :format=>"string",
+                                :name=>"bob",
+                                :retention=>{
+                                  :count=>1,
+                                  :duration=>"infinity"
+                                }
+                              }]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>frid}])
+
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"map",
+                              :arguments=>["alias", frid, "bob"]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+
+      @prd.upload(nil, {:alias=>"bob", :format=>"string", :rid=>frid}, true)
+    end
+
+    it "creating" do
+      frid = "ffffffffffffffffffffffffffffffffffffffff"
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"create",
+                              :arguments=>["dataport",{
+                                :format=>"string",
+                                :name=>"bob",
+                                :retention=>{
+                                  :count=>1,
+                                  :duration=>"infinity"
+                                }
+                              }]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>frid}])
+
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
+        with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
+                    :calls=>[{:id=>1,
+                              :procedure=>"map",
+                              :arguments=>["alias", frid, "bob"]} ]}).
+        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+
+      @prd.upload(nil, {:alias=>"bob", :format=>"string"}, false)
+    end
+  end
+
   context "compares" do
     before(:example) do
       @iA = {:alias=>"data",
@@ -134,7 +207,7 @@ RSpec.describe MrMurano::ProductResources do
       ret = @prd.docmp(@iA, @iB)
       expect(ret).to eq(false)
     end
-    
+
     it "different alias" do
       iA = @iA.merge({:alias=>"bob"})
       ret = @prd.docmp(iA, @iB)
