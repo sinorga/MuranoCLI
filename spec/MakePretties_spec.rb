@@ -49,7 +49,8 @@ RSpec.describe MrMurano::Pretties do
     data ={:type=>"debug", :timestamp=>1476386031,
            :subject=>"websocket_websocket_info",
            :data=>"Script Error: "}
-    str ="\e[31m\e[48;5;231mDEBUG \e[0m\e[31m\e[48;5;231m[websocket_websocket_info]\e[0m \e[34m2016-10-13T14:13:51.000-05:00\e[0m:\nScript Error: "
+    ldt = Time.at(1476386031).localtime.to_datetime.iso8601(3)
+    str ="\e[31m\e[48;5;231mDEBUG \e[0m\e[31m\e[48;5;231m[websocket_websocket_info]\e[0m \e[34m#{ldt}\e[0m:\nScript Error: "
     @options[:localtime] = true
     ret = MrMurano::Pretties::makePretty(data, @options)
     @options[:localtime] = false
