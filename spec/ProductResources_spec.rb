@@ -237,9 +237,89 @@ RSpec.describe MrMurano::ProductResources do
       ret = @prd.tolocalpath('a/path/', {:id=>'cors'})
       expect(ret).to eq('a/path/')
     end
+  end
+
+  context "local resoruces" do
+    before(:example) do
+      # pull over test file.
+      FileUtils.mkpath($cfg['location.specs'])
+      lb = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
+      @spec_path = File.join($cfg['location.specs'], $cfg['product.spec'])
+      FileUtils.copy(lb.to_path, @spec_path)
+    end
+
+    context "gets local items" do
+      it "is there" do
+        ret = @prd.localitems(@spec_path)
+        expect(ret).to eq([
+          {:alias=>"state", :format=>"integer", :initial=>0},
+          {:alias=>"temperature", :format=>"float", :initial=>0},
+          {:alias=>"uptime", :format=>"integer", :initial=>0},
+          {:alias=>"humidity", :format=>"float", :initial=>0}
+        ])
+      end
+
+      it "is missing" do
+        expect(@prd).to receive(:warning).once.with("Skipping missing specs/XYZ.yaml-h")
+        ret = @prd.localitems(@spec_path + '-h')
+        expect(ret).to eq([])
+      end
+
+      it "isn't a file" do
+        expect(@prd).to receive(:warning).once.with("Cannot read from specs/XYZ.yaml-h")
+        FileUtils.mkpath(@spec_path + '-h')
+        ret = @prd.localitems(@spec_path + '-h')
+        expect(ret).to eq([])
+      end
+
+      it "has wrong format" do
+        File.open(@spec_path + '-h', 'w') do |io|
+          io << ['a','b','c'].to_yaml
+        end
+        expect(@prd).to receive(:warning).once.with("Unexpected data in specs/XYZ.yaml-h")
+        ret = @prd.localitems(@spec_path + '-h')
+        expect(ret).to eq([])
+      end
+    end
+  end
+
+  context "downloads" do
+    before(:example) do
+      FileUtils.mkpath($cfg['location.specs'])
+      @lb = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
+      @spec_path = Pathname.new(File.join($cfg['location.specs'], $cfg['product.spec']))
+    end
+
+    it "when nothing is there" do
+    end
+
+    it "merging into existing file"
+      #FileUtils.copy(@lb.to_path, @spec_path)
 
   end
 
+  context "removes local items" do
+    before(:example) do
+      # pull over test file.
+      FileUtils.mkpath($cfg['location.specs'])
+      @lb = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
+      @spec_path = File.join($cfg['location.specs'], $cfg['product.spec'])
+      FileUtils.copy(@lb.to_path, @spec_path)
+      @spec_path = Pathname.new(@spec_path)
+    end
+
+    it "it exists and has item" do
+      @prd.removelocal(@spec_path, {:alias=>"state"})
+      lbns = (@testdir + 'spec/fixtures/product_spec_files/lightbulb-no-state.yaml').realpath
+      expect(FileUtils.cmp(@spec_path.to_path, lbns.to_path)).to be true
+    end
+
+    it "it exists and does not have item" do
+      @prd.removelocal(@spec_path, {:alias=>"ThisAliasDoesNotExistInHere"})
+      # nothing changed
+      expect(FileUtils.cmp(@spec_path.to_path, @lb.to_path)).to be true
+    end
+  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
