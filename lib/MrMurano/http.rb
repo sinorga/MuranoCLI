@@ -70,7 +70,7 @@ module MrMurano
         request.each_capitalized{|k,v| puts "> #{k}: #{v}"}
         if request.body.nil? then
         else
-          puts " > #{request.body[0..156]}"
+          puts ">> #{request.body[0..156]}"
         end
         puts "Got #{response.code} #{response.message}"
         response.each_capitalized{|k,v| puts "< #{k}: #{v}"}
@@ -107,7 +107,6 @@ module MrMurano
           end
         else
           showHttpError(request, response)
-          raise response
         end
       end
     end
