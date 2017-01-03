@@ -8,7 +8,7 @@ class TSUD
   include MrMurano::Verbose
   include MrMurano::SyncUpDown
   def initialize
-    @itemkey = :id
+    @itemkey = :name
     @locationbase = $cfg['location.base']
     @location = 'tsud'
   end
@@ -41,12 +41,12 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.mkpath('tsud')
       t = TSUD.new
       expect(t).to receive(:list).once.and_return([
-        {:id=>1},{:id=>2},{:id=>3}
+        {:name=>1},{:name=>2},{:name=>3}
       ])
       ret = t.status
       expect(ret).to eq({
         :toadd=>[],
-        :todel=>[{:id=>1, :synckey=>1}, {:id=>2, :synckey=>2}, {:id=>3, :synckey=>3}],
+        :todel=>[{:name=>1, :synckey=>1}, {:name=>2, :synckey=>2}, {:name=>3, :synckey=>3}],
         :tomod=>[],
         :unchg=>[]})
     end
@@ -55,12 +55,12 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.mkpath('tsud')
       t = TSUD.new
       expect(t).to receive(:list).once.and_return([
-        {:id=>1},{:id=>2},{:id=>3}
+        {:name=>1},{:name=>2},{:name=>3}
       ])
       ret = t.status({:asdown=>true})
       expect(ret).to eq({
         :todel=>[],
-        :toadd=>[{:id=>1, :synckey=>1}, {:id=>2, :synckey=>2}, {:id=>3, :synckey=>3}],
+        :toadd=>[{:name=>1, :synckey=>1}, {:name=>2, :synckey=>2}, {:name=>3, :synckey=>3}],
         :tomod=>[],
         :unchg=>[]})
     end
@@ -73,9 +73,9 @@ RSpec.describe MrMurano::SyncUpDown do
       ret = t.status
       expect(ret).to eq({
         :toadd=>[
-          {:name=>'one.lua', :synckey=>nil,
+          {:name=>'one.lua', :synckey=>'one.lua',
            :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
-          {:name=>'two.lua', :synckey=>nil,
+          {:name=>'two.lua', :synckey=>'two.lua',
            :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
         ],
         :todel=>[],
