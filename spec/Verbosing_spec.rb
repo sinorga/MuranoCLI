@@ -1,5 +1,6 @@
 require 'highline/import'
 require 'MrMurano/version'
+require 'MrMurano/hash'
 require 'MrMurano/verbosing'
 require 'MrMurano/Config'
 require '_workspace'
@@ -229,6 +230,50 @@ RSpec.describe MrMurano::Verbose do
     end
   end
 
+  context "outf" do
+    before(:example) do
+      @data = {
+        :one => "three",
+        :two => [ { :one => 3 }, { :one => 4} ]
+      }
+      $stdout = StringIO.new
+    end
+
+    it "outputs yaml" do
+      $cfg['tool.outformat'] = 'yaml'
+      @tst.outf(@data)
+      expect($stdout.string).to eq("---\none: three\ntwo:\n- one: 3\n- one: 4\n")
+    end
+
+    it "outputs json" do
+      $cfg['tool.outformat'] = 'json'
+      @tst.outf(@data)
+      expect($stdout.string).to eq("{\"one\":\"three\",\"two\":[{\"one\":3},{\"one\":4}]}\n")
+    end
+
+    it "outputs ruby" do
+      $cfg['tool.outformat'] = 'pp'
+      @tst.outf(@data)
+      expect($stdout.string).to eq("{:one=>\"three\", :two=>[{:one=>3}, {:one=>4}]}\n")
+    end
+
+    it "outputs as String" do
+      @tst.outf(@data)
+      expect($stdout.string).to eq("{:one=>\"three\", :two=>[{:one=>3}, {:one=>4}]}\n")
+    end
+
+    it "outputs as Array" do
+      @tst.outf([1,2,3,4,5])
+      expect($stdout.string).to eq("1\n2\n3\n4\n5\n")
+    end
+
+    it "returns to block" do
+      @tst.outf(@data) do |dd, ios|
+        ios.puts "pop"
+      end
+      expect($stdout.string).to eq("pop\n")
+    end
+  end
 
 end
 #  vim: set ai et sw=2 ts=2 :
