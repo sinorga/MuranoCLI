@@ -12,6 +12,8 @@ class TSUD
     @locationbase = $cfg['location.base']
     @location = 'tsud'
   end
+  def fetch(id)
+  end
 end
 RSpec.describe MrMurano::SyncUpDown do
   include_context "WORKSPACE"
@@ -159,6 +161,36 @@ RSpec.describe MrMurano::SyncUpDown do
       {:name=>'two.lua',
        :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
     ])
+  end
+
+  context "doing diffs" do
+    before(:example) do
+      FileUtils.mkpath('tsud')
+      @t = TSUD.new
+      @scpt = Pathname.new(@projectDir + '/tsud/one.lua')
+      @scpt.open('w'){|io| io << %{-- fake lua\nreturn 0\n}}
+      @scpt = @scpt.realpath
+    end
+
+    it "nothing when same." do
+      expect(@t).to receive(:fetch).and_yield(%{-- fake lua\nreturn 0\n})
+      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt})
+      expect(ret).to eq('')
+    end
+
+    it "something when different." do
+      expect(@t).to receive(:fetch).and_yield(%{-- fake lua\nreturn 2\n})
+      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt})
+      expect(ret).not_to eq('')
+    end
+
+    it "uses script in item" do
+      script = %{-- fake lua\nreturn 2\n}
+      expect(@t).to receive(:fetch).and_yield(script)
+      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt, :script=>script})
+      expect(ret).to eq('')
+    end
+
   end
 
 end
