@@ -133,12 +133,12 @@ RSpec.describe MrMurano::SyncUpDown do
     FileUtils.touch('tsud/one.lua')
     FileUtils.touch('tsud/two.lua')
     t = TSUD.new
-    ret = t.localitems(@projectDir + '/tsud')
+    ret = t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
     expect(ret).to eq([
       {:name=>'one.lua',
-       :local_path=>Pathname.new(@projectDir + '/tsud/one.lua')},
+       :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
       {:name=>'two.lua',
-       :local_path=>Pathname.new(@projectDir + '/tsud/two.lua')},
+       :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
     ])
   end
 
