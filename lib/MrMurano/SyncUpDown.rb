@@ -1,6 +1,7 @@
 require 'pathname'
 require 'tempfile'
 require 'shellwords'
+require 'open3'
 require 'MrMurano/Config'
 require 'MrMurano/hash'
 
@@ -405,7 +406,7 @@ module MrMurano
         cmd << trmt.path
         cmd << tlcl.path
 
-        IO.popen(cmd) {|io| df = io.read }
+        df, _ = Open3.capture2e(*cmd)
       ensure
         trmt.close
         trmt.unlink
