@@ -275,7 +275,7 @@ module MrMurano
           ::File.fnmatch(i,p)
         end
       end.map do |path|
-        path = Pathname.new(path)
+        path = Pathname.new(path).realpath
         item = toRemoteItem(from, path)
         if item.kind_of?(Array) then
           item.compact.map{|i| i[:local_path] = path; i}
