@@ -166,8 +166,7 @@ module MrMurano
     # @param item Hash: The item to download
     def download(local, item)
       if item[:bundled] then
-        say_warning "Not downloading into bundled item #{synckey(item)}"
-        # FIXME don't use say_warning
+        warning "Not downloading into bundled item #{synckey(item)}"
         return
       end
       local.dirname.mkpath
