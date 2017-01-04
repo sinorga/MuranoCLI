@@ -49,6 +49,18 @@ RSpec.describe MrMurano::Product1PDevice, '#sn_rid tests' do
       @prd.sn_rid("12")
     }.to raise_error "Identifier Not Found: 12"
   end
+
+  it "gets model_rid" do
+    expect(@mrp).to receive(:info).once.and_return({:modelrid=>"1234567890"})
+    ret = @prd.model_rid
+    expect(ret).to eq("1234567890")
+  end
+  it "raises with bad model_rid" do
+    expect(@mrp).to receive(:info).once.and_return({:mid=>"1234567890"})
+    expect {
+      @prd.model_rid
+    }.to raise_error(/^Bad info; .*/)
+  end
 end
 
 RSpec.describe MrMurano::Product1PDevice do
