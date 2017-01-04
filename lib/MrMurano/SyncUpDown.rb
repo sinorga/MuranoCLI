@@ -403,8 +403,8 @@ module MrMurano
         download(Pathname.new(trmt.path), item)
 
         cmd = $cfg['diff.cmd'].shellsplit
-        cmd << File.join(*trmt.path.split(%r{/}))
-        cmd << File.join(*tlcl.path.split(%r{/}))
+        cmd << ::File.join(*trmt.path.split(%r{/}))
+        cmd << ::File.join(*tlcl.path.split(%r{/}))
 
         df, _ = Open3.capture2e(*cmd)
       ensure
