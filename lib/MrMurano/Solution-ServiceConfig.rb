@@ -6,6 +6,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'serviceconfig'
+      @scid = nil
     end
 
     def list
