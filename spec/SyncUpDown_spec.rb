@@ -72,6 +72,9 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch('tsud/one.lua')
       FileUtils.touch('tsud/two.lua')
       t = TSUD.new
+      expect(t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       ret = t.status
       expect(ret).to eq({
         :toadd=>[
@@ -93,6 +96,9 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'},{:name=>'two.lua'}
       ])
+      expect(t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       ret = t.status
       expect(ret).to eq({
         :tomod=>[
@@ -114,6 +120,9 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'},{:name=>'two.lua'}
       ])
+      expect(t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       expect(t).to receive(:docmp).twice.and_return(false)
       ret = t.status
       expect(ret).to eq({
@@ -135,6 +144,9 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'}
       ])
+      expect(t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'}
+      )
       expect(t).to receive(:dodiff).once.and_return("diffed output")
       ret = t.status({:diff=>true})
       expect(ret).to eq({
@@ -157,6 +169,9 @@ RSpec.describe MrMurano::SyncUpDown do
       @t = TSUD.new
     end
     it "finds local items" do
+      expect(@t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       ret = @t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
       expect(ret).to eq([
         {:name=>'one.lua',
@@ -310,6 +325,9 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/bundles/mybun/tsud/two.lua')
 
+      expect(@t).to receive(:toRemoteItem).and_return(
+        {:name=>'two.lua'},{:name=>'one.lua'}
+      )
       ret = @t.locallist
       expect(ret).to eq([
         {:name=>'two.lua',
