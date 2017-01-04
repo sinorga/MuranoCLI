@@ -96,7 +96,11 @@ module MrMurano
 
       set('product.spec', 'resources.yaml', :defaults)
 
-      set('diff.cmd', 'diff -u', :defaults)
+      if Gem.win_platform? then
+        set('diff.cmd', 'fc', :defaults)
+      else
+        set('diff.cmd', 'diff -u', :defaults)
+      end
     end
 
     ## Find the root of this project Directory.
