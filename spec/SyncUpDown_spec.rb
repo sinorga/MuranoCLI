@@ -83,6 +83,49 @@ RSpec.describe MrMurano::SyncUpDown do
         :unchg=>[]})
     end
 
+    it "finds things here and there" do
+      FileUtils.mkpath('tsud')
+      FileUtils.touch('tsud/one.lua')
+      FileUtils.touch('tsud/two.lua')
+      t = TSUD.new
+      expect(t).to receive(:list).once.and_return([
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      ])
+      ret = t.status
+      expect(ret).to eq({
+        :tomod=>[
+          {:name=>'one.lua', :synckey=>'one.lua',
+           :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+          {:name=>'two.lua', :synckey=>'two.lua',
+           :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+        ],
+        :todel=>[],
+        :toadd=>[],
+        :unchg=>[]})
+    end
+
+    it "finds things here and there; but they're the same" do
+      FileUtils.mkpath('tsud')
+      FileUtils.touch('tsud/one.lua')
+      FileUtils.touch('tsud/two.lua')
+      t = TSUD.new
+      expect(t).to receive(:list).once.and_return([
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      ])
+      expect(t).to receive(:docmp).twice.and_return(false)
+      ret = t.status
+      expect(ret).to eq({
+        :unchg=>[
+          {:name=>'one.lua', :synckey=>'one.lua',
+           :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+          {:name=>'two.lua', :synckey=>'two.lua',
+           :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+        ],
+        :todel=>[],
+        :toadd=>[],
+        :tomod=>[]})
+    end
+
   end
 
   it "finds local items" do
