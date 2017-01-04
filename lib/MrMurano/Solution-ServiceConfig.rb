@@ -65,7 +65,7 @@ module MrMurano
   # fragile for real use.
   #
   # A much better UI/UX happens with human intervention.
-  #
+  # :nocov:
   class Services < SolutionBase
     def initialize
       super
@@ -109,7 +109,7 @@ module MrMurano
       calls
     end
   end
-
+  # :nocov:
 
   # Device config interface for the assign commands.
   class SC_Device < ServiceConfig
