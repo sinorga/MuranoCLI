@@ -222,7 +222,11 @@ RSpec.describe MrMurano::SyncUpDown do
     it "nothing when same." do
       expect(@t).to receive(:fetch).and_yield(%{-- fake lua\nreturn 0\n})
       ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt})
-      expect(ret).to eq('')
+      if Gem.win_platform? then
+        expect(ret).to match(/FC: no differences encountered/)
+      else
+        expect(ret).to eq('')
+      end
     end
 
     it "something when different." do
@@ -235,7 +239,11 @@ RSpec.describe MrMurano::SyncUpDown do
       script = %{-- fake lua\nreturn 2\n}
       expect(@t).to receive(:fetch).and_yield(script)
       ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt, :script=>script})
-      expect(ret).to eq('')
+      if Gem.win_platform? then
+        expect(ret).to match(/FC: no differences encountered/)
+      else
+        expect(ret).to eq('')
+      end
     end
   end
 
