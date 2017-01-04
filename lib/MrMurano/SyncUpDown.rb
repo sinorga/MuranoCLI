@@ -72,7 +72,9 @@ module MrMurano
     #
     # @param itemkey String: The identifying key for this item
     def remove(itemkey)
+      # :nocov:
       raise "Forgotten implementation"
+      # :nocov:
     end
 
     ## Upload local item to remote
@@ -83,7 +85,9 @@ module MrMurano
     # @param item Hash: The item details to upload
     # @param modify Bool: True if item exists already and this is changing it
     def upload(src, item, modify)
+      # :nocov:
       raise "Forgotten implementation"
+      # :nocov:
     end
 
     ##
