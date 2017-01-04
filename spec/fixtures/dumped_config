@@ -41,4 +41,4 @@ ignoring = *_test.lua *_spec.lua .*
 spec = resources.yaml
 
 [diff]
-cmd = diff -u
+cmd = <%= Gem.win_platform? ? 'fc' : 'diff -u' %>
