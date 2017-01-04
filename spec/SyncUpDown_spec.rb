@@ -149,18 +149,51 @@ RSpec.describe MrMurano::SyncUpDown do
     end
   end
 
-  it "finds local items" do
-    FileUtils.mkpath('tsud')
-    FileUtils.touch('tsud/one.lua')
-    FileUtils.touch('tsud/two.lua')
-    t = TSUD.new
-    ret = t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
-    expect(ret).to eq([
-      {:name=>'one.lua',
-       :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+  context "localitems" do
+    before(:example) do
+      FileUtils.mkpath('tsud')
+      FileUtils.touch('tsud/one.lua')
+      FileUtils.touch('tsud/two.lua')
+      @t = TSUD.new
+    end
+    it "finds local items" do
+      ret = @t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
+      expect(ret).to eq([
+        {:name=>'one.lua',
+         :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
       {:name=>'two.lua',
        :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
-    ])
+      ])
+    end
+
+    it "takes an array from toRemoteItem" do
+      expect(@t).to receive(:toRemoteItem).and_return(
+        [{:name=>'one:1'},{:name=>'one:2'}],
+        [{:name=>'two:1'},{:name=>'two:2'}]
+        )
+      ret = @t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
+      expect(ret).to eq([
+        {:name=>'one:1',
+         :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+        {:name=>'one:2',
+         :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+        {:name=>'two:1',
+         :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+        {:name=>'two:2',
+         :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+      ])
+    end
+  end
+
+  context "download" do
+    it "defaults to :id if @itemkey missing" do
+      FileUtils.mkpath('tsud')
+      FileUtils.touch('tsud/one.lua')
+      lp = Pathname.new(@projectDir + '/tsud/one.lua').realpath
+      t = TSUD.new
+      expect(t).to receive(:fetch).once.with(1).and_yield("foo")
+      t.download(lp, {:id=>1})
+    end
   end
 
   context "doing diffs" do
