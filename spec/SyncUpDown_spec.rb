@@ -269,6 +269,9 @@ RSpec.describe MrMurano::SyncUpDown do
       ])
 
       expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(Hash), true)
+      expect(@t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       @t.syncup({:update=>true})
     end
   end
@@ -307,6 +310,9 @@ RSpec.describe MrMurano::SyncUpDown do
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
+      expect(@t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       @t.syncdown({:update=>true})
       expect(FileTest.exist?(@projectDir + '/tsud/one.lua')).to be true
       expect(FileTest.exist?(@projectDir + '/tsud/two.lua')).to be true
