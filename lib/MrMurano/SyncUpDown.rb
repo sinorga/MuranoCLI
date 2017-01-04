@@ -288,31 +288,32 @@ module MrMurano
     #######################################################################
     # Methods that provide the core status/syncup/syncdown
 
+    ##
+    # Take a hash or something (a Commander::Command::Options) and return a hash
+    #
     def elevate_hash(hsh)
-      if hsh.kind_of?(Hash) then
-        hsh = Hash.transform_keys_to_symbols(hsh)
-        hsh.define_singleton_method(:method_missing) do |mid,*args|
-          if mid.to_s.match(/^(.+)=$/) then
-            self[$1.to_sym] = args.first
-          else
-            self[mid]
-          end
-        end
+      # Commander::Command::Options stripped all of the methods from parent
+      # objects. I have not nice thoughts about that.
+      begin
+        hsh = hsh.__hash__
+      rescue NoMethodError
+        # swallow this.
       end
-      hsh
+      # build a hash where the default is 'false' instead of 'nil'
+      Hash.new(false).merge(Hash.transform_keys_to_symbols(hsh))
     end
     private :elevate_hash
 
     def syncup(options={})
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
-      options.asdown=false
+      options[:asdown] = false
       dt = status(options)
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
 
-      if options.delete then
+      if options[:delete] then
         todel.each do |item|
           verbose "Removing item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
@@ -320,7 +321,7 @@ module MrMurano
           end
         end
       end
-      if options.create then
+      if options[:create] then
         toadd.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
@@ -328,7 +329,7 @@ module MrMurano
           end
         end
       end
-      if options.update then
+      if options[:update] then
         tomod.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
@@ -340,14 +341,14 @@ module MrMurano
 
     def syncdown(options={})
       options = elevate_hash(options)
-      options.asdown = true
+      options[:asdown] = true
       dt = status(options)
       into = @locationbase + @location ###
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
 
-      if options.delete then
+      if options[:delete] then
         todel.each do |item|
           verbose "Removing item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
@@ -356,7 +357,7 @@ module MrMurano
           end
         end
       end
-      if options.create then
+      if options[:create] then
         toadd.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
@@ -365,7 +366,7 @@ module MrMurano
           end
         end
       end
-      if options.update then
+      if options[:update] then
         tomod.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
@@ -433,7 +434,7 @@ module MrMurano
       todel = []
       tomod = []
       unchg = []
-      if options.asdown then
+      if options[:asdown] then
         todel = (herebox.keys - therebox.keys).map{|key| herebox[key] }
         toadd = (therebox.keys - herebox.keys).map{|key| therebox[key] }
       else
@@ -445,7 +446,7 @@ module MrMurano
         mrg = herebox[key].reject{|k,v| k==itemkey}
         mrg = therebox[key].merge(mrg)
         if docmp(herebox[key], therebox[key]) then
-          mrg[:diff] = dodiff(mrg) if options.diff
+          mrg[:diff] = dodiff(mrg) if options[:diff]
           tomod << mrg
         else
           unchg << mrg
