@@ -126,6 +126,25 @@ RSpec.describe MrMurano::SyncUpDown do
         :tomod=>[]})
     end
 
+    it "calls diff" do
+      FileUtils.mkpath('tsud')
+      FileUtils.touch('tsud/one.lua')
+      t = TSUD.new
+      expect(t).to receive(:list).once.and_return([
+        {:name=>'one.lua'}
+      ])
+      expect(t).to receive(:dodiff).once.and_return("diffed output")
+      ret = t.status({:diff=>true})
+      expect(ret).to eq({
+        :tomod=>[
+          {:name=>'one.lua', :synckey=>'one.lua',
+           :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath,
+           :diff=>"diffed output"},
+        ],
+        :todel=>[],
+        :toadd=>[],
+        :unchg=>[]})
+    end
   end
 
   it "finds local items" do
