@@ -12,11 +12,15 @@ module MrMurano
   class ServiceBase < SolutionBase
 
     def mkalias(remote)
+      # :nocov:
       raise "Needs to be implemented in child"
+      # :nocov:
     end
 
     def mkname(remote)
+      # :nocov:
       raise "Needs to be implemented in child"
+      # :nocov:
     end
 
     def list
