@@ -119,6 +119,8 @@ command 'config import' do |c|
         if routes == '' then
           acc.verbose "No endpoints to import"
         elsif File.dirname(routes) == '.' then
+          # TODO: don't need to move this anymore.
+          # Can set location.endpoints and endpoints.searchFor instead.
           acc.warning "Routes file #{File.basename(routes)} not in endpoints directory"
           if options.move then
             acc.warning "Moving it to #{$cfg['location.endpoints']}"
@@ -142,6 +144,7 @@ command 'config import' do |c|
           end
         end
 
+        # TODO: change this to take advantage of searchFor
         def update_or_stop(paths, cfgkey, what, acc=MrMurano::Account.new)
           crd = Dir.common_root(paths)
           acc.debug "crd => #{crd}"
