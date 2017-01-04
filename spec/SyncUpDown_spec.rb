@@ -72,6 +72,9 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
       t = TSUD.new
+      expect(t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       ret = t.status
       expect(ret).to match({
         :toadd=>[
