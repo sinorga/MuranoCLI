@@ -190,7 +190,80 @@ RSpec.describe MrMurano::SyncUpDown do
       ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt, :script=>script})
       expect(ret).to eq('')
     end
+  end
 
+  context "syncup" do
+    before(:example) do
+      FileUtils.mkpath('tsud')
+      @t = TSUD.new
+    end
+
+    it "removes" do
+      expect(@t).to receive(:list).once.and_return([
+        {:name=>1},{:name=>2},{:name=>3}
+      ])
+      expect(@t).to receive(:remove).exactly(3).times
+      @t.syncup({:delete=>true})
+    end
+
+    it "creates" do
+      FileUtils.touch('tsud/one.lua')
+      FileUtils.touch('tsud/two.lua')
+
+      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(Hash), false)
+      @t.syncup({:create=>true})
+    end
+
+    it "updates" do
+      FileUtils.touch('tsud/one.lua')
+      FileUtils.touch('tsud/two.lua')
+      expect(@t).to receive(:list).once.and_return([
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      ])
+
+      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(Hash), true)
+      @t.syncup({:update=>true})
+    end
+  end
+
+  context "syncdown" do
+    before(:example) do
+      FileUtils.mkpath('tsud')
+      @t = TSUD.new
+    end
+
+    it "removes" do
+      FileUtils.touch('tsud/one.lua')
+      FileUtils.touch('tsud/two.lua')
+
+      @t.syncdown({:delete=>true})
+      expect(FileTest.exist?('tsud/one.lua')).to be false
+      expect(FileTest.exist?('tsud/two.lua')).to be false
+    end
+
+    it "creates" do
+      expect(@t).to receive(:list).once.and_return([
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      ])
+
+      expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
+      @t.syncdown({:create=>true})
+      expect(FileTest.exist?('tsud/one.lua')).to be true
+      expect(FileTest.exist?('tsud/two.lua')).to be true
+    end
+
+    it "updates" do
+      FileUtils.touch('tsud/one.lua')
+      FileUtils.touch('tsud/two.lua')
+      expect(@t).to receive(:list).once.and_return([
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      ])
+
+      expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
+      @t.syncdown({:update=>true})
+      expect(FileTest.exist?('tsud/one.lua')).to be true
+      expect(FileTest.exist?('tsud/two.lua')).to be true
+    end
   end
 
 end
