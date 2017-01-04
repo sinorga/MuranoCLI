@@ -266,5 +266,35 @@ RSpec.describe MrMurano::SyncUpDown do
     end
   end
 
+  context "bundles" do
+    before(:example) do
+      FileUtils.mkpath(@projectDir + '/tsud')
+      FileUtils.mkpath(@projectDir + '/bundles/mybun/tsud')
+      @t = TSUD.new
+    end
+
+    it "finds items in bundles." do
+      FileUtils.touch(@projectDir + '/tsud/one.lua')
+      FileUtils.touch(@projectDir + '/bundles/mybun/tsud/two.lua')
+
+      ret = @t.locallist
+      expect(ret).to eq([
+        {:name=>'two.lua',
+         :bundled=>true,
+         :local_path=>Pathname.new(@projectDir + '/bundles/mybun/tsud/two.lua').realpath},
+        {:name=>'one.lua',
+         :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+      ])
+    end
+
+    it "Doesn't download a bundled item" do
+      FileUtils.touch(@projectDir + '/tsud/one.lua')
+      lp = Pathname.new(@projectDir + '/tsud/one.lua').realpath
+
+      expect(@t).to receive(:warning).once.with(/Not downloading into bundled item.*/)
+
+      @t.download(lp, {:bundled=>true, :name=>'one.lua'})
+    end
+  end
 end
 #  vim: set ai et sw=2 ts=2 :
