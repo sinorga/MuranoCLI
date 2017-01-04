@@ -76,12 +76,12 @@ RSpec.describe MrMurano::SyncUpDown do
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
       ret = t.status
-      expect(ret).to eq({
+      expect(ret).to match({
         :toadd=>[
           {:name=>'one.lua', :synckey=>'one.lua',
-           :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+           :local_path=>an_instance_of(Pathname)},
           {:name=>'two.lua', :synckey=>'two.lua',
-           :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+           :local_path=>an_instance_of(Pathname)},
         ],
         :todel=>[],
         :tomod=>[],
@@ -100,18 +100,17 @@ RSpec.describe MrMurano::SyncUpDown do
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
       ret = t.status
-      expect(ret).to eq({
+      expect(ret).to match({
         :tomod=>[
           {:name=>'one.lua', :synckey=>'one.lua',
-           :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+           :local_path=>an_instance_of(Pathname)},
           {:name=>'two.lua', :synckey=>'two.lua',
-           :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+           :local_path=>an_instance_of(Pathname)},
         ],
         :todel=>[],
         :toadd=>[],
         :unchg=>[]})
     end
-
     it "finds things here and there; but they're the same" do
       FileUtils.mkpath(@projectDir + '/tsud')
       FileUtils.touch(@projectDir + '/tsud/one.lua')
@@ -125,12 +124,12 @@ RSpec.describe MrMurano::SyncUpDown do
       )
       expect(t).to receive(:docmp).twice.and_return(false)
       ret = t.status
-      expect(ret).to eq({
+      expect(ret).to match({
         :unchg=>[
           {:name=>'one.lua', :synckey=>'one.lua',
-           :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+           :local_path=>an_instance_of(Pathname)},
           {:name=>'two.lua', :synckey=>'two.lua',
-           :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+           :local_path=>an_instance_of(Pathname)},
         ],
         :todel=>[],
         :toadd=>[],
@@ -149,10 +148,10 @@ RSpec.describe MrMurano::SyncUpDown do
       )
       expect(t).to receive(:dodiff).once.and_return("diffed output")
       ret = t.status({:diff=>true})
-      expect(ret).to eq({
+      expect(ret).to match({
         :tomod=>[
           {:name=>'one.lua', :synckey=>'one.lua',
-           :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath,
+           :local_path=>an_instance_of(Pathname),
            :diff=>"diffed output"},
         ],
         :todel=>[],
@@ -173,11 +172,11 @@ RSpec.describe MrMurano::SyncUpDown do
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
       ret = @t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
-      expect(ret).to eq([
+      expect(ret).to match([
         {:name=>'one.lua',
-         :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+         :local_path=>an_instance_of(Pathname)},
       {:name=>'two.lua',
-       :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+       :local_path=>an_instance_of(Pathname)},
       ])
     end
 
@@ -187,15 +186,15 @@ RSpec.describe MrMurano::SyncUpDown do
         [{:name=>'two:1'},{:name=>'two:2'}]
         )
       ret = @t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
-      expect(ret).to eq([
+      expect(ret).to match([
         {:name=>'one:1',
-         :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+         :local_path=>an_instance_of(Pathname)},
         {:name=>'one:2',
-         :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+         :local_path=>an_instance_of(Pathname)},
         {:name=>'two:1',
-         :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+         :local_path=>an_instance_of(Pathname)},
         {:name=>'two:2',
-         :local_path=>Pathname.new(@projectDir + '/tsud/two.lua').realpath},
+         :local_path=>an_instance_of(Pathname)},
       ])
     end
   end
@@ -223,7 +222,11 @@ RSpec.describe MrMurano::SyncUpDown do
     it "nothing when same." do
       expect(@t).to receive(:fetch).and_yield(%{-- fake lua\nreturn 0\n})
       ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt})
-      expect(ret).to eq('')
+      if Gem.win_platform? then
+        expect(ret).to match(/FC: no differences encountered/)
+      else
+        expect(ret).to eq('')
+      end
     end
 
     it "something when different." do
@@ -236,7 +239,11 @@ RSpec.describe MrMurano::SyncUpDown do
       script = %{-- fake lua\nreturn 2\n}
       expect(@t).to receive(:fetch).and_yield(script)
       ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt, :script=>script})
-      expect(ret).to eq('')
+      if Gem.win_platform? then
+        expect(ret).to match(/FC: no differences encountered/)
+      else
+        expect(ret).to eq('')
+      end
     end
   end
 
@@ -270,6 +277,9 @@ RSpec.describe MrMurano::SyncUpDown do
       ])
 
       expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(Hash), true)
+      expect(@t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       @t.syncup({:update=>true})
     end
   end
@@ -308,6 +318,9 @@ RSpec.describe MrMurano::SyncUpDown do
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
+      expect(@t).to receive(:toRemoteItem).and_return(
+        {:name=>'one.lua'},{:name=>'two.lua'}
+      )
       @t.syncdown({:update=>true})
       expect(FileTest.exist?(@projectDir + '/tsud/one.lua')).to be true
       expect(FileTest.exist?(@projectDir + '/tsud/two.lua')).to be true
@@ -329,12 +342,12 @@ RSpec.describe MrMurano::SyncUpDown do
         {:name=>'two.lua'},{:name=>'one.lua'}
       )
       ret = @t.locallist
-      expect(ret).to eq([
+      expect(ret).to match([
         {:name=>'two.lua',
          :bundled=>true,
-         :local_path=>Pathname.new(@projectDir + '/bundles/mybun/tsud/two.lua').realpath},
+         :local_path=>an_instance_of(Pathname)},
         {:name=>'one.lua',
-         :local_path=>Pathname.new(@projectDir + '/tsud/one.lua').realpath},
+         :local_path=>an_instance_of(Pathname)},
       ])
     end
 

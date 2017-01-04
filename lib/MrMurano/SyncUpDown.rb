@@ -1,6 +1,7 @@
 require 'pathname'
 require 'tempfile'
 require 'shellwords'
+require 'open3'
 require 'MrMurano/Config'
 require 'MrMurano/hash'
 
@@ -402,10 +403,10 @@ module MrMurano
         download(Pathname.new(trmt.path), item)
 
         cmd = $cfg['diff.cmd'].shellsplit
-        cmd << trmt.path
-        cmd << tlcl.path
+        cmd << trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        cmd << tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
 
-        IO.popen(cmd) {|io| df = io.read }
+        df, _ = Open3.capture2e(*cmd)
       ensure
         trmt.close
         trmt.unlink
