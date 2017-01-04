@@ -112,7 +112,7 @@ module MrMurano
     def toRemoteItem(root, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
       root = Pathname.new(root) unless root.kind_of? Pathname
-      {:name => path.relative_path_from(root).to_s}
+      {:name => path.realpath.relative_path_from(root.realpath).to_s}
     end
 
     ##
