@@ -1,0 +1,11 @@
+---
+- role_id: guest
+  parameter:
+  - name: did
+- role_id: admin
+  parameter:
+  - name: enabled
+- role_id: owns
+  parameter:
+  - name: did
+
