@@ -93,13 +93,15 @@ command 'config export' do |c|
   end
 end
 
-command 'config import' do |c|
-  c.syntax = %{mr config import}
-  c.summary = %{Import data from Solutionfiles}
-  c.description = %{Import data from Solutionfiles
+command :migrate do |c|
+  c.syntax = %{mr migrate}
+  c.summary = %{Mirgrate a project}
+  c.description = %{Migrate a project from Solutionfiles
 
   This imports from the Solutionfile.json and .Solutionfile.secret that are created
   by the exosite-cli tool.
+
+  It also moves files into ideal locations and updates event handler headers.
   }
 
   c.option '--[no-]move', %{Move files into expected places if needed}
@@ -127,8 +129,6 @@ command 'config import' do |c|
         if routes == '' then
           acc.verbose "No endpoints to import"
         elsif File.dirname(routes) == '.' then
-          # TODO: don't need to move this anymore.
-          # Can set location.endpoints and endpoints.searchFor instead.
           acc.warning "Routes file #{File.basename(routes)} not in endpoints directory"
           if options.move then
             acc.warning "Moving it to #{$cfg['location.endpoints']}"
@@ -235,5 +235,6 @@ command 'config import' do |c|
   end
 
 end
+alias_command 'config import', :migrate
 
 #  vim: set ai et sw=2 ts=2 :
