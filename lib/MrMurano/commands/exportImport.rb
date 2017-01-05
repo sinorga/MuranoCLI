@@ -67,6 +67,10 @@ command 'config export' do |c|
       solf[:modules][lb[:name]] = lb[:local_path].relative_path_from(dpwd).to_s
     end
 
+    MrMurano::Cors.new.locallist.each do |crs|
+      solf[:cors] = crs.reject{|k,v| k==:id or k==:local_path}
+    end
+
     solfile.open('w') do |io|
       io << JSON.pretty_generate(solf)
     end
