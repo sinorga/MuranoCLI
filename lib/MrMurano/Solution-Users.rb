@@ -106,6 +106,7 @@ module MrMurano
   SyncRoot.add('roles', Role, 'R', %{Roles})
 
   # …/user
+  # :nocov:
   class User < UserBase
     def initialize
       super
@@ -124,6 +125,7 @@ module MrMurano
       item[:email]
     end
   end
+  # :nocov:
   SyncRoot.add('users', User, 'U', %{Users})
 end
 #  vim: set ai et sw=2 ts=2 :
