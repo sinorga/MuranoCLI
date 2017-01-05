@@ -10,25 +10,27 @@ command 'config export' do |c|
   c.summary = %{Export data to Solutionfiles}
   c.description = %{Export data to Solutionfiles
 
-  This will write to the Solutionfile.json and .Solutionfile.secret used by the
-  exosite-cli tool.
+  This will write to the Solutionfile.json and optionally the .Solutionfile.secret
+  used by the exosite-cli tool.
 
   This also will merge all of the endpoints into a single 'routes.lua' file.
   }
 
   c.option '--force', "Overwrite existing files."
   c.option '--[no-]merge', "Merge endpoints into a single routes.lua file"
+  c.option '--[no-]secret', %{Also write the .Solutionfile.secret}
 
   c.action do |args, options|
-    options.default :merge => true
+    options.default :merge => true, :secret => false
 
-    solfile = Pathname.new($cfg['location.base'] + 'Solutionfile.json')
-    solsecret = Pathname.new($cfg['location.base'] + '.Solutionfile.secret')
+    solfile = Pathname.new($cfg['location.base']) + 'Solutionfile.json'
+    solsecret = Pathname.new($cfg['location.base']) + '.Solutionfile.secret'
 
     if not options.force and (solfile.exist? or solsecret.exist?) then
       sol = MrMurano::Solution.new
       sol.error "Solutionfile.json or .Solutionfile.secret already exist."
       sol.error "Use --force to overwrite"
+      exit 2
     end
 
     solf = {
@@ -69,17 +71,19 @@ command 'config export' do |c|
       io << JSON.pretty_generate(solf)
     end
 
-    solsecret.open('w') do |io|
-        pff = $cfg.file_at('passwords', :user)
-        pwd = MrMurano::Passwords.new(pff)
-        pwd.load
-        ps = pwd.get($cfg['net.host'], $cfg['user.name'])
-      io << {
-        :email => $cfg['user.name'],
-        :password => ps,
-        :solution_id => $cfg['solution.id'],
-        :product_id => $cfg['product.id']
-      }.to_json
+    if options.secret then
+      solsecret.open('w') do |io|
+          pff = $cfg.file_at('passwords', :user)
+          pwd = MrMurano::Passwords.new(pff)
+          pwd.load
+          ps = pwd.get($cfg['net.host'], $cfg['user.name'])
+        io << {
+          :email => $cfg['user.name'],
+          :password => ps,
+          :solution_id => $cfg['solution.id'],
+          :product_id => $cfg['product.id']
+        }.to_json
+      end
     end
 
   end
