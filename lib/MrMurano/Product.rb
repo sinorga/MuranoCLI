@@ -217,8 +217,7 @@ module MrMurano
               end
             end
           else
-            showHttpError(request, response)
-            raise resp
+            showHttpError(request, resp)
           end
         end
         nil
@@ -256,6 +255,7 @@ module MrMurano
 
   ##
   # This is not applicable to Murano.  Remove?
+  # :nocov:
   class ProductModel < ProductBase
     def initialize
       super
@@ -329,7 +329,6 @@ module MrMurano
         return response.body
       else
         showHttpError(request, response)
-        raise response
       end
     end
 
@@ -354,6 +353,7 @@ module MrMurano
     end
 
   end
+  # :nocov:
 
 end
 #  vim: set ai et sw=2 ts=2 :

@@ -114,7 +114,7 @@ module MrMurano
         remove(item[:rid])
       end
       r = create(item[:alias], item[:format])
-      raise "Create Failed: #{r}" unless r.nil?
+      raise "Create Failed: #{r}" unless r.empty?
     end
 
     ## Use alias for doing sync compares
@@ -134,11 +134,11 @@ module MrMurano
       from = Pathname.new(from) unless from.kind_of? Pathname
       debug "#{self.class.to_s}: Getting local items from: #{from}"
       if not from.exist? then
-        say_warning "Skipping missing #{from.to_s}"
+        warning "Skipping missing #{from.to_s}"
         return []
       end
       unless from.file? then
-        say_warning "Cannot read from #{from.to_s}"
+        warning "Cannot read from #{from.to_s}"
         return []
       end
 
@@ -149,6 +149,7 @@ module MrMurano
       if here.kind_of?(Hash) and here.has_key?('resources') then
         here['resources'].map{|i| Hash.transform_keys_to_symbols(i)}
       else
+        warning "Unexpected data in #{from.to_s}"
         []
       end
     end
@@ -205,7 +206,7 @@ module MrMurano
     ##
     # True if itemA and itemB are different
     def docmp(itemA, itemB)
-      itemA[:alias] == itemB[:alias] and itemA[:format] == itemB[:format]
+      itemA[:alias] != itemB[:alias] or itemA[:format] != itemB[:format]
     end
 
   end

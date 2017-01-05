@@ -6,13 +6,16 @@ command :config do |c|
   You can get, set, or query config options with this command.  All config
   options are in a 'section.key' format.  There is also a layer of scopes
   that the keys can be saved in.
+
+  If section is left out, then key is assumed to be in the 'tool' section.
+
   }
 
   c.example %{See what the current combined config is}, 'mr config --dump'
   c.example %{Query a value}, 'mr config solution.id'
   c.example %{Set a new value; writing to the project config file}, 'mr config solution.id XXXXXXXX'
   c.example %{Set a new value; writing to the user config file}, 'mr config --user user.name my@email.address'
-  c.example %{Unset a value in a configfile. (lower scopes will become visible if set)},
+  c.example %{Unset a value in a configfile. (lower scopes will become visible when unset)},
     'mr config diff.cmd --unset'
 
 

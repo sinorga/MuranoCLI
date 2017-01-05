@@ -34,8 +34,8 @@ module MrMurano
     def tabularize(data, ios=nil)
       fmt = $cfg['tool.outformat']
       ios = $stdout if ios.nil?
-      cols = []
-      rows = [[]]
+      cols = nil
+      rows = nil
       title = nil
       if data.kind_of?(Hash) then
         cols = data[:headers] if data.has_key?(:headers)
@@ -53,12 +53,18 @@ module MrMurano
         return
       end
       if fmt =~ /csv/i then
+        cols = [] if cols.nil?
+        rows = [[]] if rows.nil?
         CSV(ios, :headers=>cols, :write_headers=>(not cols.empty?)) do |csv|
           rows.each{|v| csv << v}
         end
       else
         # table.
-        ios.puts Terminal::Table.new :title=>title, :headings=>cols, :rows=>rows
+        table = Terminal::Table.new
+        table.title = title unless title.nil?
+        table.headings = cols unless cols.nil?
+        table.rows = rows unless rows.nil?
+        ios.puts table
       end
     end
 

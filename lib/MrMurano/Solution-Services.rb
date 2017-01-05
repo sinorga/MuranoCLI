@@ -12,11 +12,15 @@ module MrMurano
   class ServiceBase < SolutionBase
 
     def mkalias(remote)
+      # :nocov:
       raise "Needs to be implemented in child"
+      # :nocov:
     end
 
     def mkname(remote)
+      # :nocov:
       raise "Needs to be implemented in child"
+      # :nocov:
     end
 
     def list
@@ -106,6 +110,7 @@ module MrMurano
       if cacheFile.file? then
         cacheFile.open('r+') do |io|
           cache = YAML.load(io)
+          cache = {} unless cache
           io.rewind
           cache[local_path.to_s] = entry
           io << cache.to_yaml
@@ -127,6 +132,7 @@ module MrMurano
       ret = nil
       cacheFile.open('r') do |io|
         cache = YAML.load(io)
+        return nil unless cache
         if cache.has_key?(local_path.to_s) then
           entry = cache[local_path.to_s]
           debug("For #{local_path}:")
@@ -199,6 +205,7 @@ module MrMurano
       @uriparts << 'eventhandler'
       @itemkey = :alias
       @location = $cfg['location.eventhandlers']
+      @match_header = /--#EVENT (?<service>\S+) (?<event>\S+)/
     end
 
     def mkalias(remote)
@@ -259,14 +266,24 @@ module MrMurano
 
     def toRemoteItem(from, path)
       path = Pathname.new(path) unless path.kind_of? Pathname
-      aheader = path.readlines().first
-      md = /--#EVENT (\S+) (\S+)/.match(aheader)
-      if md.nil? then
-        rp = path.relative_path_from(Pathname.new(Dir.pwd))
-        say_warning "Not an Event handler: #{rp}"
-        return nil
+      cur = nil
+      lineno=0
+      path.readlines().each do |line|
+        md = @match_header.match(line)
+        if not md.nil? then
+          # header line.
+          cur = {:service=>md[:service],
+                 :event=>md[:event],
+                 :local_path=>path,
+                 :line=>lineno,
+                 :script=>line}
+        elsif not cur.nil? and not cur[:script].nil? then
+          cur[:script] << line
+        end
+        lineno += 1
       end
-      {:service=>md[1], :event=>md[2]}
+      cur[:line_end] = lineno unless cur.nil?
+      cur
     end
 
     def synckey(item)

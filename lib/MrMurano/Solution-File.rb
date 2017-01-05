@@ -37,8 +37,7 @@ module MrMurano
               end
             end
           else
-            showHttpError(request, response)
-            raise resp
+            showHttpError(request, resp)
           end
         end
         nil

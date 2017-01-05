@@ -15,6 +15,8 @@ group :test do
   gem 'rake', '~> 10.1.1'
   gem 'rspec', '~> 3.5'
   gem 'webmock', '~> 2.1.0'
+  gem 'simplecov', :require => false
+  gem 'coderay', :require => false
 end
 
 group :windows do

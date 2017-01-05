@@ -15,6 +15,15 @@
 # The `.rspec` file also contains a few flags that are not defaults but that
 # users commonly want.
 #
+require 'simplecov'
+SimpleCov.start do
+  add_group "Specs", "spec/.*"
+  add_group "Solution", "lib/MrMurano/Solution.*"
+  add_group "Product", "lib/MrMurano/Product.*"
+
+  track_files "lib/MrMurano/*.rb"
+end
+
 require 'webmock/rspec'
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration

@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/MrMurano.svg)](https://badge.fury.io/rb/MrMurano)
 [![Build Status](https://travis-ci.org/tadpol/MrMurano.svg?branch=master)](https://travis-ci.org/tadpol/MrMurano)
+[![Inline docs](http://inch-ci.org/github/exosite/MrMurano.svg?branch=master)](http://inch-ci.org/github/exosite/MrMurano)
 
 Do more from the command line with [Murano](https://exosite.com/platform/)
 
@@ -64,6 +65,16 @@ Your `PATH` may need to be updated to find the installed `mr` command.  See the
 [Ruby Gem FAQ](http://guides.rubygems.org/faqs/#user-install).  In short, you need
 to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 
+### Windows Install
+
+The MrMurano gem will install on Windows.  There is also a single Windows binary
+Setup installer availible in [releases](https://github.com/exosite/MrMurano/releases)
+
+You can install Ruby on Windows with [RubyInstaller](http://rubyinstaller.org).
+You might run into a [known SSL cert issue](http://guides.rubygems.org/ssl-certificate-update/).
+If so follow the steps there to update the certs.
+
+
 ## Features
 
 ### Logs
@@ -105,7 +116,7 @@ cat >> .mrmurano.prod <<EOF
 id=CCCCCCCC
 EOF
 
-cat >> .env <<EOF
+cat > .env <<EOF
 MR_CONFIGFILE=.mrmurano.dev
 EOF
 ```
@@ -155,10 +166,6 @@ following commands:
 ```
 
 Call them with `--help` for details.
-
-### ZSH tab completion
-
-Basic completion support for zsh.
 
 ### Sub-directories
 
@@ -213,13 +220,4 @@ MrMurano uses [git flow](https://github.com/nvie/gitflow#getting-started) for
 MrMurano also uses [bundler](http://bundler.io).
 
 When submitting pull requests, please do them against the develop branch.
-
-## Windows
-
-The MrMurano gem will install on Windows.
-
-You can install Ruby on Windows with [RubyInstaller](http://rubyinstaller.org).
-You might run into a [known SSL cert issue](http://guides.rubygems.org/ssl-certificate-update/).
-If so follow the steps there to update the certs.
-
 

@@ -31,6 +31,8 @@ module MrMurano
         offset += 50
       end
 
+      raise "Identifier Not Found: #{sn}" if found.empty?
+
       @sn_rid = found.first[:rid]
       @sn_rid
     end

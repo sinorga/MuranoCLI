@@ -9,7 +9,6 @@ module MrMurano
     #  env         from ENV['MR_CONFIGFILE']
     #  project     .mrmuranorc at project dir
     #  user        .mrmuranorc at $HOME
-    #  system      .mrmuranorc at /etc
     #  defaults    Internal hardcoded defaults
     #
     ConfigFile = Struct.new(:kind, :path, :data) do
@@ -34,12 +33,10 @@ module MrMurano
     attr :paths
     attr_reader :projectDir
 
-    CFG_SCOPES=%w{internal specified env project private user system defaults}.map{|i| i.to_sym}.freeze
+    CFG_SCOPES=%w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
     CFG_FILE_NAME = '.mrmuranorc'.freeze
-    CFG_PRVT_NAME = '.mrmuranorc.private'.freeze # Going away.
     CFG_DIR_NAME = '.mrmurano'.freeze
     CFG_ALTRC_NAME = '.mrmurano/config'.freeze
-    CFG_SYS_NAME = '/etc/mrmuranorc'.freeze # Going away.
 
     def initialize
       @paths = []
@@ -55,19 +52,13 @@ module MrMurano
       end
       @projectDir = findProjectDir()
       unless @projectDir.nil? then
-        if (@projectDir + CFG_PRVT_NAME).exist? then
-          say_warning "!!! Using .mrmuranorc.private is deprecated"
-        end
-        @paths << ConfigFile.new(:private, @projectDir + CFG_PRVT_NAME)
         @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
         fixModes(@projectDir + CFG_DIR_NAME)
+      else
+        @paths << ConfigFile.new(:project, Pathname.new(Dir.home) + CFG_FILE_NAME)
       end
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
-      if Pathname.new(CFG_SYS_NAME).exist? then
-        say_warning "!!! Using #{CFG_SYS_NAME} is deprecated"
-        @paths << ConfigFile.new(:system, Pathname.new(CFG_SYS_NAME))
-      end
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
@@ -89,6 +80,8 @@ module MrMurano
       set('location.cors', 'cors.yaml', :defaults)
       set('location.specs', 'specs', :defaults)
 
+      set('sync.bydefault', SyncRoot.bydefault.join(' '), :defaults)
+
       set('files.default_page', 'index.html', :defaults)
       set('files.searchFor', '**/*', :defaults)
       set('files.ignoring', '', :defaults)
@@ -105,7 +98,11 @@ module MrMurano
 
       set('product.spec', 'resources.yaml', :defaults)
 
-      set('diff.cmd', 'diff -u', :defaults)
+      if Gem.win_platform? then
+        set('diff.cmd', 'fc', :defaults)
+      else
+        set('diff.cmd', 'diff -u', :defaults)
+      end
     end
 
     ## Find the root of this project Directory.
@@ -119,10 +116,10 @@ module MrMurano
     # - .git/
     def findProjectDir()
       result=nil
-      fileNames=[CFG_FILE_NAME, CFG_PRVT_NAME, CFG_ALTRC_NAME]
+      fileNames=[CFG_FILE_NAME, CFG_ALTRC_NAME]
       dirNames=[CFG_DIR_NAME]
-      home = Pathname.new(Dir.home)
-      pwd = Pathname.new(Dir.pwd)
+      home = Pathname.new(Dir.home).realpath
+      pwd = Pathname.new(Dir.pwd).realpath
       return nil if home == pwd
       pwd.dirname.ascend do |i|
         break unless result.nil?
@@ -174,8 +171,6 @@ module MrMurano
         root = @projectDir + CFG_DIR_NAME
       when :user
         root = Pathname.new(Dir.home) + CFG_DIR_NAME
-      when :system
-        root = nil
       when :defaults
         root = nil
       end
@@ -259,25 +254,6 @@ module MrMurano
 
   end
 
-  ##
-  # IF none of -same, then -same; else just the ones listed.
-  def self.checkSAME(opt)
-    unless opt.files or opt.endpoints or opt.modules or
-        opt.eventhandlers or opt.roles or opt.users or opt.spec then
-      opt.files = true
-      opt.endpoints = true
-      opt.modules = true
-      opt.eventhandlers = true
-    end
-    if opt.all then
-      opt.files = true
-      opt.endpoints = true
-      opt.modules = true
-      opt.eventhandlers = true
-      opt.roles = true
-      opt.users = true
-    end
-  end
 end
 
 #  vim: set ai et sw=2 ts=2 :

@@ -1,8 +1,70 @@
 require 'MrMurano/version'
 require 'MrMurano/Config'
 require 'MrMurano/Product-1P-Device'
+require '_workspace'
+
+RSpec.describe MrMurano::Product1PDevice, '#sn_rid tests' do
+  include_context "WORKSPACE"
+  before(:example) do
+    $cfg = MrMurano::Config.new
+    $cfg.load
+    $cfg['net.host'] = 'bizapi.hosted.exosite.io'
+    $cfg['product.id'] = 'XYZ'
+    $cfg['product.spec'] = 'XYZ.yaml'
+
+    @prd = MrMurano::Product1PDevice.new
+    allow(@prd).to receive(:token).and_return("TTTTTTTTTT")
+    @mrp = instance_double("MrMurano::Product")
+    allow(MrMurano::Product).to receive(:new).and_return(@mrp)
+  end
+
+  it "gets rid from sn" do
+    expect(@mrp).to receive(:list).once.and_return([
+      {:sn=>"12",
+       :status=>"activated",
+       :rid=>"77cbf643ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"}])
+    ret = @prd.sn_rid("12")
+    expect(ret).to eq("77cbf643ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+  end
+
+  it "gets rid from sn on page two" do
+    expect(@mrp).to receive(:list).twice.and_return(
+      [{:sn=>"14",
+       :status=>"notactivated"}],
+      [{:sn=>"12",
+       :status=>"activated",
+       :rid=>"77cbf643ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"}])
+
+    ret = @prd.sn_rid("12")
+    expect(ret).to eq("77cbf643ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
+  end
+
+  it "doesn't find the sn" do
+    expect(@mrp).to receive(:list).twice.and_return(
+      [{:sn=>"14",
+       :status=>"notactivated"}],
+      [])
+
+    expect {
+      @prd.sn_rid("12")
+    }.to raise_error "Identifier Not Found: 12"
+  end
+
+  it "gets model_rid" do
+    expect(@mrp).to receive(:info).once.and_return({:modelrid=>"1234567890"})
+    ret = @prd.model_rid
+    expect(ret).to eq("1234567890")
+  end
+  it "raises with bad model_rid" do
+    expect(@mrp).to receive(:info).once.and_return({:mid=>"1234567890"})
+    expect {
+      @prd.model_rid
+    }.to raise_error(/^Bad info; .*/)
+  end
+end
 
 RSpec.describe MrMurano::Product1PDevice do
+  include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
