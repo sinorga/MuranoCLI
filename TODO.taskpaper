@@ -28,8 +28,8 @@ Endpoints:
 	- Add directory support like in modules @done(2016-07-26)
 
 Files:
-	- Add ignore patterns to config @done(2016-12-20)
 	- Switch to mime-types v3 @pri(low)
+	- Add ignore patterns to config @done(2016-12-20)
 	- Figure out how to make the hexed-sha checksum faster. @done(2016-09-23)
 	- Fix upload. @done(2016-08-01)
 	- Files won't update, they always delete then add. @done(2016-07-28)
@@ -56,7 +56,8 @@ Timeseries:
 
 Product:
 	- Add option for progress bar when uploading content files.
-	- Support multiple products.
+	- Support multiple products. @done(2017-01-05)
+	Won't do.  Future will be one-to-one.
 	Think about how this would work.  There is the syncing of the resoruces, and then
 	some of the commands that use product.id.
 	- Auto convert exoline spec files into murano spec files on upload? @done(2016-10-27)
@@ -68,8 +69,6 @@ Service Device:
 	- When listing and business.id is missing, gracefully fall back to --idonly @done(2016-09-12)
 
 Config:
-	- Add config tool.default_sync to set which things sync{up,down} by default
-	It is internally hardcoded to be -s, -a, -m, -e right now.
 	- Store passwords in system Keychain on system that have a Keychain.
 	mac OS does, various Linux desktops have a couple differnet ones.  Not sure about
 	Windows.
@@ -80,6 +79,8 @@ Config:
 
 	Plus things like 1Password, LastPass, KeePass, and others.
 
+	- Add config sync.bydefault to set which things sync{up,down} by default @done(2017-01-05)
+	It is internally hardcoded to be -s, -a, -m, -e right now.
 	- Add ENV['MR_CONFIGFILE'] path to file to load like --configfile @done(2016-09-22)
 	- Maybe add dotenv support. @done(2016-09-22)
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
@@ -88,6 +89,7 @@ SyncUpDown:
 	- Document the hash keys for an item. @pri(high)
 	Also consider turning that hash into a Struct
 	- Allow specifying local files to limit actions to.
+	This is one the command line.  The idea being to sync just one file.
 
 SolutionBase:
 	- All network traffic is serialized. Make some parallel.
@@ -98,8 +100,8 @@ SolutionBase:
 	- Rebuild how local names and paths are computed from remote items. @done(2016-07-27)
 
 Windows:
-	- Need to test with http://rubyinstaller.org on Windows. @pri(high)
-	- Look into http://ocra.rubyforge.org for building an exec. @pri(high)
+	- Need to test with http://rubyinstaller.org on Windows. @pri(high) @done(2016-12-21)
+	- Look into http://ocra.rubyforge.org for building an exec. @pri(high) @done(2016-12-21)
 
 Bundles:
 	- Revisit this idea. Its complexity may not be worth its value.

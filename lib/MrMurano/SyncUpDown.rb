@@ -11,23 +11,52 @@ module MrMurano
     Syncable = Struct.new(:name, :class, :type, :desc, :bydefault) do
     end
 
+    ##
+    # Add a new entry to syncable things
+    # +name+:: The name to use for the long option
+    # +klass+:: The class to instanciate from
+    # +type+:: Single letter for short option and status listing
+    # +desc+:: Summary of what this syncs.
+    # +bydefault+:: Is this part of the default sync group
+    #
+    # returns nil
     def self.add(name, klass, type, desc, bydefault=false)
       @@syncset = [] unless defined?(@@syncset)
       @@syncset << Syncable.new(name.to_s, klass, type, desc, bydefault)
+      nil
     end
 
+    ##
+    # Remove all syncables.
     def self.reset()
       @@syncset = []
     end
 
+    ##
+    # Get the list of default syncables.
+    # returns array of names
+    def self.bydefault
+      @@syncset.select{|a| a.bydefault }.map{|a| a.name}
+    end
+
+    ##
+    # Iterate over all syncables
+    # +block+:: code to run on each
     def self.each(&block)
       @@syncset.each{|a| yield a.name, a.type, a.class }
     end
 
+    ##
+    # Iterate over all syncables with option arguments.
+    # +block+:: code to run on each
     def self.each_option(&block)
       @@syncset.each{|a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc}
     end
 
+    ##
+    # Iterate over just the selected syncables.
+    # +opt+:: Options hash of which to select from
+    # +block+:: code to run on each
     def self.each_filtered(opt, &block)
       self.checkSAME(opt)
       @@syncset.each do |a|
@@ -39,13 +68,18 @@ module MrMurano
 
     ## Adjust options based on all or none
     # If none are selected, select the bydefault ones.
+    #
+    # +opt+:: Options hash of which to select from
+    #
+    # returns nil
     def self.checkSAME(opt)
       if opt[:all] then
         @@syncset.each {|a| opt[a.name.to_sym] = true }
       else
         any = @@syncset.select {|a| opt[a.name.to_sym] or opt[a.type.to_sym]}
         if any.empty? then
-          @@syncset.select{|a| a.bydefault }.each{|a| opt[a.name.to_sym] = true}
+          bydef = $cfg['sync.bydefault'].split
+          @@syncset.select{|a| bydef.include? a.name }.each{|a| opt[a.name.to_sym] = true}
         end
       end
 
