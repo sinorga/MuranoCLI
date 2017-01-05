@@ -54,7 +54,7 @@ module MrMurano
       end
     end
 
-    def removelocal(dest, item)
+    def removelocal(local, item)
       # needs to append/merge with file
       # for now, we'll read, modify, write
       here = []
