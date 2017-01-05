@@ -78,11 +78,11 @@ module MrMurano
     def localitems(from)
       from = Pathname.new(from) unless from.kind_of? Pathname
       if not from.exist? then
-        say_warning "Skipping missing #{from.to_s}"
+        warning "Skipping missing #{from.to_s}"
         return []
       end
       unless from.file? then
-        say_warning "Cannot read from #{from.to_s}"
+        warning "Cannot read from #{from.to_s}"
         return []
       end
 
@@ -116,7 +116,7 @@ module MrMurano
     # @param modify Bool: True if item exists already and this is changing it
     def upload(local, remote, modify)
       # TODO figure out APIs for updating users.
-      say_warning "Updating Users isn't working currently."
+      warning "Updating Users isn't working currently."
       # post does work if the :password field is set.
     end
 
