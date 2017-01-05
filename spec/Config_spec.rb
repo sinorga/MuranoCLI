@@ -163,6 +163,7 @@ RSpec.describe MrMurano::Config do
     it "dumps" do
       cfg = MrMurano::Config.new
       cfg.load
+      cfg['sync.bydefault'] = 'files'
       ret = cfg.dump
 
       rawwant = IO.read(File.join(@testdir.to_path, 'spec','fixtures','dumped_config'))
