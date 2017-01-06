@@ -80,7 +80,7 @@ module MrMurano
       set('location.cors', 'cors.yaml', :defaults)
       set('location.specs', 'specs', :defaults)
 
-      set('sync.bydefault', SyncRoot.bydefault.join(' '), :defaults)
+      set('sync.bydefault', SyncRoot.bydefault.join(' '), :defaults) if defined? SyncRoot
 
       set('files.default_page', 'index.html', :defaults)
       set('files.searchFor', '**/*', :defaults)
