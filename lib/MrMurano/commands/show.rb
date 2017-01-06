@@ -3,8 +3,6 @@ command 'show' do |c|
   c.syntax = %(mr show)
   c.summary = %(Show readable information about the current configuration)
   c.description = %(Show readable information about the current configuration)
-  c.option '--all', 'show verbose information'
-  c.option '-a', 'show verbose information'
 
   c.action do |args, options|
 
