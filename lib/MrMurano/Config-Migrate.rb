@@ -70,13 +70,10 @@ module MrMurano
       end
     end
 
-    def migrate_assests(data)
-        $cfg.set('location.files', data)
-    end
-
     def migrate_file_dir(data)
         $cfg.set('location.files', data)
     end
+    alias_method :migrate_assets, :migrate_file_dir
 
     def migrate_default_page(data)
         $cfg.set('files.default_page', data)
@@ -104,13 +101,15 @@ module MrMurano
 
     def migrate_cors(data)
       verbose "Exporting CORS to #{$cfg['location.cors']}"
-      File.open($cfg['location.cors'], 'w') do |cio|
-        cio << sf['cors'].to_yaml
+      unless $cfg['tool.dry'] then
+        File.open($cfg['location.cors'], 'w') do |cio|
+          cio << sf['cors'].to_yaml
+        end
       end
     end
 
     def migrate_modules(data)
-      update_or_stop(modules.values, 'location.modules', 'modules')
+      update_or_stop(data.values, 'location.modules', 'modules')
     end
 
     def migrate_event_handler(data)
@@ -121,13 +120,16 @@ module MrMurano
       data.each do |service, events|
         events.each do |event, path|
           # open path, if no header, add it
-          data = IO.readlines(path)
-          dheader = "--#EVENT #{service} #{event}"
-          aheader = (data.first or "").chomp
-          if aheader != dheader then
-            verbose "Adding event header to #{path}"
-            data.insert(0, dheader)
-            File.open(path, 'w'){|eio| eio.puts(data)} unless $cfg['tool.dry']
+          verbose "Checking event header in #{path}"
+          unless $cfg['tool.dry'] then
+            data = IO.readlines(path)
+            dheader = "--#EVENT #{service} #{event}"
+            aheader = (data.first or "").chomp
+            if aheader != dheader then
+              verbose "Adding event header to #{path}"
+              data.insert(0, dheader)
+              File.open(path, 'w'){|eio| eio.puts(data)}
+            end
           end
         end
       end
