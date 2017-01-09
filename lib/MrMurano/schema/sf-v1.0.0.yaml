@@ -1,0 +1,72 @@
+---
+type: object
+description: |
+  A Solutionfile.json
+  This describes all of the bits and bobs that go into a Murano Solution.
+
+properties:
+  default_page:
+    type: string
+    description: The local file name to upload as /
+
+  file_dir:
+    type: string
+    description: Relative path to directory of static assets
+
+  custom_api:
+    type: string
+    description: Relative path of file containing endpoints (or routes)
+
+  custom_api_hook:
+    type: string
+    description: URL path to call at end of deploy
+
+  modules:
+    type: object
+    description: Additional lua chunks to load with endpoints and event handlers
+    patternProperties:
+      "[a-z]+":
+        type: string
+        description: Relative path to module script
+
+  event_handler:
+    type: object
+    description: Event handler scripts
+    properties:
+      device:
+        type: object
+        description: Device (Product) event handlers
+        properties:
+          datapoint:
+            type: string
+            description: Relative path to device.datapoint event script
+        required: [datapoint]
+      timer:
+        type: object
+        description: Timer event handlers
+        properties:
+          timer:
+            type: string
+            description: Relative path to timer.timer event script
+        required: [timer]
+    additionalProperties: false
+
+  cors:
+    type: object
+    properties:
+      origin:
+        type: array
+      methods:
+        type: array
+      headers:
+        type: array
+      credentials:
+        type: boolean
+
+required:
+  - default_page
+  - file_dir
+  - custom_api
+  - event_handler
+additionalProperties: false
+
