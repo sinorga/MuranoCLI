@@ -46,6 +46,8 @@ RSpec.describe MrMurano::ConfigMigrate do
       expect($cfg['location.eventhandlers']).to eq('event_handler')
       expect(dafter).to eq(dbefore) # nothing new created.
     end
+
+    it "imports and modifies things"
   end
 
 end
