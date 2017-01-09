@@ -157,41 +157,32 @@ module MrMurano
     #
     # cors
 
-    #-------------------------
-    # This is one way to do this.  It assumes we want to be flexible as before.
     def get_modules_location
-      return $cfg['location.modules'] unless @data.has_key? 'modules'
-      return $cfg['location.modules'] if @data['modules'].empty?
-      Dir.common_root(@data['modules'].values)
-    end
-    def get_modules_searchFor
-      # ?
-      loc = get_modules_location
-      @data['modules'].values.map do |path|
-        path.sub(loc, '')
-      end
-    end
-    # --OR--
-    # This is better. It acts the way one would expect with a Project file
-    # describing what is here. (nothing magically appering.)
-    def get_modules_location
+      # Should I add a data_alias? Or a post/pre load method to fill some data?
+      # Either way, having a method for this is not preferred.
       "."
     end
     def get_modules_searchFor
-      [] unless @data.has_key? 'modules'
-      [] if @data['modules'].empty?
+      return [] unless @data.has_key? 'modules'
+      return [] if @data['modules'].empty?
       @data['modules'].values
     end
-    #-------------------------
 
+    def get_endpoints_location
+      '.'
+    end
+    def get_endpoints_searchFor
+      [@data['custom_api']]
+    end
 
     def get_eventhandlers_location
-      return $cfg['location.eventhandlers'] unless @data.has_key? 'event_handler'
-      return $cfg['location.eventhandlers'] if @data['event_handler'].empty?
-
+      '.'
+    end
+    def get_eventhandlers_searchFor
+      return [] unless @data.has_key? 'event_handler'
+      return [] if @data['event_handler'].empty?
       eventhandlers = @data['event_handler']
-      evd = eventhandlers.values.map{|e| e.values}.flatten
-      Dir.common_root(evd)
+      eventhandlers.values.map{|e| e.values}.flatten
     end
 
   end
