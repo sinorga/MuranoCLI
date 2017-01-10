@@ -64,7 +64,7 @@ module MrMurano
     def _loginInfo
       host = $cfg['net.host']
       user = $cfg['user.name']
-      if user.nil? then
+      if user.nil? or user.empty? then
         error("No Murano user account found; please login")
         user = ask("User name: ")
         $cfg.set('user.name', user, :user)
@@ -118,6 +118,7 @@ module MrMurano
     end
 
     def businesses
+      _loginInfo if $cfg['user.name'].nil?
       get('user/' + $cfg['user.name'] + '/membership/')
     end
 
