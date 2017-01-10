@@ -137,6 +137,14 @@ RSpec.describe MrMurano::Account do
     it "askes for account when missing" do
       bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
                  {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
+        to_return(body: bizlist )
+
+      $cfg['user.name'] = nil
+      expect(@acc).to receive(:_loginInfo) do |arg|
+        $cfg['user.name'] = 'BoB@place.net'
+      end
+
       ret = @acc.businesses
       expect(ret).to eq(bizlist)
     end
