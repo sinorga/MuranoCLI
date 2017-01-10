@@ -98,6 +98,7 @@ module MrMurano
     end
 
     def load
+      # TODO scan up to $HOME looking for project file
       return false unless @path.exist?
       @path.open {|io| @data = YAML.load(io)}
     end
@@ -125,6 +126,14 @@ module MrMurano
         # if lookup is nil, try in cfg.
         $cfg[key]
       end
+    end
+  end
+
+  class Project_V2 < Project
+    def initialize
+      @path = Pathname.new('project.murano')
+      @schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/sf-v2.0.0.yaml'
+
     end
   end
 
