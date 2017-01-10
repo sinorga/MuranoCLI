@@ -5,6 +5,11 @@ description: |
   This describes all of the bits and bobs that go into a Murano Solution.
 
 properties:
+  version:
+    type: string
+    pattern: "0.2.0"
+    description: Version format of the config
+
   default_page:
     type: string
     description: The local file name to upload as /
