@@ -134,13 +134,17 @@ module MrMurano
       @path = Pathname.new('project.murano')
       @schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/sf-v2.0.0.yaml'
 
+      @key_alias['files.searchFor'] = 'files.sources'
+      @key_alias['modules.searchFor'] = 'modules.sources'
+      @key_alias['endpoints.searchFor'] = 'endpoints.sources'
+      @key_alias['files.searchFor'] = 'files.sources'
     end
   end
 
-  class Project_V1 < Project
+  class Project_V020 < Project
     def initialize
       @path = Pathname.new('SolutionFile.json')
-      @schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/sf-v1.0.0.yaml'
+      @schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/sf-v0.2.0.yaml'
 
       @key_alias['files.location'] = 'file_dir'
       @key_alias['files.default_page'] = 'default_page'
@@ -193,7 +197,44 @@ module MrMurano
       eventhandlers = @data['event_handler']
       eventhandlers.values.map{|e| e.values}.flatten
     end
-
   end
+
+  class Project_V030 < Project
+    def initialize
+      @path = Pathname.new('SolutionFile.json')
+      @schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/sf-v0.3.0.yaml'
+
+      @key_alias['files.location'] = 'assets'
+      @key_alias['files.default_page'] = 'default_page'
+    end
+    def get_modules_location
+      # Should I add a data_alias? Or a post/pre load method to fill some data?
+      # Either way, having a method for this is not preferred.
+      "."
+    end
+    def get_modules_searchFor
+      return [] unless @data.has_key? 'modules'
+      return [] if @data['modules'].empty?
+      @data['modules'].values
+    end
+
+    def get_endpoints_location
+      '.'
+    end
+    def get_endpoints_searchFor
+      [@data['routes']]
+    end
+
+    def get_eventhandlers_location
+      '.'
+    end
+    def get_eventhandlers_searchFor
+      return [] unless @data.has_key? 'services'
+      return [] if @data['services'].empty?
+      eventhandlers = @data['services']
+      eventhandlers.values.map{|e| e.values}.flatten
+    end
+  end
+
 end
 #  vim: set ai et sw=2 ts=2 :
