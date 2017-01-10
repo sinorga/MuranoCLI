@@ -101,7 +101,6 @@ RSpec.describe MrMurano::Account, "token" do
       ret = acc.token
       expect(ret).to eq("quxx")
     end
-
   end
 end
 
@@ -123,15 +122,32 @@ RSpec.describe MrMurano::Account do
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/")
   end
 
-  it "lists business" do
-    bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
-                       {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
-      to_return(body: bizlist )
+  context "lists business" do
+    it "for user.name" do
+      bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
+                 {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
+        to_return(body: bizlist )
 
-    $cfg['user.name'] = 'BoB@place.net'
-    ret = @acc.businesses
-    expect(ret).to eq(bizlist)
+      $cfg['user.name'] = 'BoB@place.net'
+      ret = @acc.businesses
+      expect(ret).to eq(bizlist)
+    end
+
+    it "askes for account when missing" do
+      bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
+                 {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
+        to_return(body: bizlist )
+
+      $cfg['user.name'] = nil
+      expect(@acc).to receive(:_loginInfo) do |arg|
+        $cfg['user.name'] = 'BoB@place.net'
+      end
+
+      ret = @acc.businesses
+      expect(ret).to eq(bizlist)
+    end
   end
 
   it "lists products" do

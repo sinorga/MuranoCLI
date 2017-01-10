@@ -31,6 +31,8 @@ There are a few steps and pieces to getting a solution with a product up and
 running in Murano. Here is the list.
 
 - Pick a business: `mr account --business`
+	If this is the first time you've run `mr` it will ask for your Murano username
+	and password.
 - Set it: `mr config business.id ZZZZZZZZZ`
 - Create a product: `mr product create myawesomeproduct`
 - Save the result: `mr config product.id YYYYYYYYY`
