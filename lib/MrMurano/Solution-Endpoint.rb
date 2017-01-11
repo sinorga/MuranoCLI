@@ -121,7 +121,7 @@ module MrMurano
     end
 
     def toRemoteItem(from, path)
-      # Path could be have multiple endpoints in side, so a loop.
+      # Path could be have multiple endpoints inside, so a loop.
       items = []
       path = Pathname.new(path) unless path.kind_of? Pathname
       cur = nil
