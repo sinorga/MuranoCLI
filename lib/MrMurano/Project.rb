@@ -83,6 +83,17 @@ module MrMurano
 
 
   class Project
+    # XXX
+    # Does this live outside? or does it act like a ConfigFile?
+    # ConfigFile assumes INI features, so no it doesn't go into the $cfg
+    #
+    # What does this affect other than SyncUpDown?
+    #
+    def self.load
+      # TODO scan up to $HOME looking for project file
+
+    end
+
     def initialize
       @path = nil
       @schemaPath = nil
@@ -98,7 +109,6 @@ module MrMurano
     end
 
     def load
-      # TODO scan up to $HOME looking for project file
       return false unless @path.exist?
       @path.open {|io| @data = YAML.load(io)}
     end
@@ -112,7 +122,12 @@ module MrMurano
     # Get a piece of a Project config.
     # +key+:: The key for the item to get. Keys are dot seperated paths
     #
+    # Some keys have different internal names than are found in the file.  These
+    # aliases are kept in @key_alias
+    #
     # Some keys are virtual and this checks for those a dispatches as needed.
+    #
+    # returns the value for the key
     def get(key)
       # if overriden by method, call it.
       meth = "get_#{key.gsub(/\./,'_')}".to_sym
@@ -134,10 +149,18 @@ module MrMurano
       @path = Pathname.new('project.murano')
       @schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/sf-v2.0.0.yaml'
 
-      @key_alias['files.searchFor'] = 'files.sources'
+      @key_alias['files.location'] = 'assets.location'
+      @key_alias['files.searchFor'] = 'assets.sources'
+      @key_alias['files.ignoring'] = 'assets.ignoring'
+      @key_alias['modules.location'] = 'modules.location'
       @key_alias['modules.searchFor'] = 'modules.sources'
-      @key_alias['endpoints.searchFor'] = 'endpoints.sources'
-      @key_alias['files.searchFor'] = 'files.sources'
+      @key_alias['modules.ignoring'] = 'modules.ignoring'
+      @key_alias['endpoints.location'] = 'routes.location'
+      @key_alias['endpoints.searchFor'] = 'routes.sources'
+      @key_alias['endpoints.ignoring'] = 'routes.ignoring'
+      @key_alias['eventhandler.location'] = 'services.location'
+      @key_alias['eventhandler.searchFor'] = 'services.sources'
+      @key_alias['eventhandler.ignoring'] = 'services.ignoring'
     end
   end
 
@@ -171,8 +194,6 @@ module MrMurano
     # cors
 
     def get_modules_location
-      # Should I add a data_alias? Or a post/pre load method to fill some data?
-      # Either way, having a method for this is not preferred.
       "."
     end
     def get_modules_searchFor
@@ -208,8 +229,6 @@ module MrMurano
       @key_alias['files.default_page'] = 'default_page'
     end
     def get_modules_location
-      # Should I add a data_alias? Or a post/pre load method to fill some data?
-      # Either way, having a method for this is not preferred.
       "."
     end
     def get_modules_searchFor
