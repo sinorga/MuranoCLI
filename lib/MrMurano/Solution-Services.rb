@@ -180,11 +180,11 @@ module MrMurano
     end
 
     def searchFor
-      $cfg['modules.searchFor'].split
+      ($cfg['modules.searchFor'] or '').split
     end
 
     def ignoring
-      $cfg['modules.ignoring'].split
+      ($cfg['modules.ignoring'] or '').split
     end
 
     def toRemoteItem(from, path)
@@ -225,11 +225,11 @@ module MrMurano
     end
 
     def searchFor
-      $cfg['eventhandler.searchFor'].split
+      ($cfg['eventhandler.searchFor'] or '').split
     end
 
     def ignoring
-      $cfg['eventhandler.ignoring'].split
+      ($cfg['eventhandler.ignoring'] or '').split
     end
 
     def list

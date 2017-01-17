@@ -1,4 +1,5 @@
 require "bundler/gem_tasks"
+require 'shellwords'
 
 task :default => [:test]
 
@@ -77,6 +78,14 @@ namespace :push do
             # ENV['GITHUB_REPO'] set by CI
             # upload gem
             sh %{github-release upload --tag #{tagName} --name #{gemName} --file #{builtGem}}
+        end
+
+        desc "Copy tag commit message into Release Notes"
+        task :copyReleaseNotes do
+            tagMsg = `git tag -l -n999 #{tagName}`.lines
+            tagMsg.shift
+            msg = tagMsg.join().shellescape
+            sh %{github-release edit --tag #{tagName} --description #{msg}}
         end
     end
 end

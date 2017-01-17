@@ -105,11 +105,11 @@ module MrMurano
     end
 
     def searchFor
-      $cfg['endpoints.searchFor'].split
+      ($cfg['endpoints.searchFor'] or '').split
     end
 
     def ignoring
-      $cfg['endpoints.ignoring'].split
+      ($cfg['endpoints.ignoring'] or '').split
     end
 
     def tolocalname(item, key)
