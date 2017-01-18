@@ -247,6 +247,10 @@ module MrMurano
 
     def fetch(name)
       ret = get('/'+name)
+      if ret.nil? then
+        error "Fetch for #{name} returned nil; skipping"
+        return ''
+      end
       aheader = (ret[:script].lines.first or "").chomp
       dheader = "--#EVENT #{ret[:service]} #{ret[:event]}"
       if block_given? then
