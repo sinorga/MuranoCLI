@@ -214,6 +214,7 @@ module MrMurano
         debug "!!! Missing '#{@itemkey}', using :id instead!"
         debug ":id => #{item[:id]}"
         id = item[:id]
+        raise "Both #{@itemkey} and id in item are nil!" if id.nil?
       end
       local.open('wb') do |io|
         fetch(id) do |chunk|
