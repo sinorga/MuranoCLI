@@ -122,6 +122,7 @@ module MrMurano
       get('user/' + $cfg['user.name'] + '/membership/')
     end
 
+    #------------------------------------------------------------------------
     def products
       raise "Missing Business ID" if $cfg['business.id'].nil?
       get('business/' + $cfg['business.id'] + '/product/')
@@ -138,12 +139,13 @@ module MrMurano
       delete('business/' + $cfg['business.id'] + '/product/' + modelId)
     end
 
+    #------------------------------------------------------------------------
     def solutions
       raise "Missing Business ID" if $cfg['business.id'].nil?
       get('business/' + $cfg['business.id'] + '/solution/')
     end
 
-    ## Create a new solution
+    ## Create a new solution in the current business
     def new_solution(name, type='dataApi')
       raise "Missing Business ID" if $cfg['business.id'].nil?
       raise "Solution name must be lowercase" if name.match(/[A-Z]/)
@@ -153,6 +155,26 @@ module MrMurano
     def delete_solution(apiId)
       raise "Missing Business ID" if $cfg['business.id'].nil?
       delete('business/' + $cfg['business.id'] + '/solution/' + apiId)
+    end
+
+    #------------------------------------------------------------------------
+    def projects
+      raise "Missing Business ID" if $cfg['business.id'].nil?
+      get('business/' + $cfg['business.id'] + '/project/')
+    end
+
+    ## Create a new solution in the current business
+    def new_project(name)
+      raise "Missing Business ID" if $cfg['business.id'].nil?
+      # TODO name must be valid for domain names.
+      #raise "Solution name must be lowercase" if name.match(/[A-Z]/)
+
+      post('business/' + $cfg['business.id'] + '/project/', {:label=>name})
+    end
+
+    def delete_project(apiId)
+      raise "Missing Business ID" if $cfg['business.id'].nil?
+      delete('business/' + $cfg['business.id'] + '/project/' + apiId)
     end
 
   end
