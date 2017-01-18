@@ -47,7 +47,7 @@ RSpec.describe MrMurano::ConfigMigrate do
       expect(dafter).to eq(dbefore) # nothing new created.
     end
 
-    it "imports and modifies things"
+    #it "imports and modifies things"
   end
 
 end
