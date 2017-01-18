@@ -83,14 +83,14 @@ module MrMurano
       routes = data
       if routes == '' then
         verbose "No endpoints to import"
-      elsif File.dirname(routes) == '.' then
-        warning "Routes file #{File.basename(routes)} not in endpoints directory"
+      elsif ::File.dirname(routes) == '.' then
+        warning "Routes file #{::File.basename(routes)} not in endpoints directory"
         warning "Moving it to #{$cfg['location.endpoints']}"
         FileUtils.mkpath($cfg['location.endpoints'], @fuopts)
-        FileUtils.mv(routes, File.join($cfg['location.endpoints'], File.basename(routes)), @fuopts)
+        FileUtils.mv(routes, ::File.join($cfg['location.endpoints'], ::File.basename(routes)), @fuopts)
       else
         # Otherwise just use the location they already have
-        routeDir = File.dirname(routes)
+        routeDir = ::File.dirname(routes)
         verbose "For endpoints using #{routeDir}"
         if $cfg['location.endpoints'] != routeDir then
           $cfg.set('location.endpoints', routeDir)
@@ -102,7 +102,7 @@ module MrMurano
     def migrate_cors(data)
       verbose "Exporting CORS to #{$cfg['location.cors']}"
       unless $cfg['tool.dry'] then
-        File.open($cfg['location.cors'], 'w') do |cio|
+        ::File.open($cfg['location.cors'], 'w') do |cio|
           cio << sf['cors'].to_yaml
         end
       end
@@ -128,7 +128,7 @@ module MrMurano
             if aheader != dheader then
               verbose "Adding event header to #{path}"
               data.insert(0, dheader)
-              File.open(path, 'w'){|eio| eio.puts(data)}
+              ::File.open(path, 'w'){|eio| eio.puts(data)}
             end
           end
         end
@@ -159,7 +159,7 @@ module MrMurano
           error "Please move them manually to #{$cfg[cfgkey]}"
           exit(1)
         else
-          crd = File.join(crd)
+          crd = ::File.join(crd)
           verbose "For #{what} using #{crd}"
           if $cfg[cfgkey] != crd then
             $cfg.set(cfgkey, crd)
