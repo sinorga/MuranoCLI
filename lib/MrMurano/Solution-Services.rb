@@ -1,4 +1,5 @@
 require 'uri'
+require 'cgi'
 require 'net/http'
 require 'json'
 require 'yaml'
@@ -31,7 +32,7 @@ module MrMurano
     def fetch(name)
       raise "Missing name!" if name.nil?
       raise "Empty name!" if name.empty?
-      ret = get('/'+name)
+      ret = get('/'+CGI.escape(name))
       if block_given? then
         yield ret[:script]
       else
@@ -246,7 +247,7 @@ module MrMurano
     end
 
     def fetch(name)
-      ret = get('/'+name)
+      ret = get('/'+CGI.escape(name))
       if ret.nil? then
         error "Fetch for #{name} returned nil; skipping"
         return ''
