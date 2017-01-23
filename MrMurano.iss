@@ -7,7 +7,7 @@ ChangesEnvironment=yes
 OutputBaseFileName=MrMuranoSetup
 AppPublisher=Exosite
 AppPublisherURL=http://exosite.com/
-AppCopyright=Copyright (C) 2016 Exosite
+AppCopyright=Copyright (C) 2016-2017 Exosite
 LicenseFile=LICENSE.txt
 
 [Files]
