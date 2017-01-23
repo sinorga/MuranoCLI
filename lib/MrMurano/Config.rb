@@ -34,31 +34,66 @@ module MrMurano
     attr_reader :projectDir
 
     CFG_SCOPES=%w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
-    CFG_FILE_NAME = '.mrmuranorc'.freeze
-    CFG_DIR_NAME = '.mrmurano'.freeze
-    CFG_ALTRC_NAME = '.mrmurano/config'.freeze
+#    CFG_FILE_NAME = '.mrmuranorc'.freeze
+#    CFG_DIR_NAME = '.mrmurano'.freeze
+#    CFG_ALTRC_NAME = '.mrmurano/config'.freeze
+
+    # These are in order of preference
+    CFG_ENV_NAMES=%w{MURANO_CONFIGFILE MR_CONFIGFILE}.freeze
+    CFG_FILE_NAMES=%w[.murano/config .muranorc .mrmuranorc .mrmurano/config].freeze
+    CFG_DIR_NAMES=%w[.murano .mrmurano].freeze
+
+    def warning(msg)
+      $stderr.puts HighLine.color(msg, :yellow)
+    end
+
+    def pickCfg(from, at)
+      if (at + from.first).exist? then
+        return (at + from.first)
+      else
+        from[1..-1].each do |p|
+          if (at + p).exist? then
+            warning %{Using deprecated config file "#{p}", please rename to "#{from.first}"}
+            return (at+p)
+          end
+        end
+      end
+    end
 
     def initialize
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
-      unless ENV['MR_CONFIGFILE'].nil? then
-        # if it exists, must be a file
-        # if it doesn't exist, that's ok
-        ep = Pathname.new(ENV['MR_CONFIGFILE'])
-        if ep.file? or not ep.exist? then
-          @paths << ConfigFile.new(:env, ep)
+
+      CFG_ENV_NAMES.each_index do |idx|
+        envname = CFG_ENV_NAMES[idx]
+        unless ENV[envname].nil? then
+          # if it exists, must be a file
+          # if it doesn't exist, that's ok
+          ep = Pathname.new(ENV[envname])
+          if ep.file? or not ep.exist? then
+            @paths << ConfigFile.new(:env, ep)
+            if idx > 0 then
+              warning %{Using deprecated ENV var "#{envname}", please rename to #{CFG_ENV_NAMES[0]}}
+            end
+          end
         end
       end
+
       @projectDir = findProjectDir()
       unless @projectDir.nil? then
-        @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
+        @paths << ConfigFile.new(:project, pickCfg(CFG_FILE_NAMES, @projectDir))
         fixModes(@projectDir + CFG_DIR_NAME)
       else
-        @paths << ConfigFile.new(:project, Pathname.new(Dir.home) + CFG_FILE_NAME)
+        @paths << ConfigFile.new(:project, pickCfg(CFG_FILE_NAMES, Pathname.new(Dir.home)))
       end
-      @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
-      fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
+
+      @paths << ConfigFile.new(:user, pickCfg(CFG_FILE_NAMES, Pathname.new(Dir.home)))
+
+      CFG_DIR_NAMES.each do |dirname|
+        fixModes(Pathname.new(Dir.home) + dirname)
+      end
+
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
@@ -110,14 +145,13 @@ module MrMurano
     # The Project dir is the directory between PWD and HOME that has one of (in
     # order of preference):
     # - .mrmuranorc
-    # - .mrmuranorc.private
     # - .mrmurano/config
     # - .mrmurano/
     # - .git/
     def findProjectDir()
       result=nil
-      fileNames=[CFG_FILE_NAME, CFG_ALTRC_NAME]
-      dirNames=[CFG_DIR_NAME]
+      fileNames=CFG_FILE_NAMES
+      dirNames=CFG_DIR_NAMES
       home = Pathname.new(Dir.home).realpath
       pwd = Pathname.new(Dir.pwd).realpath
       return nil if home == pwd
@@ -137,15 +171,15 @@ module MrMurano
       end
 
       # If nothing found, do a last ditch try by looking for .git/
-      if result.nil? then
-        pwd.dirname.ascend do |i|
-          break unless result.nil?
-          break if i == home
-          if (i + '.git').directory? then
-            result = i
-          end
-        end
-      end
+#      if result.nil? then
+#        pwd.dirname.ascend do |i|
+#          break unless result.nil?
+#          break if i == home
+#          if (i + '.git').directory? then
+#            result = i
+#          end
+#        end
+#      end
 
       # Now if nothing found, assume it will live in pwd.
       result = Pathname.new(Dir.pwd) if result.nil?
