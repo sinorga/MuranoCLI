@@ -118,37 +118,60 @@ this.is.a.host:
     end
   end
 
-  it "Uses ENV instead" do
-    Tempfile.open('test') do |tf|
-      tf << %{---
-this.is.a.host:
-  user: password
-}
-      tf.close
-
-      ENV['MR_PASSWORD'] = 'a test!'
-      pwd = MrMurano::Passwords.new( tf.path )
-      pwd.load
-      ps = pwd.get('this.is.a.host', 'user')
-      expect(ps).to eq('a test!')
+  context "Uses ENV" do
+    before(:example) do
       ENV['MR_PASSWORD'] = nil
     end
-  end
-
-  it "Uses ENV instead, even with empty file" do
-    Tempfile.open('test') do |tf|
-      tf.close
-
-      ENV['MR_PASSWORD'] = 'a test!'
-      pwd = MrMurano::Passwords.new( tf.path )
-      pwd.load
-      ps = pwd.get('this.is.a.host', 'user')
-      expect(ps).to eq('a test!')
+    after(:example) do
       ENV['MR_PASSWORD'] = nil
+    end
 
-      data = IO.read(tf.path)
-      expect(data).to eq('')
+    it "Uses ENV instead" do
+      Tempfile.open('test') do |tf|
+        tf << %{---
+this.is.a.host:
+  user: password
+        }
+        tf.close
 
+        ENV['MURANO_PASSWORD'] = 'a test!'
+        pwd = MrMurano::Passwords.new( tf.path )
+        pwd.load
+        expect(pwd).not_to receive(:warning)
+        ps = pwd.get('this.is.a.host', 'user')
+        expect(ps).to eq('a test!')
+        ENV['MURANO_PASSWORD'] = nil
+      end
+    end
+
+    it "Uses ENV instead, even with empty file" do
+      Tempfile.open('test') do |tf|
+        tf.close
+
+        ENV['MURANO_PASSWORD'] = 'a test!'
+        pwd = MrMurano::Passwords.new( tf.path )
+        pwd.load
+        expect(pwd).not_to receive(:warning)
+        ps = pwd.get('this.is.a.host', 'user')
+        expect(ps).to eq('a test!')
+        ENV['MURANO_PASSWORD'] = nil
+
+        data = IO.read(tf.path)
+        expect(data).to eq('')
+      end
+    end
+
+    it "Warns about migrating" do
+      Tempfile.open('test') do |tf|
+        tf.close
+
+        ENV['MR_PASSWORD'] = 'a test!'
+        pwd = MrMurano::Passwords.new( tf.path )
+        pwd.load
+        expect(pwd).to receive(:warning).once
+        ps = pwd.get('this.is.a.host', 'user')
+        expect(ps).to eq('a test!')
+      end
     end
   end
 
