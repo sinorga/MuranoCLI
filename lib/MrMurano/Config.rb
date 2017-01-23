@@ -39,9 +39,9 @@ module MrMurano
     CFG_FILE_NAME=%[.murano/config].freeze
     CFG_DIR_NAME=%[.murano].freeze
 
-    CFG_OLD_ENV_NAMES=%w[MR_PASSWORD MR_CONFIGFILE].freeze
-    CFG_OLD_FILE_NAMES=%w[.muranorc .mrmuranorc .mrmurano/config].freeze
-    CFG_OLD_DIR_NAMES=%w[.mrmurano].freeze
+    CFG_OLD_ENV_NAME=%[MR_CONFIGFILE].freeze
+    CFG_OLD_DIR_NAME=%[.mrmurano].freeze
+    CFG_OLD_FILE_NAME=%[.mrmuranorc].freeze
 
     def warning(msg)
       $stderr.puts HighLine.color(msg, :yellow)
@@ -50,21 +50,30 @@ module MrMurano
       $stderr.puts HighLine.color(msg, :red)
     end
 
-    def failForOldENVs
-      CFG_OLD_ENV_NAMES.each do |en|
-        unless ENV[en].nil? then
-          error %{ENV "#{en}" is no longer supported. Rename it to "#{en.sub(/MR/,'MURANO')}"}
-          exit(-4)
+    def migrateOldEnv
+      unless ENV[CFG_OLD_ENV_NAME].nil? then
+        warning %{ENV "#{CFG_OLD_ENV_NAME}" is no longer supported. Rename it to "#{CFG_ENV_NAME}"}
+        unless ENV[CFG_ENV_NAME].nil? then
+          error %{Both "#{CFG_ENV_NAME}" and "#{CFG_OLD_ENV_NAME}" defined, please remove "#{CFG_OLD_ENV_NAME}".}
         end
+        ENV[CFG_ENV_NAME] = ENV[CFG_OLD_ENV_NAME]
       end
     end
-    def failForOldCfgNames(where)
-      CFG_OLD_FILE_NAMES.each do |cn|
-        if (where + cn).exist? then
-          error %{ConfigFile name "#{cn}" at "#{where}" is no longer supported. Rename it to "#{CFG_FILE_NAME}"}
-          exit(-5)
-        end
+
+    def migrateOldConfig(where)
+      # Check for dir.
+      if (where + CFG_OLD_DIR_NAME).exist? then
+        warning %{Moving old directory "#{CFG_OLD_DIR_NAME}" to "#{CFG_DIR_NAME}" in "#{where}"}
+        (where + CFG_OLD_DIR_NAME).rename(where + CFG_DIR_NAME)
       end
+
+      # check for cfg.
+      if (where + CFG_OLD_FILE_NAME).exist? then
+        warning %{Moving old config "#{CFG_OLD_FILE_NAME}" to "#{CFG_FILE_NAME}" in "#{where}"}
+        (where + CFG_DIR_NAME).mkpath
+        (where + CFG_OLD_FILE_NAME).rename(where + CFG_FILE_NAME)
+      end
+
     end
 
     def initialize
@@ -72,8 +81,7 @@ module MrMurano
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
 
-      failForOldENVs
-
+      migrateOldEnv
       unless ENV[CFG_ENV_NAME].nil? then
         # if it exists, must be a file
         # if it doesn't exist, that's ok
@@ -84,11 +92,11 @@ module MrMurano
       end
 
       @projectDir = findProjectDir()
-      failForOldCfgNames(@projectDir)
+      migrateOldConfig(@projectDir)
       @paths << ConfigFile.new(:project,  @projectDir + CFG_FILE_NAME)
       fixModes(@projectDir + CFG_DIR_NAME)
 
-      failForOldCfgNames(Pathname.new(Dir.home))
+      migrateOldConfig(Pathname.new(Dir.home))
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
 
@@ -142,13 +150,14 @@ module MrMurano
     #
     # The Project dir is the directory between PWD and HOME that has one of (in
     # order of preference):
-    # - .muranorc
     # - .murano/config
+    # - .mrmuranorc
     # - .murano/
+    # - .mrmurano/
     def findProjectDir()
       result=nil
-      fileNames=CFG_OLD_FILE_NAMES.dup.unshift(CFG_FILE_NAME)
-      dirNames=CFG_OLD_DIR_NAMES.dup.unshift(CFG_DIR_NAME)
+      fileNames=[CFG_FILE_NAME, CFG_OLD_FILE_NAME]
+      dirNames=[CFG_DIR_NAME, CFG_OLD_DIR_NAME]
       home = Pathname.new(Dir.home).realpath
       pwd = Pathname.new(Dir.pwd).realpath
       return home if home == pwd
@@ -166,17 +175,6 @@ module MrMurano
           end
         end
       end
-
-      # If nothing found, do a last ditch try by looking for .git/
-#      if result.nil? then
-#        pwd.dirname.ascend do |i|
-#          break unless result.nil?
-#          break if i == home
-#          if (i + '.git').directory? then
-#            result = i
-#          end
-#        end
-#      end
 
       # Now if nothing found, assume it will live in pwd.
       result = Pathname.new(Dir.pwd) if result.nil?
