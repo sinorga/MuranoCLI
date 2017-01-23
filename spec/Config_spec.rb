@@ -47,7 +47,7 @@ RSpec.describe MrMurano::Config do
       expect(cfg['bob.test']).to eq('twelve')
       expect(cfg.get('bob.test', :project)).to eq('twelve')
 
-      expect(FileTest.exist?(@projectDir + '.mrmuranorc'))
+      expect(FileTest.exist?(@projectDir + '.murano/config'))
 
       #reload
       cfg = MrMurano::Config.new
@@ -64,7 +64,7 @@ RSpec.describe MrMurano::Config do
       expect(cfg['bob.test']).to eq('twelve')
       expect(cfg.get('bob.test', :user)).to eq('twelve')
 
-      expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+      expect(FileTest.exist?(ENV['HOME'] + '.murano/config'))
 
       #reload
       cfg = MrMurano::Config.new
@@ -91,7 +91,7 @@ RSpec.describe MrMurano::Config do
         cfg = MrMurano::Config.new
         cfg.load
         path = cfg.file_at('testfile').realdirpath
-        want = Pathname.new(@projectDir + '/.mrmurano/testfile').realdirpath
+        want = Pathname.new(@projectDir + '/.murano/testfile').realdirpath
 
         expect(path).to eq(want)
       end
@@ -100,7 +100,7 @@ RSpec.describe MrMurano::Config do
         cfg = MrMurano::Config.new
         cfg.load
         path = cfg.file_at('testfile', :user).realdirpath
-        want = Pathname.new(Dir.home + '/.mrmurano/testfile').realdirpath
+        want = Pathname.new(Dir.home + '/.murano/testfile').realdirpath
 
         expect(path).to eq(want)
       end
@@ -130,9 +130,13 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    context "ENV['MR_CONFIGFILE']" do
+    context "ENV['MURANO_CONFIGFILE']" do
+      after(:example) do
+        ENV['MURANO_CONFIGFILE'] = nil
+      end
+
       it "loads file in env" do
-        ENV['MR_CONFIGFILE'] = @tmpdir + '/home/test.config'
+        ENV['MURANO_CONFIGFILE'] = @tmpdir + '/home/test.config'
         File.open(@tmpdir + '/home/test.config', 'w') do |io|
           io << %{[test]
             bob = test
@@ -145,12 +149,12 @@ RSpec.describe MrMurano::Config do
       end
 
       it "will create file at env" do
-        ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
+        ENV['MURANO_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
         cfg = MrMurano::Config.new
         cfg.load
         cfg.set('coffee.hot', 'yes', :env)
 
-        expect(FileTest.exist?(ENV['MR_CONFIGFILE']))
+        expect(FileTest.exist?(ENV['MURANO_CONFIGFILE']))
 
         #reload
         cfg = MrMurano::Config.new
