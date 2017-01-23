@@ -206,13 +206,14 @@ RSpec.describe MrMurano::Config do
     end
   end
 
-  context "Can find the project directory by .mrmuranorc" do
+  context "Can find the project directory by .murano/config" do
     before(:example) do
       @tmpdir = Dir.tmpdir
       path = '/home/work/project/some/where'
       @projectDir = @tmpdir + '/home/work/project'
       FileUtils.mkpath(@tmpdir + path)
-      FileUtils.touch(@projectDir + '/.mrmuranorc')
+      FileUtils.mkpath(@projectDir + '/.murano')
+      FileUtils.touch(@projectDir + '/.murano/config')
 
       # Set ENV to override output of Dir.home
       ENV['HOME'] = @tmpdir + '/home'
@@ -245,13 +246,13 @@ RSpec.describe MrMurano::Config do
     end
   end
 
-  context "Can find the project directory by .mrmurano/" do
+  context "Can find the project directory by .murano/" do
     before(:example) do
       @tmpdir = Dir.tmpdir
       path = '/home/work/project/some/where'
       @projectDir = @tmpdir + '/home/work/project'
       FileUtils.mkpath(@tmpdir + path)
-      FileUtils.mkpath(@projectDir + '/.mrmurano')
+      FileUtils.mkpath(@projectDir + '/.murano')
 
       # Set ENV to override output of Dir.home
       ENV['HOME'] = @tmpdir + '/home'
@@ -307,7 +308,7 @@ RSpec.describe MrMurano::Config do
         expect(cfg['bob.test']).to eq('twelve')
         expect(cfg.get('bob.test', :user)).to eq('twelve')
 
-        expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+        expect(FileTest.exist?(ENV['HOME'] + '/.murano/config')).to be true
 
         #reload
         cfg = MrMurano::Config.new
@@ -326,7 +327,7 @@ RSpec.describe MrMurano::Config do
         expect(cfg['bob.test']).to eq('twelve')
         expect(cfg.get('bob.test', :project)).to eq('twelve')
 
-        expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+        expect(FileTest.exist?(ENV['HOME'] + '/.murano/config')).to be true
 
         #reload
         cfg = MrMurano::Config.new
@@ -346,7 +347,7 @@ RSpec.describe MrMurano::Config do
         # :user won't have the new value until it is loaded again
         expect(cfg.get('bob.test', :project)).to eq('twelve')
 
-        expect(FileTest.exist?(ENV['HOME'] + '.mrmuranorc'))
+        expect(FileTest.exist?(ENV['HOME'] + '/.murano/config')).to be true
 
         #reload
         cfg = MrMurano::Config.new
