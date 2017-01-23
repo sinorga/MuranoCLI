@@ -19,6 +19,9 @@ users = users.yaml
 cors = cors.yaml
 specs = specs
 
+[sync]
+bydefault = files
+
 [files]
 default_page = index.html
 searchFor = **/*
@@ -42,6 +45,3 @@ spec = resources.yaml
 
 [diff]
 cmd = <%= Gem.win_platform? ? 'fc' : 'diff -u' %>
-
-[sync]
-bydefault = files
