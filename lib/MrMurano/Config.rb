@@ -1,5 +1,6 @@
 require 'pathname'
 require 'inifile'
+require 'highline'
 
 module MrMurano
   class Config
