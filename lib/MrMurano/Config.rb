@@ -93,10 +93,12 @@ module MrMurano
       @projectDir = findProjectDir()
       migrateOldConfig(@projectDir)
       @paths << ConfigFile.new(:project,  @projectDir + CFG_FILE_NAME)
+      (@projectDir + CFG_DIR_NAME).mkpath
       fixModes(@projectDir + CFG_DIR_NAME)
 
       migrateOldConfig(Pathname.new(Dir.home))
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
+      (Pathname.new(Dir.home) + CFG_DIR_NAME).mkpath
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
