@@ -6,9 +6,9 @@ module MrMurano
     #
     #  internal    transient this-run-only things (also -c options)
     #  specified   from --configfile
-    #  env         from ENV['MR_CONFIGFILE']
-    #  project     .mrmuranorc at project dir
-    #  user        .mrmuranorc at $HOME
+    #  env         from ENV['MURANO_CONFIGFILE']
+    #  project     .murano/config at project dir
+    #  user        .murano/config at $HOME
     #  defaults    Internal hardcoded defaults
     #
     ConfigFile = Struct.new(:kind, :path, :data) do
@@ -73,7 +73,6 @@ module MrMurano
         (where + CFG_DIR_NAME).mkpath
         (where + CFG_OLD_FILE_NAME).rename(where + CFG_FILE_NAME)
       end
-
     end
 
     def initialize
