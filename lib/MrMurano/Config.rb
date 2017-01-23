@@ -34,28 +34,35 @@ module MrMurano
     attr_reader :projectDir
 
     CFG_SCOPES=%w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
-#    CFG_FILE_NAME = '.mrmuranorc'.freeze
-#    CFG_DIR_NAME = '.mrmurano'.freeze
-#    CFG_ALTRC_NAME = '.mrmurano/config'.freeze
 
-    # These are in order of preference
-    CFG_ENV_NAMES=%w{MURANO_CONFIGFILE MR_CONFIGFILE}.freeze
-    CFG_FILE_NAMES=%w[.murano/config .muranorc .mrmuranorc .mrmurano/config].freeze
-    CFG_DIR_NAMES=%w[.murano .mrmurano].freeze
+    CFG_ENV_NAME=%{MURANO_CONFIGFILE}.freeze
+    CFG_FILE_NAME=%[.murano/config].freeze
+    CFG_DIR_NAME=%[.murano].freeze
+
+    CFG_OLD_ENV_NAMES=%w[MR_PASSWORD MR_CONFIGFILE].freeze
+    CFG_OLD_FILE_NAMES=%w[.muranorc .mrmuranorc .mrmurano/config].freeze
+    CFG_OLD_DIR_NAMES=%w[.mrmurano].freeze
 
     def warning(msg)
       $stderr.puts HighLine.color(msg, :yellow)
     end
+    def error(msg)
+      $stderr.puts HighLine.color(msg, :red)
+    end
 
-    def pickCfg(from, at)
-      if (at + from.first).exist? then
-        return (at + from.first)
-      else
-        from[1..-1].each do |p|
-          if (at + p).exist? then
-            warning %{Using deprecated config file "#{p}", please rename to "#{from.first}"}
-            return (at+p)
-          end
+    def failForOldENVs
+      CFG_OLD_ENV_NAMES.each do |en|
+        unless ENV[en].nil? then
+          error %{ENV "#{en}" is no longer supported. Rename it to "#{en.sub(/MR/,'MURANO')}"}
+          exit(-4)
+        end
+      end
+    end
+    def failForOldCfgNames(where)
+      CFG_OLD_FILE_NAMES.each do |cn|
+        if (where + cn).exist? then
+          error %{ConfigFile name "#{cn}" at "#{where}" is no longer supported. Rename it to "#{CFG_FILE_NAME}"}
+          exit(-5)
         end
       end
     end
@@ -65,34 +72,25 @@ module MrMurano
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
 
-      CFG_ENV_NAMES.each_index do |idx|
-        envname = CFG_ENV_NAMES[idx]
-        unless ENV[envname].nil? then
-          # if it exists, must be a file
-          # if it doesn't exist, that's ok
-          ep = Pathname.new(ENV[envname])
-          if ep.file? or not ep.exist? then
-            @paths << ConfigFile.new(:env, ep)
-            if idx > 0 then
-              warning %{Using deprecated ENV var "#{envname}", please rename to #{CFG_ENV_NAMES[0]}}
-            end
-          end
+      failForOldENVs
+
+      unless ENV[CFG_ENV_NAME].nil? then
+        # if it exists, must be a file
+        # if it doesn't exist, that's ok
+        ep = Pathname.new(ENV[CFG_ENV_NAME])
+        if ep.file? or not ep.exist? then
+          @paths << ConfigFile.new(:env, ep)
         end
       end
 
       @projectDir = findProjectDir()
-      unless @projectDir.nil? then
-        @paths << ConfigFile.new(:project, pickCfg(CFG_FILE_NAMES, @projectDir))
-        fixModes(@projectDir + CFG_DIR_NAME)
-      else
-        @paths << ConfigFile.new(:project, pickCfg(CFG_FILE_NAMES, Pathname.new(Dir.home)))
-      end
+      failForOldCfgNames(@projectDir)
+      @paths << ConfigFile.new(:project,  @projectDir + CFG_FILE_NAME)
+      fixModes(@projectDir + CFG_DIR_NAME)
 
-      @paths << ConfigFile.new(:user, pickCfg(CFG_FILE_NAMES, Pathname.new(Dir.home)))
-
-      CFG_DIR_NAMES.each do |dirname|
-        fixModes(Pathname.new(Dir.home) + dirname)
-      end
+      failForOldCfgNames(Pathname.new(Dir.home))
+      @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
+      fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
@@ -144,17 +142,16 @@ module MrMurano
     #
     # The Project dir is the directory between PWD and HOME that has one of (in
     # order of preference):
-    # - .mrmuranorc
-    # - .mrmurano/config
-    # - .mrmurano/
-    # - .git/
+    # - .muranorc
+    # - .murano/config
+    # - .murano/
     def findProjectDir()
       result=nil
-      fileNames=CFG_FILE_NAMES
-      dirNames=CFG_DIR_NAMES
+      fileNames=CFG_OLD_FILE_NAMES.dup.unshift(CFG_FILE_NAME)
+      dirNames=CFG_OLD_DIR_NAMES.dup.unshift(CFG_DIR_NAME)
       home = Pathname.new(Dir.home).realpath
       pwd = Pathname.new(Dir.pwd).realpath
-      return nil if home == pwd
+      return home if home == pwd
       pwd.dirname.ascend do |i|
         break unless result.nil?
         break if i == home
