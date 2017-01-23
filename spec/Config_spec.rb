@@ -162,6 +162,8 @@ RSpec.describe MrMurano::Config do
         expect(cfg['coffee.hot']).to eq('yes')
         expect(cfg.get('coffee.hot', :env)).to eq('yes')
       end
+
+      it "warns about migrating old ENV name"
     end
 
     it "dumps" do
@@ -355,6 +357,11 @@ RSpec.describe MrMurano::Config do
         expect(cfg.get('bob.test', :user)).to eq('twelve')
       end
     end
+  end
+
+  context "Warns about migrating old" do
+    it "config file name"
+    it "config directory name"
   end
 end
 
