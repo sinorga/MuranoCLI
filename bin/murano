@@ -56,12 +56,14 @@ $cfg.load
 
 # Look for plug-ins
 pgds = [
-  Pathname.new(Dir.home) + '.mrmurano' + 'plugins'
+  Pathname.new(Dir.home) + '.mrmurano' + 'plugins',
+  Pathname.new(Dir.home) + '.murano' + 'plugins'
 ]
 # Add plugin dirs from configs
 # This is run before the command line options are parsed, so need to check old way.
 if not ARGV.include? '--skip-plugins' then
   pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.has_key? 'MR_MURANO_PLUGIN_DIR'
+  pgds << Pathname.new(ENV['MURANO_PLUGIN_DIR']) if ENV.has_key? 'MURANO_PLUGIN_DIR'
   pgds.each do |path|
     next unless path.exist?
     path.each_child do |plugin|
