@@ -133,6 +133,7 @@ RSpec.describe MrMurano::Config do
     context "ENV['MURANO_CONFIGFILE']" do
       after(:example) do
         ENV['MURANO_CONFIGFILE'] = nil
+        ENV['MR_CONFIGFILE'] = nil
       end
 
       it "loads file in env" do
@@ -163,7 +164,11 @@ RSpec.describe MrMurano::Config do
         expect(cfg.get('coffee.hot', :env)).to eq('yes')
       end
 
-      it "warns about migrating old ENV name"
+      it "warns about migrating old ENV name" do
+        ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
+        expect_any_instance_of(MrMurano::Config).to receive(:warning).once
+        MrMurano::Config.new
+      end
     end
 
     it "dumps" do
