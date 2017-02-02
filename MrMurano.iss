@@ -11,7 +11,7 @@ AppCopyright=Copyright (C) 2016-2017 Exosite
 LicenseFile=LICENSE.txt
 
 [Files]
-Source: "mr.exe"; DestDir: "{app}\bin"
+Source: "murano.exe"; DestDir: "{app}\bin"
 Source: "LICENSE.txt"; DestDir: "{app}"
 Source: "ReadMe.txt"; DestDir: "{app}"; Flags: isreadme
 
