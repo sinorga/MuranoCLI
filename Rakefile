@@ -42,6 +42,7 @@ namespace :git do
     task :all => [:origin, :upstream]
 end
 
+desc "Build, install locally, and push gem"
 task :gemit do
     mrt=Bundler::GemHelper.gemspec.version
     sh %{git checkout v#{mrt}}
