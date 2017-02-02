@@ -21,55 +21,111 @@ RSpec.describe MrMurano::Cors do
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors/")
   end
 
-  it "lists" do
-    cors = {:origin=>true,
-            :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
-            :headers=>["Content-Type","Cookie","Authorization"],
-            :credentials=>true}
-    body = {:cors=>cors.to_json}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
+  context "when server gives string" do
+    it "lists" do
+      cors = {:origin=>true,
+              :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
+              :headers=>["Content-Type","Cookie","Authorization"],
+              :credentials=>true}
+      body = {:cors=>cors.to_json}
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: body.to_json)
 
-    ret = @srv.list()
-    expect(ret).to eq([cors.merge({:id=>'cors'})])
+      ret = @srv.list()
+      expect(ret).to eq([cors.merge({:id=>'cors'})])
+    end
+
+    context "fetches" do
+      it "as a hash" do
+        cors = {:origin=>true,
+                :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
+                :headers=>["Content-Type","Cookie","Authorization"],
+                :credentials=>true}
+        body = {:cors=>cors.to_json}
+        stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors").
+          with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                          'Content-Type'=>'application/json'}).
+                          to_return(body: body.to_json)
+
+        ret = @srv.fetch()
+        expect(ret).to eq(cors)
+      end
+      it "as a block" do
+        cors = {:origin=>true,
+                :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
+                :headers=>["Content-Type","Cookie","Authorization"],
+                :credentials=>true}
+        body = {:cors=>cors.to_json}
+        stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors").
+          with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                          'Content-Type'=>'application/json'}).
+                          to_return(body: body.to_json)
+
+        ret = ''
+        loops = 0
+        @srv.fetch() do |chunk|
+          loops += 1
+          ret << chunk
+          expect(loops).to be <= 1
+        end
+        expect(ret).to eq(Hash.transform_keys_to_strings(cors).to_yaml)
+      end
+    end
   end
 
-  context "fetches" do
-    it "as a hash" do
+  context "when server gives object" do
+    it "lists" do
       cors = {:origin=>true,
               :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
               :headers=>["Content-Type","Cookie","Authorization"],
               :credentials=>true}
-      body = {:cors=>cors.to_json}
+      body = cors
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
 
-      ret = @srv.fetch()
-      expect(ret).to eq(cors)
+      ret = @srv.list()
+      expect(ret).to eq([cors.merge({:id=>'cors'})])
     end
-    it "as a block" do
-      cors = {:origin=>true,
-              :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
-              :headers=>["Content-Type","Cookie","Authorization"],
-              :credentials=>true}
-      body = {:cors=>cors.to_json}
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors").
-        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                        'Content-Type'=>'application/json'}).
-                        to_return(body: body.to_json)
 
-      ret = ''
-      loops = 0
-      @srv.fetch() do |chunk|
-        loops += 1
-        ret << chunk
-        expect(loops).to be <= 1
+    context "fetches" do
+      it "as a hash" do
+        cors = {:origin=>true,
+                :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
+                :headers=>["Content-Type","Cookie","Authorization"],
+                :credentials=>true}
+        body = cors
+        stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors").
+          with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                          'Content-Type'=>'application/json'}).
+                          to_return(body: body.to_json)
+
+        ret = @srv.fetch()
+        expect(ret).to eq(cors)
       end
-      expect(ret).to eq(Hash.transform_keys_to_strings(cors).to_yaml)
+      it "as a block" do
+        cors = {:origin=>true,
+                :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
+                :headers=>["Content-Type","Cookie","Authorization"],
+                :credentials=>true}
+        body = cors
+        stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors").
+          with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                          'Content-Type'=>'application/json'}).
+                          to_return(body: body.to_json)
+
+        ret = ''
+        loops = 0
+        @srv.fetch() do |chunk|
+          loops += 1
+          ret << chunk
+          expect(loops).to be <= 1
+        end
+        expect(ret).to eq(Hash.transform_keys_to_strings(cors).to_yaml)
+      end
     end
   end
 
