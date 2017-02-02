@@ -13,6 +13,11 @@ product definitions at once, set up endpoints and APIs, and more.
 MrMurano works around the idea of syncing, much like rsync.  Files from your project
 directory are synced up (or down) from Murano.
 
+!!!!!
+The upcoming release of 2.0 will include some breaking changes.  The most noticable
+of which is the command will be renamed from `mr` to `murano`.
+!!!!!
+
 ## Usage
 
 ### To start from an existing project in Murano
@@ -48,6 +53,9 @@ Then deploy with `murano syncup`
 
 ## Install
 
+When upgrading from a 1.\* version to a 2.0, you should uninstall the old versions
+first. `gem uninstall MrMurano`
+
 ```
 > gem install MrMurano
 ```
@@ -72,9 +80,11 @@ to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 The MrMurano gem will install on Windows.  There is also a single Windows binary
 Setup installer availible in [releases](https://github.com/exosite/MrMurano/releases)
 
-You can install Ruby on Windows with [RubyInstaller](http://rubyinstaller.org).
-You might run into a [known SSL cert issue](http://guides.rubygems.org/ssl-certificate-update/).
-If so follow the steps there to update the certs.
+If you do not already use Ruby on Windows, then you should use the binary
+installer.
+
+When upgrading, it is best to run the uninstaller for the old version before
+installing the new version.
 
 
 ## Features
