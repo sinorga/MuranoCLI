@@ -360,28 +360,19 @@ RSpec.describe MrMurano::Config do
   end
 
   context "Warns about migrating old" do
-    before(:example) do
-      @tmpdir = Dir.tmpdir
-      path = '/home/work/project/some/where'
-      @projectDir = @tmpdir + '/home/work/project'
-      FileUtils.mkpath(@tmpdir + path)
-      FileUtils.touch(@projectDir + '/.mrmuranorc')
-
-      # Set ENV to override output of Dir.home
-      ENV['HOME'] = @tmpdir + '/home'
-    end
-
-    after(:example) do
-      FileUtils.remove_dir(@tmpdir + '/home', true) if FileTest.exist? @tmpdir
-    end
+    include_context "WORKSPACE"
 
     it "config file name" do
-      # TODO: blar, remember how to do this.
-      expect(instance_double(MrMurano::Config)).to receive(:warning).once
-      cfg = MrMurano::Config.new
+      FileUtils.touch(@projectDir + '/.mrmuranorc')
+      expect_any_instance_of(MrMurano::Config).to receive(:warning).once
+      MrMurano::Config.new
     end
 
-    it "config directory name"
+    it "config directory name" do
+      FileUtils.mkpath(@projectDir + '/.mrmurano')
+      expect_any_instance_of(MrMurano::Config).to receive(:warning).once
+      MrMurano::Config.new
+    end
   end
 end
 
