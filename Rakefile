@@ -123,7 +123,7 @@ if Gem.win_platform? then
     task :wexe => ['murano.exe']
 
     desc 'Run rspec on cmd tests using murano.exe'
-    task :mr_exe_test => ['murano.exe'] do
+    task :murano_exe_test => ['murano.exe'] do
         Dir.mkdir("report") unless File.directory?("report")
         ENV['CI_MR_EXE'] = '1'
         files = Dir[File.join('spec', 'cmd_*_spec.rb')]
