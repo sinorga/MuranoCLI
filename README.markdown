@@ -13,10 +13,11 @@ product definitions at once, set up endpoints and APIs, and more.
 MrMurano works around the idea of syncing, much like rsync.  Files from your project
 directory are synced up (or down) from Murano.
 
-!!!!!
+!!!!! *IMPORTANT*
+
 The upcoming release of 2.0 will include some breaking changes.  The most noticable
 of which is the command will be renamed from `mr` to `murano`.
-!!!!!
+
 
 ## Usage
 
