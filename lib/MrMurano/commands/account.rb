@@ -16,6 +16,7 @@ command :account do |c|
     acc = MrMurano::Account.new
 
     if options.businesses then
+      acc.warning "--business is deprecated; please use `mr business list` instead"
       data = acc.businesses
       if options.idonly then
         say data.map{|row| row[:bizid]}.join(' ')
@@ -26,6 +27,7 @@ command :account do |c|
       end
 
     elsif options.products then
+      acc.warning "--products is deprecated; please use `mr products list` instead"
       data = acc.products
       if options.idonly then
         say data.map{|row| row[:pid]}.join(' ')
@@ -36,6 +38,7 @@ command :account do |c|
       end
 
     elsif options.solutions then
+      acc.warning "--solutions is deprecated; please use `mr solutions list` instead"
       data = acc.solutions
       if options.idonly then
         say data.map{|row| row[:apiId]}.join(' ')
