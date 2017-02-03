@@ -18,7 +18,7 @@ command 'business list' do |c|
 
     if options.idonly then
       headers = [:bizid]
-      data = data.map{|row| [row[:modelId]]}
+      data = data.map{|row| [row[:bizid]]}
     elsif not options.all then
       headers = [:bizid, :role, :name]
       data = data.map{|r| [r[:bizid], r[:role], r[:name]]}
