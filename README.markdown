@@ -55,7 +55,12 @@ Then deploy with `murano syncup`
 ## Install
 
 When upgrading from a 1.\* version to a 2.0, you should uninstall the old versions
-first. `gem uninstall MrMurano`
+first.
+```
+> gem uninstall MrMurano`
+```
+
+And then install:
 
 ```
 > gem install MrMurano
