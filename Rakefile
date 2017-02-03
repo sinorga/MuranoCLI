@@ -94,7 +94,7 @@ end
 desc "Prints a cmd to test this in another directory"
 task :testwith do
     pwd=Dir.pwd.sub(Dir.home, '~')
-    puts "ruby -I#{pwd}/lib #{pwd}/bin/mr "
+    puts "ruby -I#{pwd}/lib #{pwd}/bin/murano "
 end
 
 desc 'Run RSpec'
@@ -113,30 +113,30 @@ file "ReadMe.txt" => ['README.markdown'] do |t|
 end
 
 if Gem.win_platform? then
-    file 'mr.exe' => Dir['lib/MrMurano/**/*.rb'] do
+    file 'murano.exe' => Dir['lib/MrMurano/**/*.rb'] do
         # Need to find all dlls, because ocra isn't finding them for some reason.
         gemdir = `gem env gemdir`.chomp
         gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
         ENV['RUBYLIB'] = 'lib'
-        sh %{ocra bin/mr #{gemdlls.join(' ')}}
+        sh %{ocra bin/murano #{gemdlls.join(' ')}}
     end
-    task :wexe => ['mr.exe']
+    task :wexe => ['murano.exe']
 
-    desc 'Run rspec on cmd tests using mr.exe'
-    task :mr_exe_test => ['mr.exe'] do
+    desc 'Run rspec on cmd tests using murano.exe'
+    task :mr_exe_test => ['murano.exe'] do
         Dir.mkdir("report") unless File.directory?("report")
         ENV['CI_MR_EXE'] = '1'
         files = Dir[File.join('spec', 'cmd_*_spec.rb')]
-        sh %{rspec --format html --out report/mr_exe.html --format progress #{files.join(' ')}}
+        sh %{rspec --format html --out report/murano_exe.html --format progress #{files.join(' ')}}
     end
-    task :test => [:mr_exe_test]
+    task :test => [:murano_exe_test]
 
     installerName = "Output/MrMurano-#{Bundler::GemHelper.gemspec.version.to_s}-Setup.exe"
 
     desc "Build a Windows installer for MrMurano"
     task :inno => [installerName]
 
-    file "Output/MrMuranoSetup.exe" => ['mr.exe', 'ReadMe.txt'] do
+    file "Output/MrMuranoSetup.exe" => ['murano.exe', 'ReadMe.txt'] do
         ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version.to_s
         sh %{"C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MrMurano.iss}
     end
