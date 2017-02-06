@@ -19,7 +19,7 @@ RSpec.describe 'mr init' do
   it "Asks to import if Solutionfile exists" do
     FileUtils.touch('Solutionfile.json')
     out, err, status = Open3.capture3(capcmd('murano', 'init', '--trace'), :stdin_data=>'y')
-    expect(out).to eq("\nA Solutionfile.json exists, Do you want exit and run `mr config import` instead? [yN]\n")
+    expect(out).to eq("\nA Solutionfile.json exists, Do you want exit and run `murano config import` instead? [yN]\n")
     expect(err).to eq("")
     expect(status.exitstatus).to eq(0)
   end
