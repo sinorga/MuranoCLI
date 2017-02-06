@@ -64,7 +64,7 @@ module MrMurano
       maxid = ((calls.max_by{|c| c[:id] or 0 }[:id]) or 0)
       calls.map!{|c| c[:id] = (maxid += 1) unless c.has_key?(:id); c}
       post('', {
-        :auth=>{:client_id=>cid},
+        :auth=>(cid ? {:client_id=>cid} : {}),
         :calls=>calls
       })
     end
