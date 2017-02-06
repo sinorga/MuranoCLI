@@ -48,7 +48,7 @@ module MrMurano
       return ENV['MURANO_PASSWORD'] unless ENV['MURANO_PASSWORD'].nil?
       unless ENV['MR_PASSWORD'].nil? then
         warning %{Using depercated ENV "MR_PASSWORD", please rename to "MURANO_PASSWORD"}
-        return ENV['MR_PASSWORD'] 
+        return ENV['MR_PASSWORD']
       end
       return nil unless @data.kind_of? Hash
       return nil unless @data.has_key? host
