@@ -2,16 +2,18 @@ require 'MrMurano/version'
 require 'MrMurano/verbosing'
 require 'MrMurano/hash'
 require 'MrMurano/http'
+
 require 'MrMurano/Config'
 require 'MrMurano/Account'
 
 require 'MrMurano/Solution'
-require 'MrMurano/Solution-Cors'
-require 'MrMurano/Solution-Endpoint'
-require 'MrMurano/Solution-File'
 require 'MrMurano/Solution-Services'
-require 'MrMurano/Solution-Users'
 require 'MrMurano/Solution-ServiceConfig'
+
+require 'MrMurano/Solution-Cors' # service/{pid}/webservice/
+require 'MrMurano/Solution-Endpoint' # service/{pid}/webservice/
+require 'MrMurano/Solution-File' # service/{pid}/webservice/
+require 'MrMurano/Solution-Users' # service/{pid}/webservice/
 
 require 'MrMurano/Product'
 require 'MrMurano/Product-1P-Device'
