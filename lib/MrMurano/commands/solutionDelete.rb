@@ -1,7 +1,7 @@
 require 'MrMurano/Account'
 
 command 'solution delete' do |c|
-  c.syntax = %{mr solution delete <solution id>}
+  c.syntax = %{murano solution delete <solution id>}
   c.description = %{Delete a solution}
 
   c.action do |args, options|

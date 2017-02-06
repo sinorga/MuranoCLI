@@ -1,7 +1,7 @@
 require 'MrMurano/Account'
 
 command 'product delete' do |c|
-  c.syntax = %{mr product delete <product>}
+  c.syntax = %{murano product delete <product>}
   c.summary = %{Delete a product}
   c.description = %{Delete a product}
 

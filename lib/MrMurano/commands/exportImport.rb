@@ -6,7 +6,7 @@ require 'MrMurano/dir'
 require 'MrMurano/Account'
 
 command 'config export' do |c|
-  c.syntax = %{mr config export}
+  c.syntax = %{murano config export}
   c.summary = %{Export data to Solutionfiles}
   c.description = %{Export data to Solutionfiles
 
@@ -94,7 +94,7 @@ command 'config export' do |c|
 end
 
 command :migrate do |c|
-  c.syntax = %{mr migrate}
+  c.syntax = %{murano migrate}
   c.summary = %{Mirgrate a project}
   c.description = %{Migrate a project from Solutionfiles
 
@@ -113,7 +113,7 @@ command :migrate do |c|
     cm.import_secret
 
     say "Configuration items have been imported."
-    #say "Use `mr syncdown` get get all endpoints, modules, and event handlers"
+    #say "Use `murano syncdown` get get all endpoints, modules, and event handlers"
   end
 
 end

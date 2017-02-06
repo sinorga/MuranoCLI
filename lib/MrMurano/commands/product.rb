@@ -1,7 +1,7 @@
 require 'MrMurano/SubCmdGroupContext'
 
 command :product do |c|
-  c.syntax = %{mr product}
+  c.syntax = %{murano product}
   c.summary = %{About Product}
   c.description = %{Sub-commands for working with Products}
 

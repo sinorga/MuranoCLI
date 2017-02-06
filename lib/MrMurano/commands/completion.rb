@@ -90,14 +90,14 @@ class ::Commander::Runner
 end
 
 command :completion do |c|
-  c.syntax = %{mr completion}
+  c.syntax = %{murano completion}
   c.summary = %{Generate a completion file}
   c.description = %{For starts, this is zsh only. Because that is what I use.
 
-eval "$(mr completion)"
+eval "$(murano completion)"
 or
-mr completion > _mr
-source _mr
+murano completion > _murano
+source _murano
 }
   c.option '--subs', 'List sub commands'
   #c.option '--opts CMD', 'List options for subcommand'

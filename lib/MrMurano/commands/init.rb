@@ -2,7 +2,7 @@ require 'MrMurano/Account'
 
 
 command :init do |c|
-  c.syntax = %{mr init}
+  c.syntax = %{murano init}
   c.summary = %{The easy way to start a project}
   c.description = %{}
 
@@ -20,7 +20,7 @@ command :init do |c|
     end
 
     if not options.force and ($cfg['location.base'] + 'Solutionfile.json').exist? then
-      y=ask("A Solutionfile.json exists, Do you want exit and run `mr config import` instead? [yN]")
+      y=ask("A Solutionfile.json exists, Do you want exit and run `murano config import` instead? [yN]")
       exit 0 unless y =~ /^n/i
     end
 

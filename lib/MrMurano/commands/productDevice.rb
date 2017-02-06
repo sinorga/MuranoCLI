@@ -1,7 +1,7 @@
 require 'MrMurano/Product-1P-Device'
 
 command 'product device' do |c|
-  c.syntax = %{mr product device}
+  c.syntax = %{murano product device}
   c.summary = %{Interact with a device in a product}
   c.description = %{}
 
@@ -12,7 +12,7 @@ command 'product device' do |c|
 end
 
 command 'product device read' do |c|
-  c.syntax = %{mr product device read <identifier> (<resources>)}
+  c.syntax = %{murano product device read <identifier> (<resources>)}
   c.summary = %{Read recources on a device}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
@@ -35,7 +35,7 @@ command 'product device read' do |c|
 end
 
 command 'product device twee' do |c|
-  c.syntax = %{mr product device twee <identifier>}
+  c.syntax = %{murano product device twee <identifier>}
   c.summary = %{Show info about a device}
 
 
@@ -65,7 +65,7 @@ command 'product device twee' do |c|
 end
 
 command 'product device delete' do |c|
-  c.syntax = %{mr product device delete <identifier>}
+  c.syntax = %{murano product device delete <identifier>}
   c.summary = %{Delete a device}
 
   c.action do |args,options|

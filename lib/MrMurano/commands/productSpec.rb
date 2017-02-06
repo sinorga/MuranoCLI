@@ -5,7 +5,7 @@ require 'yaml'
 require 'terminal-table'
 
 command 'product spec' do |c|
-  c.syntax = %{mr product spec}
+  c.syntax = %{murano product spec}
   c.summary = %{About Product Specs}
   c.description = %{Some utility for working with prodcut specification files.}
 
@@ -16,7 +16,7 @@ command 'product spec' do |c|
 end
 
 command 'product spec convert' do |c|
-  c.syntax = %{mr product spec convert FILE}
+  c.syntax = %{murano product spec convert FILE}
   c.summary = %{Convert exoline spec file into Murano format}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
@@ -31,11 +31,11 @@ command 'product spec convert' do |c|
 end
 
 command 'product spec push' do |c|
-  c.syntax = %{mr product spec push [--file FILE]}
+  c.syntax = %{murano product spec push [--file FILE]}
   c.summary = %{Upload a new specification for a product [Deprecated]}
   c.description = %{Convert exoline spec file into Murano format
 
-This is deprecated.  Use `mr syncup --specs` instead.
+This is deprecated.  Use `murano syncup --specs` instead.
   }
 
   c.option '--file FILE', "The spec file to upload"
@@ -47,7 +47,7 @@ This is deprecated.  Use `mr syncup --specs` instead.
 
   c.action do |args, options|
     prd = MrMurano::Product.new
-    prd.warning "This is deprecated.  Use `mr syncup --specs` instead."
+    prd.warning "This is deprecated.  Use `murano syncup --specs` instead."
 
     file = $cfg['product.spec']
     prid = $cfg['product.id']
@@ -63,7 +63,7 @@ This is deprecated.  Use `mr syncup --specs` instead.
 end
 
 command 'product spec pull' do |c|
-  c.syntax = %{mr product spec pull [--output FILE]}
+  c.syntax = %{murano product spec pull [--output FILE]}
   c.summary = %{Pull down the specification for a product}
 
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
