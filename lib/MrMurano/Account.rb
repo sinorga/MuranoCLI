@@ -10,6 +10,7 @@ require 'MrMurano/verbosing'
 
 module MrMurano
   class Passwords
+    include Verbose
     def initialize(path)
       path = Pathname.new(path) unless path.kind_of? Pathname
       @path = path
@@ -44,7 +45,11 @@ module MrMurano
       return
     end
     def get(host, user)
-      return ENV['MR_PASSWORD'] unless ENV['MR_PASSWORD'].nil?
+      return ENV['MURANO_PASSWORD'] unless ENV['MURANO_PASSWORD'].nil?
+      unless ENV['MR_PASSWORD'].nil? then
+        warning %{Using depercated ENV "MR_PASSWORD", please rename to "MURANO_PASSWORD"}
+        return ENV['MR_PASSWORD'] 
+      end
       return nil unless @data.kind_of? Hash
       return nil unless @data.has_key? host
       return nil unless @data[host].kind_of? Hash

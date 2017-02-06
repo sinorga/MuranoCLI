@@ -41,7 +41,7 @@ module MrMurano
 end
 
 command :keystore do |c|
-  c.syntax = %{mr keystore}
+  c.syntax = %{murano keystore}
   c.summary = %{About Keystore}
   c.description = %{The Keystore sub-commands let you interact directly with the Keystore instance
 in a solution.  This allows for easier debugging, being able to quickly get and
@@ -53,7 +53,7 @@ set data.  As well as calling any of the other supported REDIS commands.}
 end
 
 command 'keystore clearAll' do |c|
-  c.syntax = %{mr keystore clearAll}
+  c.syntax = %{murano keystore clearAll}
   c.description = %{Delete all keys in the keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
@@ -62,7 +62,7 @@ command 'keystore clearAll' do |c|
 end
 
 command 'keystore info' do |c|
-  c.syntax = %{mr keystore info}
+  c.syntax = %{murano keystore info}
   c.description = %{Show info about the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
@@ -71,7 +71,7 @@ command 'keystore info' do |c|
 end
 
 command 'keystore list' do |c|
-  c.syntax = %{mr keystore list}
+  c.syntax = %{murano keystore list}
   c.description = %{List all of the keys in the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
@@ -80,7 +80,7 @@ command 'keystore list' do |c|
 end
 
 command 'keystore get' do |c|
-  c.syntax = %{mr keystore get <key>}
+  c.syntax = %{murano keystore get <key>}
   c.description = %{Get the value of a key in the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
@@ -90,7 +90,7 @@ command 'keystore get' do |c|
 end
 
 command 'keystore set' do |c|
-  c.syntax = %{mr keystore set <key> <value...>}
+  c.syntax = %{murano keystore set <key> <value...>}
   c.description = %{Set the value of a key in the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
@@ -99,7 +99,7 @@ command 'keystore set' do |c|
 end
 
 command 'keystore delete' do |c|
-  c.syntax = %{mr keystore delete <key>}
+  c.syntax = %{murano keystore delete <key>}
   c.description = %{Delete a key from the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
@@ -110,16 +110,16 @@ alias_command 'keystore rm', 'keystore delete'
 alias_command 'keystore del', 'keystore delete'
 
 command 'keystore command' do |c|
-  c.syntax = %{mr keystore command <command> <key> <args...>}
+  c.syntax = %{murano keystore command <command> <key> <args...>}
   c.summary = %{Call some Redis commands in the Keystore}
   c.description = %{Call some Redis commands in the Keystore.
 
 Only a subset of all Redis commands is supported.
 See http://docs.exosite.com/murano/services/keystore/#command for current list.
   }
-  c.example %{mr keystore command lpush mykey myvalue}, %{Push a value onto list}
-  c.example %{mr keystore command lpush mykey A B C}, %{Push three values onto list}
-  c.example %{mr keystore command lrem mykey 0 B}, %{Remove all B values from list}
+  c.example %{murano keystore command lpush mykey myvalue}, %{Push a value onto list}
+  c.example %{murano keystore command lpush mykey A B C}, %{Push three values onto list}
+  c.example %{murano keystore command lrem mykey 0 B}, %{Remove all B values from list}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
     if args.count < 2 then

@@ -1,6 +1,6 @@
 
 command :status do |c|
-  c.syntax = %{mr status [options]}
+  c.syntax = %{murano status [options]}
   c.description = %{Get the status of files}
   c.option '--all', 'Check everything'
 

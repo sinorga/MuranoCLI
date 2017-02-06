@@ -1,6 +1,6 @@
 
 command :config do |c|
-  c.syntax = %{mr config [options] <key> [<new value>]}
+  c.syntax = %{murano config [options] <key> [<new value>]}
   c.summary = %{Get and set options}
   c.description = %{
   You can get, set, or query config options with this command.  All config
@@ -11,12 +11,12 @@ command :config do |c|
 
   }
 
-  c.example %{See what the current combined config is}, 'mr config --dump'
-  c.example %{Query a value}, 'mr config solution.id'
-  c.example %{Set a new value; writing to the project config file}, 'mr config solution.id XXXXXXXX'
-  c.example %{Set a new value; writing to the user config file}, 'mr config --user user.name my@email.address'
+  c.example %{See what the current combined config is}, 'murano config --dump'
+  c.example %{Query a value}, 'murano config solution.id'
+  c.example %{Set a new value; writing to the project config file}, 'murano config solution.id XXXXXXXX'
+  c.example %{Set a new value; writing to the user config file}, 'murano config --user user.name my@email.address'
   c.example %{Unset a value in a configfile. (lower scopes will become visible when unset)},
-    'mr config diff.cmd --unset'
+    'murano config diff.cmd --unset'
 
 
   c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'

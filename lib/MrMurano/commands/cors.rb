@@ -2,16 +2,16 @@ require 'yaml'
 require 'MrMurano/Solution-Cors'
 
 command :cors do |c|
-  c.syntax = %{mr cors [options]}
+  c.syntax = %{murano cors [options]}
   c.summary = %{Get or set the CORS for the solution. [Deprecated]}
   c.description = %{Get or set the CORS for the solution.
 
-This is deprecated.  Use `mr syncup --cors` or `mr syncdown --cors` instead.
+This is deprecated.  Use `murano syncup --cors` or `murano syncdown --cors` instead.
   }
   c.option '-f','--file FILE', String, %{File to set CORS from}
 
   c.action do |args,options|
-    say_warning "This is deprecated.  Use `mr syncup --cors` or `mr syncdown --cors` instead."
+    say_warning "This is deprecated.  Use `murano syncup --cors` or `murano syncdown --cors` instead."
     sol = MrMurano::Cors.new
 
     if options.file then

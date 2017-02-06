@@ -1,6 +1,6 @@
 
 command 'solution create' do |c|
-  c.syntax = %{mr solution create <name>}
+  c.syntax = %{murano solution create <name>}
   c.description = %{Create a new solution}
 
   c.action do |args, options|

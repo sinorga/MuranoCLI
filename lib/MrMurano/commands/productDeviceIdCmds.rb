@@ -2,7 +2,7 @@ require 'MrMurano/Product'
 require 'terminal-table'
 
 command 'product device list' do |c|
-  c.syntax = %{mr product device list [options]}
+  c.syntax = %{murano product device list [options]}
   c.summary = %{List serial numbers for a product}
 
   c.option '--offset NUMBER', Integer, %{Offset to start listing at}
@@ -27,7 +27,7 @@ command 'product device list' do |c|
 end
 
 command 'product device enable' do |c|
-  c.syntax = %{mr product device enable [<sn>|--file <sns>]}
+  c.syntax = %{murano product device enable [<sn>|--file <sns>]}
   c.summary = %{Enable a serial number; Creates device in Murano}
   c.description = %{Enables serial numbers, creating the digial shadow in Murano.
 
@@ -54,7 +54,7 @@ the activation call within this time, it will need to be enabled again.
 end
 
 command 'product device activate' do |c|
-  c.syntax = %{mr product device activate <sn>}
+  c.syntax = %{murano product device activate <sn>}
   c.summary = %{Activate a serial number, retriving its CIK}
   c.description = %{Activates a serial number.
 

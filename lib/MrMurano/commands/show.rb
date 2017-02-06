@@ -1,6 +1,6 @@
 
 command 'show' do |c|
-  c.syntax = %(mr show)
+  c.syntax = %(murano show)
   c.summary = %(Show readable information about the current configuration)
   c.description = %(Show readable information about the current configuration)
 
@@ -67,7 +67,7 @@ command 'show' do |c|
 end
 
 command 'show location' do |c|
-  c.syntax = %(mr show location)
+  c.syntax = %(murano show location)
   c.summary = %(Show readable location information)
   c.description = %(Show readable information about the current configuration)
 

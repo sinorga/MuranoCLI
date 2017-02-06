@@ -1,7 +1,7 @@
 require 'MrMurano/SubCmdGroupContext'
 
 command :solution do |c|
-  c.syntax = %{mr solution}
+  c.syntax = %{murano solution}
   c.summary = %{About Solution}
   c.description = %{Sub-commands for working with solutions}
 

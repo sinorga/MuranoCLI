@@ -1,6 +1,6 @@
 
 command 'product create' do |c|
-  c.syntax = %{mr product create <name>}
+  c.syntax = %{murano product create <name>}
   c.description = %{Create a new product}
 
   c.action do |args, options|
