@@ -7,9 +7,11 @@ require 'MrMurano/SyncUpDown'
 module MrMurano
   class SolutionBase
     def initialize
-      @sid = $cfg['solution.id']
+      @sid = $cfg['project.id']
+#      @sid = $cfg['solution.id']
       raise "No solution!" if @sid.nil?
-      @uriparts = [:solution, @sid]
+      @uriparts = [:project, @sid]
+#      @uriparts = [:solution, @sid]
       @itemkey = :id
       @locationbase = $cfg['location.base']
       @location = nil
@@ -43,6 +45,10 @@ module MrMurano
 
     def list
       get('/')
+    end
+
+    def usage
+      get('/usage')
     end
 
     def log
