@@ -357,11 +357,15 @@ module MrMurano
     end
     private :elevate_hash
 
-    def syncup(options={})
+    ## Make things in Murano look like local project
+    # 
+    # This creates, uploads, and deletes things as needed up in Murano to match
+    # what is in the local project directory.
+    def syncup(options={}, selected=[])
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
       options[:asdown] = false
-      dt = status(options)
+      dt = status(options, selected)
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
@@ -392,10 +396,14 @@ module MrMurano
       end
     end
 
-    def syncdown(options={})
+    ## Make things in local project look like Murano 
+    # 
+    # This creates, downloads, and deletes things as needed up in the local project
+    # directory to match what is in Murano.
+    def syncdown(options={}, selected=[])
       options = elevate_hash(options)
       options[:asdown] = true
-      dt = status(options)
+      dt = status(options, selected)
       into = @locationbase + @location ###
       toadd = dt[:toadd]
       todel = dt[:todel]
