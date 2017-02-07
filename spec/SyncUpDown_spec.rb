@@ -159,6 +159,61 @@ RSpec.describe MrMurano::SyncUpDown do
         :toadd=>[],
         :unchg=>[]})
     end
+
+    context "Filtering" do
+      before(:example) do
+        FileUtils.mkpath(@projectDir + '/tsud')
+        FileUtils.touch(@projectDir + '/tsud/one.lua')   # tomod
+        FileUtils.touch(@projectDir + '/tsud/two.lua')   # tomod
+        FileUtils.touch(@projectDir + '/tsud/three.lua') # unchg
+        FileUtils.touch(@projectDir + '/tsud/four.lua')  # unchg
+        FileUtils.touch(@projectDir + '/tsud/five.lua')  # toadd
+        FileUtils.touch(@projectDir + '/tsud/six.lua')   # toadd
+        @t = TSUD.new
+        expect(@t).to receive(:list).once.and_return([
+          {:name=>'one.lua'},{:name=>'two.lua'},         # tomod
+          {:name=>'three.lua'},{:name=>'four.lua'},      # unchg
+          {:name=>'seven.lua'},{:name=>'eight.lua'},     # todel
+        ])
+        expect(@t).to receive(:toRemoteItem).and_return(
+          {:name=>'one.lua'},{:name=>'two.lua'},         # tomod
+          {:name=>'three.lua'},{:name=>'four.lua'},      # unchg
+          {:name=>'five.lua'},{:name=>'six.lua'},        # toadd
+        )
+      expect(@t).to receive(:docmp).and_return(
+        true,true,    # one, two
+        false,false,  # three, four
+      )
+      end
+
+      it "Returns all with no filter" do
+        ret = @t.status
+        expect(ret).to match({
+          :unchg=>[
+            {:name=>'three.lua', :synckey=>'three.lua',
+             :local_path=>an_instance_of(Pathname)},
+            {:name=>'four.lua', :synckey=>'four.lua',
+             :local_path=>an_instance_of(Pathname)},
+          ],
+          :toadd=>[
+            {:name=>'five.lua', :synckey=>'five.lua',
+             :local_path=>an_instance_of(Pathname)},
+            {:name=>'six.lua', :synckey=>'six.lua',
+             :local_path=>an_instance_of(Pathname)},
+          ],
+          :todel=>[
+            {:name=>'seven.lua', :synckey=>'seven.lua'},
+            {:name=>'eight.lua', :synckey=>'eight.lua'},
+          ],
+          :tomod=>[
+            {:name=>'one.lua', :synckey=>'one.lua',
+             :local_path=>an_instance_of(Pathname)},
+            {:name=>'two.lua', :synckey=>'two.lua',
+             :local_path=>an_instance_of(Pathname)},
+          ]})
+      end
+
+    end
   end
 
   context "localitems" do
