@@ -540,10 +540,10 @@ module MrMurano
         { :toadd=>toadd, :todel=>todel, :tomod=>tomod, :unchg=>unchg }
       else
         {
-          :toadd=>toadd.select{|i| i[:selected]},
-          :todel=>todel.select{|i| i[:selected]},
-          :tomod=>tomod.select{|i| i[:selected]},
-          :unchg=>unchg.select{|i| i[:selected]}
+          :toadd=>toadd.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
+          :todel=>todel.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
+          :tomod=>tomod.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
+          :unchg=>unchg.select{|i| i[:selected]}.map{|i| i.delete(:selected); i}
         }
       end
     end
