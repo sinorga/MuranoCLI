@@ -15,6 +15,13 @@ class TSUD
   def fetch(id)
   end
 end
+
+RSpec::Matchers.define :pathname_globs do |glob|
+  match do |pthnm|
+    pthnm.fnmatch(glob)
+  end
+end
+
 RSpec.describe MrMurano::SyncUpDown do
   include_context "WORKSPACE"
   before(:example) do
