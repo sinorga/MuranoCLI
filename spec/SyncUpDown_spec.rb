@@ -169,13 +169,14 @@ RSpec.describe MrMurano::SyncUpDown do
 
     context "Filtering" do
       before(:example) do
-        FileUtils.mkpath(@projectDir + '/tsud')
-        FileUtils.touch(@projectDir + '/tsud/one.lua')   # tomod
-        FileUtils.touch(@projectDir + '/tsud/two.lua')   # tomod
-        FileUtils.touch(@projectDir + '/tsud/three.lua') # unchg
-        FileUtils.touch(@projectDir + '/tsud/four.lua')  # unchg
-        FileUtils.touch(@projectDir + '/tsud/five.lua')  # toadd
-        FileUtils.touch(@projectDir + '/tsud/six.lua')   # toadd
+        FileUtils.mkpath(@projectDir + '/tsud/ga')
+        FileUtils.mkpath(@projectDir + '/tsud/gb')
+        FileUtils.touch(@projectDir + '/tsud/one.lua')     # tomod
+        FileUtils.touch(@projectDir + '/tsud/ga/two.lua')  # tomod
+        FileUtils.touch(@projectDir + '/tsud/three.lua')   # unchg
+        FileUtils.touch(@projectDir + '/tsud/gb/four.lua') # unchg
+        FileUtils.touch(@projectDir + '/tsud/five.lua')    # toadd
+        FileUtils.touch(@projectDir + '/tsud/ga/six.lua')  # toadd
         @t = TSUD.new
         expect(@t).to receive(:list).once.and_return([
           {:name=>'one.lua'},{:name=>'two.lua'},         # tomod
@@ -228,12 +229,26 @@ RSpec.describe MrMurano::SyncUpDown do
           ],
           :tomod=>[
             {:name=>'one.lua', :synckey=>'one.lua',
+             :local_path=>pathname_globs('**/one.lua')},
+            {:name=>'two.lua', :synckey=>'two.lua',
+             :local_path=>pathname_globs('**/two.lua')},
+          ]})
+      end
+
+      it "Finds local path globs" do
+        ret = @t.status({}, ['**/ga/*.lua'])
+        expect(ret).to match({
+          :unchg=>[ ],
+          :toadd=>[
+            {:name=>'six.lua', :synckey=>'six.lua',
              :local_path=>an_instance_of(Pathname)},
+          ],
+          :todel=>[ ],
+          :tomod=>[
             {:name=>'two.lua', :synckey=>'two.lua',
              :local_path=>an_instance_of(Pathname)},
           ]})
       end
-
     end
   end
 
