@@ -1,6 +1,6 @@
 
 command :syncdown do |c|
-  c.syntax = %{murano syncdown [options]}
+  c.syntax = %{murano syncdown [options] [filters]}
   c.description = %{Sync project down from Murano}
   c.option '--all', 'Sync everything'
 
@@ -22,14 +22,14 @@ command :syncdown do |c|
 
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
       sol = klass.new
-      sol.syncdown(options)
+      sol.syncdown(options, args)
     end
   end
 end
 alias_command :pull, :syncdown, '--no-delete'
 
 command :syncup do |c|
-  c.syntax = %{murano syncup [options]}
+  c.syntax = %{murano syncup [options] [filters]}
   c.description = %{Sync project up into Murano}
   c.option '--all', 'Sync everything'
 
@@ -51,7 +51,7 @@ command :syncup do |c|
 
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
       sol = klass.new
-      sol.syncup(options)
+      sol.syncup(options, args)
     end
   end
 end
