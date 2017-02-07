@@ -186,6 +186,17 @@ module MrMurano
       into + name
     end
 
+    ## Does item match pattern?
+    #
+    # Children objects should override this if synckey is not @itemkey
+    #
+    # Check child specific patterns against item
+    #
+    # @returns true or false
+    def match(item, pattern)
+      false
+    end
+
     ## Get the key used to quickly compare two items
     #
     # Children objects should override this if synckey is not @itemkey
@@ -306,9 +317,11 @@ module MrMurano
     # @param from Pathname: Directory of items to scan
     # @return Array: of Hashes of item details
     def localitems(from)
+      # TODO: Profile this.
       debug "#{self.class.to_s}: Getting local items from: #{from}"
       searchIn = from.to_s
       sf = searchFor.map{|i| ::File.join(searchIn, i)}
+      debug "#{self.class.to_s}: Globs: #{sf}"
       Dir[*sf].flatten.compact.reject do |p|
         ::File.directory?(p) or ignoring.any? do |i|
           ::File.fnmatch(i,p)
@@ -354,7 +367,7 @@ module MrMurano
       tomod = dt[:tomod]
 
       if options[:delete] then
-        todel.each do |item|
+        todel.select{|i| i[:selected]}.each do |item|
           verbose "Removing item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             remove(item[itemkey])
@@ -362,7 +375,7 @@ module MrMurano
         end
       end
       if options[:create] then
-        toadd.each do |item|
+        toadd.select{|i| i[:selected]}.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             upload(item[:local_path], item.reject{|k,v| k==:local_path}, false)
@@ -370,7 +383,7 @@ module MrMurano
         end
       end
       if options[:update] then
-        tomod.each do |item|
+        tomod.select{|i| i[:selected]}.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             upload(item[:local_path], item.reject{|k,v| k==:local_path}, true)
@@ -389,7 +402,7 @@ module MrMurano
       tomod = dt[:tomod]
 
       if options[:delete] then
-        todel.each do |item|
+        todel.select{|i| i[:selected]}.each do |item|
           verbose "Removing item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
@@ -398,7 +411,7 @@ module MrMurano
         end
       end
       if options[:create] then
-        toadd.each do |item|
+        toadd.select{|i| i[:selected]}.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
@@ -407,7 +420,7 @@ module MrMurano
         end
       end
       if options[:update] then
-        tomod.each do |item|
+        tomod.select{|i| i[:selected]}.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
@@ -451,12 +464,40 @@ module MrMurano
       df
     end
 
+    ##
+    # Check if an item matches a pattern.
+    def _matcher(items, patterns)
+      def _imatch(item, pattern)
+        if pattern.to_s[0] == '#' then
+          match(item, pattern)
+        elsif not item.has_key? :local_path then
+          false
+        else
+          item[:local_path].fnmatch(pattern)
+        end
+      end
+
+      items.map do |item|
+        if patterns.empty? then
+          item[:selected] = true
+        else
+          item[:selected] = patterns.any?{|pattern| _imatch(item, pattern)}
+        end
+        item
+      end
+    end
+    private :_matcher
+
     ## Get status of things here verses there
-    def status(options={})
+    def status(options={}, selected=[])
       options = elevate_hash(options)
-      there = list()
-      here = locallist()
       itemkey = @itemkey.to_sym
+
+      there = _matcher(list(), selected)
+      here = _matcher(locallist(), selected)
+
+        # TODO: Mark things in here and there that will not be acted on.
+        # Actions are Sync{Up,Down} and Diff.
 
       therebox = {}
       there.each do |item|
@@ -486,7 +527,7 @@ module MrMurano
         mrg = herebox[key].reject{|k,v| k==itemkey}
         mrg = therebox[key].merge(mrg)
         if docmp(herebox[key], therebox[key]) then
-          mrg[:diff] = dodiff(mrg) if options[:diff]
+          mrg[:diff] = dodiff(mrg) if options[:diff] and mrg[:selected]
           tomod << mrg
         else
           unchg << mrg
