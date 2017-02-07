@@ -367,7 +367,7 @@ module MrMurano
       tomod = dt[:tomod]
 
       if options[:delete] then
-        todel.select{|i| i[:selected]}.each do |item|
+        todel.each do |item|
           verbose "Removing item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             remove(item[itemkey])
@@ -375,7 +375,7 @@ module MrMurano
         end
       end
       if options[:create] then
-        toadd.select{|i| i[:selected]}.each do |item|
+        toadd.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             upload(item[:local_path], item.reject{|k,v| k==:local_path}, false)
@@ -383,7 +383,7 @@ module MrMurano
         end
       end
       if options[:update] then
-        tomod.select{|i| i[:selected]}.each do |item|
+        tomod.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             upload(item[:local_path], item.reject{|k,v| k==:local_path}, true)
@@ -402,7 +402,7 @@ module MrMurano
       tomod = dt[:tomod]
 
       if options[:delete] then
-        todel.select{|i| i[:selected]}.each do |item|
+        todel.each do |item|
           verbose "Removing item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
@@ -411,7 +411,7 @@ module MrMurano
         end
       end
       if options[:create] then
-        toadd.select{|i| i[:selected]}.each do |item|
+        toadd.each do |item|
           verbose "Adding item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
@@ -420,7 +420,7 @@ module MrMurano
         end
       end
       if options[:update] then
-        tomod.select{|i| i[:selected]}.each do |item|
+        tomod.each do |item|
           verbose "Updating item #{item[:synckey]}"
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
@@ -496,9 +496,6 @@ module MrMurano
       there = _matcher(list(), selected)
       here = _matcher(locallist(), selected)
 
-        # TODO: Mark things in here and there that will not be acted on.
-        # Actions are Sync{Up,Down} and Diff.
-
       therebox = {}
       there.each do |item|
         item = Hash.transform_keys_to_symbols(item)
@@ -533,7 +530,16 @@ module MrMurano
           unchg << mrg
         end
       end
-      { :toadd=>toadd, :todel=>todel, :tomod=>tomod, :unchg=>unchg }
+      if options[:unselected] then
+        { :toadd=>toadd, :todel=>todel, :tomod=>tomod, :unchg=>unchg }
+      else
+        {
+          :toadd=>toadd.select{|i| i[:selected]},
+          :todel=>todel.select{|i| i[:selected]},
+          :tomod=>tomod.select{|i| i[:selected]},
+          :unchg=>unchg.select{|i| i[:selected]}
+        }
+      end
     end
   end
 end
