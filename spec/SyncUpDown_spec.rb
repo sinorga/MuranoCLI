@@ -182,15 +182,29 @@ RSpec.describe MrMurano::SyncUpDown do
           {:name=>'three.lua'},{:name=>'four.lua'},      # unchg
           {:name=>'seven.lua'},{:name=>'eight.lua'},     # todel
         ])
-        expect(@t).to receive(:toRemoteItem).and_return(
-          {:name=>'one.lua'},{:name=>'two.lua'},         # tomod
-          {:name=>'three.lua'},{:name=>'four.lua'},      # unchg
-          {:name=>'five.lua'},{:name=>'six.lua'},        # toadd
-        )
-      expect(@t).to receive(:docmp).and_return(
-        true,true,    # one, two
-        false,false,  # three, four
-      )
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/one.lua')).
+          and_return({:name=>'one.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/two.lua')).
+          and_return({:name=>'two.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/three.lua')).
+          and_return({:name=>'three.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/four.lua')).
+          and_return({:name=>'four.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/five.lua')).
+          and_return({:name=>'five.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/six.lua')).
+          and_return({:name=>'six.lua'})
+
+        expect(@t).to receive(:docmp).with(include({:name=>'one.lua'}),anything()).and_return(true)
+        expect(@t).to receive(:docmp).with(include({:name=>'two.lua'}),anything()).and_return(true)
+        expect(@t).to receive(:docmp).with(include({:name=>'three.lua'}),anything()).and_return(false)
+        expect(@t).to receive(:docmp).with(include({:name=>'four.lua'}),anything()).and_return(false)
       end
 
       it "Returns all with no filter" do
@@ -198,15 +212,15 @@ RSpec.describe MrMurano::SyncUpDown do
         expect(ret).to match({
           :unchg=>[
             {:name=>'three.lua', :synckey=>'three.lua',
-             :local_path=>an_instance_of(Pathname)},
+             :local_path=> pathname_globs('**/three.lua')},
             {:name=>'four.lua', :synckey=>'four.lua',
-             :local_path=>an_instance_of(Pathname)},
+             :local_path=>pathname_globs('**/four.lua')},
           ],
           :toadd=>[
             {:name=>'five.lua', :synckey=>'five.lua',
-             :local_path=>an_instance_of(Pathname)},
+             :local_path=>pathname_globs('**/five.lua')},
             {:name=>'six.lua', :synckey=>'six.lua',
-             :local_path=>an_instance_of(Pathname)},
+             :local_path=>pathname_globs('**/six.lua')},
           ],
           :todel=>[
             {:name=>'seven.lua', :synckey=>'seven.lua'},
