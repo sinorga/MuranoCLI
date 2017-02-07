@@ -58,7 +58,7 @@ command :status do |c|
 
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
       sol = klass.new
-      ret = sol.status(options)
+      ret = sol.status(options, args)
       gmerge(ret, type, options)
     end
 
