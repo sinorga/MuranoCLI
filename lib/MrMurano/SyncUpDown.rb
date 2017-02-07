@@ -358,7 +358,7 @@ module MrMurano
     private :elevate_hash
 
     ## Make things in Murano look like local project
-    # 
+    #
     # This creates, uploads, and deletes things as needed up in Murano to match
     # what is in the local project directory.
     def syncup(options={}, selected=[])
@@ -396,8 +396,8 @@ module MrMurano
       end
     end
 
-    ## Make things in local project look like Murano 
-    # 
+    ## Make things in local project look like Murano
+    #
     # This creates, downloads, and deletes things as needed up in the local project
     # directory to match what is in Murano.
     def syncdown(options={}, selected=[])
@@ -475,21 +475,19 @@ module MrMurano
     ##
     # Check if an item matches a pattern.
     def _matcher(items, patterns)
-      def _imatch(item, pattern)
-        if pattern.to_s[0] == '#' then
-          match(item, pattern)
-        elsif not item.has_key? :local_path then
-          false
-        else
-          item[:local_path].fnmatch(pattern)
-        end
-      end
-
       items.map do |item|
         if patterns.empty? then
           item[:selected] = true
         else
-          item[:selected] = patterns.any?{|pattern| _imatch(item, pattern)}
+          item[:selected] = patterns.any? do |pattern|
+            if pattern.to_s[0] == '#' then
+              match(item, pattern)
+            elsif not item.has_key? :local_path then
+              false
+            else
+              item[:local_path].fnmatch(pattern)
+            end
+          end
         end
         item
       end
