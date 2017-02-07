@@ -18,6 +18,7 @@ end
 RSpec.describe MrMurano::SyncUpDown do
   include_context "WORKSPACE"
   before(:example) do
+    MrMurano::SyncRoot.reset
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
