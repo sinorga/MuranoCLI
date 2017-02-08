@@ -159,7 +159,7 @@ module MrMurano
         return false unless item[:method].downcase == md[:method].downcase
       end
 
-      return true unless md[:path].empty?
+      return true if md[:path].empty?
 
       ::File.fnmatch(md[:path],item[:path])
     end
