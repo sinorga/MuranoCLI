@@ -1,8 +1,8 @@
 require 'yaml'
-require 'hash'
 require 'vine'
 require 'json-schema'
 require 'MrMurano/Config'
+require 'MrMurano/hash'
 
 module MrMurano
   ##
@@ -61,18 +61,59 @@ module MrMurano
 
     def initialize()
       @prjFile = nil
+      tname = $cfg['location.base'].basename.to_s
       @data = PrfFile.new(
-        PrjMeta.new, #TODO: Fill out some default meta.
-        PrjFiles.new,
-        PrjModules.new,
-        PrjEndpoints.new,
-        PrjEventHandlers.new,
+        PrjMeta.new(
+          tname,
+          "One line summary of #{tname}",
+          "In depth description of #{tname}\n\nWith lots of details.",
+          [$cfg['user.name']],
+          "1.0.0",
+          nil,
+          nil
+        ), #TODO: Fill out some default meta.
+        PrjFiles.new($cfg['location.files'], $cfg['files.searchFor'], $cfg['files.ignoring'], $cfg['files.default_page']),
+        PrjModules.new($cfg['location.modules'], $cfg['modules.searchFor'], $cfg['modules.ignoring']),
+        PrjEndpoints.new($cfg['location.endpoints'], $cfg['endpoints.searchFor'], $cfg['endpoints.ignoring']),
+        PrjEventHandlers.new($cfg['location.eventhandler'], $cfg['eventhandler.searchFor'], $cfg['eventhandler.ignoring']),
       )
     end
 
-    def get()
+    # Get a value for a key.
+    # Keys are 'section.key'
+    def get(key)
+      section, ikey = key.split('.')
+      begin
+        return @data[section.to_sym][ikey.to_sym]
+      rescue NameError => e
+        debug ">>=>> #{e}"
+        return nil
+      end
+    end
+    alias [] get
+
+    # Set a value for a key.
+    # Keys are 'section.key'
+    def set(key, value)
+      section, ikey = key.split('.')
+      begin
+        sec = @data[section.to_sym]
+        sec[ikey.to_sym] = value
+      rescue NameError => e
+        debug ">>=>> #{e}"
+      end
+    end
+    alias []= set
+
+    ## Save the Project File.
+    #
+    # This ALWAYS saves in the latest format only.
+    def save
+      puts @data.to_yaml # as tempting as this is, don't
     end
 
+    ##
+    # Load the project file in the project directory.
     def load
       possible = $cfg['location.base'].glob('*.murano', 'SolutionFile.json')
       debug "Possible Project files: #{possible}"
