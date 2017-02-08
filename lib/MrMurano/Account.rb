@@ -11,7 +11,8 @@ require 'MrMurano/verbosing'
 module MrMurano
   class Passwords
     include Verbose
-    def initialize(path)
+    def initialize(path=nil)
+      path = $cfg.file_at('passwords', :user) if path.nil?
       path = Pathname.new(path) unless path.kind_of? Pathname
       @path = path
       @data = nil
