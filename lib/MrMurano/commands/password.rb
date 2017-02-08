@@ -11,6 +11,10 @@ end
 
 alias_command 'password current', :config, 'user.name'
 
+class Outter
+  include MrMurano::Verbose
+end
+
 command 'password list' do |c|
   c.syntax = %{murano password list}
   c.summary = %{List the usernames with saved passwords}
@@ -19,8 +23,18 @@ command 'password list' do |c|
     psd = MrMurano::Passwords.new
     psd.load
 
-    pp psd.list
-    # TODO. need outf()
+    ret = psd.list
+    outter = Outter.new
+    outter.outf(ret) do |dd, ios|
+      rows=[]
+      dd.each_pair do |key, value|
+        value.each{|v| rows << [key, v] }
+      end
+      outter.tabularize({
+        :rows=>rows, :headers => [:Host, :Username]
+      }, ios)
+    end
+
   end
 
 end
