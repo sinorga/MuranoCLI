@@ -118,6 +118,59 @@ this.is.a.host:
     end
   end
 
+  it "lists usernames" do
+    Tempfile.open('pwstest') do |tf|
+      tf.close
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.set('this.is.a.host', 'user3', 'passwords4')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      pwd.set('this.is.a.host', 'user9', 'passwords2')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      ret = pwd.list
+      expect(ret).to match({
+        "this.is.a.host"=>a_collection_containing_exactly("user9", "user3")
+      })
+    end
+  end
+
+
+  it "removes username" do
+    Tempfile.open('pwstest') do |tf|
+      tf.close
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.set('this.is.a.host', 'user3', 'passwords4')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      pwd.set('this.is.a.host', 'user9', 'passwords2')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      pwd.remove('this.is.a.host', 'user3')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      ret = pwd.list
+      expect(ret).to match({ "this.is.a.host"=>["user9"] })
+    end
+  end
+
   context "Uses ENV" do
     before(:example) do
       ENV['MR_PASSWORD'] = nil
@@ -174,6 +227,7 @@ this.is.a.host:
       end
     end
   end
+
 
 end
 
