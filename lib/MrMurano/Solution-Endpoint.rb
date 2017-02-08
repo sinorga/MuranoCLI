@@ -149,12 +149,12 @@ module MrMurano
     end
 
     def match(item, pattern)
-      # Pattern is: #{mthod}#{path glob}
+      # Pattern is: #{method}#{path glob}
       pattern_pattern = /^#(?<method>[^#]*)#(?<path>.*)/i
       md = pattern_pattern.match(pattern)
       return false if md.nil?
       debug "match pattern: '#{md[:method]}' '#{md[:path]}'"
-      #item[:method] == md[:method].downcase and ::File.fnmatch(md[:path],item[:path])
+
       unless md[:method].empty? then
         return false unless item[:method].downcase == md[:method].downcase
       end
