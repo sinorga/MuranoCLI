@@ -13,40 +13,54 @@ product definitions at once, set up endpoints and APIs, and more.
 MrMurano works around the idea of syncing, much like rsync.  Files from your project
 directory are synced up (or down) from Murano.
 
+!!!!! *IMPORTANT*
+
+The upcoming release of 2.0 will include some breaking changes.  The most noticable
+of which is the command will be renamed from `mr` to `murano`.
+
+
 ## Usage
 
 ### To start from an existing project in Murano
 ```
 mkdir myproject
 cd myproject
-mr config solution.id XXXXXX
-mr syncdown -V
+murano config solution.id XXXXXX
+murano syncdown -V
 ```
 
-Do stuff, see what changed: `mr status` or `mr diff`.
-Then deploy with `mr syncup`
+Do stuff, see what changed: `murano status` or `murano diff`.
+Then deploy with `murano syncup`
 
 ### To start a brand new project
 There are a few steps and pieces to getting a solution with a product up and
 running in Murano. Here is the list.
 
-- Pick a business: `mr account --business`
-	If this is the first time you've run `mr` it will ask for your Murano username
+- Pick a business: `murano account --business`
+	If this is the first time you've run `murano` it will ask for your Murano username
 	and password.
-- Set it: `mr config business.id ZZZZZZZZZ`
-- Create a product: `mr product create myawesomeproduct`
-- Save the result: `mr config product.id YYYYYYYYY`
+- Set it: `murano config business.id ZZZZZZZZZ`
+- Create a product: `murano product create myawesomeproduct`
+- Save the result: `murano config product.id YYYYYYYYY`
 - Add resource aliases to specs/resources.yaml
-- Sync the product definition up: `mr syncup -V --specs`
-- Create a solution: `mr solution create myawesomesolution`
-- Save the result: `mr config solution.id XXXXXX`
-- Sync solution code up: `mr syncup -V`
-- Assign the product to the solution: `mr assign set`
+- Sync the product definition up: `murano syncup -V --specs`
+- Create a solution: `murano solution create myawesomesolution`
+- Save the result: `murano config solution.id XXXXXX`
+- Sync solution code up: `murano syncup -V`
+- Assign the product to the solution: `murano assign set`
 
-Do stuff, see what changed: `mr status` or `mr diff`.
-Then deploy with `mr syncup`
+Do stuff, see what changed: `murano status` or `murano diff`.
+Then deploy with `murano syncup`
 
 ## Install
+
+When upgrading from a 1.\* version to a 2.0, you should uninstall the old versions
+first.
+```
+> gem uninstall MrMurano`
+```
+
+And then install:
 
 ```
 > gem install MrMurano
@@ -63,7 +77,7 @@ install as root, you can install gems in the user directory.
 > gem install MrMurano --user-install
 ```
 
-Your `PATH` may need to be updated to find the installed `mr` command.  See the
+Your `PATH` may need to be updated to find the installed `murano` command.  See the
 [Ruby Gem FAQ](http://guides.rubygems.org/faqs/#user-install).  In short, you need
 to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 
@@ -72,17 +86,19 @@ to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 The MrMurano gem will install on Windows.  There is also a single Windows binary
 Setup installer availible in [releases](https://github.com/exosite/MrMurano/releases)
 
-You can install Ruby on Windows with [RubyInstaller](http://rubyinstaller.org).
-You might run into a [known SSL cert issue](http://guides.rubygems.org/ssl-certificate-update/).
-If so follow the steps there to update the certs.
+If you do not already use Ruby on Windows, then you should use the binary
+installer.
+
+When upgrading, it is best to run the uninstaller for the old version before
+installing the new version.
 
 
 ## Features
 
 ### Logs
 
-You can monitor the log messages from your solution with the `mr logs --follow`.
-Or quickly get the last few with `mr logs`
+You can monitor the log messages from your solution with the `murano logs --follow`.
+Or quickly get the last few with `murano logs`
 
 MrMurano does a few things to make your log output easier to follow.
 - Adds color to easily see where each log message starts.
@@ -91,35 +107,35 @@ MrMurano does a few things to make your log output easier to follow.
 
 All of these can be toggled with command line options.
 
-### MR_CONFIGFILE environment and Dotenv
+### MURANO_CONFIGFILE environment and Dotenv
 
-The environment variable `MR_CONFIGFILE` is checked for an additional config to
+The environment variable `MURANO_CONFIGFILE` is checked for an additional config to
 load.  This in conjuction with dotenv support, allows for easily switching between
 development, staging, and production setups.
 
-To use this, write the three solution ids into `.mrmurano.dev`, `.mrmurano.stg`,
-and `.mrmurano.prod`. Then write the `.env` file to point at the system you're
+To use this, write the three solution ids into `.murano.dev`, `.murano.stg`,
+and `.murano.prod`. Then write the `.env` file to point at the system you're
 currently working on.
 
 The files for this are then:
 ```
-cat >> .mrmurano.dev <<EOF
+cat >> .murano.dev <<EOF
 [solution]
 id=AAAAAAAA
 EOF
 
-cat >> .mrmurano.stg <<EOF
+cat >> .murano.stg <<EOF
 [solution]
 id=BBBBBBBB
 EOF
 
-cat >> .mrmurano.prod <<EOF
+cat >> .murano.prod <<EOF
 [solution]
 id=CCCCCCCC
 EOF
 
 cat > .env <<EOF
-MR_CONFIGFILE=.mrmurano.dev
+MURANO_CONFIGFILE=.murano.dev
 EOF
 ```
 
@@ -132,9 +148,9 @@ To aid with debugging, MrMurano has direct access to some of the services in a
 solution.
 
 Currently these are:
-- Keystore: `mr keystore`
-- Timeseries: `mr timeseries`
-- TSDB: `mr tsdb`
+- Keystore: `murano keystore`
+- Timeseries: `murano timeseries`
+- TSDB: `murano tsdb`
 
 ### Output Format
 
@@ -143,11 +159,11 @@ between YAML, JSON, Ruby, CSV, and pretty tables.  Not all formats work with all
 commands.
 
 ```
-mr tsdb product list
-mr tsdb product list -c outformat=csv
-mr tsdb product list -c outformat=json
-mr tsdb product list -c outformat=yaml
-mr tsdb product list -c outformat=pp
+> murano tsdb product list
+> murano tsdb product list -c outformat=csv
+> murano tsdb product list -c outformat=json
+> murano tsdb product list -c outformat=yaml
+> murano tsdb product list -c outformat=pp
 ```
 
 ### Product Content Area
@@ -160,59 +176,14 @@ can be stored here.
 Once the `product.id` is set, the content for that product can be accessed with the
 following commands:
 ```
-> mr content list
-> mr content upload
-> mr content info
-> mr content delete
-> mr content download
+> murano content list
+> murano content upload
+> murano content info
+> murano content delete
+> murano content download
 ```
 
 Call them with `--help` for details.
-
-### Sub-directories
-
-For the endpoints, modules, and eventhandlers directories. The can contain both
-files or a sub-directory of files.  This allows for keeping common things grouped
-together.  Or adding a git submodule in to manage reusable chunks.
-
-So, as an example, your project could be like:
-```
-endpoints
-endpoints/get_-v1-data-averaged.lua
-endpoints/get_-v1-data-cupsDrank.lua
-endpoints/get_-v1-data-latest.lua
-endpoints/statusboard-data.lua
-endpoints/users
-endpoints/users/get_-session.lua
-endpoints/users/get_-v1-verify-code.lua
-endpoints/users/patch_-v1-user.lua
-endpoints/users/post_-session.lua
-endpoints/users/post_-v1-pushtoken.lua
-endpoints/users/put_-v1-user-email.lua
-eventhandlers
-eventhandlers/product.lua
-eventhandlers/timer_timer.lua
-files
-files/batteryMeter.svg
-files/index.html
-files/meter.html
-modules
-modules/TSQ
-modules/TSQ/func_field_quote_test.lua
-modules/TSQ/isadate_test.lua
-modules/TSQ/README.md
-modules/TSQ/results_test.lua
-modules/TSQ/select_fields_test.lua
-modules/TSQ/tsq-1.2-2.rockspec
-modules/TSQ/tsq.lua
-modules/TSQ/tsq_test.lua
-modules/TSQ/tsw.lua
-modules/TSQ/tsw_test.lua
-modules/users.lua
-modules/util.lua
-spec
-spec/cico.murano.spec
-```
 
 ## Developing
 

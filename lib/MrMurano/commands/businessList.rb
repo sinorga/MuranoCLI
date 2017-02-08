@@ -1,7 +1,7 @@
 require 'MrMurano/Account'
 
 command 'business list' do |c|
-  c.syntax = %{mr business list [options]}
+  c.syntax = %{murano business list [options]}
   c.description = %{List businesses}
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'
@@ -18,7 +18,7 @@ command 'business list' do |c|
 
     if options.idonly then
       headers = [:bizid]
-      data = data.map{|row| [row[:modelId]]}
+      data = data.map{|row| [row[:bizid]]}
     elsif not options.all then
       headers = [:bizid, :role, :name]
       data = data.map{|r| [r[:bizid], r[:role], r[:name]]}

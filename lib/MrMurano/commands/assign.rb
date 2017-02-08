@@ -1,7 +1,7 @@
 require 'terminal-table'
 
 command 'assign list' do |c|
-  c.syntax = 'mr assign list [options]'
+  c.syntax = 'murano assign list [options]'
   c.description = 'List the products that are assigned'
   c.option '--idonly', 'Only return the ids'
 
@@ -30,7 +30,7 @@ end
 alias_command :assign, 'assign list'
 
 command 'assign set' do |c|
-  c.syntax = 'mr assign set [product]'
+  c.syntax = 'murano assign set [product]'
   c.description = 'Assign a product to a eventhandler'
 
   c.action do |args, options|

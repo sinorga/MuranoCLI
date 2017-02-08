@@ -527,5 +527,53 @@ RSpec.describe MrMurano::Endpoint do
     end
   end
 
+  context "Matching" do
+    before(:example) do
+      @an_item = {
+        :method=>'get',
+        :path=>'/api/read/stuff',
+        :local_path=>Pathname.new('a/relative/path.lua'),
+      }
+    end
+    context "method" do
+      it "any path" do
+        ret = @srv.match(@an_item, '#get#')
+        expect(ret).to be true
+        ret = @srv.match(@an_item, '#post#')
+        expect(ret).to be false
+      end
+      it "exact path" do
+        ret = @srv.match(@an_item, '#get#/api/read/stuff')
+        expect(ret).to be true
+        ret = @srv.match(@an_item, '#post#/api/read/stuff')
+        expect(ret).to be false
+      end
+      it "path glob" do
+        ret = @srv.match(@an_item, '#get#/api/*/stuff')
+        expect(ret).to be true
+        ret = @srv.match(@an_item, '#get#/**/stuff')
+        expect(ret).to be true
+      end
+    end
+    context "any method" do
+      it "any path" do
+        ret = @srv.match(@an_item, '##')
+        expect(ret).to be true
+      end
+      it "exact path" do
+        ret = @srv.match(@an_item, '##/api/read/stuff')
+        expect(ret).to be true
+        ret = @srv.match(@an_item, '##/api/do/stuff')
+        expect(ret).to be false
+      end
+      it "path glob" do
+        ret = @srv.match(@an_item, '##/api/*/stuff')
+        expect(ret).to be true
+        ret = @srv.match(@an_item, '##/**/stuff')
+        expect(ret).to be true
+      end
+    end
+  end
+
 end
 #  vim: set ai et sw=2 ts=2 :

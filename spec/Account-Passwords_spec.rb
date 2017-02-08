@@ -118,39 +118,116 @@ this.is.a.host:
     end
   end
 
-  it "Uses ENV instead" do
-    Tempfile.open('test') do |tf|
-      tf << %{---
+  it "lists usernames" do
+    Tempfile.open('pwstest') do |tf|
+      tf.close
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.set('this.is.a.host', 'user3', 'passwords4')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      pwd.set('this.is.a.host', 'user9', 'passwords2')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      ret = pwd.list
+      expect(ret).to match({
+        "this.is.a.host"=>a_collection_containing_exactly("user9", "user3")
+      })
+    end
+  end
+
+
+  it "removes username" do
+    Tempfile.open('pwstest') do |tf|
+      tf.close
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.set('this.is.a.host', 'user3', 'passwords4')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      pwd.set('this.is.a.host', 'user9', 'passwords2')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      pwd.remove('this.is.a.host', 'user3')
+      pwd.save
+      pwd = nil
+
+      pwd = MrMurano::Passwords.new(tf.path)
+      pwd.load
+      ret = pwd.list
+      expect(ret).to match({ "this.is.a.host"=>["user9"] })
+    end
+  end
+
+  context "Uses ENV" do
+    before(:example) do
+      ENV['MR_PASSWORD'] = nil
+    end
+    after(:example) do
+      ENV['MR_PASSWORD'] = nil
+    end
+
+    it "Uses ENV instead" do
+      Tempfile.open('test') do |tf|
+        tf << %{---
 this.is.a.host:
   user: password
-}
-      tf.close
+        }
+        tf.close
 
-      ENV['MR_PASSWORD'] = 'a test!'
-      pwd = MrMurano::Passwords.new( tf.path )
-      pwd.load
-      ps = pwd.get('this.is.a.host', 'user')
-      expect(ps).to eq('a test!')
-      ENV['MR_PASSWORD'] = nil
+        ENV['MURANO_PASSWORD'] = 'a test!'
+        pwd = MrMurano::Passwords.new( tf.path )
+        pwd.load
+        expect(pwd).not_to receive(:warning)
+        ps = pwd.get('this.is.a.host', 'user')
+        expect(ps).to eq('a test!')
+        ENV['MURANO_PASSWORD'] = nil
+      end
+    end
+
+    it "Uses ENV instead, even with empty file" do
+      Tempfile.open('test') do |tf|
+        tf.close
+
+        ENV['MURANO_PASSWORD'] = 'a test!'
+        pwd = MrMurano::Passwords.new( tf.path )
+        pwd.load
+        expect(pwd).not_to receive(:warning)
+        ps = pwd.get('this.is.a.host', 'user')
+        expect(ps).to eq('a test!')
+        ENV['MURANO_PASSWORD'] = nil
+
+        data = IO.read(tf.path)
+        expect(data).to eq('')
+      end
+    end
+
+    it "Warns about migrating" do
+      Tempfile.open('test') do |tf|
+        tf.close
+
+        ENV['MR_PASSWORD'] = 'a test!'
+        pwd = MrMurano::Passwords.new( tf.path )
+        pwd.load
+        expect(pwd).to receive(:warning).once
+        ps = pwd.get('this.is.a.host', 'user')
+        expect(ps).to eq('a test!')
+      end
     end
   end
 
-  it "Uses ENV instead, even with empty file" do
-    Tempfile.open('test') do |tf|
-      tf.close
-
-      ENV['MR_PASSWORD'] = 'a test!'
-      pwd = MrMurano::Passwords.new( tf.path )
-      pwd.load
-      ps = pwd.get('this.is.a.host', 'user')
-      expect(ps).to eq('a test!')
-      ENV['MR_PASSWORD'] = nil
-
-      data = IO.read(tf.path)
-      expect(data).to eq('')
-
-    end
-  end
 
 end
 

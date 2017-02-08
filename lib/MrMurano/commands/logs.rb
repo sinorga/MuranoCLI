@@ -2,7 +2,7 @@ require 'MrMurano/Solution'
 require 'MrMurano/makePretty'
 
 command :logs do |c|
-  c.syntax = %{mr logs [options]}
+  c.syntax = %{murano logs [options]}
   c.description = %{Get the logs for a solution}
   c.option '-f','--follow', %{Follow logs from server}
   c.option('--[no-]color', %{Toggle colorizing of logs}) {

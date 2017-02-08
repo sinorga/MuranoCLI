@@ -86,7 +86,7 @@ module MrMurano
     # +sn+:: Identifier for a device
     def remove(sn)
       # First drop it from the 1P database
-      do_rpc({:id=>1, :procedure=>:drop, :arguments=>[sn_rid(sn)]})
+      do_rpc({:id=>1, :procedure=>:drop, :arguments=>[sn_rid(sn)]}, nil)
       # Then remove it from the provisioning databases
       psn = ProductSerialNumber.new
       psn.remove_sn(sn)

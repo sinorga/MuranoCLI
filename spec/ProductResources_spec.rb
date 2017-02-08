@@ -99,10 +99,10 @@ RSpec.describe MrMurano::ProductResources do
                     :calls=>[{:id=>1,
                               :procedure=>"drop",
                               :arguments=>["abcdefg"]} ]}).
-        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+        to_return(body: [{:id=>1, :status=>"ok"}])
 
       ret = @prd.remove("abcdefg")
-      expect(ret).to eq({})
+      expect(ret).to be_nil
     end
 
     it "Creates" do
@@ -126,10 +126,10 @@ RSpec.describe MrMurano::ProductResources do
                     :calls=>[{:id=>1,
                               :procedure=>"map",
                               :arguments=>["alias", frid, "bob"]} ]}).
-        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+        to_return(body: [{:id=>1, :status=>"ok"}])
 
       ret = @prd.create("bob")
-      expect(ret).to eq({})
+      expect(ret).to be_nil
     end
   end
 
@@ -141,7 +141,7 @@ RSpec.describe MrMurano::ProductResources do
                     :calls=>[{:id=>1,
                               :procedure=>"drop",
                               :arguments=>[frid]} ]}).
-        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+        to_return(body: [{:id=>1, :status=>"ok"}])
 
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process").
         with(body: {:auth=>{:client_id=>"LLLLLLLLLL"},
@@ -162,7 +162,7 @@ RSpec.describe MrMurano::ProductResources do
                     :calls=>[{:id=>1,
                               :procedure=>"map",
                               :arguments=>["alias", frid, "bob"]} ]}).
-        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+        to_return(body: [{:id=>1, :status=>"ok"}])
 
       @prd.upload(nil, {:alias=>"bob", :format=>"string", :rid=>frid}, true)
     end
@@ -188,7 +188,7 @@ RSpec.describe MrMurano::ProductResources do
                     :calls=>[{:id=>1,
                               :procedure=>"map",
                               :arguments=>["alias", frid, "bob"]} ]}).
-        to_return(body: [{:id=>1, :status=>"ok", :result=>{}}])
+        to_return(body: [{:id=>1, :status=>"ok"}])
 
       @prd.upload(nil, {:alias=>"bob", :format=>"string"}, false)
     end

@@ -14,9 +14,8 @@ pkg/
 report/
 coverage/
 
-.mrmurano/
-.mrmuranorc
-.mrmuranorc.private
+.murano/
+
 files/
 endpoints/
 modules/

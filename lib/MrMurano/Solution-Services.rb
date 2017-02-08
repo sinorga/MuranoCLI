@@ -1,4 +1,5 @@
 require 'uri'
+require 'cgi'
 require 'net/http'
 require 'json'
 require 'yaml'
@@ -31,7 +32,7 @@ module MrMurano
     def fetch(name)
       raise "Missing name!" if name.nil?
       raise "Empty name!" if name.empty?
-      ret = get('/'+name)
+      ret = get('/'+CGI.escape(name))
       if block_given? then
         yield ret[:script]
       else
@@ -246,7 +247,11 @@ module MrMurano
     end
 
     def fetch(name)
-      ret = get('/'+name)
+      ret = get('/'+CGI.escape(name))
+      if ret.nil? then
+        error "Fetch for #{name} returned nil; skipping"
+        return ''
+      end
       aheader = (ret[:script].lines.first or "").chomp
       dheader = "--#EVENT #{ret[:service]} #{ret[:event]}"
       if block_given? then
@@ -284,6 +289,24 @@ module MrMurano
       end
       cur[:line_end] = lineno unless cur.nil?
       cur
+    end
+
+    def match(item, pattern)
+      # Pattern is: #{service}#{event}
+      pattern_pattern = /^#(?<service>[^#]*)#(?<event>.*)/i
+      md = pattern_pattern.match(pattern)
+      return false if md.nil?
+      debug "match pattern: '#{md[:service]}' '#{md[:event]}'"
+
+      unless md[:service].empty? then
+        return false unless item[:service].downcase == md[:service].downcase
+      end
+
+      unless md[:event].empty? then
+        return false unless item[:event].downcase == md[:event].downcase
+      end
+
+      true # Both match (or are empty.)
     end
 
     def synckey(item)

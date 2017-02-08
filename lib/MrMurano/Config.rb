@@ -1,14 +1,15 @@
 require 'pathname'
 require 'inifile'
+require 'highline'
 
 module MrMurano
   class Config
     #
     #  internal    transient this-run-only things (also -c options)
     #  specified   from --configfile
-    #  env         from ENV['MR_CONFIGFILE']
-    #  project     .mrmuranorc at project dir
-    #  user        .mrmuranorc at $HOME
+    #  env         from ENV['MURANO_CONFIGFILE']
+    #  project     .murano/config at project dir
+    #  user        .murano/config at $HOME
     #  defaults    Internal hardcoded defaults
     #
     ConfigFile = Struct.new(:kind, :path, :data) do
@@ -34,31 +35,73 @@ module MrMurano
     attr_reader :projectDir
 
     CFG_SCOPES=%w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
-    CFG_FILE_NAME = '.mrmuranorc'.freeze
-    CFG_DIR_NAME = '.mrmurano'.freeze
-    CFG_ALTRC_NAME = '.mrmurano/config'.freeze
+
+    CFG_ENV_NAME=%{MURANO_CONFIGFILE}.freeze
+    CFG_FILE_NAME=%[.murano/config].freeze
+    CFG_DIR_NAME=%[.murano].freeze
+
+    CFG_OLD_ENV_NAME=%[MR_CONFIGFILE].freeze
+    CFG_OLD_DIR_NAME=%[.mrmurano].freeze
+    CFG_OLD_FILE_NAME=%[.mrmuranorc].freeze
+
+    def warning(msg)
+      $stderr.puts HighLine.color(msg, :yellow)
+    end
+    def error(msg)
+      $stderr.puts HighLine.color(msg, :red)
+    end
+
+    def migrateOldEnv
+      unless ENV[CFG_OLD_ENV_NAME].nil? then
+        warning %{ENV "#{CFG_OLD_ENV_NAME}" is no longer supported. Rename it to "#{CFG_ENV_NAME}"}
+        unless ENV[CFG_ENV_NAME].nil? then
+          error %{Both "#{CFG_ENV_NAME}" and "#{CFG_OLD_ENV_NAME}" defined, please remove "#{CFG_OLD_ENV_NAME}".}
+        end
+        ENV[CFG_ENV_NAME] = ENV[CFG_OLD_ENV_NAME]
+      end
+    end
+
+    def migrateOldConfig(where)
+      # Check for dir.
+      if (where + CFG_OLD_DIR_NAME).exist? then
+        warning %{Moving old directory "#{CFG_OLD_DIR_NAME}" to "#{CFG_DIR_NAME}" in "#{where}"}
+        (where + CFG_OLD_DIR_NAME).rename(where + CFG_DIR_NAME)
+      end
+
+      # check for cfg.
+      if (where + CFG_OLD_FILE_NAME).exist? then
+        warning %{Moving old config "#{CFG_OLD_FILE_NAME}" to "#{CFG_FILE_NAME}" in "#{where}"}
+        (where + CFG_DIR_NAME).mkpath
+        (where + CFG_OLD_FILE_NAME).rename(where + CFG_FILE_NAME)
+      end
+    end
 
     def initialize
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new())
       # :specified --configfile FILE goes here. (see load_specific)
-      unless ENV['MR_CONFIGFILE'].nil? then
+
+      migrateOldEnv
+      unless ENV[CFG_ENV_NAME].nil? then
         # if it exists, must be a file
         # if it doesn't exist, that's ok
-        ep = Pathname.new(ENV['MR_CONFIGFILE'])
+        ep = Pathname.new(ENV[CFG_ENV_NAME])
         if ep.file? or not ep.exist? then
           @paths << ConfigFile.new(:env, ep)
         end
       end
+
       @projectDir = findProjectDir()
-      unless @projectDir.nil? then
-        @paths << ConfigFile.new(:project, @projectDir + CFG_FILE_NAME)
-        fixModes(@projectDir + CFG_DIR_NAME)
-      else
-        @paths << ConfigFile.new(:project, Pathname.new(Dir.home) + CFG_FILE_NAME)
-      end
+      migrateOldConfig(@projectDir)
+      @paths << ConfigFile.new(:project,  @projectDir + CFG_FILE_NAME)
+      (@projectDir + CFG_DIR_NAME).mkpath
+      fixModes(@projectDir + CFG_DIR_NAME)
+
+      migrateOldConfig(Pathname.new(Dir.home))
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
+      (Pathname.new(Dir.home) + CFG_DIR_NAME).mkpath
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
+
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
 
@@ -109,18 +152,17 @@ module MrMurano
     #
     # The Project dir is the directory between PWD and HOME that has one of (in
     # order of preference):
+    # - .murano/config
     # - .mrmuranorc
-    # - .mrmuranorc.private
-    # - .mrmurano/config
+    # - .murano/
     # - .mrmurano/
-    # - .git/
     def findProjectDir()
       result=nil
-      fileNames=[CFG_FILE_NAME, CFG_ALTRC_NAME]
-      dirNames=[CFG_DIR_NAME]
+      fileNames=[CFG_FILE_NAME, CFG_OLD_FILE_NAME]
+      dirNames=[CFG_DIR_NAME, CFG_OLD_DIR_NAME]
       home = Pathname.new(Dir.home).realpath
       pwd = Pathname.new(Dir.pwd).realpath
-      return nil if home == pwd
+      return home if home == pwd
       pwd.dirname.ascend do |i|
         break unless result.nil?
         break if i == home
@@ -131,17 +173,6 @@ module MrMurano
         end
         dirNames.each do |f|
           if (i + f).directory? then
-            result = i
-          end
-        end
-      end
-
-      # If nothing found, do a last ditch try by looking for .git/
-      if result.nil? then
-        pwd.dirname.ascend do |i|
-          break unless result.nil?
-          break if i == home
-          if (i + '.git').directory? then
             result = i
           end
         end
