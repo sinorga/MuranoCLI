@@ -249,6 +249,42 @@ RSpec.describe MrMurano::SyncUpDown do
              :local_path=>an_instance_of(Pathname)},
           ]})
       end
+
+      it "Finds nothing with specific matcher" do
+        ret = @t.status({}, ['#foo'])
+        expect(ret).to match({
+          :unchg=>[ ],
+          :toadd=>[ ],
+          :todel=>[ ],
+          :tomod=>[ ]})
+      end
+
+      it "gets all the details" do
+        ret = @t.status({:unselected=>true})
+        expect(ret).to match({
+          :unchg=>[
+            {:name=>'three.lua', :synckey=>'three.lua', :selected=>true,
+             :local_path=> pathname_globs('**/three.lua')},
+            {:name=>'four.lua', :synckey=>'four.lua', :selected=>true,
+             :local_path=>pathname_globs('**/four.lua')},
+          ],
+          :toadd=>[
+            {:name=>'five.lua', :synckey=>'five.lua', :selected=>true,
+             :local_path=>pathname_globs('**/five.lua')},
+            {:name=>'six.lua', :synckey=>'six.lua', :selected=>true,
+             :local_path=>pathname_globs('**/six.lua')},
+          ],
+          :todel=>[
+            {:name=>'seven.lua', :selected=>true, :synckey=>'seven.lua'},
+            {:name=>'eight.lua', :selected=>true, :synckey=>'eight.lua'},
+          ],
+          :tomod=>[
+            {:name=>'one.lua', :synckey=>'one.lua', :selected=>true,
+             :local_path=>pathname_globs('**/one.lua')},
+            {:name=>'two.lua', :synckey=>'two.lua', :selected=>true,
+             :local_path=>pathname_globs('**/two.lua')},
+          ]})
+      end
     end
   end
 
