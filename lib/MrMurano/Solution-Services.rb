@@ -291,6 +291,24 @@ module MrMurano
       cur
     end
 
+    def match(item, pattern)
+      # Pattern is: #{service}#{event}
+      pattern_pattern = /^#(?<service>[^#]*)#(?<event>.*)/i
+      md = pattern_pattern.match(pattern)
+      return false if md.nil?
+      debug "match pattern: '#{md[:service]}' '#{md[:event]}'"
+
+      unless md[:service].empty? then
+        return false unless item[:service].downcase == md[:service].downcase
+      end
+
+      unless md[:event].empty? then
+        return false unless item[:event].downcase == md[:event].downcase
+      end
+
+      true # Both match (or are empty.)
+    end
+
     def synckey(item)
       "#{item[:service]}_#{item[:event]}"
     end
