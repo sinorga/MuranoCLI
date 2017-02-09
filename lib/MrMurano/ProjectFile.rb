@@ -35,6 +35,10 @@ module MrMurano
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
+        [:include, :exclude].each do |key|
+          self[key] = [self[key]] unless self[key].kind_of? Array
+        end
+      end
       def save
         ret={}
         self.members.each do |key|
@@ -49,6 +53,10 @@ module MrMurano
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
+        [:include, :exclude].each do |key|
+          self[key] = [self[key]] unless self[key].kind_of? Array
+        end
+      end
       def save
         ret={}
         self.members.each do |key|
@@ -63,6 +71,10 @@ module MrMurano
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
+        [:include, :exclude].each do |key|
+          self[key] = [self[key]] unless self[key].kind_of? Array
+        end
+      end
       def save
         ret={}
         self.members.each do |key|
@@ -77,6 +89,10 @@ module MrMurano
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
+        [:include, :exclude].each do |key|
+          self[key] = [self[key]] unless self[key].kind_of? Array
+        end
+      end
       def save
         ret={}
         self.members.each do |key|
