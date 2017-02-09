@@ -262,16 +262,20 @@ module MrMurano
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
 
+      @data[:assets].location = nil
       ifset(data, 'default_page', @data[:assets], :default_page)
-      ifset(data, 'file_dir', @data[:assets], :location)
+      ifset(data, 'file_dir', @data[:assets], :include)
 
+      @data[:routes].location = nil
       ifset(data, 'custom_api', @data[:routes], :include)
 
       if data.has_key? 'modules' then
+        @data[:modules].location = nil
         @data[:modules][:include] = data['modules'].values
       end
 
       if data.has_key? 'event_handler' then
+        @data[:eventhandlers].location = nil
         evd = data['event_handler'].values.map{|e| e.values}.flatten
         @data[:eventhandlers].include = evd
       end
@@ -289,16 +293,20 @@ module MrMurano
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
 
+      @data[:assets].location = nil
       ifset(data, 'default_page', @data[:assets], :default_page)
       ifset(data, 'assets', @data[:assets], :location)
 
+      @data[:routes].location = nil
       ifset(data, 'routes', @data[:routes], :include)
 
       if data.has_key? 'modules' then
+        @data[:modules].location = nil
         @data[:modules][:include] = data['modules'].values
       end
 
       if data.has_key? 'services' then
+        @data[:eventhandlers].location = nil
         evd = data['services'].values.map{|e| e.values}.flatten
         @data[:eventhandlers].include = evd
       end
