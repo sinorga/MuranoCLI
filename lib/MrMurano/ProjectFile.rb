@@ -126,11 +126,27 @@ module MrMurano
           "1.0.0",
           nil,
           nil
-        ), #TODO: Fill out some default meta.
-        PrjFiles.new($cfg['location.files'], $cfg['files.searchFor'], $cfg['files.ignoring'], $cfg['files.default_page']),
-        PrjModules.new($cfg['location.modules'], $cfg['modules.searchFor'], $cfg['modules.ignoring']),
-        PrjEndpoints.new($cfg['location.endpoints'], $cfg['endpoints.searchFor'], $cfg['endpoints.ignoring']),
-        PrjEventHandlers.new($cfg['location.eventhandler'], $cfg['eventhandler.searchFor'], $cfg['eventhandler.ignoring']),
+        ),
+        PrjFiles.new(
+          $cfg['location.files'],
+          ($cfg['files.searchFor'] or '').split,
+          ($cfg['files.ignoring'] or '').split,
+          $cfg['files.default_page']),
+        PrjModules.new(
+          $cfg['location.modules'],
+          ($cfg['modules.searchFor'] or '').split,
+          ($cfg['modules.ignoring'] or '').split,
+          ),
+        PrjEndpoints.new(
+          $cfg['location.endpoints'],
+          ($cfg['endpoints.searchFor'] or '').split,
+          ($cfg['endpoints.ignoring'] or '').split,
+        ),
+        PrjEventHandlers.new(
+          $cfg['location.eventhandlers'],
+          ($cfg['eventhandler.searchFor'] or '').split,
+          ($cfg['eventhandler.ignoring'] or '').split,
+        ),
       )
     end
 
