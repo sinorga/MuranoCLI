@@ -10,9 +10,10 @@ require 'MrMurano/Solution'
 require 'MrMurano/Solution-Services'
 require 'MrMurano/Solution-ServiceConfig'
 
-require 'MrMurano/Solution-Cors' # service/{pid}/webservice/
-require 'MrMurano/Solution-Endpoint' # service/{pid}/webservice/
-require 'MrMurano/Solution-File' # service/{pid}/webservice/
+require 'MrMurano/Webservice-Cors' # service/{pid}/webservice/
+require 'MrMurano/Webservice-Endpoint' # service/{pid}/webservice/
+require 'MrMurano/Webservice-File' # service/{pid}/webservice/
+
 require 'MrMurano/Solution-Users' # service/{pid}/webservice/
 
 require 'MrMurano/Product'
