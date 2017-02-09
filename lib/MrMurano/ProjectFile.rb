@@ -215,10 +215,14 @@ module MrMurano
         return -4
       end
 
-      data = Hash.transform_key_to_symbols(data)
+      data = Hash.transform_keys_to_symbols(data)
 
-      # get format version
-      fmtvers = (data[:formatversion] or data[:fmtvers] or '1.0.0')
+      # get format version; little different for older format.
+      if @prjFile.basename.to_s == "Solutionfile.json" then
+        fmtvers = data[:version] or '0.2.0'
+      else
+        fmtvers = data[:formatversion] or '1.0.0'
+      end
 
       methodname = "load_#{fmtvers.gsub(/\./, '_')}".to_sym
       if respond_to? methodname then
