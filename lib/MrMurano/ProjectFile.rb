@@ -242,7 +242,11 @@ module MrMurano
     end
 
     def load_1_0_0(data)
-      # TODO: Schema Validation.
+      schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/pf-v1.0.0.yaml'
+      schema = YAML.load_file(schemaPath.to_s)
+      v = JSON::Validator.fully_validate(schema, data)
+      return v unless v.empty?
+
       @data.each_pair do |key, str|
         str.load(data[key]) if data.has_key? key
       end
