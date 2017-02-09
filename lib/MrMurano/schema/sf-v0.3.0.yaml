@@ -73,5 +73,6 @@ required:
   - assets
   - routes
   - services
+  - version
 additionalProperties: false
 
