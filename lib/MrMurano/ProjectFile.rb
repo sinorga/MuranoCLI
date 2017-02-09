@@ -1,5 +1,4 @@
 require 'yaml'
-require 'vine'
 require 'json-schema'
 require 'MrMurano/Config'
 require 'MrMurano/hash'
