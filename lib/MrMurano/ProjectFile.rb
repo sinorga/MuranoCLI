@@ -21,6 +21,13 @@ module MrMurano
           self[key] = obj[key] if obj.has_key? key
         end
       end
+      def save
+        ret={}
+        self.members.each do |key|
+          ret[key] = self[key] unless self[key].nil?
+        end
+        ret
+      end
     end
 
     PrjFiles = Struct.new(:location, :include, :exclude, :default_page) do
@@ -28,6 +35,12 @@ module MrMurano
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
+      def save
+        ret={}
+        self.members.each do |key|
+          ret[key] = self[key] unless self[key].nil?
+        end
+        ret
       end
     end
 
@@ -36,6 +49,12 @@ module MrMurano
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
+      def save
+        ret={}
+        self.members.each do |key|
+          ret[key] = self[key] unless self[key].nil?
+        end
+        ret
       end
     end
 
@@ -44,6 +63,12 @@ module MrMurano
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
+      def save
+        ret={}
+        self.members.each do |key|
+          ret[key] = self[key] unless self[key].nil?
+        end
+        ret
       end
     end
 
@@ -52,11 +77,25 @@ module MrMurano
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
+      def save
+        ret={}
+        self.members.each do |key|
+          ret[key] = self[key] unless self[key].nil?
+          # TODO don't add if equal to default.
+        end
+        ret
       end
     end
     #PrjCors = Struct.new(:origin, :methods, :headers, :credentials)
 
     PrfFile = Struct.new(:info, :assets, :modules, :routes, :eventhandlers) do
+      def save
+        ret={}
+        self.members.each do |key|
+          ret[key] = self[key].save
+        end
+        ret
+      end
     end
 
     def initialize()
@@ -109,7 +148,9 @@ module MrMurano
     #
     # This ALWAYS saves in the latest format only.
     def save
-      puts @data.to_yaml # as tempting as this is, don't
+      dt = @data.save
+      puts Hash.transform_keys_to_strings(dt).to_yaml
+
     end
 
     ##
