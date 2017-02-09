@@ -96,18 +96,17 @@ module MrMurano
         ret={}
         self.members.each do |key|
           ret[key] = self[key] unless self[key].nil?
-          # TODO don't add if equal to default.
         end
         ret
       end
     end
-    #PrjCors = Struct.new(:origin, :methods, :headers, :credentials)
 
     PrfFile = Struct.new(:info, :assets, :modules, :routes, :eventhandlers) do
       def save
         ret={}
         self.members.each do |key|
-          ret[key] = self[key].save
+          value = self[key].save
+          ret[key] = value unless value.empty?
         end
         ret
       end
@@ -126,26 +125,10 @@ module MrMurano
           nil,
           nil
         ),
-        PrjFiles.new(
-          $cfg['location.files'],
-          ($cfg['files.searchFor'] or '').split,
-          ($cfg['files.ignoring'] or '').split,
-          $cfg['files.default_page']),
-        PrjModules.new(
-          $cfg['location.modules'],
-          ($cfg['modules.searchFor'] or '').split,
-          ($cfg['modules.ignoring'] or '').split,
-          ),
-        PrjEndpoints.new(
-          $cfg['location.endpoints'],
-          ($cfg['endpoints.searchFor'] or '').split,
-          ($cfg['endpoints.ignoring'] or '').split,
-        ),
-        PrjEventHandlers.new(
-          $cfg['location.eventhandlers'],
-          ($cfg['eventhandler.searchFor'] or '').split,
-          ($cfg['eventhandler.ignoring'] or '').split,
-        ),
+        PrjFiles.new(),
+        PrjModules.new(),
+        PrjEndpoints.new(),
+        PrjEventHandlers.new(),
       )
     end
 
@@ -154,13 +137,35 @@ module MrMurano
     def get(key)
       section, ikey = key.split('.')
       begin
-        return @data[section.to_sym][ikey.to_sym]
+        ret = @data[section.to_sym][ikey.to_sym]
+        return default_value_for(key) if ret.nil?
+        return ret
       rescue NameError => e
         debug ">>=>> #{e}"
         return nil
       end
     end
     alias [] get
+
+    def default_value_for(key)
+      keymap = {
+        'assets.location' => 'location.files',
+        'assets.include' => 'files.searchFor',
+        'assets.exclude' => 'files.ignoring',
+        'assets.default_page' => 'files.default_page',
+        'modules.location' => 'location.modules',
+        'modules.include' => 'modules.searchFor',
+        'modules.exclude' => 'modules.ignoring',
+        'routes.location' => 'location.endpoints',
+        'routes.include' => 'endpoints.searchFor',
+        'routes.exclude' => 'endpoints.ignoring',
+        'eventhandler.location' => 'location.eventhandlers',
+        'eventhandler.include' => 'eventhandler.searchFor',
+        'eventhandler.exclude' => 'eventhandler.ignoring',
+      }
+      return nil unless keymap.has_key? key
+      $cfg[ keymap[key] ]
+    end
 
     # Set a value for a key.
     # Keys are 'section.key'
