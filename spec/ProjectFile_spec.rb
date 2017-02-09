@@ -1,0 +1,141 @@
+require 'MrMurano/version'
+require 'MrMurano/Config'
+require 'MrMurano/ProjectFile'
+require '_workspace'
+require 'tempfile'
+require 'erb'
+
+RSpec.describe MrMurano::Config do
+
+  context "Basics " do
+    include_context "WORKSPACE"
+    before(:example) do
+      $cfg = MrMurano::Config.new
+      $cfg.load
+      $cfg['user.name'] = 'bob@builder.co'
+    end
+
+    context "No files to load" do
+      context "Defaults" do
+        before(:example) do
+          @pjf = MrMurano::ProjectFile.new
+          #@pjf.load
+        end
+        it "Info" do
+          expect(@pjf.get('info.name')).to eq('project')
+          expect(@pjf.get('info.summary')).to eq('One line summary of project')
+          expect(@pjf.get('info.description')).to eq("In depth description of project\n\nWith lots of details.")
+          expect(@pjf.get('info.authors')).to eq(['bob@builder.co'])
+          expect(@pjf.get('info.version')).to eq('1.0.0')
+        end
+
+        it "Assets" do
+          # Because defaults before load() are all nil, the default_value_for method
+          # is called.
+          expect(@pjf).to receive(:default_value_for).with('assets.location').and_return('here')
+          expect(@pjf.get('assets.location')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('assets.include').and_return('here')
+          expect(@pjf.get('assets.include')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('assets.exclude').and_return('here')
+          expect(@pjf.get('assets.exclude')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('assets.default_page').and_return('here')
+          expect(@pjf.get('assets.default_page')).to eq('here')
+        end
+
+        it "Modules" do
+          # Because defaults before load() are all nil, the default_value_for method
+          # is called.
+          expect(@pjf).to receive(:default_value_for).with('modules.location').and_return('here')
+          expect(@pjf.get('modules.location')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('modules.include').and_return('here')
+          expect(@pjf.get('modules.include')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('modules.exclude').and_return('here')
+          expect(@pjf.get('modules.exclude')).to eq('here')
+        end
+
+        it "Routes" do
+          # Because defaults before load() are all nil, the default_value_for method
+          # is called.
+          expect(@pjf).to receive(:default_value_for).with('routes.location').and_return('here')
+          expect(@pjf.get('routes.location')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('routes.include').and_return('here')
+          expect(@pjf.get('routes.include')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('routes.exclude').and_return('here')
+          expect(@pjf.get('routes.exclude')).to eq('here')
+        end
+
+        it "Event handlers" do
+          # Because defaults before load() are all nil, the default_value_for method
+          # is called.
+          expect(@pjf).to receive(:default_value_for).with('eventhandlers.location').and_return('here')
+          expect(@pjf.get('eventhandlers.location')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('eventhandlers.include').and_return('here')
+          expect(@pjf.get('eventhandlers.include')).to eq('here')
+
+          expect(@pjf).to receive(:default_value_for).with('eventhandlers.exclude').and_return('here')
+          expect(@pjf.get('eventhandlers.exclude')).to eq('here')
+        end
+      end
+
+      context "Bad Keys" do
+        before(:example) do
+          @pjf = MrMurano::ProjectFile.new
+        end
+        it "Empty" do
+          expect{@pjf.get('')}.to raise_error("Empty key")
+        end
+        it "No dot" do
+          expect{@pjf.get('info')}.to raise_error("Missing dot")
+        end
+        it "Undefined key" do
+          expect{@pjf.get('info.bob')}.to raise_error("no member 'bob' in struct")
+        end
+        it "Undefined section" do
+          expect{@pjf.get('sob.include')}.to raise_error("no member 'sob' in struct")
+        end
+        it "Missing key" do
+          expect{@pjf.get('info.')}.to raise_error("Missing key")
+        end
+        it "Missing section" do
+          expect{@pjf.get('.include')}.to raise_error("no member '' in struct")
+        end
+      end
+
+      context "default_value_for mapping" do
+        before(:example) do
+          @pjf = MrMurano::ProjectFile.new
+        end
+
+        it "returns nil for unmapped key." do
+          expect(@pjf.default_value_for('foooood')).to be_nil
+        end
+
+        it "hits $cfg if mapped key" do
+          expect($cfg).to receive(:get).with('location.endpoints').and_return('beef')
+          expect(@pjf.default_value_for('routes.location')).to eq('beef')
+        end
+      end
+    end
+
+    context "Calling load" do
+      before(:example) do
+        @pjf = MrMurano::ProjectFile.new
+      end
+
+      it "load" do
+        @pjf.load
+      end
+
+    end
+  end
+end
+
+#  vim: set ai et sw=2 ts=2 :

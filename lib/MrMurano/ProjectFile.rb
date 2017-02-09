@@ -1,5 +1,6 @@
 require 'yaml'
 require 'json-schema'
+require 'MrMurano/verbosing'
 require 'MrMurano/Config'
 require 'MrMurano/hash'
 
@@ -8,6 +9,7 @@ module MrMurano
   # A Project File that describes details about a project that is synced into
   # Murano
   class ProjectFile
+    include Verbose
 
     # The contents of this is explictily not just a nest of hashes and arrays.
     # To keep expectations in check, there is a set number of known keys.
@@ -135,18 +137,21 @@ module MrMurano
     # Get a value for a key.
     # Keys are 'section.key'
     def get(key)
+      raise "Empty key" if key.empty?
       section, ikey = key.split('.')
-      begin
-        ret = @data[section.to_sym][ikey.to_sym]
-        return default_value_for(key) if ret.nil?
-        return ret
-      rescue NameError => e
-        debug ">>=>> #{e}"
-        return nil
-      end
+      raise "Missing dot" if ikey.nil? and section == key
+      raise "Missing key" if ikey.nil? and section != key
+      ret = @data[section.to_sym][ikey.to_sym]
+      return default_value_for(key) if ret.nil?
+      return ret
     end
     alias [] get
 
+    # Get the default value for a key.
+    #
+    # Keys are 'section.key'
+    #
+    # All of these are currently stored in $cfg, but under different names.
     def default_value_for(key)
       keymap = {
         'assets.location' => 'location.files',
@@ -164,6 +169,8 @@ module MrMurano
         'eventhandler.exclude' => 'eventhandler.ignoring',
       }
       return nil unless keymap.has_key? key
+      # FIXME *.{include,exclude} want arrays returned. But what they map to is
+      # strings.
       $cfg[ keymap[key] ]
     end
 
@@ -186,17 +193,21 @@ module MrMurano
     def save
       dt = @data.save
       puts Hash.transform_keys_to_strings(dt).to_yaml
+      # TODO: where? to the file?
 
     end
 
     ##
     # Load the project file in the project directory.
     def load
-      possible = $cfg['location.base'].glob('*.murano', 'SolutionFile.json')
+      possible = Dir[
+        ($cfg['location.base'] + '*.murano').to_s,
+        ($cfg['location.base'] + 'Solutionfile.json').to_s,
+      ]
       debug "Possible Project files: #{possible}"
       return 0 if possible.empty? # this is ok.
 
-      @prjFile = possible.first
+      @prjFile = Pathname.new(possible.first)
       if @prjFile.nil? then
         error "No project file found!"
         return -1
@@ -283,9 +294,8 @@ module MrMurano
         evd = data['event_handler'].values.map{|e| e.values}.flatten
         @data[:eventhandlers].include = evd
       end
-      # TODO: check if eventhandlers need header added.
-
-      # TODO: cors.
+      # TODO: check if eventhandlers need header added. (see config-migrate)
+      # TODO: load cors and write out. (see config-migrate)
 
       []
     end
@@ -314,9 +324,8 @@ module MrMurano
         evd = data['services'].values.map{|e| e.values}.flatten
         @data[:eventhandlers].include = evd
       end
-      # TODO: check if eventhandlers need header added.
-
-      # TODO: cors.
+      # TODO: check if eventhandlers need header added. (see config-migrate)
+      # TODO: load cors and write out. (see config-migrate)
 
       []
     end
