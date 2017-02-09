@@ -186,6 +186,17 @@ module MrMurano
       into + name
     end
 
+    ## Does item match pattern?
+    #
+    # Children objects should override this if synckey is not @itemkey
+    #
+    # Check child specific patterns against item
+    #
+    # @returns true or false
+    def match(item, pattern)
+      false
+    end
+
     ## Get the key used to quickly compare two items
     #
     # Children objects should override this if synckey is not @itemkey
@@ -306,9 +317,11 @@ module MrMurano
     # @param from Pathname: Directory of items to scan
     # @return Array: of Hashes of item details
     def localitems(from)
+      # TODO: Profile this.
       debug "#{self.class.to_s}: Getting local items from: #{from}"
       searchIn = from.to_s
       sf = searchFor.map{|i| ::File.join(searchIn, i)}
+      debug "#{self.class.to_s}: Globs: #{sf}"
       Dir[*sf].flatten.compact.reject do |p|
         ::File.directory?(p) or ignoring.any? do |i|
           ::File.fnmatch(i,p)
@@ -344,11 +357,15 @@ module MrMurano
     end
     private :elevate_hash
 
-    def syncup(options={})
+    ## Make things in Murano look like local project
+    #
+    # This creates, uploads, and deletes things as needed up in Murano to match
+    # what is in the local project directory.
+    def syncup(options={}, selected=[])
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
       options[:asdown] = false
-      dt = status(options)
+      dt = status(options, selected)
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
@@ -379,10 +396,14 @@ module MrMurano
       end
     end
 
-    def syncdown(options={})
+    ## Make things in local project look like Murano
+    #
+    # This creates, downloads, and deletes things as needed up in the local project
+    # directory to match what is in Murano.
+    def syncdown(options={}, selected=[])
       options = elevate_hash(options)
       options[:asdown] = true
-      dt = status(options)
+      dt = status(options, selected)
       into = @locationbase + @location ###
       toadd = dt[:toadd]
       todel = dt[:todel]
@@ -451,12 +472,35 @@ module MrMurano
       df
     end
 
+    ##
+    # Check if an item matches a pattern.
+    def _matcher(items, patterns)
+      items.map do |item|
+        if patterns.empty? then
+          item[:selected] = true
+        else
+          item[:selected] = patterns.any? do |pattern|
+            if pattern.to_s[0] == '#' then
+              match(item, pattern)
+            elsif not item.has_key? :local_path then
+              false
+            else
+              item[:local_path].fnmatch(pattern)
+            end
+          end
+        end
+        item
+      end
+    end
+    private :_matcher
+
     ## Get status of things here verses there
-    def status(options={})
+    def status(options={}, selected=[])
       options = elevate_hash(options)
-      there = list()
-      here = locallist()
       itemkey = @itemkey.to_sym
+
+      there = _matcher(list(), selected)
+      here = _matcher(locallist(), selected)
 
       therebox = {}
       there.each do |item|
@@ -486,13 +530,22 @@ module MrMurano
         mrg = herebox[key].reject{|k,v| k==itemkey}
         mrg = therebox[key].merge(mrg)
         if docmp(herebox[key], therebox[key]) then
-          mrg[:diff] = dodiff(mrg) if options[:diff]
+          mrg[:diff] = dodiff(mrg) if options[:diff] and mrg[:selected]
           tomod << mrg
         else
           unchg << mrg
         end
       end
-      { :toadd=>toadd, :todel=>todel, :tomod=>tomod, :unchg=>unchg }
+      if options[:unselected] then
+        { :toadd=>toadd, :todel=>todel, :tomod=>tomod, :unchg=>unchg }
+      else
+        {
+          :toadd=>toadd.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
+          :todel=>todel.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
+          :tomod=>tomod.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
+          :unchg=>unchg.select{|i| i[:selected]}.map{|i| i.delete(:selected); i}
+        }
+      end
     end
   end
 end

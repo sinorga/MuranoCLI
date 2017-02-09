@@ -11,7 +11,8 @@ require 'MrMurano/verbosing'
 module MrMurano
   class Passwords
     include Verbose
-    def initialize(path)
+    def initialize(path=nil)
+      path = $cfg.file_at('passwords', :user) if path.nil?
       path = Pathname.new(path) unless path.kind_of? Pathname
       @path = path
       @data = nil
@@ -55,6 +56,25 @@ module MrMurano
       return nil unless @data[host].kind_of? Hash
       return nil unless @data[host].has_key? user
       return @data[host][user]
+    end
+
+    ## Remove the password for a user
+    def remove(host, user)
+      if @data.kind_of? Hash then
+        hd = @data[host]
+        if not hd.nil? and hd.kind_of?(Hash) then
+          if hd.has_key? user then
+            @data[host].delete user
+          end
+        end
+      end
+    end
+
+    ## Get all hosts and usernames. (does not return the passwords)
+    def list
+      ret = {}
+      @data.each_pair{|key,value| ret[key] = value.keys}
+      ret
     end
   end
 

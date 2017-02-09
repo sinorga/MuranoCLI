@@ -1,7 +1,28 @@
 
 command :status do |c|
-  c.syntax = %{murano status [options]}
-  c.description = %{Get the status of files}
+  c.syntax = %{murano status [options] [filters]}
+  c.summary = %{Get the status of files}
+  c.description = %{Get the status of files
+
+  Compares the local project against what is up in Murano, returning a summary of
+  what things are new or changed.
+
+  When --diff is passed, for items that have changes, the remote item and local
+  item are passed to a diff tool and that output is included.
+
+  The diff tool and options to it can be set with the config key 'diff.cmd'.
+
+
+  Filters allow for selecting a subset of items to check based on patterns.
+
+  File glob filters can be used to select local files.  The glob is compared with
+  the full file path.
+
+  Each item type also supports specific filters. These always start with #.
+  Endpoints can be selected with a "#<method>#<path glob>" pattern.
+
+
+  }.gsub(/^ +/,'')
   c.option '--all', 'Check everything'
 
   # Load options to control which things to status
@@ -58,7 +79,7 @@ command :status do |c|
 
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
       sol = klass.new
-      ret = sol.status(options)
+      ret = sol.status(options, args)
       gmerge(ret, type, options)
     end
 
