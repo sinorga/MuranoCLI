@@ -5,6 +5,8 @@ require 'MrMurano/verbosing'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
+
+  ## The details of talking to the Webservice service.
   module Webservice
     class Base
       def initialize
