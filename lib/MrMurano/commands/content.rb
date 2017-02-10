@@ -1,4 +1,4 @@
-require 'MrMurano/Product'
+require 'MrMurano/Content'
 
 command :content do |c|
   c.syntax = %{murano content}
@@ -22,9 +22,22 @@ command 'content list' do |c|
   Data uploaded to a product's content area can be downloaded by devices using the
   HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
   }
+
+  c.option '-l', '--long', %{Include more info for each file}
+
   c.action do |args, options|
-    prd = MrMurano::ProductContent.new
-    prd.outf prd.list
+    prd = MrMurano::Content::Base.new
+    items = prd.list
+    prd.outf(items) do |dd, ios|
+      if options.long then
+        headers = [:Name, :Id, :Size, :MTime, :MIME]
+        rows = dd.map{|d| [d[:tags][:name], d[:id], d[:size], d[:mtime], d[:type]]}
+      else
+        headers = [:Name, :Size]
+        rows = dd.map{|d| [d[:tags][:name], d[:size]]}
+      end
+      prd.tabularize({:headers=>headers, :rows=>rows}, ios)
+    end
   end
 end
 
