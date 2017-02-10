@@ -1,6 +1,7 @@
 require 'uri'
 require 'cgi'
 require 'net/http'
+require 'digest'
 require "http/form_data"
 require 'MrMurano/Config'
 require 'MrMurano/http'
@@ -43,18 +44,34 @@ module MrMurano
       end
 
       # MRMUR-59
-      def upload(id, local_path)
+      def upload(name, local_path, tags=nil)
         # This is a two step process.
         # 1: Get the post instructions for S3.
         # 2: Upload to S3.
-        ret = get("/upload?expires_in=3600&name=#{CGI.escape(id)}")
+
+        # ?tags=CGI.escape(meta.to_json)
+        # ?type=
+        sha256 = Digest::SHA256.new
+        sha256.file(local_path.to_s)
+        mime = MIME::Types.type_for(local_path.to_s)[0] || MIME::Types["application/octet-stream"][0]
+
+        params = {
+          :sha256 => sha256.hexdigest,
+          :expires_in => 30,
+          :type => mime,
+          :name => name,
+        }
+        if not tags.nil? and tags.kind_of? Hash then
+          params[:tags] = tags.to_json
+        end
+
+        ret = get("/upload?#{URI.encode_www_form(params)}")
         debug "POST instructions: #{ret}"
         raise "Method isn't POST!!!" unless ret[:method] == 'POST'
         raise "EncType isn't multipart/form-data" unless ret[:enctype] == 'multipart/form-data'
 
         uri = URI(ret[:url])
         request = Net::HTTP::Post.new(uri)
-        mime = MIME::Types.type_for(local_path.to_s)[0] || MIME::Types["application/octet-stream"][0]
         file = HTTP::FormData::File.new(local_path.to_s, {:mime_type=>mime})
         form = HTTP::FormData.create(ret[:inputs].merge({ret[:field]=>file}))
 
@@ -77,11 +94,13 @@ module MrMurano
         end
 
         unless $cfg['tool.dry'] then
-          response = http.request(request)
-          case response
-          when Net::HTTPSuccess
-          else
-            showHttpError(request, response)
+          Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
+            response = ihttp.request(request)
+            case response
+            when Net::HTTPSuccess
+            else
+              showHttpError(request, response)
+            end
           end
         end
       end
@@ -91,11 +110,11 @@ module MrMurano
       end
 
       # MRMUR-59
-      def download(id, &block)
+      def download(name, &block)
         # This is a two step process.
         # 1: Get the get instructions for S3.
         # 2: fetch from S3.
-        ret = get("/download?id=#{CGI.escape(id)}")
+        ret = get("/download?name=#{CGI.escape(name)}")
         debug "GET instructions: #{ret}"
         raise "Method isn't GET!!!" unless ret[:method] == 'GET'
 
@@ -113,18 +132,22 @@ module MrMurano
         end
 
         unless $cfg['tool.dry'] then
-          response = http.request(request)
-          case response
-          when Net::HTTPSuccess
-            if block_given? then
-              resp.read_body(&block)
-            else
-              resp.read_body do |chunk|
-                $stdout.write chunk
+          Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
+            response = ihttp.request(request)
+            case response
+            when Net::HTTPSuccess
+              if block_given? then
+                response.read_body(&block)
+              else
+                puts "==TUCK"
+                # is getting called twice. How?
+                response.read_body do |chunk|
+                  $stdout.write chunk
+                end
               end
+            else
+              showHttpError(request, response)
             end
-          else
-            showHttpError(request, response)
           end
         end
       end
