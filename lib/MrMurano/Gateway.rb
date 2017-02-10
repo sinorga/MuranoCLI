@@ -82,9 +82,9 @@ module MrMurano
       end
 
       ## All devices (pagination?)
-      def list(limit=1000)
+      def list(limit=1000, before=nil)
         # MRMUR-54
-        get("?limit=#{limit}")
+        get('', {:limit=>limit})
       end
 
       def query(args)
@@ -106,7 +106,6 @@ module MrMurano
       ## Create a device with given Identity
       # @param id [String] The new identity
       def enable(id)
-        # MRMUR-51
         put("/#{CGI.escape(id)}")
       end
       alias whitelist enable

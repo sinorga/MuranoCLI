@@ -4,21 +4,39 @@ command 'product device list' do |c|
   c.syntax = %{murano product device list [options]}
   c.summary = %{List serial numbers for a product}
 
-  c.option '--offset NUMBER', Integer, %{Offset to start listing at}
   c.option '--limit NUMBER', Integer, %{How many devices to return}
+  c.option '-l', '--long', %{show everything}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args,options|
-    options.default :offset=>0, :limit=>50
+    options.default :limit=>50
 
     prd = MrMurano::Gateway::Device.new
     io=nil
     io = File.open(options.output, 'w') if options.output
-    data = prd.list(options.offset, options.limit)
+    data = prd.list(options.limit)
     prd.outf(data, nil) do |dd,ios|
       dt={}
-      dt[:headers] = [:SN, :Status, :RID]
-      dt[:rows] = data.map{|row| [row[:sn], row[:status], row[:rid]]}
+      if options.long then
+        dt[:headers] = [:Identifier,
+                        :AuthType,
+                        :Locked,
+                        :Reprovision, 'Dev Mode', 'Last IP',
+                        'Last Seen',
+                        :Status, :Online]
+        dt[:rows] = data[:devices].map{|row| [row[:identity],
+                                    (row[:auth] or {})[:type],
+                                    row[:locked],
+                                    row[:reprovision],
+                                    row[:devmode],
+                                    row[:lastip],
+                                    row[:lastseen],
+                                    row[:status],
+                                    row[:online]]}
+      else
+        dt[:headers] = [:Identifier, :Status, :Online]
+        dt[:rows] = data[:devices].map{|row| [row[:identity], row[:status], row[:online]]}
+      end
       prd.tabularize(dt, ios)
     end
     io.close unless io.nil?
