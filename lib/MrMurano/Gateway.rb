@@ -33,10 +33,15 @@ module MrMurano
       # …
       #include SyncUpDown
 
+      def info
+        get()
+      end
 
     end
 
     class Resources < Base
+      # MRMUR-58
+
       # TODO: CRUD Resources
       # - Create
       # - Read
@@ -44,29 +49,48 @@ module MrMurano
       # - Delete
 
       def list()
-        get('/getProduct')
+        ret = get('')
+        return {} unless ret.has_key? :resources
+        ret[:resources]
       end
 
       # XXX We will want SyncUpDown on this one.
     end
 
+    ##
+    # Talking to the devices on a Gateway
     class Device < Base
+      def initialize
+        super
+        @uriparts << :device
+      end
 
       ## All devices (pagination?)
-      def list
+      def list(limit=1000)
         # MRMUR-54
+        get("?limit=#{limit}")
+      end
+
+      def query(args)
+        # ?limit=#
+        # ?before=<time stamp in ms>
+        # ?status={provisioned,locked,devmode,whitelisted}
+        # ?identity=<pattern>
       end
 
       ## Get one device
       def fetch(id)
         # MRMUR-54
+        get("/#{CGI.escape(id)}")
       end
 
       ## Create a device with given Identity
       def enable(id)
         # MRMUR-51
+        put("/#{CGI.escape(id)}")
       end
       alias whitelist enable
+      alias create enable
 
       ## Create a bunch of devices at once
       # @param data [String] CSV of identifies to create
