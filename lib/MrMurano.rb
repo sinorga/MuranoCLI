@@ -16,6 +16,8 @@ require 'MrMurano/Webservice-File' # service/{pid}/webservice/
 
 require 'MrMurano/Solution-Users' # service/{pid}/user/
 
+require 'MrMurano/Content'
+
 # Okami replaces
 require 'MrMurano/Product'
 require 'MrMurano/Product-1P-Device'
