@@ -80,31 +80,42 @@ command 'content delete' do |c|
 end
 
 command 'content upload' do |c|
-  c.syntax = %{murano content upload <content id> <file>}
+  tags = {}
+  c.syntax = %{murano content upload <file>}
   c.summary = %{Upload content}
   c.description = %{Upload a content item
 
   Data uploaded to a product's content area can be downloaded by devices using the
   HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
   }
-  c.option '--meta STRING', %{Add extra meta info to the content item}
+  c.option('--tags KEY=VALUE', %{Add extra meta info to the content item}) do |ec|
+    key, value = ec.split('=', 2)
+    # a=b :> ["a","b"]
+    # a= :> ["a",""]
+    # a :> ["a"]
+    raise "Bad tag key '#{param}'" if key.nil? or key.empty?
+    raise "Bad tag value '#{param}'" if value.nil? or value.empty?
+    key = key.downcase if key.downcase == 'name'
+    tags[key] = value
+  end
 
   c.action do |args, options|
     options.default :meta=>' '
-    prd = MrMurano::ProductContent.new
+    prd = MrMurano::Content::Base.new
 
     if args[0].nil? then
-      prd.error "Missing <content id>"
-    elsif args[1].nil? then
       prd.error "Missing <file>"
     else
-
-      ret = prd.info(args[0])
-      if ret.nil? then
-        prd.outf prd.create(args[0], options.meta)
+      name = ::File.basename(args[0])
+      name = tags['name'] if tags.has_key? 'name'
+      if name.empty? or name.nil? then
+        prd.error "Bad file name."
+        exit 2
       end
 
-      prd.outf prd.upload(args[0], args[1])
+      tags = nil if tags.empty?
+      prd.upload(name, args[0], tags)
+
     end
   end
 end
