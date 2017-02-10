@@ -50,11 +50,13 @@ command 'content info' do |c|
   HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
   }
   c.action do |args, options|
-    prd = MrMurano::ProductContent.new
+    prd = MrMurano::Content::Base.new
     if args[0].nil? then
       prd.error "Missing <content id>"
     else
-      prd.tabularize prd.info(args[0])
+      prd.outf(prd.info(args[0])) do |dd,ios|
+        ios.puts Hash.transform_keys_to_strings(dd).to_yaml
+      end
     end
   end
 end
