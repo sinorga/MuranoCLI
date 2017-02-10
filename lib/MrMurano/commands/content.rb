@@ -42,7 +42,7 @@ command 'content list' do |c|
 end
 
 command 'content info' do |c|
-  c.syntax = %{murano content info <content id>}
+  c.syntax = %{murano content info <content name>}
   c.summary = %{Show more info for a content item}
   c.description = %{Show more info for a content item
 
@@ -52,7 +52,7 @@ command 'content info' do |c|
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
     if args[0].nil? then
-      prd.error "Missing <content id>"
+      prd.error "Missing <content name>"
     else
       prd.outf(prd.info(args[0])) do |dd,ios|
         ios.puts Hash.transform_keys_to_strings(dd).to_yaml
@@ -62,7 +62,7 @@ command 'content info' do |c|
 end
 
 command 'content delete' do |c|
-  c.syntax = %{murano content delete <content id>}
+  c.syntax = %{murano content delete <content name>}
   c.summary = %{Delete a content item}
   c.description = %{Delete a content item
 
@@ -72,7 +72,7 @@ command 'content delete' do |c|
   c.action do |args, options|
     prd = MrMurano::ProductContent.new
     if args[0].nil? then
-      prd.error "Missing <content id>"
+      prd.error "Missing <content name>"
     else
       prd.outf prd.remove(args[0])
     end
@@ -121,7 +121,7 @@ command 'content upload' do |c|
 end
 
 command 'content download' do |c|
-  c.syntax = %{murano content download <content id>}
+  c.syntax = %{murano content download <content name>}
   c.summary = %{Download a content item}
   c.description = %{Download a content item
 
@@ -132,7 +132,7 @@ command 'content download' do |c|
   c.action do |args, options|
     prd = MrMurano::ProductContent.new
     if args[0].nil? then
-      prd.error "Missing <content id>"
+      prd.error "Missing <content name>"
     else
 
       if options.output.nil? then
