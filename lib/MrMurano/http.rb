@@ -142,6 +142,14 @@ module MrMurano
       workit(req, &block)
     end
 
+    def patch(path='', body={}, &block)
+      uri = endPoint(path)
+      req = Net::HTTP::Patch.new(uri)
+      set_def_headers(req)
+      req.body = JSON.generate(body)
+      workit(req, &block)
+    end
+
     def delete(path='', &block)
       uri = endPoint(path)
       workit(set_def_headers(Net::HTTP::Delete.new(uri)), &block)
