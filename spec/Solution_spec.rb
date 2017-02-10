@@ -30,7 +30,7 @@ RSpec.describe MrMurano::Solution do
       :biz_id=>"ABCDEFG",
       :cors=> "{\"origin\":true,\"methods\":[\"HEAD\",\"GET\",\"POST\",\"PUT\",\"DELETE\",\"OPTIONS\",\"PATCH\"],\"headers\":[\"Content-Type\",\"Cookie\",\"Authorization\"],\"credentials\":true}"
     }
-    
+
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
@@ -48,7 +48,7 @@ RSpec.describe MrMurano::Solution do
       :biz_id=>"ABCDEFG",
       :cors=> "{\"origin\":true,\"methods\":[\"HEAD\",\"GET\",\"POST\",\"PUT\",\"DELETE\",\"OPTIONS\",\"PATCH\"],\"headers\":[\"Content-Type\",\"Cookie\",\"Authorization\"],\"credentials\":true}"
     }
-    
+
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
