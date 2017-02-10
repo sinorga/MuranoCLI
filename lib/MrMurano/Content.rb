@@ -34,7 +34,7 @@ module MrMurano
         URI(s + path.to_s)
       end
 
-      # MRMUR-61, MRMUR-62
+      # List of what is in the content area?
       def list
         get('/list')
       end
@@ -44,13 +44,17 @@ module MrMurano
         delete('/clear')
       end
 
-      # MRMUR-61, MRMUR-62
+      # Get details of a single item in content area
+      # @param name [String] Name of content
       def fetch(name)
         get("/info?name=#{CGI.escape(name)}")
       end
       alias info fetch
 
-      # MRMUR-59
+      # Upload content to area.
+      # @param name [String] Name of content to be uploaded.
+      # @param local_path [String, Pathname] The file to upload
+      # @param tags [Hash] Extra meta to attach to this file.
       def upload(name, local_path, tags=nil)
         # This is a two step process.
         # 1: Get the post instructions for S3.
@@ -112,12 +116,15 @@ module MrMurano
         end
       end
 
-      # MRMUR-60
+      # Remove content by name
+      # @param name [String] Name of content to be deleted
       def remove(name)
         delete("/delete?name=#{CGI.escape(name)}")
       end
 
-      # MRMUR-59
+      # Download content
+      # @param name [String] Name of content to be downloaded
+      # @param block [Block] Block to process data as it is downloaded
       def download(name, &block)
         # This is a two step process.
         # 1: Get the get instructions for S3.
