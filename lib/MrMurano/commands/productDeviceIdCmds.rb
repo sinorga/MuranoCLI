@@ -16,7 +16,7 @@ command 'product device list' do |c|
     io=nil
     io = File.open(options.output, 'w') if options.output
     data = prd.list(options.limit, options.before)
-    prd.outf(data, nil) do |dd,ios|
+    prd.outf(data, io) do |dd,ios|
       dt={}
       if options.long then
         dt[:headers] = [:Identifier,
