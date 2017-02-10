@@ -130,7 +130,7 @@ command 'content download' do |c|
   }
   c.option '-o','--output FILE',%{save to this file}
   c.action do |args, options|
-    prd = MrMurano::ProductContent.new
+    prd = MrMurano::Content::Base.new
     if args[0].nil? then
       prd.error "Missing <content name>"
     else
