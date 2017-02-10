@@ -148,20 +148,19 @@ module MrMurano
 
         unless $cfg['tool.dry'] then
           Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
-            response = ihttp.request(request)
-            case response
-            when Net::HTTPSuccess
-              if block_given? then
-                response.read_body(&block)
-              else
-                puts "==TUCK"
-                # is getting called twice. How?
-                response.read_body do |chunk|
-                  $stdout.write chunk
+            ihttp.request(request) do |response|
+              case response
+              when Net::HTTPSuccess
+                if block_given? then
+                  response.read_body(&block)
+                else
+                  response.read_body do |chunk|
+                    $stdout.write chunk
+                  end
                 end
+              else
+                showHttpError(request, response)
               end
-            else
-              showHttpError(request, response)
             end
           end
         end
