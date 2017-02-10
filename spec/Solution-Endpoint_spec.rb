@@ -1,23 +1,23 @@
 require 'MrMurano/version'
-require 'MrMurano/Solution-Endpoint'
+require 'MrMurano/Webservice-Endpoint'
 require 'tempfile'
 require '_workspace'
 
-RSpec.describe MrMurano::Endpoint do
+RSpec.describe MrMurano::Webservice::Endpoint do
   include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['solution.id'] = 'XYZ'
+    $cfg['project.id'] = 'XYZ'
 
-    @srv = MrMurano::Endpoint.new
+    @srv = MrMurano::Webservice::Endpoint.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/")
   end
 
   context "lists" do
@@ -34,7 +34,7 @@ RSpec.describe MrMurano::Endpoint do
        :content_type=>"application/json",
        :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
       }]
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -56,7 +56,7 @@ RSpec.describe MrMurano::Endpoint do
        :content_type=>"application/json",
        :script=> "response.message = \"HI\"\n\n-- BOB WAS HERE\n",
       }]
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -78,7 +78,7 @@ RSpec.describe MrMurano::Endpoint do
        :content_type=>"image/png",
        :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id} image/png\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
       }]
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -100,7 +100,7 @@ RSpec.describe MrMurano::Endpoint do
        :content_type=>"image/png",
        :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
       }]
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -122,7 +122,7 @@ RSpec.describe MrMurano::Endpoint do
        :content_type=>"image/png",
        :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
       }]
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -144,7 +144,7 @@ RSpec.describe MrMurano::Endpoint do
        :content_type=>"image/png",
        :script=> "--#ENDPOINT WEBSOCKET /api/v1/foo/{id}\nresponse.message = \"HI\"\n\n-- BOB WAS HERE\n",
       }]
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -165,7 +165,7 @@ RSpec.describe MrMurano::Endpoint do
               :content_type=>"application/json",
               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n",
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -181,7 +181,7 @@ RSpec.describe MrMurano::Endpoint do
               :content_type=>"application/json",
               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n",
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -200,7 +200,7 @@ RSpec.describe MrMurano::Endpoint do
               :content_type=>"application/json",
               :script=>"response.message = \"HI\"\n",
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -216,7 +216,7 @@ RSpec.describe MrMurano::Endpoint do
               :content_type=>"text/csv",
               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar text/csv\nresponse.message = \"HI\"\n",
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -232,7 +232,7 @@ RSpec.describe MrMurano::Endpoint do
               :content_type=>"text/csv",
               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar\nresponse.message = \"HI\"\n",
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -248,7 +248,7 @@ RSpec.describe MrMurano::Endpoint do
               :content_type=>"text/csv",
               :script=>"--#ENDPOINT WEBSOCKET /api/v1/bar image/png\nresponse.message = \"HI\"\n",
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -259,7 +259,7 @@ RSpec.describe MrMurano::Endpoint do
   end
 
   it "removes" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: "")
@@ -283,7 +283,7 @@ RSpec.describe MrMurano::Endpoint do
     end
 
     it "over old version" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -297,11 +297,11 @@ RSpec.describe MrMurano::Endpoint do
     end
 
     it "when nothing is there" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 404)
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -315,7 +315,7 @@ RSpec.describe MrMurano::Endpoint do
     end
 
     it "without an itemkey" do
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -328,7 +328,7 @@ RSpec.describe MrMurano::Endpoint do
     end
 
     it "Handles others errors" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint/9K0").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 502, body: "{}")
