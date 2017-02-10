@@ -1,22 +1,22 @@
 require 'MrMurano/version'
-require 'MrMurano/Solution-File'
+require 'MrMurano/Webservice-File'
 require '_workspace'
 
-RSpec.describe MrMurano::File do
+RSpec.describe MrMurano::Webservice::File do
   include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['solution.id'] = 'XYZ'
+    $cfg['project.id'] = 'XYZ'
 
-    @srv = MrMurano::File.new
+    @srv = MrMurano::Webservice::File.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/file/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/")
   end
 
   it "lists" do
@@ -31,7 +31,7 @@ RSpec.describe MrMurano::File do
        :mime_type=>"text/html",
        :checksum=>"82e12125c2f1324bbf7bd64bf187f3334416117e"}
     ]
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/file").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
                       to_return(body: body.to_json)
@@ -41,7 +41,7 @@ RSpec.describe MrMurano::File do
   end
 
   it "removes" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/file/index.html").
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/index.html").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
                       to_return(status: 200)
@@ -51,7 +51,7 @@ RSpec.describe MrMurano::File do
 
   context "fetches" do
     it "gets an error" do
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/file/bob").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/bob").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 404, body: "nope")
@@ -64,7 +64,7 @@ RSpec.describe MrMurano::File do
     end
 
     it "gets $stdout" do
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/file/bob").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/bob").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 200, body: "nope")
@@ -77,7 +77,7 @@ RSpec.describe MrMurano::File do
     end
 
     it "gets to block" do
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/file/bob").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/bob").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 200, body: "nope")
@@ -97,7 +97,7 @@ RSpec.describe MrMurano::File do
     end
 
     it "an item" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/fileupload/one.text").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/fileupload/one.text").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>%r{multipart/form-data; boundary=.*}},
             )
@@ -106,7 +106,7 @@ RSpec.describe MrMurano::File do
     end
 
     it "gets an error" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/fileupload/one.text").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/fileupload/one.text").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>%r{multipart/form-data; boundary=.*}},
             ).
@@ -120,7 +120,7 @@ RSpec.describe MrMurano::File do
     end
 
     it "an item with curl debug" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/fileupload/one.text").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/fileupload/one.text").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>%r{multipart/form-data; boundary=.*}},
             )
@@ -128,7 +128,7 @@ RSpec.describe MrMurano::File do
       saved = $stdout
       $stdout = StringIO.new
       @srv.upload(@lp, {:path=>'/one.text'}, false)
-      expect($stdout.string).to match(%r{^curl -s -H 'Authorization: token TTTTTTTTTT'.*-X PUT 'https://bizapi.hosted.exosite.io/api:1/solution/XYZ/fileupload/one.text' -F file=@.*$})
+      expect($stdout.string).to match(%r{^curl -s -H 'Authorization: token TTTTTTTTTT'.*-X PUT 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/fileupload/one.text' -F file=@.*$})
       $stdout = saved
     end
   end
