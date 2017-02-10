@@ -70,7 +70,7 @@ command 'content delete' do |c|
   HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
   }
   c.action do |args, options|
-    prd = MrMurano::ProductContent.new
+    prd = MrMurano::Content::Base.new
     if args[0].nil? then
       prd.error "Missing <content name>"
     else
