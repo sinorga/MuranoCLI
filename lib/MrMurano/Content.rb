@@ -2,7 +2,7 @@ require 'uri'
 require 'cgi'
 require 'net/http'
 require 'digest'
-require "http/form_data"
+require 'http/form_data'
 require 'MrMurano/Config'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
