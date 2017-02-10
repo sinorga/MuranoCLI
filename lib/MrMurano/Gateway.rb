@@ -54,7 +54,21 @@ module MrMurano
         ret[:resources]
       end
 
-      # XXX We will want SyncUpDown on this one.
+      def create_res(name, type, unit)
+        # XXX This is a REPLACING action. So to *add* we have to read-modify-write.
+        patch('/', {:resources=>{
+          name => {
+            :format => type,
+            :unit => unit,
+            :settable => true,
+            #:allowed => [],
+          }
+        }
+        })
+      end
+
+
+      # TODO We will want SyncUpDown on this one.
     end
 
     ##
