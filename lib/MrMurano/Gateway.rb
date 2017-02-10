@@ -74,17 +74,21 @@ module MrMurano
       def query(args)
         # ?limit=#
         # ?before=<time stamp in ms>
-        # ?status={provisioned,locked,devmode,whitelisted}
+        # ?status={whitelisted, provisioned, locked, devmode, reprovision}
         # ?identity=<pattern>
+        # ?ipaddress=<pattern>
+        # ?version=<pattern>
       end
 
       ## Get one device
+      # @param id [String] The identity to fetch
       def fetch(id)
         # MRMUR-54
         get("/#{CGI.escape(id)}")
       end
 
       ## Create a device with given Identity
+      # @param id [String] The new identity
       def enable(id)
         # MRMUR-51
         put("/#{CGI.escape(id)}")
@@ -99,6 +103,8 @@ module MrMurano
       # convert into CSV for uploading?
       def enable_batch(data)
         # MRMUR-52
+
+        # multipart/form-data
       end
 
     end
