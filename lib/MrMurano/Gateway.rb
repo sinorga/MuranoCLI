@@ -82,9 +82,13 @@ module MrMurano
       end
 
       ## All devices (pagination?)
-      def list(limit=1000, before=nil)
+      def list(limit=nil, before=nil)
         # MRMUR-54
-        get('', {:limit=>limit})
+        pr = {}
+        pr[:limit] = limit unless limit.nil?
+        pr[:before] = before unless before.nil?
+        pr = nil if pr.empty?
+        get('', pr)
       end
 
       def query(args)

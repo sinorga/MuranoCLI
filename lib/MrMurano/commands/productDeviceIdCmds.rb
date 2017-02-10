@@ -5,16 +5,17 @@ command 'product device list' do |c|
   c.summary = %{List serial numbers for a product}
 
   c.option '--limit NUMBER', Integer, %{How many devices to return}
+  c.option '--before TIMESTAMP', Integer, %{Show devices before timestamp}
   c.option '-l', '--long', %{show everything}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args,options|
-    options.default :limit=>50
+    #options.default :limit=>1000
 
     prd = MrMurano::Gateway::Device.new
     io=nil
     io = File.open(options.output, 'w') if options.output
-    data = prd.list(options.limit)
+    data = prd.list(options.limit, options.before)
     prd.outf(data, nil) do |dd,ios|
       dt={}
       if options.long then
