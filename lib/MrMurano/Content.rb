@@ -39,9 +39,16 @@ module MrMurano
         get('/list')
       end
 
-      # MRMUR-61, MRMUR-62
-      def fetch(id)
+      # Delete Everything in you content area
+      def clear_all
+        delete('/clear')
       end
+
+      # MRMUR-61, MRMUR-62
+      def fetch(name)
+        get("/info?name=#{CGI.escape(name)}")
+      end
+      alias info fetch
 
       # MRMUR-59
       def upload(name, local_path, tags=nil)
@@ -106,7 +113,8 @@ module MrMurano
       end
 
       # MRMUR-60
-      def remove(id)
+      def remove(name)
+        delete("/delete?name=#{CGI.escape(name)}")
       end
 
       # MRMUR-59
