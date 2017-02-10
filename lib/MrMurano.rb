@@ -14,8 +14,9 @@ require 'MrMurano/Webservice-Cors' # service/{pid}/webservice/
 require 'MrMurano/Webservice-Endpoint' # service/{pid}/webservice/
 require 'MrMurano/Webservice-File' # service/{pid}/webservice/
 
-require 'MrMurano/Solution-Users' # service/{pid}/webservice/
+require 'MrMurano/Solution-Users' # service/{pid}/user/
 
+# Okami replaces
 require 'MrMurano/Product'
 require 'MrMurano/Product-1P-Device'
 require 'MrMurano/Product-Resources'
