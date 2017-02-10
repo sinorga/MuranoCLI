@@ -1,4 +1,6 @@
 require 'uri'
+require 'net/http'
+require 'http/form_data'
 require 'MrMurano/Config'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
@@ -111,14 +113,69 @@ module MrMurano
       alias create enable
 
       ## Create a bunch of devices at once
-      # @param data [String] CSV of identifies to create
-      #
-      # The API wants CVS data. So is #data a string of CSV? or an array that we
-      # convert into CSV for uploading?
-      def enable_batch(data)
+      # @param local [String, Pathname] CSV file of identifiers
+      # @param expire [Number] Expire time for all identities (ignored)
+      def enable_batch(local, expire=nil)
         # MRMUR-52
+        uri = endPoint('s/')
+        file = HTTP::FormData::File.new(local.to_s, {:mime_type=>'text/csv'})
+        form = HTTP::FormData.create(:identities=>file)
+        req = Net::HTTP::Put.new(uri)
+        set_def_headers(req)
+        workit(req) do |request,http|
+          request.content_type = form.content_type
+          request.content_length = form.content_length
+          request.body = form.to_s
 
-        # multipart/form-data
+          if $cfg['tool.curldebug'] then
+            a = []
+            a << %{curl -s -H 'Authorization: #{request['authorization']}'}
+            a << %{-H 'User-Agent: #{request['User-Agent']}'}
+            a << %{-X #{request.method}}
+            a << %{'#{request.uri.to_s}'}
+            a << %{-F identities=@#{local.to_s}}
+            puts a.join(' ')
+          end
+
+          response = http.request(request)
+          case response
+          when Net::HTTPSuccess
+          else
+            showHttpError(request, response)
+          end
+        end
+      end
+
+      # Call the device Activation URI.
+      #
+      # Only useful durring debugging of devices.
+      #
+      # @param identifier [String] Who to activate.
+      def activate(identifier)
+        fqdn = info()[:fqdn]
+        fqdn = "#{@pid}.m2.exosite-staging.io" if fqdn.nil?
+
+        uri = URI("https://#{fqdn}/provision/activate")
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        http.start
+        request = Net::HTTP::Post.new(uri)
+        request.form_data = {
+          :vendor => @pid,
+          :model => @pid,
+          :sn => identifier
+        }
+        request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
+        request['Authorization'] = nil
+        request.content_type = 'application/x-www-form-urlencoded; charset=utf-8'
+        curldebug(request)
+        response = http.request(request)
+        case response
+        when Net::HTTPSuccess
+          return response.body
+        else
+          showHttpError(request, response)
+        end
       end
 
     end

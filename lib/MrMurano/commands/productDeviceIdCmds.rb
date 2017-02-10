@@ -1,5 +1,4 @@
-require 'MrMurano/Product'
-require 'terminal-table'
+require 'MrMurano/Gateway'
 
 command 'product device list' do |c|
   c.syntax = %{murano product device list [options]}
@@ -12,7 +11,7 @@ command 'product device list' do |c|
   c.action do |args,options|
     options.default :offset=>0, :limit=>50
 
-    prd = MrMurano::Product.new
+    prd = MrMurano::Gateway::Device.new
     io=nil
     io = File.open(options.output, 'w') if options.output
     data = prd.list(options.offset, options.limit)
@@ -27,36 +26,28 @@ command 'product device list' do |c|
 end
 
 command 'product device enable' do |c|
-  c.syntax = %{murano product device enable [<sn>|--file <sns>]}
-  c.summary = %{Enable a serial number; Creates device in Murano}
-  c.description = %{Enables serial numbers, creating the digial shadow in Murano.
-
-NOTE: This opens the 24 hour activation window.  If the device does not make
-the activation call within this time, it will need to be enabled again.
+  c.syntax = %{murano product device enable [<identifier>|--file <identifiers>]}
+  c.summary = %{Enable an Identifier; Creates device in Murano}
+  c.description = %{Enables identifiers, creating the digial shadow in Murano.
   }
   c.option '-f', '--file FILE', %{A file of serial numbers, one per line}
 
   c.action do |args,options|
-    prd = MrMurano::Product.new
+    prd = MrMurano::Gateway::Device.new
     if options.file then
-      File.open(options.file) do |io|
-        io.each_line do |line|
-          line.strip!
-          prd.enable(line) unless line.empty?
-        end
-      end
+      prd.enable_batch(options.file)
     elsif args.count > 0 then
       prd.enable(args[0])
     else
-      prd.error "Missing a serial number to enable"
+      prd.error "Missing an identifier to enable"
     end
   end
 end
 
 command 'product device activate' do |c|
-  c.syntax = %{murano product device activate <sn>}
+  c.syntax = %{murano product device activate <identifier>}
   c.summary = %{Activate a serial number, retriving its CIK}
-  c.description = %{Activates a serial number.
+  c.description = %{Activates an Identifier.
 
 Generally you should not use this.  Instead the device should make the activation
 call itself and save the CIK token.  Its just that sometimes when building a
@@ -67,14 +58,13 @@ CIK again.
 }
 
   c.action do |args,options|
-    prd = MrMurano::ProductSerialNumber.new
+    prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
-      prd.error "Serial number missing"
+      prd.error "Identifier missing"
       return
     end
-    sn = args.first
 
-    prd.outf prd.activate(sn)
+    prd.outf prd.activate(args.first)
 
   end
 end
