@@ -43,7 +43,7 @@ module MrMurano
       end
 
       # MRMUR-59
-      def upload(id, local)
+      def upload(id, local_path)
         # This is a two step process.
         # 1: Get the post instructions for S3.
         # 2: Upload to S3.
@@ -54,8 +54,8 @@ module MrMurano
 
         uri = URI(ret[:url])
         request = Net::HTTP::Post.new(uri)
-        mime = MIME::Types.type_for(local.to_s)[0] || MIME::Types["application/octet-stream"][0]
-        file = HTTP::FormData::File.new(local.to_s, {:mime_type=>mime})
+        mime = MIME::Types.type_for(local_path.to_s)[0] || MIME::Types["application/octet-stream"][0]
+        file = HTTP::FormData::File.new(local_path.to_s, {:mime_type=>mime})
         form = HTTP::FormData.create(ret[:inputs].merge({ret[:field]=>file}))
 
         request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
@@ -72,7 +72,7 @@ module MrMurano
           ret[:inputs].each_pair do |key, value|
             a << %{-F '#{key}=#{value}'}
           end
-          a << %{-F #{ret[:field]}=@#{local.to_s}}
+          a << %{-F #{ret[:field]}=@#{local_path.to_s}}
           puts a.join(' ')
         end
 
