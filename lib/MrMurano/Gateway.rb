@@ -42,6 +42,12 @@ module MrMurano
     end
 
     class Resources < Base
+      include SyncUpDown
+      def initialize
+        super
+        @itemkey = :alias
+        @location = 'resources.yaml'
+      end
       # MRMUR-58
 
       # TODO: CRUD Resources
@@ -52,8 +58,25 @@ module MrMurano
 
       def list()
         ret = get('')
-        return {} unless ret.has_key? :resources
-        ret[:resources]
+        return [] unless ret.has_key? :resources
+
+        # convert hash to array.
+        res = []
+        ret[:resources].each_pair do |key, value|
+          res << value.merge({:alias=>key.to_s})
+        end
+        res
+      end
+
+      def upload_all(data)
+        # convert array to hash
+        res = {}
+        data.each do |value|
+          key = value[:alias]
+          res[key] = value.reject{|k,v| k==:alias}
+        end
+
+        patch('/', {:resources=>res})
       end
 
       def create_res(name, type, unit)
@@ -64,14 +87,101 @@ module MrMurano
             :unit => unit,
             :settable => true,
             #:allowed => [],
+          },
+          'fuzz' => {
+            :format => type,
+            :unit => unit,
+            :settable => true,
+            #:allowed => [],
           }
         }
         })
       end
 
 
+
       # TODO We will want SyncUpDown on this one.
+      # But this one is differnet. Both sides are single-file, single-action.
+
+      ###################################################
+      def syncup_before()
+        @there = list()
+      end
+
+      def remove(itemkey)
+      end
+
+      def upload(local, remote, modify)
+      end
+
+      def syncup_after()
+        upload_all(@there)
+        @there = nil
+      end
+
+      ###################################################
+      def syncdown_before(local)
+        @here = locallist()
+      end
+
+      def download(local, item)
+        # needs to append/merge with file
+        @here.delete_if do |i|
+          i[@itemkey] == item[@itemkey]
+        end
+        @here << item.reject{|k,v| k==:synckey}
+      end
+
+      def removelocal(local, item)
+        # needs to append/merge with file
+        key = @itemkey.to_sym
+        @here.delete_if do |it|
+          it[key] == item[key]
+        end
+      end
+
+      def syncdown_after(local)
+        local.open('wb') do|io|
+          # convert array to hash
+          res = {}
+          @here.each do |value|
+            key = value[:alias]
+            res[key] = Hash.transform_keys_to_strings(value.reject{|k,v| k==:alias})
+          end
+          io.write res.to_yaml
+        end
+        @here = nil
+      end
+
+      ###################################################
+      def tolocalpath(into, item)
+        into
+      end
+
+      def localitems(from)
+        from = Pathname.new(from) unless from.kind_of? Pathname
+        if not from.exist? then
+          warning "Skipping missing #{from.to_s}"
+          return []
+        end
+        unless from.file? then
+          warning "Cannot read from #{from.to_s}"
+          return []
+        end
+
+        here = {}
+        from.open {|io| here = YAML.load(io) }
+        here = {} if here == false
+
+        res = []
+        here.each_pair do |key, value|
+          res << Hash.transform_keys_to_symbols(value).merge({:alias=>key.to_s})
+        end
+        res
+      end
+
     end
+    SyncRoot.add('resources', Resources, 'T', %{Resources.})
 
     ##
     # Talking to the devices on a Gateway
