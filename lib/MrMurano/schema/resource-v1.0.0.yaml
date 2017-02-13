@@ -1,0 +1,23 @@
+---
+type: object
+description: Map of the Resources allowed on Devices in this project.
+patternProperties:
+  "[a-z]+":
+    type: object
+    description: 
+    properties:
+      format:
+        type: string
+        pattern: "(string|boolean|number)"
+        description: The type of data stored in aliases for this resource.
+      unit:
+        type: string
+        description: Helpful unit description for the alias.
+      settable:
+        type: boolean
+        description: True if the cloud can write to this
+      allowed:
+        type: array
+        description: Unknown. Leave blank
+
+#  vim: set et sw=2 ts=2 :

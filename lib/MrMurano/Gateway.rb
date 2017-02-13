@@ -1,6 +1,7 @@
 require 'uri'
 require 'net/http'
 require 'http/form_data'
+require 'json-schema'
 require 'MrMurano/Config'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
@@ -146,6 +147,11 @@ module MrMurano
         here = {}
         from.open {|io| here = YAML.load(io) }
         here = {} if here == false
+
+        # Validate file against schema.
+        schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/resource-v1.0.0.yaml'
+        schema = YAML.load_file(schemaPath.to_s)
+        JSON::Validator.validate!(schema, here)
 
         res = []
         here.each_pair do |key, value|
