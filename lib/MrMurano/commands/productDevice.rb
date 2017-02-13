@@ -64,17 +64,17 @@ command 'product device twee' do |c|
   end
 end
 
-command 'product device delete' do |c|
-  c.syntax = %{murano product device delete <identifier>}
-  c.summary = %{Delete a device}
-
-  c.action do |args,options|
-    snid = args.shift
-    prd = MrMurano::Product1PDevice.new
-
-    ret = prd.remove(snid)
-    prd.outf ret unless ret.empty?
-  end
-end
+#command 'product device delete' do |c|
+#  c.syntax = %{murano product device delete <identifier>}
+#  c.summary = %{Delete a device}
+#
+#  c.action do |args,options|
+#    snid = args.shift
+#    prd = MrMurano::Product1PDevice.new
+#
+#    ret = prd.remove(snid)
+#    prd.outf ret unless ret.empty?
+#  end
+#end
 
 #  vim: set ai et sw=2 ts=2 :

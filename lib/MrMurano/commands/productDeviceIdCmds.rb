@@ -95,5 +95,21 @@ end
 alias_command 'sn list', 'product device list'
 alias_command 'sn enable', 'product device enable'
 alias_command 'sn activate', 'product device activate'
+command 'device delete' do |c|
+  c.syntax = %{murano device delete <identifier>}
+  c.summary = %{Delete a device}
+
+  c.action do |args,options|
+    snid = args.shift
+    prd = MrMurano::Gateway::Device.new
+    if args.count < 1 then
+      prd.error "Identifier missing"
+      exit 1
+    end
+
+    ret = prd.remove(snid)
+    prd.outf ret unless ret.empty?
+  end
+end
 
 #  vim: set ai et sw=2 ts=2 :

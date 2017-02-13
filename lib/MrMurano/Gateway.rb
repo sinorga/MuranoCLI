@@ -148,6 +148,11 @@ module MrMurano
         end
       end
 
+      ## Delete a device
+      def remove(identifier)
+        delete("/#{CGI.escape(identifier)}")
+      end
+
       # Call the device Activation URI.
       #
       # Only useful durring debugging of devices.
