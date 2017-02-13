@@ -17,6 +17,7 @@ eventhandlers = eventhandlers
 roles = roles.yaml
 users = users.yaml
 cors = cors.yaml
+resources = resources.yaml
 specs = specs
 
 [sync]
