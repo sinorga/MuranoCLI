@@ -83,7 +83,6 @@ module MrMurano
 
       ## All devices (pagination?)
       def list(limit=nil, before=nil)
-        # MRMUR-54
         pr = {}
         pr[:limit] = limit unless limit.nil?
         pr[:before] = before unless before.nil?

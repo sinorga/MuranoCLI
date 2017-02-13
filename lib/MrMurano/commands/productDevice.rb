@@ -77,7 +77,4 @@ command 'product device delete' do |c|
   end
 end
 
-# XXX cannot call this here, since 'sn list' doesn't exist yet.
-#alias_command 'product device list', 'sn list'
-
 #  vim: set ai et sw=2 ts=2 :

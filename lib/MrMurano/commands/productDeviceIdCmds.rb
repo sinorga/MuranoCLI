@@ -3,6 +3,10 @@ require 'MrMurano/Gateway'
 command 'product device list' do |c|
   c.syntax = %{murano product device list [options]}
   c.summary = %{List serial numbers for a product}
+  c.description = %{List serial numbers for a product
+
+  The API for pagination of devices seems broken.
+  }
 
   c.option '--limit NUMBER', Integer, %{How many devices to return}
   c.option '--before TIMESTAMP', Integer, %{Show devices before timestamp}
