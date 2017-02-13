@@ -59,6 +59,44 @@ command 'device list' do |c|
   end
 end
 
+command 'device read' do |c|
+  c.syntax = %{murano device read <identifier> (<alias>...)}
+  c.summary = %{Read state of a device}
+  c.description = %{Read state of a device
+
+  This reads the latest state values for the resources in a device.
+  }
+  c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
+
+  c.action do |args,options|
+    prd = MrMurano::Gateway::Device.new
+    if args.count < 1 then
+      prd.error "Identifier missing"
+      exit 1
+    end
+    snid = args.shift
+
+    io=nil
+    io = File.open(options.output, 'w') if options.output
+    data = prd.read(snid)
+    unless args.empty? then
+      data.select!{|k,v| args.include? k.to_s}
+    end
+    prd.outf(data, io) do |dd,ios|
+      rows = []
+      dd.each_pair do |k,v|
+        rows << [k, v[:reported], v[:set], v[:timestamp]]
+      end
+      prd.tabularize({
+        :headers => [:Alias, :Reported, :Set, :Timestamp],
+        :rows => rows,
+      }, ios)
+    end
+    io.close unless io.nil?
+  end
+end
+
+
 command 'device enable' do |c|
   c.syntax = %{murano device enable [<identifier>|--file <identifiers>]}
   c.summary = %{Enable an Identifier; Creates device in Murano}

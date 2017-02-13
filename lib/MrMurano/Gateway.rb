@@ -273,9 +273,6 @@ module MrMurano
         end
       end
 
-      # Read & write resources.
-
-
       # Read & write State.
 
       def write(identifier, *args)
