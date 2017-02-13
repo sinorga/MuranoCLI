@@ -185,6 +185,7 @@ module MrMurano
       end
 
       def query(args)
+        # TODO: actually just part of list.
         # ?limit=#
         # ?before=<time stamp in ms>
         # ?status={whitelisted, provisioned, locked, devmode, reprovision}
@@ -283,8 +284,10 @@ module MrMurano
 
       def write(identifier, *args)
 
-        put("/#{identifier}/state", {'bob'=>'fuddle'})
+        put("/#{identifier}/state", {'bob'=>{:set=>'fuddle'}})
         # XXX fails with 404: Could not find entry
+        # XXX or with 400: Value is not settable
+        #
       end
 
       def read(identifier)
