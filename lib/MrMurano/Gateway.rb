@@ -254,8 +254,8 @@ module MrMurano
       #
       # @param identifier [String] Who to activate.
       def activate(identifier)
-        fqdn = info()[:fqdn] # FIXME needs to call Base NOT self.
-        fqdn = "#{@pid}.m2.exosite-staging.io" if fqdn.nil?
+        fqdn = Base.new.info()[:fqdn]
+        fqdn = "#{@pid}.m2.exosite.io" if fqdn.nil?
 
         uri = URI("https://#{fqdn}/provision/activate")
         http = Net::HTTP.new(uri.host, uri.port)
