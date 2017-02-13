@@ -1,9 +1,20 @@
 require 'MrMurano/Gateway'
 
-command 'product device list' do |c|
-  c.syntax = %{murano product device list [options]}
-  c.summary = %{List serial numbers for a product}
-  c.description = %{List serial numbers for a product
+command 'device' do |c|
+  c.syntax = %{murano device}
+  c.summary = %{Interact with a device}
+  c.description = %{}
+
+  c.action do |a,o|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
+command 'device list' do |c|
+  c.syntax = %{murano device list [options]}
+  c.summary = %{List identifiers for a product}
+  c.description = %{List identifiers for a product
 
   The API for pagination of devices seems broken.
   }
@@ -48,8 +59,8 @@ command 'product device list' do |c|
   end
 end
 
-command 'product device enable' do |c|
-  c.syntax = %{murano product device enable [<identifier>|--file <identifiers>]}
+command 'device enable' do |c|
+  c.syntax = %{murano device enable [<identifier>|--file <identifiers>]}
   c.summary = %{Enable an Identifier; Creates device in Murano}
   c.description = %{Enables identifiers, creating the digial shadow in Murano.
   }
@@ -67,8 +78,8 @@ command 'product device enable' do |c|
   end
 end
 
-command 'product device activate' do |c|
-  c.syntax = %{murano product device activate <identifier>}
+command 'device activate' do |c|
+  c.syntax = %{murano device activate <identifier>}
   c.summary = %{Activate a serial number, retriving its CIK}
   c.description = %{Activates an Identifier.
 
@@ -84,7 +95,7 @@ CIK again.
     prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
       prd.error "Identifier missing"
-      return
+      exit 1
     end
 
     prd.outf prd.activate(args.first)
@@ -92,9 +103,6 @@ CIK again.
   end
 end
 
-alias_command 'sn list', 'product device list'
-alias_command 'sn enable', 'product device enable'
-alias_command 'sn activate', 'product device activate'
 command 'device delete' do |c|
   c.syntax = %{murano device delete <identifier>}
   c.summary = %{Delete a device}
