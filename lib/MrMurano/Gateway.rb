@@ -41,14 +41,15 @@ module MrMurano
 
     end
 
+    ##############################################################################
+    ## Working with the resources on a set of Devices. (Gateway)
     class Resources < Base
       include SyncUpDown
       def initialize
         super
         @itemkey = :alias
-        @location = 'resources.yaml'
+        @location = $cfg['location.resources']
       end
-      # MRMUR-58
 
       def list()
         ret = get('')
@@ -159,6 +160,7 @@ module MrMurano
     end
     SyncRoot.add('resources', Resources, 'T', %{Resources.})
 
+    ##############################################################################
     ##
     # Talking to the devices on a Gateway
     class Device < Base
