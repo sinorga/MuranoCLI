@@ -302,12 +302,11 @@ module MrMurano
 
       def write(identifier, *args)
 
-        put("/#{identifier}/state", {:test=>'bob'})
+        put("/#{identifier}/state", {'bob'=>'fuddle'})
         # XXX fails with 404: Could not find entry
       end
 
-      def read(identifier, *args)
-
+      def read(identifier)
         get("/#{identifier}/state")
       end
 
