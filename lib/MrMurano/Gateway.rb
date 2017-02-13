@@ -154,7 +154,7 @@ module MrMurano
       #
       # @param identifier [String] Who to activate.
       def activate(identifier)
-        fqdn = info()[:fqdn]
+        fqdn = info()[:fqdn] # FIXME needs to call Base NOT self.
         fqdn = "#{@pid}.m2.exosite-staging.io" if fqdn.nil?
 
         uri = URI("https://#{fqdn}/provision/activate")
@@ -178,6 +178,22 @@ module MrMurano
         else
           showHttpError(request, response)
         end
+      end
+
+      # Read & write resources.
+
+
+      # Read & write State.
+
+      def write(identifier, *args)
+
+        put("/#{identifier}/state", {:test=>'bob'})
+        # XXX fails with 404: Could not find entry
+      end
+
+      def read(identifier, *args)
+
+        get("/#{identifier}/state")
       end
 
     end
