@@ -50,12 +50,6 @@ module MrMurano
       end
       # MRMUR-58
 
-      # TODO: CRUD Resources
-      # - Create
-      # - Read
-      # - Update
-      # - Delete
-
       def list()
         ret = get('')
         return [] unless ret.has_key? :resources
@@ -79,39 +73,18 @@ module MrMurano
         patch('/', {:resources=>res})
       end
 
-      def create_res(name, type, unit)
-        # XXX This is a REPLACING action. So to *add* we have to read-modify-write.
-        patch('/', {:resources=>{
-          name => {
-            :format => type,
-            :unit => unit,
-            :settable => true,
-            #:allowed => [],
-          },
-          'fuzz' => {
-            :format => type,
-            :unit => unit,
-            :settable => true,
-            #:allowed => [],
-          }
-        }
-        })
-      end
-
-
-
-      # TODO We will want SyncUpDown on this one.
-      # But this one is differnet. Both sides are single-file, single-action.
-
       ###################################################
       def syncup_before()
         @there = list()
       end
 
       def remove(itemkey)
+        @there.delete_if {|item| item[@itemkey] == itemkey}
       end
 
       def upload(local, remote, modify)
+        @there.delete_if {|item| item[@itemkey] == remote[@itemkey]}
+        @there << remote.reject{|k,v| k==:synckey}
       end
 
       def syncup_after()
@@ -180,6 +153,9 @@ module MrMurano
         res
       end
 
+      def docmp(itemA, itemB)
+        itemA != itemB
+      end
     end
     SyncRoot.add('resources', Resources, 'T', %{Resources.})
 
