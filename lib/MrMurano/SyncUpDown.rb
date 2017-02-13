@@ -245,6 +245,16 @@ module MrMurano
       dest.unlink
     end
 
+    def syncup_before
+    end
+    def syncup_after
+    end
+
+    def syncdown_before(local)
+    end
+    def syncdown_after(local)
+    end
+
     #
     #######################################################################
 
@@ -365,6 +375,7 @@ module MrMurano
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
       options[:asdown] = false
+      syncup_before
       dt = status(options, selected)
       toadd = dt[:toadd]
       todel = dt[:todel]
@@ -394,6 +405,7 @@ module MrMurano
           end
         end
       end
+      syncup_after
     end
 
     ## Make things in local project look like Murano
@@ -403,8 +415,9 @@ module MrMurano
     def syncdown(options={}, selected=[])
       options = elevate_hash(options)
       options[:asdown] = true
-      dt = status(options, selected)
       into = @locationbase + @location ###
+      syncdown_before(into)
+      dt = status(options, selected)
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
@@ -436,6 +449,7 @@ module MrMurano
           end
         end
       end
+      syncdown_after(into)
     end
 
     ## Call external diff tool on item
