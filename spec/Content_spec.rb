@@ -105,8 +105,32 @@ RSpec.describe MrMurano::Content::Base do
       expect{|b| @ct.download('TODO.taskpaper', &b) }.to yield_with_args("FOOOOOOOOOOOO")
     end
 
-    it "something that isn't there"
-    # XXX ??? bizapi/content/download always returns GET instructions?
+    it "something that isn't there" do
+      # bizapi/content/download always returns GET instructions? yes.
+      body = {
+        :url=>"https://s3-us-west-1.amazonaws.com/murano-content-service-staging/XXX/ZZZ",
+        :method=>"GET",
+        :id=>"8076e5d091844814d7f5cd97a1a730aa"
+      }
+
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/download?name=Notthere").
+        to_return(:body => body.to_json)
+
+      resp = %{
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message><Key>XXX/ZZZ</Key><RequestId>12</RequestId><HostId>=</HostId></Error>
+      }
+      stub_request(:get , "https://s3-us-west-1.amazonaws.com/murano-content-service-staging/XXX/ZZZ").
+        to_return(:status=>404, :body => resp)
+
+      saved = $stderr
+      $stderr = StringIO.new
+
+      ret = @ct.download('Notthere')
+      expect(ret).to match(Net::HTTPNotFound)
+      expect($stderr.string).to eq("\e[31mRequest Failed: 404: " + resp + "\e[0m\n")
+      $stderr = saved
+    end
 
     it "something to block with --curl" do
       body = {
