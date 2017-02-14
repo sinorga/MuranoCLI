@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'MrMurano/version'
 require 'MrMurano/Content'
 require '_workspace'
@@ -66,7 +67,150 @@ RSpec.describe MrMurano::Content::Base do
   end
 
   context "uploads" do
+    before(:example) do
+      @tup = Pathname.new(@projectDir) + 'Solutionfile.json'
+      FileUtils.copy(File.join(@testdir, 'spec/fixtures/SolutionFiles/basic.json'), @tup.to_path)
+    end
+
+    it "uploads file" do
+      body = {
+        :url=>"https://s3-us-west-1.amazonaws.com/murano-content-service-staging",
+        :method=>"POST",
+        :inputs=>{
+          :"x-amz-meta-name"=>"Solutionfile.json",
+          :"x-amz-signature"=>"Bunch of Hex",
+          :"x-amz-date"=>"20170214T200752Z",
+          :"x-amz-credential"=>"AAA/BBB/us-west-1/s3/aws4_request",
+          :"x-amz-algorithm"=>"AWS4-HMAC-SHA256",
+          :policy=>"something base64 encoded.",
+          :key=>"XXX/ZZZ",
+          :acl=>"authenticated-read"
+        },
+        :id=>"more Hex",
+        :field=>"file",
+        :enctype=>"multipart/form-data"
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload").
+        with(:query=>{
+          :expires_in=>30,
+          :name=>'Solutionfile.json',
+          :sha256=>'018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136',
+          :type=>'application/json'}).
+        to_return(:body => body.to_json)
+
+      stub_request(:post, "https://s3-us-west-1.amazonaws.com/murano-content-service-staging").
+        with(:headers=>{"Content-Type"=>%r|\Amultipart/form-data|}) do |request|
+          request.body =~ /something base64 encoded/
+        end.
+        to_return(:status=>200)
+
+      @ct.upload('Solutionfile.json', @tup.to_path)
+    end
+
+    it "uploads with tags" do
+      body = {
+        :url=>"https://s3-us-west-1.amazonaws.com/murano-content-service-staging",
+        :method=>"POST",
+        :inputs=>{
+          :"x-amz-meta-name"=>"Solutionfile.json",
+          :"x-amz-signature"=>"Bunch of Hex",
+          :"x-amz-date"=>"20170214T200752Z",
+          :"x-amz-credential"=>"AAA/BBB/us-west-1/s3/aws4_request",
+          :"x-amz-algorithm"=>"AWS4-HMAC-SHA256",
+          :policy=>"something base64 encoded.",
+          :key=>"XXX/ZZZ",
+          :acl=>"authenticated-read"
+        },
+        :id=>"more Hex",
+        :field=>"file",
+        :enctype=>"multipart/form-data"
+      }
+      tags = {:one=>12, :four=>'bob'}
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload").
+        with(:query=>{
+          :expires_in=>30,
+          :name=>'Solutionfile.json',
+          :sha256=>'018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136',
+          :type=>'application/json',
+          :tags => tags.to_json}).
+        to_return(:body => body.to_json)
+
+      stub_request(:post, "https://s3-us-west-1.amazonaws.com/murano-content-service-staging").
+        with(:headers=>{"Content-Type"=>%r|\Amultipart/form-data|}) do |request|
+          request.body =~ /something base64 encoded/
+        end.
+        to_return(:status=>200)
+
+      @ct.upload('Solutionfile.json', @tup.to_path, tags)
+    end
+
+    it "uploads with --dry" do
+      body = {
+        :url=>"https://s3-us-west-1.amazonaws.com/murano-content-service-staging",
+        :method=>"POST",
+        :inputs=>{
+          :"x-amz-meta-name"=>"resources.yaml",
+          :"x-amz-signature"=>"Bunch of Hex",
+          :"x-amz-date"=>"20170214T200752Z",
+          :"x-amz-credential"=>"AAA/BBB/us-west-1/s3/aws4_request",
+          :"x-amz-algorithm"=>"AWS4-HMAC-SHA256",
+          :policy=>"something base64 encoded.",
+          :key=>"XXX/ZZZ",
+          :acl=>"authenticated-read"
+        },
+        :id=>"more Hex",
+        :field=>"file",
+        :enctype=>"multipart/form-data"
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload?expires_in=30&name=Solutionfile.json&sha256=018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136&type=application/json").
+        to_return(:body => body.to_json)
+
+      $cfg['tool.dry'] = true
+      @ct.upload('Solutionfile.json', @tup.to_path)
+    end
+
+    it "uploads with --curl" do
+      body = {
+        :url=>"https://s3-us-west-1.amazonaws.com/murano-content-service-staging",
+        :method=>"POST",
+        :inputs=>{
+          :"x-amz-meta-name"=>"Solutionfile.json",
+          :"x-amz-signature"=>"Bunch of Hex",
+          :"x-amz-date"=>"20170214T200752Z",
+          :"x-amz-credential"=>"AAA/BBB/us-west-1/s3/aws4_request",
+          :"x-amz-algorithm"=>"AWS4-HMAC-SHA256",
+          :policy=>"something base64 encoded.",
+          :key=>"XXX/ZZZ",
+          :acl=>"authenticated-read"
+        },
+        :id=>"more Hex",
+        :field=>"file",
+        :enctype=>"multipart/form-data"
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload").
+        with(:query=>{
+          :expires_in=>30,
+          :name=>'Solutionfile.json',
+          :sha256=>'018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136',
+          :type=>'application/json'}).
+        to_return(:body => body.to_json)
+
+      stub_request(:post, "https://s3-us-west-1.amazonaws.com/murano-content-service-staging").
+        with(:headers=>{"Content-Type"=>%r|\Amultipart/form-data|}) do |request|
+          request.body =~ /something base64 encoded/
+        end.
+        to_return(:status=>200)
+
+      saved = $stdout
+      $stdout = StringIO.new
+
+      $cfg['tool.curldebug'] = true
+      @ct.upload('Solutionfile.json', @tup.to_path)
+      expect($stdout.string).to eq("")
+      $stdout = saved
+    end
   end
+
   context "downloads" do
     it "something to stdout" do
       body = {
