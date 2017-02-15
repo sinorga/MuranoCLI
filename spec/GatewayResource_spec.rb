@@ -173,6 +173,64 @@ RSpec.describe MrMurano::Gateway::Resources do
       @gw.syncup_after
     end
   end
+
+  context "syncdown" do
+    before(:example) do
+      expect(@gw).to receive(:locallist).once.and_return([
+        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
+        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"fuzz"},
+        {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"}
+      ])
+
+      @io = instance_double("IO")
+      @p = instance_double('Pathname')
+      expect(@p).to receive(:open).and_yield(@io)
+    end
+    it "removes keys" do
+      expect(@io).to receive(:write) do |args|
+        fy = YAML.load(args)
+        expect(fy).to eq({
+          'bob'=>{'format'=>"string", 'unit'=>"c", 'settable'=>true},
+          'gruble'=>{'format'=>"string", 'unit'=>"bits", 'settable'=>true}
+        })
+      end
+
+      @gw.syncdown_before(@p)
+      @gw.removelocal(@p, {:alias=>'fuzz'})
+      @gw.syncdown_after(@p)
+    end
+
+    it "adds keys" do
+      expect(@io).to receive(:write) do |args|
+        fy = YAML.load(args)
+        expect(fy).to eq({
+          'bob'=>{'format'=>"string", 'unit'=>"c", 'settable'=>true},
+          'gruble'=>{'format'=>"string", 'unit'=>"bits", 'settable'=>true},
+          'fuzz'=>{'format'=>"string", 'unit'=>"c", 'settable'=>true},
+          'greeble'=>{'format'=>"number", 'unit'=>"bibs", 'settable'=>false},
+        })
+      end
+
+      @gw.syncdown_before(@p)
+      @gw.download(@pl, {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"greeble"})
+      @gw.syncdown_after(@p)
+    end
+
+    it "replaces keys" do
+      expect(@io).to receive(:write) do |args|
+        fy = YAML.load(args)
+        expect(fy).to eq({
+          'bob'=>{'format'=>"string", 'unit'=>"c", 'settable'=>true},
+          'gruble'=>{'format'=>"string", 'unit'=>"bits", 'settable'=>true},
+          'fuzz'=>{'format'=>"number", 'unit'=>"bibs", 'settable'=>false},
+        })
+      end
+
+      @gw.syncdown_before(@p)
+      @gw.download(@pl, {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"fuzz"})
+      @gw.syncdown_after(@p)
+    end
+  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
