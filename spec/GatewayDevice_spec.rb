@@ -207,10 +207,37 @@ RSpec.describe MrMurano::Gateway::Device do
     it "but file is malformed csv"
   end
 
-  it "reads state"
+  it "reads state" do
+    body = {:bob=>{:reported=>"9", :set=>"9", :timestamp=>1487021046160363}}
+    stub_request(:get, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/56/state').
+      to_return(:body=>body.to_json)
+
+    ret = @gw.read(56)
+    expect(ret).to eq(body)
+  end
+
   context "writes state" do
-    it "succeeds"
-    it "fails"
+    it "succeeds" do
+      body = {:bob=>{:set=>"fuzz"}}
+      stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/56/state').
+        with(:body=>body.to_json)
+
+      @gw.write(56, body)
+    end
+
+    it "fails" do
+      body = {:bob=>{:set=>"fuzz"}}
+      stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/56/state').
+        with(:body=>body.to_json).
+        to_return(:status=> 400, :body => 'Value is not settable')
+
+      saved = $stderr
+      $stderr = StringIO.new
+
+      @gw.write(56, body)
+      expect($stderr.string).to eq("\e[31mRequest Failed: 400: Value is not settable\e[0m\n")
+      $stderr = saved
+    end
   end
 
 end

@@ -282,9 +282,10 @@ module MrMurano
 
       # Read & write State.
 
-      def write(identifier, *args)
+      def write(identifier, values)
 
-        put("/#{identifier}/state", {'bob'=>{:set=>'fuddle'}})
+        put("/#{identifier}/state", values)
+        #put("/#{identifier}/state", {'bob'=>{:set=>'fuddle'}})
         # XXX fails with 404: Could not find entry
         # XXX or with 400: Value is not settable
         #
