@@ -1,0 +1,12 @@
+[bob]
+format = string
+unit = c
+settable = true
+[fuzz]
+format = string
+unit = c
+settable = true
+[gruble]
+format = string
+unit = bits
+settable = true
