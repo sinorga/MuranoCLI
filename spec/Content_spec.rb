@@ -206,7 +206,8 @@ RSpec.describe MrMurano::Content::Base do
 
       $cfg['tool.curldebug'] = true
       @ct.upload('Solutionfile.json', @tup.to_path)
-      expect($stdout.string).to eq("")
+      expect($stdout.string).to start_with(%{curl -s  -H 'Authorization: token TTTTTTTTTT' -H 'User-Agent: MrMurano/2.0.0.pre' -H 'Content-Type: application/json' -X GET 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload?sha256=018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136&expires_in=30&type=application%2Fjson&name=Solutionfile.json'\ncurl -s -H 'User-Agent: MrMurano/2.0.0.pre' -X POST 'https://s3-us-west-1.amazonaws.com/murano-content-service-staging' -F 'x-amz-meta-name=Solutionfile.json' -F 'x-amz-signature=Bunch of Hex' -F 'x-amz-date=20170214T200752Z' -F 'x-amz-credential=AAA/BBB/us-west-1/s3/aws4_request' -F 'x-amz-algorithm=AWS4-HMAC-SHA256' -F 'policy=something base64 encoded.' -F 'key=XXX/ZZZ' -F 'acl=authenticated-read' -F file=@}).
+        and end_with(%{/home/work/project/Solutionfile.json\n})
       $stdout = saved
     end
   end
