@@ -159,9 +159,45 @@ RSpec.describe MrMurano::Gateway::Device do
   end
 
   context "activates" do
-    it "succeeds"
-    it "was already activated"
-    it "wasn't enabled"
+    before(:example) do
+      @bgw = MrMurano::Gateway::Base.new
+      allow(@bgw).to receive(:token).and_return("TTTTTTTTTT")
+      expect(MrMurano::Gateway::Base).to receive(:new).and_return(@bgw)
+      allow(@gw).to receive(:token).and_return("TTTTTTTTTT")
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway").
+        to_return(:body=>{:fqdn=>"xxxxx.m2.exosite-staging.io"}.to_json)
+    end
+    it "succeeds" do
+      stub_request(:post, "https://xxxxx.m2.exosite-staging.io/provision/activate").
+        to_return(:body=>'XXXXXXXX')
+
+      ret = @gw.activate(58)
+      expect(ret).to eq('XXXXXXXX')
+    end
+
+    it "was already activated" do
+      stub_request(:post, "https://xxxxx.m2.exosite-staging.io/provision/activate").
+        to_return(:status => 409)
+
+      saved = $stderr
+      $stderr = StringIO.new
+
+      @gw.activate(58)
+      expect($stderr.string).to eq("\e[31mRequest Failed: 409: nil\e[0m\n")
+      $stderr = saved
+    end
+
+    it "wasn't enabled" do
+      stub_request(:post, "https://xxxxx.m2.exosite-staging.io/provision/activate").
+        to_return(:status => 404)
+
+      saved = $stderr
+      $stderr = StringIO.new
+
+      @gw.activate(58)
+      expect($stderr.string).to eq("\e[31mRequest Failed: 404: nil\e[0m\n")
+      $stderr = saved
+    end
   end
 
   context "enables batch" do
