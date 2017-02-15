@@ -85,7 +85,7 @@ module MrMurano
           resp << jsn[:message] if jsn.has_key? :message
         end
       else
-        resp << jsn
+        resp << (jsn or 'nil')
       end
       # assuming verbosing was included.
       error resp
