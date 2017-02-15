@@ -204,7 +204,7 @@ module MrMurano
       ## Create a device with given Identity
       # @param id [String] The new identity
       def enable(id)
-        put("/#{CGI.escape(id)}")
+        put("/#{CGI.escape(id.to_s)}")
       end
       alias whitelist enable
       alias create enable
@@ -245,7 +245,7 @@ module MrMurano
 
       ## Delete a device
       def remove(identifier)
-        delete("/#{CGI.escape(identifier)}")
+        delete("/#{CGI.escape(identifier.to_s)}")
       end
 
       # Call the device Activation URI.

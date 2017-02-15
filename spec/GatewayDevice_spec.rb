@@ -120,8 +120,43 @@ RSpec.describe MrMurano::Gateway::Device do
     expect(ret).to eq(body)
   end
 
-  it "enables one"
-  it "removes one"
+  it "enables one" do
+    body = {
+      :identity=>"58",
+      :auth=>{:type=>"cik"},
+      :state=>{},
+      :locked=>false,
+      :reprovision=>false,
+      :devmode=>false,
+      :lastip=>"",
+      :lastseen=>1487021743864000,
+      :status=>"provisioned",
+      :online=>false}
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+      to_return(:body=>body.to_json)
+
+    ret = @gw.enable(58)
+    expect(ret).to eq(body)
+  end
+
+  it "removes one" do
+    body = {
+      :identity=>"58",
+      :auth=>{:type=>"cik"},
+      :state=>{},
+      :locked=>false,
+      :reprovision=>false,
+      :devmode=>false,
+      :lastip=>"",
+      :lastseen=>1487021743864000,
+      :status=>"provisioned",
+      :online=>false}
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+      to_return(:body=>body.to_json)
+
+    ret = @gw.remove(58)
+    expect(ret).to eq(body)
+  end
 
   context "activates" do
     it "succeeds"
