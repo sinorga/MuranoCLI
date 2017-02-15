@@ -128,6 +128,51 @@ RSpec.describe MrMurano::Gateway::Resources do
       expect{ @gw.localitems(resfile) }.to raise_error(JSON::Schema::ValidationError)
     end
   end
+
+  context "syncup" do
+    before(:example) do
+      expect(@gw).to receive(:list).once.and_return([
+        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
+        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"fuzz"},
+        {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"}
+      ])
+    end
+    it "removes keys" do
+      expect(@gw).to receive(:upload_all).with([
+        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
+        {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"}
+      ])
+
+      @gw.syncup_before
+      @gw.remove('fuzz')
+      @gw.syncup_after
+    end
+
+    it "adds keys" do
+      expect(@gw).to receive(:upload_all).with([
+        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
+        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"fuzz"},
+        {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"},
+        {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"greeble"},
+      ])
+
+      @gw.syncup_before
+      @gw.upload(nil, {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"greeble"}, nil)
+      @gw.syncup_after
+    end
+
+    it "replaces keys" do
+      expect(@gw).to receive(:upload_all).with([
+        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
+        {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"},
+        {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"fuzz"},
+      ])
+
+      @gw.syncup_before
+      @gw.upload(nil, {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"fuzz"}, nil)
+      @gw.syncup_after
+    end
+  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
