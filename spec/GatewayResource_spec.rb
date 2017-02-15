@@ -212,7 +212,7 @@ RSpec.describe MrMurano::Gateway::Resources do
       end
 
       @gw.syncdown_before(@p)
-      @gw.download(@pl, {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"greeble"})
+      @gw.download(@p, {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"greeble"})
       @gw.syncdown_after(@p)
     end
 
@@ -227,7 +227,7 @@ RSpec.describe MrMurano::Gateway::Resources do
       end
 
       @gw.syncdown_before(@p)
-      @gw.download(@pl, {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"fuzz"})
+      @gw.download(@p, {:format=>"number", :unit=>"bibs", :settable=>false, :alias=>"fuzz"})
       @gw.syncdown_after(@p)
     end
   end
