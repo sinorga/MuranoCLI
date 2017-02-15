@@ -101,7 +101,25 @@ RSpec.describe MrMurano::Gateway::Device do
     end
   end
 
-  it "fetches one"
+  it "fetches one" do
+    body = {
+      :identity=>"58",
+      :auth=>{:type=>"cik"},
+      :state=>{},
+      :locked=>false,
+      :reprovision=>false,
+      :devmode=>false,
+      :lastip=>"",
+      :lastseen=>1487021743864000,
+      :status=>"provisioned",
+      :online=>false}
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+      to_return(:body=>body.to_json)
+
+    ret = @gw.fetch(58)
+    expect(ret).to eq(body)
+  end
+
   it "enables one"
   it "removes one"
 

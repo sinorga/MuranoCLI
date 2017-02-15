@@ -198,7 +198,7 @@ module MrMurano
       # @param id [String] The identity to fetch
       def fetch(id)
         # MRMUR-54
-        get("/#{CGI.escape(id)}")
+        get("/#{CGI.escape(id.to_s)}")
       end
 
       ## Create a device with given Identity
