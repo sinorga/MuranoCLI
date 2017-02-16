@@ -146,15 +146,26 @@ command 'device delete' do |c|
   c.summary = %{Delete a device}
 
   c.action do |args,options|
-    snid = args.shift
     prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
       prd.error "Identifier missing"
       exit 1
     end
+    snid = args.shift
 
     ret = prd.remove(snid)
     prd.outf ret unless ret.empty?
+  end
+end
+
+command 'device httpurl' do |c|
+  c.syntax = %{murano device httpurl}
+  c.summary = %{Get the URL for the HTTP-Data-API for this Project}
+
+  c.action do |args,options|
+    prd = MrMurano::Gateway::Base.new
+    ret = prd.info()
+    say "https://#{ret[:fqdn]}/onep:v1/stack/alias"
   end
 end
 
