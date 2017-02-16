@@ -120,8 +120,8 @@ module MrMurano
       dirNames=[CFG_DIR_NAME]
       home = Pathname.new(Dir.home).realpath
       pwd = Pathname.new(Dir.pwd).realpath
-      return nil if home == pwd
-      pwd.dirname.ascend do |i|
+      return home if home == pwd
+      pwd.ascend do |i|
         break unless result.nil?
         break if i == home
         fileNames.each do |f|
@@ -131,17 +131,6 @@ module MrMurano
         end
         dirNames.each do |f|
           if (i + f).directory? then
-            result = i
-          end
-        end
-      end
-
-      # If nothing found, do a last ditch try by looking for .git/
-      if result.nil? then
-        pwd.dirname.ascend do |i|
-          break unless result.nil?
-          break if i == home
-          if (i + '.git').directory? then
             result = i
           end
         end
