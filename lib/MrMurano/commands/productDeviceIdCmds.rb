@@ -96,6 +96,28 @@ command 'device read' do |c|
   end
 end
 
+command 'device write' do |c|
+  c.syntax = %{murano device write <identifier> <Alias=Value> [<Alias=Value>...]}
+  c.summary = %{Write to 'set' of aliases on devices}
+  c.description = %{Write to 'set' of aliases on devices
+  }
+
+  c.action do |args,options|
+    prd = MrMurano::Gateway::Device.new
+    if args.count < 1 then
+      prd.error "Identifier missing"
+      exit 1
+    end
+    snid = args.shift
+
+    set = Hash[ args.map{|i| i.split('=')} ]
+    set.each_pair{|k,v| set[k] = '' if v.nil?}
+
+    ret = prd.write(snid, set)
+    pp ret
+  end
+end
+
 
 command 'device enable' do |c|
   c.syntax = %{murano device enable [<identifier>|--file <identifiers>]}
