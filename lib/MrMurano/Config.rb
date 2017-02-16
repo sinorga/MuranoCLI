@@ -164,7 +164,7 @@ module MrMurano
       home = Pathname.new(Dir.home).realpath
       pwd = Pathname.new(Dir.pwd).realpath
       return home if home == pwd
-      pwd.dirname.ascend do |i|
+      pwd.ascend do |i|
         break unless result.nil?
         break if i == home
         fileNames.each do |f|
