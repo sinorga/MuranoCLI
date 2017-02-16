@@ -29,7 +29,7 @@ RSpec.describe MrMurano::SyncUpDown do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['solution.id'] = 'XYZ'
+    $cfg['project.id'] = 'XYZ'
   end
 
   context "status" do

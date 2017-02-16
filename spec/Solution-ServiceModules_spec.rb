@@ -9,7 +9,7 @@ RSpec.describe MrMurano::Library do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['solution.id'] = 'XYZ'
+    $cfg['project.id'] = 'XYZ'
 
     @srv = MrMurano::Library.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
@@ -17,7 +17,7 @@ RSpec.describe MrMurano::Library do
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/")
   end
 
   it "lists" do
@@ -28,7 +28,7 @@ RSpec.describe MrMurano::Library do
              :created_at=>"2016-07-07T19:16:19.479Z",
              :updated_at=>"2016-09-12T13:26:55.868Z"}],
             :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -50,7 +50,7 @@ RSpec.describe MrMurano::Library do
     end
     }
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -72,7 +72,7 @@ RSpec.describe MrMurano::Library do
     end
     }
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -83,7 +83,7 @@ RSpec.describe MrMurano::Library do
   end
 
   it "removes" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: "")
@@ -94,7 +94,7 @@ RSpec.describe MrMurano::Library do
 
   context "uploads" do
     it "over old version" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -117,11 +117,11 @@ RSpec.describe MrMurano::Library do
     end
 
     it "when nothing is there" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 404)
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -144,7 +144,7 @@ RSpec.describe MrMurano::Library do
     end
 
     it "shows other errors" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 418, body: %{{"teapot":true}})
@@ -168,7 +168,7 @@ RSpec.describe MrMurano::Library do
     end
 
     it "over old version; replacing cache miss" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -193,7 +193,7 @@ RSpec.describe MrMurano::Library do
     end
 
     it "over old version; replacing cache hit" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/library/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")

@@ -11,7 +11,7 @@ RSpec.describe MrMurano::Solution do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['solution.id'] = 'XYZ'
+    $cfg['project.id'] = 'XYZ'
 
     @srv = MrMurano::Solution.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
@@ -19,7 +19,7 @@ RSpec.describe MrMurano::Solution do
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/project/XYZ/")
   end
 
   it "gets info" do
@@ -31,7 +31,7 @@ RSpec.describe MrMurano::Solution do
       :cors=> "{\"origin\":true,\"methods\":[\"HEAD\",\"GET\",\"POST\",\"PUT\",\"DELETE\",\"OPTIONS\",\"PATCH\"],\"headers\":[\"Content-Type\",\"Cookie\",\"Authorization\"],\"credentials\":true}"
     }
 
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -49,7 +49,7 @@ RSpec.describe MrMurano::Solution do
       :cors=> "{\"origin\":true,\"methods\":[\"HEAD\",\"GET\",\"POST\",\"PUT\",\"DELETE\",\"OPTIONS\",\"PATCH\"],\"headers\":[\"Content-Type\",\"Cookie\",\"Authorization\"],\"credentials\":true}"
     }
 
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -60,7 +60,7 @@ RSpec.describe MrMurano::Solution do
 
   it "Gets version" do
     body = {:min_cli_version=>"0.10"}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/version").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/version").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -77,7 +77,7 @@ RSpec.describe MrMurano::Solution do
        :data=>{:service_alias=>"user", :function_call=>"assignUser"}
       }, ],
       :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/logs").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/logs").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)

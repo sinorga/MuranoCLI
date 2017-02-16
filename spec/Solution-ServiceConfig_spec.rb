@@ -9,7 +9,7 @@ RSpec.describe MrMurano::ServiceConfig do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['solution.id'] = 'XYZ'
+    $cfg['project.id'] = 'XYZ'
 
     @srv = MrMurano::ServiceConfig.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
@@ -17,7 +17,7 @@ RSpec.describe MrMurano::ServiceConfig do
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/")
   end
 
   it "lists" do
@@ -31,7 +31,7 @@ RSpec.describe MrMurano::ServiceConfig do
              :updated_at=>"2016-09-12T13:26:55.868Z",
              :deleted_at=>nil}],
             :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -50,7 +50,7 @@ RSpec.describe MrMurano::ServiceConfig do
              :created_at=>"2016-07-07T19:16:19.479Z",
              :updated_at=>"2016-09-12T13:26:55.868Z"
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -70,7 +70,7 @@ RSpec.describe MrMurano::ServiceConfig do
              :updated_at=>"2016-09-12T13:26:55.868Z",
              :deleted_at=>nil}],
             :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -90,7 +90,7 @@ RSpec.describe MrMurano::ServiceConfig do
              :updated_at=>"2016-09-12T13:26:55.868Z",
              :deleted_at=>nil}],
             :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -101,7 +101,7 @@ RSpec.describe MrMurano::ServiceConfig do
 
   it "gets info" do
     body = {:calls=>{:daily=>0, :monthly=>0, :total=>0}}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0/info").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0/info").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -116,7 +116,7 @@ RSpec.describe MrMurano::ServiceConfig do
     end
     it "a get" do
       body = {:calls=>{:daily=>0, :monthly=>0, :total=>0}}
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0/call/info").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0/call/info").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -127,7 +127,7 @@ RSpec.describe MrMurano::ServiceConfig do
 
     it "a get with query" do
       body = {:calls=>{:daily=>0, :monthly=>0, :total=>0}}
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0/call/ask?q=what").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0/call/ask?q=what").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
@@ -138,7 +138,7 @@ RSpec.describe MrMurano::ServiceConfig do
 
     it "a post" do
       body = {:calls=>{:daily=>0, :monthly=>0, :total=>0}}
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0/call/ask").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0/call/ask").
         with(:body => JSON.generate({:q=> 'what'}),
           :headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
@@ -150,7 +150,7 @@ RSpec.describe MrMurano::ServiceConfig do
 
     it "a post without data" do
       body = {:calls=>{:daily=>0, :monthly=>0, :total=>0}}
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0/call/ask").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0/call/ask").
         with(:body => JSON.generate({}),
           :headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
@@ -162,7 +162,7 @@ RSpec.describe MrMurano::ServiceConfig do
 
     it "a put" do
       body = {:calls=>{:daily=>0, :monthly=>0, :total=>0}}
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0/call/ask").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0/call/ask").
         with(:body => JSON.generate({:q=> 'what'}),
           :headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
@@ -174,7 +174,7 @@ RSpec.describe MrMurano::ServiceConfig do
 
     it "a put without data" do
       body = {:calls=>{:daily=>0, :monthly=>0, :total=>0}}
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0/call/ask").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0/call/ask").
         with(:body => JSON.generate({}),
           :headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
@@ -186,7 +186,7 @@ RSpec.describe MrMurano::ServiceConfig do
 
     it "a delete" do
       body = {:calls=>{:daily=>0, :monthly=>0, :total=>0}}
-      stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0/call/gone").
+      stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/9K0/call/gone").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)

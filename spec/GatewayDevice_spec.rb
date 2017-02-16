@@ -201,6 +201,7 @@ RSpec.describe MrMurano::Gateway::Device do
   end
 
   context "enables batch" do
+    # FIXME do these
     it "enables from cvs"
     it "but file is missing"
     it "but file is not text"
