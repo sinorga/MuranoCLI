@@ -54,7 +54,7 @@ module MrMurano
       script = local.read
 
       pst = remote.merge ({
-        :solution_id => $cfg['solution.id'],
+        :solution_id => $cfg['project.id'],
         :script => script,
         :alias=>mkalias(remote),
         :name=>mkname(remote),
@@ -166,7 +166,7 @@ module MrMurano
 
     def mkalias(remote)
       if remote.has_key? :name then
-        [$cfg['solution.id'], remote[:name]].join('_')
+        [$cfg['project.id'], remote[:name]].join('_')
       else
         raise "Missing parts! #{remote.to_json}"
       end
@@ -211,7 +211,7 @@ module MrMurano
 
     def mkalias(remote)
       if remote.has_key? :service and remote.has_key? :event then
-        [$cfg['solution.id'], remote[:service], remote[:event]].join('_')
+        [$cfg['project.id'], remote[:service], remote[:event]].join('_')
       else
         raise "Missing parts! #{remote.to_json}"
       end
