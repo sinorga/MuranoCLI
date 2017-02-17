@@ -284,11 +284,11 @@ module MrMurano
 
       def write(identifier, values)
 
-        put("/#{identifier}/state", values)
+        wvalues = Hash[ values.map{|k,v| [k, {:set=>v}]} ]
+        put("/#{identifier}/state", wvalues)
         #put("/#{identifier}/state", {'bob'=>{:set=>'fuddle'}})
         # XXX fails with 404: Could not find entry
         # XXX or with 400: Value is not settable
-        #
       end
 
       def read(identifier)
