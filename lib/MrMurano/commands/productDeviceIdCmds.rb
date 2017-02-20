@@ -191,4 +191,13 @@ command 'device httpurl' do |c|
   end
 end
 
+alias_command 'product device', 'device'
+alias_command 'product device activate', 'device activate'
+alias_command 'product device enable', 'device enable'
+alias_command 'product device list', 'device list'
+alias_command 'product device read', 'device read'
+alias_command 'product device twee', 'device read'
+alias_command 'product device write', 'device write'
+alias_command 'product device delete', 'device delete'
+
 #  vim: set ai et sw=2 ts=2 :
