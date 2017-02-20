@@ -223,7 +223,7 @@ RSpec.describe MrMurano::Gateway::Device do
       stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/56/state').
         with(:body=>body.to_json)
 
-      @gw.write(56, body)
+      @gw.write(56, :bob=>'fuzz')
     end
 
     it "fails" do
@@ -235,7 +235,7 @@ RSpec.describe MrMurano::Gateway::Device do
       saved = $stderr
       $stderr = StringIO.new
 
-      @gw.write(56, body)
+      @gw.write(56, :bob=>'fuzz')
       expect($stderr.string).to eq("\e[31mRequest Failed: 400: Value is not settable\e[0m\n")
       $stderr = saved
     end
