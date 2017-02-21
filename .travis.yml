@@ -2,7 +2,8 @@ language: ruby
 rvm:
   - 2.0
   - 2.2
-  - 2.3
+  - 2.3.3
+  - 2.4
 
 before_deploy: "rake build"
 deploy:
