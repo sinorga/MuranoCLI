@@ -1,10 +1,10 @@
 [Setup]
-AppName=MrMurano
+AppName=MuranoCLI
 AppVersion={%MRVERSION}
-DefaultDirName={pf}\MrMurano
-DefaultGroupName=MrMurano
+DefaultDirName={pf}\MuranoCLI
+DefaultGroupName=MuranoCLI
 ChangesEnvironment=yes
-OutputBaseFileName=MrMuranoSetup
+OutputBaseFileName=MuranoCLISetup
 AppPublisher=Exosite
 AppPublisherURL=http://exosite.com/
 AppCopyright=Copyright (C) 2016-2017 Exosite
