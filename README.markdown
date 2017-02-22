@@ -86,7 +86,7 @@ to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 ### Windows Install
 
 The MrMurano gem will install on Windows.  There is also a single Windows binary
-Setup installer availible in [releases](https://github.com/exosite/MrMurano/releases)
+Setup installer availible in [releases](https://github.com/exosite/MuranoCLI/releases)
 
 If you do not already use Ruby on Windows, then you should use the binary
 installer.
