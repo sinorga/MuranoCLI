@@ -270,24 +270,24 @@ module MrMurano
       # then merge @locationbase/@location
       #
 
-      bundleDir = $cfg['location.bundles'] or 'bundles'
-      bundleDir = 'bundles' if bundleDir.nil?
-      items = {}
-      if (@locationbase + bundleDir).directory? then
-        (@locationbase + bundleDir).children.sort.each do |bndl|
-          if (bndl + @location).exist? then
-            verbose("Loading from bundle #{bndl.basename}")
-            bitems = localitems(bndl + @location)
-            bitems.map!{|b| b[:bundled] = true; b} # mark items from bundles.
-
-
-            # use synckey for quicker merging.
-            bitems.each { |b| items[synckey(b)] = b }
-          end
-        end
-      end
       if (@locationbase + @location).exist? then
         bitems = localitems(@locationbase + @location)
+#      bundleDir = $cfg['location.bundles'] or 'bundles'
+#      bundleDir = 'bundles' if bundleDir.nil?
+#      items = {}
+#      if (@locationbase + bundleDir).directory? then
+#        (@locationbase + bundleDir).children.sort.each do |bndl|
+#          if (bndl + @location).exist? then
+#            verbose("Loading from bundle #{bndl.basename}")
+#            bitems = localitems(bndl + @location)
+#            bitems.map!{|b| b[:bundled] = true; b} # mark items from bundles.
+#
+#
+#            # use synckey for quicker merging.
+#            bitems.each { |b| items[synckey(b)] = b }
+#          end
+#        end
+#      end
         # use synckey for quicker merging.
         bitems.each { |b| items[synckey(b)] = b }
       else
