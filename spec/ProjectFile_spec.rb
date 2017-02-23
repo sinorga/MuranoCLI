@@ -14,6 +14,7 @@ RSpec.describe MrMurano::Config do
       $cfg = MrMurano::Config.new
       $cfg.load
       $cfg['user.name'] = 'bob@builder.co'
+      $project = nil
     end
 
     context "No files to load" do
@@ -72,17 +73,17 @@ RSpec.describe MrMurano::Config do
           expect(@pjf.get('routes.exclude')).to eq(['here'])
         end
 
-        it "Event handlers" do
+        it "Services" do
           # Because defaults before load() are all nil, the default_value_for method
           # is called.
-          expect(@pjf).to receive(:default_value_for).with('eventhandlers.location').and_return('here')
-          expect(@pjf.get('eventhandlers.location')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('services.location').and_return('here')
+          expect(@pjf.get('services.location')).to eq('here')
 
-          expect(@pjf).to receive(:default_value_for).with('eventhandlers.include').and_return(['here'])
-          expect(@pjf.get('eventhandlers.include')).to eq(['here'])
+          expect(@pjf).to receive(:default_value_for).with('services.include').and_return(['here'])
+          expect(@pjf.get('services.include')).to eq(['here'])
 
-          expect(@pjf).to receive(:default_value_for).with('eventhandlers.exclude').and_return(['here'])
-          expect(@pjf.get('eventhandlers.exclude')).to eq(['here'])
+          expect(@pjf).to receive(:default_value_for).with('services.exclude').and_return(['here'])
+          expect(@pjf.get('services.exclude')).to eq(['here'])
         end
       end
 

@@ -8,6 +8,8 @@ RSpec.describe MrMurano::ProductResources do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
     $cfg['product.spec'] = 'XYZ.yaml'
