@@ -71,6 +71,12 @@ properties:
     properties:
       "$ref": "#/definitions/common"
 
+  resources:
+    type: object
+    description: Which aliases will exist on connected devices.
+    properties:
+      "$ref": "#/definitions/common"
+
   cors:
     type: object
     properties:

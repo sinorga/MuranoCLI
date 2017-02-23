@@ -103,7 +103,25 @@ module MrMurano
       end
     end
 
-    PrfFile = Struct.new(:info, :assets, :modules, :routes, :services) do
+    PrjResources = Struct.new(:location, :include, :exclude) do
+      def load(obj)
+        self.members.each do |key|
+          self[key] = obj[key] if obj.has_key? key
+        end
+        [:include, :exclude].each do |key|
+          self[key] = [self[key]] unless self[key].kind_of? Array
+        end
+      end
+      def save
+        ret={}
+        self.members.each do |key|
+          ret[key] = self[key] unless self[key].nil?
+        end
+        ret
+      end
+    end
+
+    PrfFile = Struct.new(:info, :assets, :modules, :routes, :services, :resources) do
       def save
         ret={}
         self.members.each do |key|
@@ -127,10 +145,11 @@ module MrMurano
           nil,
           nil
         ),
-        PrjFiles.new(),
-        PrjModules.new(),
-        PrjEndpoints.new(),
-        PrjEventHandlers.new(),
+        PrjFiles.new,
+        PrjModules.new,
+        PrjEndpoints.new,
+        PrjEventHandlers.new,
+        PrjResources.new,
       )
     end
 
@@ -164,9 +183,12 @@ module MrMurano
         'routes.location' => 'location.endpoints',
         'routes.include' => 'endpoints.searchFor',
         'routes.exclude' => 'endpoints.ignoring',
-        'eventhandler.location' => 'location.eventhandlers',
-        'eventhandler.include' => 'eventhandler.searchFor',
-        'eventhandler.exclude' => 'eventhandler.ignoring',
+        'services.location' => 'location.eventhandlers',
+        'services.include' => 'eventhandler.searchFor',
+        'services.exclude' => 'eventhandler.ignoring',
+        'resources.location' => 'location.specs',
+        'resources.include' => 'product.spec',
+        'resources.exclude' => 'product.ignoring',
       }.freeze
       needSplit = %r{.*\.(searchFor|ignoring)$}.freeze
       return nil unless keymap.has_key? key
