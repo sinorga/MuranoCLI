@@ -270,8 +270,6 @@ module MrMurano
       # then merge @locationbase/@location
       #
 
-      if (@locationbase + @location).exist? then
-        bitems = localitems(@locationbase + @location)
 #      bundleDir = $cfg['location.bundles'] or 'bundles'
 #      bundleDir = 'bundles' if bundleDir.nil?
 #      items = {}
@@ -288,24 +286,35 @@ module MrMurano
 #          end
 #        end
 #      end
+      if location.exist? then
+        bitems = localitems(location)
         # use synckey for quicker merging.
         bitems.each { |b| items[synckey(b)] = b }
       else
-        warning "Skipping missing location #{@locationbase + @location}"
+        warning "Skipping missing location #{location}"
       end
 
       items.values
     end
 
     ##
+    # Get the full path for the local versions
+    def location
+      raise "Missing @project_section" if @project_section.nil?
+      Pathname.new($cfg['location.base']) + $project["#{@project_section}.location"]
+    end
+
+    ##
     # Returns array of globs to search for files
     def searchFor
-      %w{*.lua */*.lua}
+      raise "Missing @project_section" if @project_section.nil?
+      $project["#{@project_section}.include"]
     end
 
     ## Returns array of globs of files to ignore
     def ignoring
-      %w{*_test.lua *_spec.lua .*}
+      raise "Missing @project_section" if @project_section.nil?
+      $project["#{@project_section}.exclude"]
     end
 
     ##
@@ -404,7 +413,7 @@ module MrMurano
       options = elevate_hash(options)
       options[:asdown] = true
       dt = status(options, selected)
-      into = @locationbase + @location ###
+      into = location ###
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
