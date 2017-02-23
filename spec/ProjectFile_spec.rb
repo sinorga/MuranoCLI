@@ -139,13 +139,43 @@ RSpec.describe MrMurano::Config do
         @pjf = MrMurano::ProjectFile.new
       end
 
-      it "load just meta" do
-        src = File.join(@testdir, 'spec/fixtures/ProjectFiles/only_meta.yaml')
-        dst = File.join(@projectDir, 'meta.murano')
-        FileUtils.copy(src, dst)
-        @pjf.load
+      context "load just meta" do
+        before(:example) do
+          src = File.join(@testdir, 'spec/fixtures/ProjectFiles/only_meta.yaml')
+          dst = File.join(@projectDir, 'meta.murano')
+          FileUtils.copy(src, dst)
+          @pjf.load
+        end
+        it "has the name" do
+          expect(@pjf.get('info.name')).to eq('tested')
+        end
+        it "has version" do
+          expect(@pjf.get('info.version')).to eq('1.56.12')
+        end
 
-        expect(@pjf.get('info.name')).to eq('tested')
+        it "fails back to $cfg" do
+          expect(@pjf).to receive(:default_value_for).with('routes.include').and_return(['here'])
+          expect(@pjf.get('routes.include')).to eq(['here'])
+        end
+      end
+
+      context "load custom routes" do
+        before(:example) do
+          src = File.join(@testdir, 'spec/fixtures/ProjectFiles/with_routes.yaml')
+          dst = File.join(@projectDir, 'meta.murano')
+          FileUtils.copy(src, dst)
+          @pjf.load
+        end
+        it "has the name" do
+          expect(@pjf.get('info.name')).to eq('tested')
+        end
+        it "has version" do
+          expect(@pjf.get('info.version')).to eq('1.56.12')
+        end
+        it "does not fail back to $cfg" do
+          expect(@pjf).to_not receive(:default_value_for)
+          expect(@pjf.get('routes.include')).to eq(['custom_api.lua'])
+        end
       end
 
     end
