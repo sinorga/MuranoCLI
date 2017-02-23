@@ -16,12 +16,7 @@ coverage/
 
 .murano/
 
-files/
-endpoints/
-modules/
-eventhandlers/
-roles.yaml
-users.yaml
+_testProject/
 
 # Thumbnails
 ._*
