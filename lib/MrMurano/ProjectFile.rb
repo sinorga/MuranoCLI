@@ -103,7 +103,7 @@ module MrMurano
       end
     end
 
-    PrfFile = Struct.new(:info, :assets, :modules, :routes, :eventhandlers) do
+    PrfFile = Struct.new(:info, :assets, :modules, :routes, :services) do
       def save
         ret={}
         self.members.each do |key|
