@@ -5,7 +5,7 @@ description: |-
   This describes all of the bits and bobs that go into a Murano Solution.
 
 additionalProperties: false
-required: [info]
+required: [info, formatversion]
 properties:
   formatversion:
     type: string

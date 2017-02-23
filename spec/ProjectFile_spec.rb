@@ -2,8 +2,9 @@ require 'MrMurano/version'
 require 'MrMurano/Config'
 require 'MrMurano/ProjectFile'
 require '_workspace'
-require 'tempfile'
-require 'erb'
+require 'fileutils'
+#require 'tempfile'
+#require 'erb'
 
 RSpec.describe MrMurano::Config do
 
@@ -138,8 +139,13 @@ RSpec.describe MrMurano::Config do
         @pjf = MrMurano::ProjectFile.new
       end
 
-      it "load" do
+      it "load just meta" do
+        src = File.join(@testdir, 'spec/fixtures/ProjectFiles/only_meta.yaml')
+        dst = File.join(@projectDir, 'meta.murano')
+        FileUtils.copy(src, dst)
         @pjf.load
+
+        expect(@pjf.get('info.name')).to eq('tested')
       end
 
     end

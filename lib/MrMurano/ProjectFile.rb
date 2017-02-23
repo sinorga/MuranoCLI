@@ -238,9 +238,9 @@ module MrMurano
 
       # get format version; little different for older format.
       if @prjFile.basename.to_s == "Solutionfile.json" then
-        fmtvers = data[:version] or '0.2.0'
+        fmtvers = (data[:version] or '0.2.0')
       else
-        fmtvers = data[:formatversion] or '1.0.0'
+        fmtvers = (data[:formatversion] or '1.0.0')
       end
 
       methodname = "load_#{fmtvers.gsub(/\./, '_')}".to_sym
