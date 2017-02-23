@@ -3,6 +3,7 @@ require 'tempfile'
 require 'shellwords'
 require 'open3'
 require 'MrMurano/Config'
+require 'MrMurano/ProjectFile'
 require 'MrMurano/hash'
 
 module MrMurano
@@ -272,7 +273,7 @@ module MrMurano
 
 #      bundleDir = $cfg['location.bundles'] or 'bundles'
 #      bundleDir = 'bundles' if bundleDir.nil?
-#      items = {}
+      items = {}
 #      if (@locationbase + bundleDir).directory? then
 #        (@locationbase + bundleDir).children.sort.each do |bndl|
 #          if (bndl + @location).exist? then
