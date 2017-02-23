@@ -100,7 +100,6 @@ module MrMurano
       super
       @uriparts << 'role'
       @itemkey = :role_id
-      @location = $cfg['location.roles']
     end
   end
   SyncRoot.add('roles', Role, 'R', %{Roles})
@@ -111,7 +110,6 @@ module MrMurano
     def initialize
       super
       @uriparts << 'user'
-      @location = $cfg['location.users']
     end
 
     # @param modify Bool: True if item exists already and this is changing it

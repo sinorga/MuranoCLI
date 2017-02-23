@@ -7,7 +7,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'cors'
-      @location = $cfg['location.cors']
+      @project_section = :cors
     end
 
     def list()

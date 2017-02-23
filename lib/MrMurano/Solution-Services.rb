@@ -158,7 +158,7 @@ module MrMurano
       super
       @uriparts << 'library'
       @itemkey = :alias
-      @location = $cfg['location.modules']
+      @project_section = :modules
     end
 
     def tolocalname(item, key)
@@ -182,14 +182,6 @@ module MrMurano
       end
     end
 
-    def searchFor
-      ($cfg['modules.searchFor'] or '').split
-    end
-
-    def ignoring
-      ($cfg['modules.ignoring'] or '').split
-    end
-
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
       {:name => name}
@@ -207,7 +199,7 @@ module MrMurano
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
-      @location = $cfg['location.eventhandlers']
+      @project_section = :services
       @match_header = /--#EVENT (?<service>\S+) (?<event>\S+)/
     end
 
@@ -225,14 +217,6 @@ module MrMurano
       else
         raise "Missing parts! #{remote.to_json}"
       end
-    end
-
-    def searchFor
-      ($cfg['eventhandler.searchFor'] or '').split
-    end
-
-    def ignoring
-      ($cfg['eventhandler.ignoring'] or '').split
     end
 
     def list
