@@ -251,6 +251,19 @@ RSpec.describe MrMurano::Config do
         expect(locbase).to eq(wkd)
       end
     end
+
+    it "when .murano is in both PWD and parent dir" do
+      Dir.chdir(@projectDir + '/some') do
+        FileUtils.mkpath('.murano')
+        FileUtils.touch('.murano/config')
+        cfg = MrMurano::Config.new
+        cfg.load
+        # Follow symlinks to get the paths comparable.
+        locbase = cfg.get('location.base', :defaults).realdirpath
+        wkd = (Pathname.new(@projectDir) + 'some').realdirpath
+        expect(locbase).to eq(wkd)
+      end
+    end
   end
 
   context "Can find the project directory by .murano/" do
@@ -287,6 +300,18 @@ RSpec.describe MrMurano::Config do
         # Follow symlinks to get the paths comparable.
         locbase = cfg.get('location.base', :defaults).realdirpath
         wkd = Pathname.new(@projectDir).realdirpath
+        expect(locbase).to eq(wkd)
+      end
+    end
+
+    it "when .murano is in both PWD and parent dir" do
+      Dir.chdir(@projectDir + '/some') do
+        FileUtils.mkpath('.murano')
+        cfg = MrMurano::Config.new
+        cfg.load
+        # Follow symlinks to get the paths comparable.
+        locbase = cfg.get('location.base', :defaults).realdirpath
+        wkd = (Pathname.new(@projectDir) + 'some').realdirpath
         expect(locbase).to eq(wkd)
       end
     end

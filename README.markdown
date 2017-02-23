@@ -1,16 +1,16 @@
-# MrMurano
+# MuranoCLI
 
 [![Gem Version](https://badge.fury.io/rb/MrMurano.svg)](https://badge.fury.io/rb/MrMurano)
 [![Build Status](https://travis-ci.org/tadpol/MrMurano.svg?branch=master)](https://travis-ci.org/tadpol/MrMurano)
-[![Inline docs](http://inch-ci.org/github/exosite/MrMurano.svg?branch=master)](http://inch-ci.org/github/exosite/MrMurano)
+[![Inline docs](http://inch-ci.org/github/exosite/MuranoCLI.svg?branch=master)](http://inch-ci.org/github/exosite/MuranoCLI)
 
 Do more from the command line with [Murano](https://exosite.com/platform/)
 
-MrMurano is the command-line tool that interacts with Murano and makes different
-tasks easier. MrMurano makes it easy to deploy code to a solution, import many
+MuranoCLI is the command-line tool that interacts with Murano and makes different
+tasks easier. MuranoCLI makes it easy to deploy code to a solution, import many
 product definitions at once, set up endpoints and APIs, and more.
 
-MrMurano works around the idea of syncing, much like rsync.  Files from your project
+MuranoCLI works around the idea of syncing, much like rsync.  Files from your project
 directory are synced up (or down) from Murano.
 
 !!!!! *IMPORTANT*
@@ -54,6 +54,8 @@ Then deploy with `murano syncup`
 
 ## Install
 
+### Gem Install (Linux and Macos)
+
 When upgrading from a 1.\* version to a 2.0, you should uninstall the old versions
 first.
 ```
@@ -84,7 +86,7 @@ to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 ### Windows Install
 
 The MrMurano gem will install on Windows.  There is also a single Windows binary
-Setup installer availible in [releases](https://github.com/exosite/MrMurano/releases)
+Setup installer availible in [releases](https://github.com/exosite/MuranoCLI/releases)
 
 If you do not already use Ruby on Windows, then you should use the binary
 installer.
@@ -100,7 +102,7 @@ installing the new version.
 You can monitor the log messages from your solution with the `murano logs --follow`.
 Or quickly get the last few with `murano logs`
 
-MrMurano does a few things to make your log output easier to follow.
+MuranoCLI does a few things to make your log output easier to follow.
 - Adds color to easily see where each log message starts.
 - Reformats the timestamps to be in local time.
 - Finds JSON blobs and pretty prints them.
@@ -110,7 +112,7 @@ All of these can be toggled with command line options.
 ### MURANO_CONFIGFILE environment and Dotenv
 
 The environment variable `MURANO_CONFIGFILE` is checked for an additional config to
-load.  This in conjuction with dotenv support, allows for easily switching between
+load.  This in conjunction with dotenv support, allows for easily switching between
 development, staging, and production setups.
 
 To use this, write the three solution ids into `.murano.dev`, `.murano.stg`,
@@ -144,7 +146,7 @@ the shared things checked into source control.
 
 ### Direct Service Access
 
-To aid with debugging, MrMurano has direct access to some of the services in a
+To aid with debugging, MuranoCLI has direct access to some of the services in a
 solution.
 
 Currently these are:
@@ -168,7 +170,7 @@ commands.
 
 ### Product Content Area
 
-MrMurano can manage the content area for a product.  This area is a place to store
+MuranoCLI can manage the content area for a product.  This area is a place to store
 files for use by devices.  Typically holding firmware images for Over-The-Air
 updating.  Although any kind of fleet wide data that devices may need to download
 can be stored here.
@@ -187,10 +189,10 @@ Call them with `--help` for details.
 
 ## Developing
 
-MrMurano uses [git flow](https://github.com/nvie/gitflow#getting-started) for
+MuranoCLI uses [git flow](https://github.com/nvie/gitflow#getting-started) for
 [managing branches](http://nvie.com/posts/a-successful-git-branching-model/).
 
-MrMurano also uses [bundler](http://bundler.io).
+MuranoCLI also uses [bundler](http://bundler.io).
 
 When submitting pull requests, please do them against the develop branch.
 

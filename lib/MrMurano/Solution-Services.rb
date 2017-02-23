@@ -33,10 +33,12 @@ module MrMurano
       raise "Missing name!" if name.nil?
       raise "Empty name!" if name.empty?
       ret = get('/'+CGI.escape(name))
+      error "Unexpected result type, assuming empty instead: #{ret}" unless ret.kind_of? Hash
+      ret = {} unless ret.kind_of? Hash
       if block_given? then
-        yield ret[:script]
+        yield (ret[:script] or '')
       else
-        ret[:script]
+        ret[:script] or ''
       end
     end
 

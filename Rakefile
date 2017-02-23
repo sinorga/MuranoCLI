@@ -23,6 +23,21 @@ task :echo do
     puts builtGem
 end
 
+desc "Prints a cmd to test this in another directory"
+task :testwith do
+    pwd=Dir.pwd.sub(Dir.home, '~')
+    puts "ruby -I#{pwd}/lib #{pwd}/bin/murano "
+end
+
+desc 'Run RSpec'
+task :rspec do
+    Dir.mkdir("report") unless File.directory?("report")
+    sh %{rspec --format html --out report/index.html --format progress}
+end
+task :test => [:rspec]
+
+###
+# When new tags are pushed to upstream, the CI will kick-in and build the release
 namespace :git do
     desc "Push only develop, master, and tags to origin"
     task :origin do
@@ -52,6 +67,8 @@ task :gemit do
     sh %{git checkout develop}
 end
 
+###########################################
+# Tasks below are largly used by CI systems
 namespace :push do
     desc 'Push gem up to RubyGems'
     task :gem do
@@ -90,19 +107,6 @@ namespace :push do
         end
     end
 end
-
-desc "Prints a cmd to test this in another directory"
-task :testwith do
-    pwd=Dir.pwd.sub(Dir.home, '~')
-    puts "ruby -I#{pwd}/lib #{pwd}/bin/murano "
-end
-
-desc 'Run RSpec'
-task :rspec do
-    Dir.mkdir("report") unless File.directory?("report")
-    sh %{rspec --format html --out report/index.html --format progress}
-end
-task :test => [:rspec]
 
 file "ReadMe.txt" => ['README.markdown'] do |t|
     File.open(t.prerequisites.first) do |rio|
