@@ -102,7 +102,7 @@ module MrMurano
       @itemkey = :role_id
     end
   end
-  SyncRoot.add('roles', Role, 'R', %{Roles})
+  #SyncRoot.add('roles', Role, 'R', %{Roles})
 
   # …/user
   # :nocov:
@@ -124,6 +124,6 @@ module MrMurano
     end
   end
   # :nocov:
-  SyncRoot.add('users', User, 'U', %{Users})
+  #SyncRoot.add('users', User, 'U', %{Users})
 end
 #  vim: set ai et sw=2 ts=2 :
