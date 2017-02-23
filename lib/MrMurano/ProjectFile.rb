@@ -167,11 +167,15 @@ module MrMurano
         'eventhandler.location' => 'location.eventhandlers',
         'eventhandler.include' => 'eventhandler.searchFor',
         'eventhandler.exclude' => 'eventhandler.ignoring',
-      }
+      }.freeze
+      needSplit = %r{.*\.(searchFor|ignoring)$}.freeze
       return nil unless keymap.has_key? key
-      # FIXME *.{include,exclude} want arrays returned. But what they map to is
+      # *.{include,exclude} want arrays returned. But what they map to is
       # strings.
-      $cfg[ keymap[key] ]
+      cfg_key = keymap[key]
+      ret = $cfg[cfg_key] or ''
+      ret = ret.split() if cfg_key =~ needSplit
+      ret
     end
 
     # Set a value for a key.

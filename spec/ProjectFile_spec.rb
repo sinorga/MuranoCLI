@@ -35,11 +35,11 @@ RSpec.describe MrMurano::Config do
           expect(@pjf).to receive(:default_value_for).with('assets.location').and_return('here')
           expect(@pjf.get('assets.location')).to eq('here')
 
-          expect(@pjf).to receive(:default_value_for).with('assets.include').and_return('here')
-          expect(@pjf.get('assets.include')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('assets.include').and_return(['here'])
+          expect(@pjf.get('assets.include')).to eq(['here'])
 
-          expect(@pjf).to receive(:default_value_for).with('assets.exclude').and_return('here')
-          expect(@pjf.get('assets.exclude')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('assets.exclude').and_return(['here'])
+          expect(@pjf.get('assets.exclude')).to eq(['here'])
 
           expect(@pjf).to receive(:default_value_for).with('assets.default_page').and_return('here')
           expect(@pjf.get('assets.default_page')).to eq('here')
@@ -51,11 +51,11 @@ RSpec.describe MrMurano::Config do
           expect(@pjf).to receive(:default_value_for).with('modules.location').and_return('here')
           expect(@pjf.get('modules.location')).to eq('here')
 
-          expect(@pjf).to receive(:default_value_for).with('modules.include').and_return('here')
-          expect(@pjf.get('modules.include')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('modules.include').and_return(['here'])
+          expect(@pjf.get('modules.include')).to eq(['here'])
 
-          expect(@pjf).to receive(:default_value_for).with('modules.exclude').and_return('here')
-          expect(@pjf.get('modules.exclude')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('modules.exclude').and_return(['here'])
+          expect(@pjf.get('modules.exclude')).to eq(['here'])
         end
 
         it "Routes" do
@@ -64,11 +64,11 @@ RSpec.describe MrMurano::Config do
           expect(@pjf).to receive(:default_value_for).with('routes.location').and_return('here')
           expect(@pjf.get('routes.location')).to eq('here')
 
-          expect(@pjf).to receive(:default_value_for).with('routes.include').and_return('here')
-          expect(@pjf.get('routes.include')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('routes.include').and_return(['here'])
+          expect(@pjf.get('routes.include')).to eq(['here'])
 
-          expect(@pjf).to receive(:default_value_for).with('routes.exclude').and_return('here')
-          expect(@pjf.get('routes.exclude')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('routes.exclude').and_return(['here'])
+          expect(@pjf.get('routes.exclude')).to eq(['here'])
         end
 
         it "Event handlers" do
@@ -77,11 +77,11 @@ RSpec.describe MrMurano::Config do
           expect(@pjf).to receive(:default_value_for).with('eventhandlers.location').and_return('here')
           expect(@pjf.get('eventhandlers.location')).to eq('here')
 
-          expect(@pjf).to receive(:default_value_for).with('eventhandlers.include').and_return('here')
-          expect(@pjf.get('eventhandlers.include')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('eventhandlers.include').and_return(['here'])
+          expect(@pjf.get('eventhandlers.include')).to eq(['here'])
 
-          expect(@pjf).to receive(:default_value_for).with('eventhandlers.exclude').and_return('here')
-          expect(@pjf.get('eventhandlers.exclude')).to eq('here')
+          expect(@pjf).to receive(:default_value_for).with('eventhandlers.exclude').and_return(['here'])
+          expect(@pjf.get('eventhandlers.exclude')).to eq(['here'])
         end
       end
 
@@ -121,6 +121,14 @@ RSpec.describe MrMurano::Config do
         it "hits $cfg if mapped key" do
           expect($cfg).to receive(:get).with('location.endpoints').and_return('beef')
           expect(@pjf.default_value_for('routes.location')).to eq('beef')
+        end
+
+        it "returns array for split values" do
+          expect($cfg).to receive(:get).with('endpoints.searchFor').and_return('beef')
+          expect(@pjf.default_value_for('routes.include')).to eq(['beef'])
+
+          expect($cfg).to receive(:get).with('endpoints.searchFor').and_return('beef and potatoes')
+          expect(@pjf.default_value_for('routes.include')).to eq(['beef','and','potatoes'])
         end
       end
     end
