@@ -291,9 +291,9 @@ module MrMurano
       end
 
       if data.has_key? 'event_handler' then
-        @data[:eventhandlers].location = nil
+        @data[:services].location = nil
         evd = data['event_handler'].values.map{|e| e.values}.flatten
-        @data[:eventhandlers].include = evd
+        @data[:services].include = evd
       end
       # TODO: check if eventhandlers need header added. (see config-migrate)
       # TODO: load cors and write out. (see config-migrate)
@@ -324,9 +324,9 @@ module MrMurano
       end
 
       if data.has_key? 'services' then
-        @data[:eventhandlers].location = nil
+        @data[:services].location = nil
         evd = data['services'].values.map{|e| e.values}.flatten
-        @data[:eventhandlers].include = evd
+        @data[:services].include = evd
       end
       # TODO: check if eventhandlers need header added. (see config-migrate)
       # TODO: load cors and write out. (see config-migrate)
