@@ -230,6 +230,7 @@ module MrMurano
       end
 
       methodname = "load_#{fmtvers.gsub(/\./, '_')}".to_sym
+      debug "Will try to #{methodname}"
       if respond_to? methodname then
         errorlist = __send__(methodname, data)
         unless errorlist.empty? then
@@ -310,20 +311,19 @@ module MrMurano
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
 
-      @data[:assets].location = nil
-      ifset(data, default_page, @data[:assets], :default_page)
-      ifset(data, assets, @data[:assets], :location)
+      ifset(data, :default_page, @data[:assets], :default_page)
+      ifset(data, :assets, @data[:assets], :location)
 
-      @data[:routes].location = nil
-      ifset(data, routes, @data[:routes], :include)
+      @data[:routes].location = '.'
+      @data[:routes][:include] = [data[:routes]] if data.has_key? :routes
 
       if data.has_key? :modules then
-        @data[:modules].location = nil
+        @data[:modules].location = '.'
         @data[:modules][:include] = data[:modules].values
       end
 
       if data.has_key? :services then
-        @data[:services].location = nil
+        @data[:services].location = '.'
         evd = data[:services].values.map{|e| e.values}.flatten
         @data[:services].include = evd
       end
