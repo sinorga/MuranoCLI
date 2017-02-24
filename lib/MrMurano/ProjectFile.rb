@@ -1,5 +1,6 @@
 require 'yaml'
 require 'json-schema'
+require 'pathname'
 require 'MrMurano/verbosing'
 require 'MrMurano/Config'
 require 'MrMurano/hash'
@@ -283,7 +284,7 @@ module MrMurano
     end
 
     def load_1_0_0(data)
-      schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/pf-v1.0.0.yaml'
+      schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/pf-v1.0.0.yaml'
       schema = YAML.load_file(schemaPath.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
@@ -298,7 +299,7 @@ module MrMurano
     alias load_1 load_1_0_0
 
     def load_0_2_0(data)
-      schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/sf-v0.2.0.yaml'
+      schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/sf-v0.2.0.yaml'
       schema = YAML.load_file(schemaPath.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
@@ -328,7 +329,7 @@ module MrMurano
     alias load_0_2 load_0_2_0
 
     def load_0_3_0(data)
-      schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/sf-v0.3.0.yaml'
+      schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/sf-v0.3.0.yaml'
       schema = YAML.load_file(schemaPath.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
