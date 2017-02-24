@@ -12,6 +12,24 @@ module MrMurano
   class ProjectFile
     include Verbose
 
+    module PrjStructCommonMethods
+      def load(obj)
+        self.members.each do |key|
+          self[key] = obj[key] if obj.has_key? key
+        end
+        [:include, :exclude].each do |key|
+          self[key] = [self[key]] unless self[key].kind_of? Array
+        end
+      end
+      def save
+        ret={}
+        self.members.each do |key|
+          ret[key] = self[key] unless self[key].nil?
+        end
+        ret
+      end
+    end
+
     # The contents of this is explictily not just a nest of hashes and arrays.
     # To keep expectations in check, there is a set number of known keys.
     # This should also help by keeping the file format seperate from the internal
@@ -33,93 +51,23 @@ module MrMurano
     end
 
     PrjFiles = Struct.new(:location, :include, :exclude, :default_page) do
-      def load(obj)
-        self.members.each do |key|
-          self[key] = obj[key] if obj.has_key? key
-        end
-        [:include, :exclude].each do |key|
-          self[key] = [self[key]] unless self[key].kind_of? Array
-        end
-      end
-      def save
-        ret={}
-        self.members.each do |key|
-          ret[key] = self[key] unless self[key].nil?
-        end
-        ret
-      end
+      include PrjStructCommonMethods
     end
 
     PrjModules = Struct.new(:location, :include, :exclude) do
-      def load(obj)
-        self.members.each do |key|
-          self[key] = obj[key] if obj.has_key? key
-        end
-        [:include, :exclude].each do |key|
-          self[key] = [self[key]] unless self[key].kind_of? Array
-        end
-      end
-      def save
-        ret={}
-        self.members.each do |key|
-          ret[key] = self[key] unless self[key].nil?
-        end
-        ret
-      end
+      include PrjStructCommonMethods
     end
 
     PrjEndpoints = Struct.new(:location, :include, :exclude) do
-      def load(obj)
-        self.members.each do |key|
-          self[key] = obj[key] if obj.has_key? key
-        end
-        [:include, :exclude].each do |key|
-          self[key] = [self[key]] unless self[key].kind_of? Array
-        end
-      end
-      def save
-        ret={}
-        self.members.each do |key|
-          ret[key] = self[key] unless self[key].nil?
-        end
-        ret
-      end
+      include PrjStructCommonMethods
     end
 
     PrjEventHandlers = Struct.new(:location, :include, :exclude) do
-      def load(obj)
-        self.members.each do |key|
-          self[key] = obj[key] if obj.has_key? key
-        end
-        [:include, :exclude].each do |key|
-          self[key] = [self[key]] unless self[key].kind_of? Array
-        end
-      end
-      def save
-        ret={}
-        self.members.each do |key|
-          ret[key] = self[key] unless self[key].nil?
-        end
-        ret
-      end
+      include PrjStructCommonMethods
     end
 
     PrjResources = Struct.new(:location, :include, :exclude) do
-      def load(obj)
-        self.members.each do |key|
-          self[key] = obj[key] if obj.has_key? key
-        end
-        [:include, :exclude].each do |key|
-          self[key] = [self[key]] unless self[key].kind_of? Array
-        end
-      end
-      def save
-        ret={}
-        self.members.each do |key|
-          ret[key] = self[key] unless self[key].nil?
-        end
-        ret
-      end
+      include PrjStructCommonMethods
     end
 
     PrfFile = Struct.new(:info, :assets, :modules, :routes, :services, :resources) do
@@ -217,11 +165,14 @@ module MrMurano
     ## Save the Project File.
     #
     # This ALWAYS saves in the latest format only.
-    def save
+    def save(ios=$stdout)
       dt = @data.save
-      puts Hash.transform_keys_to_strings(dt).to_yaml
-      # TODO: where? to the file?
-
+      dt = Hash.transform_keys_to_strings(dt).to_yaml
+      if ios.nil?
+        dt
+      else
+        ios.write dt
+      end
     end
 
     ##
