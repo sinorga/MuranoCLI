@@ -281,16 +281,16 @@ module MrMurano
       ifset(data, :default_page, @data[:assets], :default_page)
       ifset(data, :file_dir, @data[:assets], :location)
 
-      @data[:routes].location = nil
-      ifset(data, :custom_api, @data[:routes], :include)
+      @data[:routes].location = '.'
+      @data[:routes][:include] = [data[:custom_api]] if data.has_key? :custom_api
 
       if data.has_key? :modules then
-        @data[:modules].location = nil
+        @data[:modules].location = '.'
         @data[:modules][:include] = data[:modules].values
       end
 
       if data.has_key? :event_handler then
-        @data[:services].location = nil
+        @data[:services].location = '.'
         evd = data[:event_handler].values.map{|e| e.values}.flatten
         @data[:services].include = evd
       end

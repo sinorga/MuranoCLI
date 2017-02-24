@@ -208,7 +208,11 @@ RSpec.describe MrMurano::ProjectFile do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0_invalid.json')
         dst = File.join(@projectDir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
+        saved = $stderr
+        $stderr = StringIO.new
         @pjf.load
+        expect($stderr.string).to match(%r{The property '#/' did not contain a required property of 'custom_api'})
+        $stderr = saved
     end
 
     context "loads" do
@@ -225,12 +229,26 @@ RSpec.describe MrMurano::ProjectFile do
       end
 
       it "defines routes" do
-        expect(@pjf.get('routes.include')).to eq(['custom_api.lua'])
+        expect(@pjf['routes.location']).to eq ('.')
+        expect(@pjf.get('routes.include')).to eq(['sample_api.lua'])
       end
 
-      it "defines modules"
-      it "defines services"
-      it "falls back to $cfg"
+      it "defines modules" do
+        expect(@pjf['modules.location']).to eq ('.')
+        expect(@pjf['modules.include']).to match_array(["modules/debug.lua", "modules/listen.lua", "modules/util.lua"])
+      end
+
+      it "defines services" do
+        expect(@pjf['services.location']).to eq ('.')
+        expect(@pjf['services.include']).to match_array(["event_handler/product.lua", "event_handler/timer.lua"])
+      end
+
+      # XXX event_handler migration ???
+      # XXX cors migration ???
+    end
+  end
+      end
+
       # XXX event_handler migration ???
       # XXX cors migration ???
     end
