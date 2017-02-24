@@ -159,7 +159,7 @@ module MrMurano
       # *.{include,exclude} want arrays returned. But what they map to is
       # strings.
       cfg_key = keymap[key]
-      ret = $cfg[cfg_key] or ''
+      ret = ($cfg[cfg_key] or '')
       ret = ret.split() if cfg_key =~ needSplit
       ret
     end
@@ -202,10 +202,6 @@ module MrMurano
 
       warning "Multiple possible Project files! #{possible}" if possible.count > 1
       @prjFile = Pathname.new(possible.first)
-      if @prjFile.nil? then
-        error "No project file found!"
-        return -1
-      end
 
       data = nil
       begin
