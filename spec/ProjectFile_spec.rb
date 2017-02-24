@@ -193,6 +193,48 @@ RSpec.describe MrMurano::ProjectFile do
 
     end
   end
+
+  context "Solutionfile 0.2.0" do
+    include_context "WORKSPACE"
+    before(:example) do
+      $cfg = MrMurano::Config.new
+      $cfg.load
+      $cfg['user.name'] = 'bob@builder.co'
+      $project = nil
+      @pjf = MrMurano::ProjectFile.new
+    end
+
+    it "Reports validation errors" do
+        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0_invalid.json')
+        dst = File.join(@projectDir, 'Solutionfile.json')
+        FileUtils.copy(src, dst)
+        @pjf.load
+    end
+
+    context "loads" do
+      before(:example) do
+        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0.json')
+        dst = File.join(@projectDir, 'Solutionfile.json')
+        FileUtils.copy(src, dst)
+        @pjf.load
+      end
+      it "defines assets" do
+        expect(@pjf.get('assets.default_page')).to eq('index.html')
+        expect(@pjf.get('assets.location')).to eq('public')
+        expect(@pjf.get('assets.include')).to eq(['**/*'])
+      end
+
+      it "defines routes" do
+        expect(@pjf.get('routes.include')).to eq(['custom_api.lua'])
+      end
+
+      it "defines modules"
+      it "defines services"
+      it "falls back to $cfg"
+      # XXX event_handler migration ???
+      # XXX cors migration ???
+    end
+  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
