@@ -278,21 +278,20 @@ module MrMurano
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
 
-      @data[:assets].location = nil
-      ifset(data, 'default_page', @data[:assets], :default_page)
-      ifset(data, 'file_dir', @data[:assets], :include)
+      ifset(data, :default_page, @data[:assets], :default_page)
+      ifset(data, :file_dir, @data[:assets], :location)
 
       @data[:routes].location = nil
-      ifset(data, 'custom_api', @data[:routes], :include)
+      ifset(data, :custom_api, @data[:routes], :include)
 
-      if data.has_key? 'modules' then
+      if data.has_key? :modules then
         @data[:modules].location = nil
-        @data[:modules][:include] = data['modules'].values
+        @data[:modules][:include] = data[:modules].values
       end
 
-      if data.has_key? 'event_handler' then
+      if data.has_key? :event_handler then
         @data[:services].location = nil
-        evd = data['event_handler'].values.map{|e| e.values}.flatten
+        evd = data[:event_handler].values.map{|e| e.values}.flatten
         @data[:services].include = evd
       end
       # TODO: check if eventhandlers need header added. (see config-migrate)
@@ -312,20 +311,20 @@ module MrMurano
       return v unless v.empty?
 
       @data[:assets].location = nil
-      ifset(data, 'default_page', @data[:assets], :default_page)
-      ifset(data, 'assets', @data[:assets], :location)
+      ifset(data, default_page, @data[:assets], :default_page)
+      ifset(data, assets, @data[:assets], :location)
 
       @data[:routes].location = nil
-      ifset(data, 'routes', @data[:routes], :include)
+      ifset(data, routes, @data[:routes], :include)
 
-      if data.has_key? 'modules' then
+      if data.has_key? :modules then
         @data[:modules].location = nil
-        @data[:modules][:include] = data['modules'].values
+        @data[:modules][:include] = data[:modules].values
       end
 
-      if data.has_key? 'services' then
+      if data.has_key? :services then
         @data[:services].location = nil
-        evd = data['services'].values.map{|e| e.values}.flatten
+        evd = data[:services].values.map{|e| e.values}.flatten
         @data[:services].include = evd
       end
       # TODO: check if eventhandlers need header added. (see config-migrate)
