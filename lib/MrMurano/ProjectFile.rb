@@ -12,7 +12,13 @@ module MrMurano
   class ProjectFile
     include Verbose
 
+    # Methods that are common to various internal structs.
     module PrjStructCommonMethods
+      ## Load data from Hash into self
+      #
+      # Also makes sure that :include and :exclude are arrays.
+      #
+      # @param obj [Hash] Data to load in
       def load(obj)
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
@@ -21,6 +27,9 @@ module MrMurano
           self[key] = [self[key]] unless self[key].kind_of? Array
         end
       end
+
+      ## Returns a sparse hash of the data in self
+      # @return [Hash] Just the non-nil members of this
       def save
         ret={}
         self.members.each do |key|
@@ -36,11 +45,15 @@ module MrMurano
     # lookups.  Hopefully, this will avoid (or at least minimize) changes to the
     # file format affecting all kinds of code.
     PrjMeta = Struct.new(:name, :summary, :description, :authors, :version, :source, :dependencies) do
+      ## Load data from Hash into self
+      # @param obj [Hash] Data to load in
       def load(obj)
         self.members.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
       end
+      ## Returns a sparse hash of the data in self
+      # @return [Hash] Just the non-nil members of this
       def save
         ret={}
         self.members.each do |key|
@@ -71,6 +84,8 @@ module MrMurano
     end
 
     PrfFile = Struct.new(:info, :assets, :modules, :routes, :services, :resources) do
+      ## Returns a sparse hash of the data in self
+      # @return [Hash] Just the non-empty members of this
       def save
         ret={}
         self.members.each do |key|
