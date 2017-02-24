@@ -7,9 +7,9 @@ RSpec.describe MrMurano::Product1PDevice, '#sn_rid tests' do
   include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
+    $cfg.load
     $project = MrMurano::ProjectFile.new
     $project.load
-    $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
     $cfg['product.spec'] = 'XYZ.yaml'
