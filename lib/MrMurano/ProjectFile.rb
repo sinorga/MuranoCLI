@@ -200,6 +200,7 @@ module MrMurano
       debug "Possible Project files: #{possible}"
       return 0 if possible.empty? # this is ok.
 
+      warning "Multiple possible Project files! #{possible}" if possible.count > 1
       @prjFile = Pathname.new(possible.first)
       if @prjFile.nil? then
         error "No project file found!"
