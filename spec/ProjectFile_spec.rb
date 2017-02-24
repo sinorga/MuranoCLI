@@ -179,6 +179,18 @@ RSpec.describe MrMurano::Config do
         end
       end
 
+      it "reports validation errors" do
+        src = File.join(@testdir, 'spec/fixtures/ProjectFiles/invalid.yaml')
+        dst = File.join(@projectDir, 'meta.murano')
+        FileUtils.copy(src, dst)
+
+        saved = $stderr
+        $stderr = StringIO.new
+        expect(@pjf.load).to eq(-5)
+        expect($stderr.string).to match(%r{The property '#/info' did not contain a required property of 'description'})
+        $stderr = saved
+      end
+
     end
   end
 end
