@@ -6,7 +6,7 @@ require 'fileutils'
 #require 'tempfile'
 #require 'erb'
 
-RSpec.describe MrMurano::Config do
+RSpec.describe MrMurano::ProjectFile do
 
   context "Basics " do
     include_context "WORKSPACE"
