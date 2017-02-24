@@ -242,10 +242,18 @@ module MrMurano
       end
     end
 
+    # Only set destination if source has key
+    # @param src [Hash,Struct] Source of value to copy
+    # @param skey [String,Symbol] Key in source to check and read
+    # @param dest [Hash,Struct] Destination to save value in
+    # @param dkey [String,Symbol] Key in destination to save to
     def ifset(src, skey, dest, dkey)
       dest[dkey] = src[skey] if src.has_key? skey
     end
 
+    # Load data in the 1.0.0 format.
+    # @param data [Hash] the data to load
+    # @return [Array] An array of validation errors in the data
     def load_1_0_0(data)
       schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/pf-v1.0.0.yaml'
       schema = YAML.load_file(schemaPath.to_s)
@@ -261,6 +269,9 @@ module MrMurano
     alias load_1_0 load_1_0_0
     alias load_1 load_1_0_0
 
+    # Load data in the 0.2.0 format.
+    # @param data [Hash] the data to load
+    # @return [Array] An array of validation errors in the data
     def load_0_2_0(data)
       schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/sf-v0.2.0.yaml'
       schema = YAML.load_file(schemaPath.to_s)
@@ -291,6 +302,9 @@ module MrMurano
     end
     alias load_0_2 load_0_2_0
 
+    # Load data in the 0.3.0 format.
+    # @param data [Hash] the data to load
+    # @return [Array] An array of validation errors in the data
     def load_0_3_0(data)
       schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/sf-v0.3.0.yaml'
       schema = YAML.load_file(schemaPath.to_s)
