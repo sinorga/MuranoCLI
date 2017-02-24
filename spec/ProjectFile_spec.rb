@@ -247,6 +247,54 @@ RSpec.describe MrMurano::ProjectFile do
       # XXX cors migration ???
     end
   end
+
+  context "Solutionfile 0.3.0" do
+    include_context "WORKSPACE"
+    before(:example) do
+      $cfg = MrMurano::Config.new
+      $cfg.load
+      $cfg['user.name'] = 'bob@builder.co'
+      $project = nil
+      @pjf = MrMurano::ProjectFile.new
+    end
+
+    it "Reports validation errors" do
+        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.0_invalid.json')
+        dst = File.join(@projectDir, 'Solutionfile.json')
+        FileUtils.copy(src, dst)
+        saved = $stderr
+        $stderr = StringIO.new
+        @pjf.load
+        expect($stderr.string).to match(%r{The property '#/' did not contain a required property of 'routes'})
+        $stderr = saved
+    end
+
+    context "loads" do
+      before(:example) do
+        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.0.json')
+        dst = File.join(@projectDir, 'Solutionfile.json')
+        FileUtils.copy(src, dst)
+        @pjf.load
+      end
+      it "defines assets" do
+        expect(@pjf.get('assets.default_page')).to eq('index.html')
+        expect(@pjf.get('assets.location')).to eq('public')
+        expect(@pjf.get('assets.include')).to eq(['**/*'])
+      end
+
+      it "defines routes" do
+        expect(@pjf['routes.location']).to eq ('.')
+        expect(@pjf.get('routes.include')).to eq(['sample_api.lua'])
+      end
+
+      it "defines modules" do
+        expect(@pjf['modules.location']).to eq ('.')
+        expect(@pjf['modules.include']).to match_array(["modules/debug.lua", "modules/listen.lua", "modules/util.lua"])
+      end
+
+      it "defines services" do
+        expect(@pjf['services.location']).to eq ('.')
+        expect(@pjf['services.include']).to match_array(["event_handler/product.lua", "event_handler/timer.lua"])
       end
 
       # XXX event_handler migration ???
