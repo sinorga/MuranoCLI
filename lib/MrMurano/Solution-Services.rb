@@ -256,6 +256,8 @@ module MrMurano
     end
 
     def toRemoteItem(from, path)
+      # This allows multiple events to be in the same file.
+      # :legacy support doesn't allow for that. but that's ok.
       path = Pathname.new(path) unless path.kind_of? Pathname
       cur = nil
       lineno=0
@@ -274,6 +276,24 @@ module MrMurano
         lineno += 1
       end
       cur[:line_end] = lineno unless cur.nil?
+
+      # If cur is nil here, then we need to do a :legacy check.
+      if cur.nil? and $project['services.legacy'].kind_of? Hash then
+        spath = path.relative_path_from(from)
+        debug "No headers: #{spath}"
+        service, event = $project['services.legacy'][spath.to_s]
+        debug "Legacy lookup #{spath} => [#{service}, #{event}]"
+        unless service.nil? or event.nil? then
+          warning "Event in #{spath} missing header, but has legacy support."
+          warning "Please add the header \"--#EVENT #{service} #{event}\""
+          cur = {:service=>service,
+                 :event=>event,
+                 :local_path=>path,
+                 :line=>0,
+                 :line_end => lineno,
+                 :script=>path.read()} # FIXME: ick, fix this.
+        end
+      end
       cur
     end
 
