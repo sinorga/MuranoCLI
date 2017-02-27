@@ -1,5 +1,6 @@
 require 'MrMurano/version'
 require 'MrMurano/Config-Migrate'
+require 'highline/import'
 require '_workspace'
 #require 'tempfile'
 #require 'erb'
@@ -10,44 +11,74 @@ RSpec.describe MrMurano::ConfigMigrate do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
+
+    @lry = Pathname.new(@projectDir) + '.Solutionfile.secret'
+    FileUtils.copy(File.join(@testdir, 'spec/fixtures/SolutionFiles/secret.json'), @lry.to_path)
+
+    @mrt = MrMurano::ConfigMigrate.new
+
+    @stdsaved = [$stdout, $stderr]
+    $stdout, $stderr = [StringIO.new, StringIO.new]
   end
 
-  context "Basic" do
-    before(:example) do
-      @lry = Pathname.new(@projectDir) + 'Solutionfile.json'
-      FileUtils.copy(File.join(@testdir, 'spec/fixtures/SolutionFiles/basic.json'), @lry.to_path)
+  after(:example) do
+    $stdout, $stderr = @stdsaved
+  end
 
-      @stdsaved = [$stdout, $stderr]
-      $stdout, $stderr = [StringIO.new, StringIO.new]
-    end
+  it "imports all" do
+    @mrt.import_secret
 
-    after(:example) do
-      $stdout, $stderr = @stdsaved
-    end
+    expect($cfg['solution.id']).to eq('ABCDEFG')
+    expect($cfg['product.id']).to eq('HIJKLMNOP')
+    expect($cfg['user.name']).to eq('test@user.account')
+    pff = $cfg.file_at('passwords', :user)
+    pwd = MrMurano::Passwords.new(pff)
+    pwd.load
+    expect(pwd.get$cfg['net.host'], $cfg['user.name']).to eq('gibblygook')
+    expect($stdout.string).to eq('')
+    expect($stderr.string).to eq('')
+  end
 
-    it "imports data without changing files" do
-      $cfg['tool.dry'] = true
-      $cfg['tool.verbose'] = true
-      cm = MrMurano::ConfigMigrate.new
-      cm.load
+  it "imports over" do
+    $cfg['solution.id'] = '12'
+    $cfg['product.id'] = 'awdfvs'
+    $cfg['user.name'] = '3qrarvsa'
+    $cfg = MrMurano::Config.new
+    $cfg.load
+    $cfg['net.host'] = 'bizapi.hosted.exosite.io'
 
-      allow(cm).to receive(:verbose)
-      allow(FileUtils).to receive(:fu_output_message)
+    @mrt.import_secret
 
-      dbefore = Dir['**/*']
+    expect($cfg['solution.id']).to eq('ABCDEFG')
+    expect($cfg['product.id']).to eq('HIJKLMNOP')
+    expect($cfg['user.name']).to eq('test@user.account')
+    pff = $cfg.file_at('passwords', :user)
+    pwd = MrMurano::Passwords.new(pff)
+    pwd.load
+    expect(pwd.get$cfg['net.host'], $cfg['user.name']).to eq('gibblygook')
+    expect($stdout.string).to eq('')
+    expect($stderr.string).to eq('')
+  end
 
-      cm.migrate
+  it "Asks about password differences" do
+    pff = $cfg.file_at('passwords', :user)
+    pwd = MrMurano::Passwords.new(pff)
+    pwd.set($cfg['net.host'], 'test@user.account', 'bob')
+    pwd.save
 
-      dafter = Dir['**/*']
+    expect($terminal).to receive(:ask).with('A different password for this account already exists. Overwrite? N/y').and_return('y')
 
-      expect($cfg['location.files']).to eq('public')
-      expect($cfg['files.default_page']).to eq('index.html')
-      expect($cfg['location.modules']).to eq('modules')
-      expect($cfg['location.eventhandlers']).to eq('event_handler')
-      expect(dafter).to eq(dbefore) # nothing new created.
-    end
+    @mrt.import_secret
 
-    #it "imports and modifies things"
+    expect($cfg['solution.id']).to eq('ABCDEFG')
+    expect($cfg['product.id']).to eq('HIJKLMNOP')
+    expect($cfg['user.name']).to eq('test@user.account')
+    pff = $cfg.file_at('passwords', :user)
+    pwd = MrMurano::Passwords.new(pff)
+    pwd.load
+    expect(pwd.get$cfg['net.host'], $cfg['user.name']).to eq('gibblygook')
+    expect($stdout.string).to eq('')
+    expect($stderr.string).to eq('')
   end
 
 end
