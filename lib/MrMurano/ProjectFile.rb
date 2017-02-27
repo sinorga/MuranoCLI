@@ -23,7 +23,7 @@ module MrMurano
         self.members.reject{|key| [:legacy].include? key}.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
-        [:include, :exclude].each do |key|
+        self.members.select{|k| [:include, :exclude].include? k}.each do |key|
           self[key] = [self[key]] unless self[key].kind_of? Array
         end
       end
