@@ -280,7 +280,7 @@ module MrMurano
         @data[:services].location = '.'
         evd = data[:event_handler].values.map{|e| e.values}.flatten
         @data[:services].include = evd
-        group_warn |= check_service_handlers(data[:event_handler])
+        @data.services.legacy = store_legacy_service_handlers(data[:event_handler])
       end
       group_warn |= check_cors(data[:cors])
 
@@ -309,28 +309,15 @@ module MrMurano
       end
       false
     end
-
-    def check_service_handlers(services)
-      warned = false
+    
+    def store_legacy_service_handlers(services)
+      ret = {}
       services.each do |service, events|
         events.each do |event, path|
-          # open path, if no header, add it
-          verbose "Checking event header in #{path}"
-          if ::File.exist? path then
-            data = IO.readlines(path)
-            dheader = "--#EVENT #{service} #{event}"
-            aheader = (data.first or "").chomp
-            if aheader != dheader then
-              warning "Missing event header in #{path}"
-              warned = true
-            end
-          else
-            warning "Missing service file at #{path}"
-            warned = true
-          end
+          ret[path] = [service, event]
         end
       end
-      warned
+      ret
     end
 
     # Load data in the 0.3.0 format.
@@ -357,8 +344,8 @@ module MrMurano
         @data[:services].location = '.'
         evd = data[:services].values.map{|e| e.values}.flatten
         @data[:services].include = evd
+        @data.services.legacy = store_legacy_service_handlers(data[:event_handler])
       end
-      # TODO: check if eventhandlers need header added. (see config-migrate)
       # TODO: load cors and write out. (see config-migrate)
 
       []
