@@ -106,6 +106,9 @@ definitions:
     exclude:
       description: Glob pattern to remove files from the included list
       "$ref": "#/definitions/globSet"
+    location:
+      description: Directory prefix all include globs with
+      type: string
 
 
 #  vim: set et sw=2 ts=2 :

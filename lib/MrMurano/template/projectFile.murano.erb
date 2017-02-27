@@ -30,7 +30,7 @@ info:
 #routes:
 #   #To get all of the routes, first find all files that come from this array of globs.
 #   #If using single glob, then can be just the string.
-#  include: ['routes/*.lua', 'routes/*/*.lua', 'endpoints/*.lua', 'endpoints/*/*.lua']
+#  include: ['{routes,endpoints}/*.lua', '{routes,endpoints}/*/*.lua']
 #
 #   #Then remove all that match these globs. Again, if a single, can drop the array.
 #   #If not excluding, use empty array [], or empty node.
@@ -49,7 +49,8 @@ info:
 #  cors: {"origin":true,"methods":["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],"headers":["Content-Type","Cookie","Authorization"],"credentials":true}
 #
 #assets:
-#  include: 'assets/**/*'
+#  location: assets
+#  include: '**/*'
 #  exclude:
 #  default_page: index.html
 #
@@ -59,12 +60,8 @@ info:
 #
 #services:
 #  include:
-#    - 'services/*.lua'
-#    - 'services/*/*.lua'
-#    - 'eventhandlers/*.lua'
-#    - 'eventhandlers/*/*.lua'
-#    - 'event_handler/*.lua'
-#    - 'event_handler/*/*.lua'
+#    - '{services,eventhandlers,event_handler}/*.lua'
+#    - '{services,eventhandlers,event_handler}/*/*.lua'
 #  exclude: ['*_test.lua', '*_spec.lua', '**/.*']
 
 
