@@ -134,7 +134,7 @@ module MrMurano
       set('eventhandler.ignoring', '*_test.lua *_spec.lua .*', :defaults)
       set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
 
-      set('modules.searchFor', '*.lua */*.lua', :defaults)
+      set('modules.searchFor', 'modules/*.lua modules/*/*.lua', :defaults)
       set('modules.ignoring', '*_test.lua *_spec.lua .*', :defaults)
 
       set('product.spec', 'resources.yaml', :defaults)
