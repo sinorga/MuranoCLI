@@ -322,7 +322,7 @@ module MrMurano
         @data[:services].location = '.'
         evd = data[:services].values.map{|e| e.values}.flatten
         @data[:services].include = evd
-        @data.services.legacy = store_legacy_service_handlers(data[:event_handler])
+        @data.services.legacy = store_legacy_service_handlers(data[:services])
       end
 
       []
