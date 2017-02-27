@@ -20,7 +20,7 @@ module MrMurano
       #
       # @param obj [Hash] Data to load in
       def load(obj)
-        self.members.each do |key|
+        self.members.reject{|key| [:legacy].include? key}.each do |key|
           self[key] = obj[key] if obj.has_key? key
         end
         [:include, :exclude].each do |key|
@@ -32,7 +32,7 @@ module MrMurano
       # @return [Hash] Just the non-nil members of this
       def save
         ret={}
-        self.members.each do |key|
+        self.members.reject{|key| [:legacy].include? key}.each do |key|
           ret[key] = self[key] unless self[key].nil?
         end
         ret
@@ -45,22 +45,7 @@ module MrMurano
     # lookups.  Hopefully, this will avoid (or at least minimize) changes to the
     # file format affecting all kinds of code.
     PrjMeta = Struct.new(:name, :summary, :description, :authors, :version, :source, :dependencies) do
-      ## Load data from Hash into self
-      # @param obj [Hash] Data to load in
-      def load(obj)
-        self.members.each do |key|
-          self[key] = obj[key] if obj.has_key? key
-        end
-      end
-      ## Returns a sparse hash of the data in self
-      # @return [Hash] Just the non-nil members of this
-      def save
-        ret={}
-        self.members.each do |key|
-          ret[key] = self[key] unless self[key].nil?
-        end
-        ret
-      end
+      include PrjStructCommonMethods
     end
 
     PrjFiles = Struct.new(:location, :include, :exclude, :default_page) do
@@ -75,7 +60,7 @@ module MrMurano
       include PrjStructCommonMethods
     end
 
-    PrjEventHandlers = Struct.new(:location, :include, :exclude) do
+    PrjEventHandlers = Struct.new(:location, :include, :exclude, :legacy) do
       include PrjStructCommonMethods
     end
 
