@@ -79,11 +79,14 @@ module MrMurano
         end
         ret
       end
+      def get_binding
+        binding()
+      end
     end
 
     def initialize()
       @prjFile = nil
-      tname = $cfg['location.base'].basename.to_s
+      tname = $cfg['location.base'].basename.to_s.gsub(/[^A-Za-z0-9]/, '')
       @data = PrfFile.new(
         PrjMeta.new(
           tname,
@@ -100,6 +103,15 @@ module MrMurano
         PrjEventHandlers.new,
         PrjResources.new,
       )
+    end
+
+    # Get the current Project file
+    # @return [Pathname] PAth to current project file.
+    def project_file
+      @prjFile
+    end
+    def data_binding
+      @data.get_binding
     end
 
     # Get a value for a key.
