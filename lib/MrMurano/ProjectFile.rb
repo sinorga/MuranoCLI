@@ -110,6 +110,7 @@ module MrMurano
     def project_file
       @prjFile
     end
+    # Get a binding to the data for building the example ProjectFile
     def data_binding
       @data.get_binding
     end
