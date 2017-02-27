@@ -2,29 +2,29 @@ require 'yaml'
 require 'MrMurano/Solution-Cors'
 
 command :cors do |c|
-  c.syntax = %{murano cors [options]}
-  c.summary = %{Get or set the CORS for the solution. [Deprecated]}
-  c.description = %{Get or set the CORS for the solution.
+  c.syntax = %{murano cors}
+  c.summary = %{Get the CORS for the project.}
+  c.description = %{Get the CORS for the project.
 
-This is deprecated.  Use `murano syncup --cors` or `murano syncdown --cors` instead.
+  Set the CORS with `murano cors set`
   }
-  c.option '-f','--file FILE', String, %{File to set CORS from}
 
   c.action do |args,options|
-    say_warning "This is deprecated.  Use `murano syncup --cors` or `murano syncdown --cors` instead."
     sol = MrMurano::Cors.new
-
-    if options.file then
-      #set
-      data = sol.localitems(options.file)
-      sol.outf sol.upload(options.file, data.first)
-    else
-      # get
-      ret = sol.fetch()
-      sol.outf ret
-    end
+    ret = sol.fetch()
+    sol.outf ret
   end
+end
 
+command 'cors set' do |c|
+  c.syntax = %{murano cors set [<file>]}
+  c.summary = %{Set the CORS for the project.}
+
+  c.action do |args,options|
+    crs = MrMurano::Cors.new
+    file = args.shift
+    crs.upload(file)
+  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
