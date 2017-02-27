@@ -29,8 +29,9 @@ command 'device list' do |c|
 
     prd = MrMurano::Gateway::Device.new
     io=nil
-    io = File.open(options.output, 'w') if options.output
     data = prd.list(options.limit, options.before)
+    exit 1 if data.nil?
+    io = File.open(options.output, 'w') if options.output
     prd.outf(data, io) do |dd,ios|
       dt={}
       if options.long then
@@ -77,8 +78,9 @@ command 'device read' do |c|
     snid = args.shift
 
     io=nil
-    io = File.open(options.output, 'w') if options.output
     data = prd.read(snid)
+    exit 1 if data.nil?
+    io = File.open(options.output, 'w') if options.output
     unless args.empty? then
       data.select!{|k,v| args.include? k.to_s}
     end
