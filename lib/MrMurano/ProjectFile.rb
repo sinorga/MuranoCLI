@@ -275,41 +275,16 @@ module MrMurano
         @data[:modules][:include] = data[:modules].values
       end
 
-      group_warn = false
       if data.has_key? :event_handler then
         @data[:services].location = '.'
         evd = data[:event_handler].values.map{|e| e.values}.flatten
         @data[:services].include = evd
         @data.services.legacy = store_legacy_service_handlers(data[:event_handler])
       end
-      group_warn |= check_cors(data[:cors])
-
-      if group_warn then
-        warning ("!" * 80)
-        warning "Need to run `murano migrate` to clear these warnings before using syncup"
-        warning ("!" * 80)
-      end
-
       []
     end
     alias load_0_2 load_0_2_0
 
-    def check_cors(cors)
-      return if cors.nil?
-      # If have cors, and cors.yaml missing; warn that needs repair.
-      unless ::File.exist? $cfg['location.cors'] then
-        warning "CORS info in Solutionfile but not yet in #{$cfg['location.cors']}"
-        return true
-      end
-      # load cors.yaml, compare with cors, if different warn about differences
-      other_cors = YAML.load_file($cfg['location.cors'])
-      if other_cors != cors then
-        warning "CORS info in Solutionfile does not match contents of #{$cfg['location.cors']}"
-        return true
-      end
-      false
-    end
-    
     def store_legacy_service_handlers(services)
       ret = {}
       services.each do |service, events|
@@ -346,7 +321,6 @@ module MrMurano
         @data[:services].include = evd
         @data.services.legacy = store_legacy_service_handlers(data[:event_handler])
       end
-      # TODO: load cors and write out. (see config-migrate)
 
       []
     end
