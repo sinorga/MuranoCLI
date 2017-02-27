@@ -13,7 +13,7 @@ module MrMurano
       super
       @uriparts << 'file'
       @itemkey = :path
-      @location = $cfg['location.files']
+      @project_section = :assets
     end
 
     ##
@@ -143,29 +143,6 @@ module MrMurano
       return (itemA[:mime_type] != itemB[:mime_type] or
         itemA[:checksum] != itemB[:checksum])
     end
-
-    def searchFor
-      ($cfg['files.searchFor'] or '').split
-    end
-    def ignoring
-      ($cfg['files.ignoring'] or '').split
-    end
-
-#    def localitems(from)
-#      from = Pathname.new(from) unless from.kind_of? Pathname
-#      unless from.exist? then
-#        return []
-#      end
-#      raise "Not a directory: #{from.to_s}" unless from.directory?
-#
-#      Pathname.glob(from.to_s + '/**/*').reject do |path|
-#        path.directory? or ignoring.any?{|i| ::File.fnmatch(i,path)}
-#      end.map do |path|
-#        name = toRemoteItem(from, path)
-#        name[:local_path] = path
-#        name
-#      end
-#    end
 
   end
   SyncRoot.add('files', File, 'S', %{Static Files}, true)

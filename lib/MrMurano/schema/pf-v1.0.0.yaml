@@ -1,0 +1,111 @@
+---
+type: object
+description: |-
+  A Project File. "*.murano"
+  This describes all of the bits and bobs that go into a Murano Solution.
+
+additionalProperties: false
+required: [info, formatversion]
+properties:
+  formatversion:
+    type: string
+    description: The version of the format of this file
+    pattern: '1.0.0'
+
+  info:
+    type: object
+    description: Meta data about this Project.
+    properties:
+      name:
+        type: string
+        pattern: '^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+        description: |-
+          The name of this Project.  This needs to be domain name safe, since it
+          will be used to construct the the app domain.
+      summary:
+        type: string
+        description: Short, one line descript of this project
+      description:
+        type: string
+        description: A longer, multiple paragraph explaination of this project
+      authors:
+        type: array
+        description: Who contributed to building this project.
+        minItems: 1
+        items:
+          type: string
+      version:
+        type: string
+        description: Version of this project.  Use Semantic Versioning. http://semver.org/
+        pattern: '^(\d+\.)?(\d+\.)?(\*|\d+)$'
+    required:
+      - name
+      - summary
+      - description
+      - authors
+    additionalProperties: false
+
+  assets:
+    type: object
+    description: How to find the static assests for this project.
+    properties:
+      default_page:
+        type: string
+      "$ref": "#/definitions/common"
+
+  modules:
+    type: object
+    description: How to find the modules for this project.
+    properties:
+      "$ref": "#/definitions/common"
+
+  routes:
+    type: object
+    description: How to find the endpoint routes for this project.
+    properties:
+      "$ref": "#/definitions/common"
+      cors:
+        oneOf:
+          - type: string
+          - type: object
+            properties:
+              origin:
+                type: array
+              methods:
+                type: array
+              headers:
+                type: array
+              credentials:
+                type: boolean
+
+  services:
+    type: object
+    description: How to find the service event handlers for this project.
+    properties:
+      "$ref": "#/definitions/common"
+
+  resources:
+    type: object
+    description: Which aliases will exist on connected devices.
+    properties:
+      "$ref": "#/definitions/common"
+
+definitions:
+  globSet:
+    anyOf:
+      - type: null
+      - type: string
+      - type: array
+        items:
+          type: string
+
+  common:
+    include:
+      description: Glob patterns to specify which files to include
+      "$ref": "#/definitions/globSet"
+    exclude:
+      description: Glob pattern to remove files from the included list
+      "$ref": "#/definitions/globSet"
+
+
+#  vim: set et sw=2 ts=2 :

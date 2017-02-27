@@ -1,4 +1,6 @@
 require 'MrMurano/Account'
+require 'MrMurano/Config-Migrate'
+require 'erb'
 
 
 command :init do |c|
@@ -19,16 +21,16 @@ command :init do |c|
       exit 2
     end
 
-    if not options.force and ($cfg['location.base'] + 'Solutionfile.json').exist? then
-      y=ask("A Solutionfile.json exists, Do you want exit and run `murano config import` instead? [yN]")
-      exit 0 unless y =~ /^n/i
-    end
-
     say "Found project base directory at #{$cfg['location.base'].to_s}"
     puts ''
 
+    # Try to import a .Solutionfile.secret
+    MrMurano::ConfigMigrate.new.import_secret
+
     # If they have never logged in, then asking for the business.id will also ask
     # for their username and password.
+    say "Using account #{$cfg['user.name']}"
+    say ''
 
     # 1. Get business id
     if not options.force and not $cfg['business.id'].nil? then
@@ -99,9 +101,18 @@ command :init do |c|
       end
     end
 
-
     puts ''
     say "Ok, In business ID: #{$cfg['business.id']} using Solution ID: #{$cfg['solution.id']} with Product ID: #{$cfg['product.id']}"
+
+    # If no ProjectFile or Solutionfile, then write a ProjectFile
+    if $project.project_file.nil? then
+      tmpl = File.read(File.join(File.dirname(__FILE__),'..','template','projectFile.murano.erb'))
+      tmpl = ERB.new(tmpl)
+      res = tmpl.result($project.data_binding)
+      prFile = $project['info.name'] + '.murano'
+      say "Writing an initial Project file: #{prFile}"
+      File.open(prFile, 'w') {|io| io << res}
+    end
 
     if options.mkdirs then
       base = $cfg['location.base']

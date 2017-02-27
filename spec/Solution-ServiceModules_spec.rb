@@ -8,6 +8,8 @@ RSpec.describe MrMurano::Library do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['solution.id'] = 'XYZ'
 

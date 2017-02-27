@@ -56,10 +56,10 @@ Timeseries:
 
 Product:
 	- Add option for progress bar when uploading content files.
-	- Support multiple products. @done(2017-01-05)
-	Won't do.  Future will be one-to-one.
-	Think about how this would work.  There is the syncing of the resoruces, and then
+	- Support multiple products. @pri(low)
+	Think about how this would work.  There is the syncing of the resources, and then
 	some of the commands that use product.id.
+	Which product.id maps to which resource file?
 	- Auto convert exoline spec files into murano spec files on upload? @done(2016-10-27)
 	Not doing this. Convert is there if you need it.
 	- write alias command @done(2016-09-26)

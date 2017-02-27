@@ -47,6 +47,8 @@ default_command :help
 
 $cfg = MrMurano::Config.new
 $cfg.load
+$project = MrMurano::ProjectFile.new
+$project.load
 
 # Basic command support is:
 # - read/write config file in [Project, User, System] (all are optional)

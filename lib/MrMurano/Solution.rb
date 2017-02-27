@@ -11,8 +11,7 @@ module MrMurano
       raise "No solution!" if @sid.nil?
       @uriparts = [:solution, @sid]
       @itemkey = :id
-      @locationbase = $cfg['location.base']
-      @location = nil
+      @project_section = nil
     end
 
     include Http
