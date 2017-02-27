@@ -101,7 +101,7 @@ RSpec.describe MrMurano::ProjectFile do
           expect{@pjf.get('info.bob')}.to raise_error("no member 'bob' in struct")
         end
         it "Undefined section" do
-          expect{@pjf.get('sob.include')}.to raise_error("no member 'sob' in struct")
+          expect{@pjf.get('sob.include')}.to raise_error(NameError)
         end
         it "Missing key" do
           expect{@pjf.get('info.')}.to raise_error("Missing key")
