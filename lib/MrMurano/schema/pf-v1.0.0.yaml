@@ -64,6 +64,19 @@ properties:
     description: How to find the endpoint routes for this project.
     properties:
       "$ref": "#/definitions/common"
+      cors:
+        oneOf:
+          - type: string
+          - type: object
+            properties:
+              origin:
+                type: array
+              methods:
+                type: array
+              headers:
+                type: array
+              credentials:
+                type: boolean
 
   services:
     type: object
@@ -74,11 +87,6 @@ properties:
   resources:
     type: object
     description: Which aliases will exist on connected devices.
-    properties:
-      "$ref": "#/definitions/common"
-
-  cors:
-    type: object
     properties:
       "$ref": "#/definitions/common"
 
