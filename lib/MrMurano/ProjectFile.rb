@@ -56,7 +56,7 @@ module MrMurano
       include PrjStructCommonMethods
     end
 
-    PrjEndpoints = Struct.new(:location, :include, :exclude) do
+    PrjEndpoints = Struct.new(:location, :include, :exclude, :cors) do
       include PrjStructCommonMethods
     end
 
@@ -132,6 +132,7 @@ module MrMurano
         'routes.location' => 'location.endpoints',
         'routes.include' => 'endpoints.searchFor',
         'routes.exclude' => 'endpoints.ignoring',
+        'routes.cors' => 'location.cors',
         'services.location' => 'location.eventhandlers',
         'services.include' => 'eventhandler.searchFor',
         'services.exclude' => 'eventhandler.ignoring',
@@ -269,6 +270,7 @@ module MrMurano
 
       @data[:routes].location = '.'
       @data[:routes][:include] = [data[:custom_api]] if data.has_key? :custom_api
+      ifset(data, :cors, @data[:routes], :cors)
 
       if data.has_key? :modules then
         @data[:modules].location = '.'
@@ -309,6 +311,7 @@ module MrMurano
 
       @data[:routes].location = '.'
       @data[:routes][:include] = [data[:routes]] if data.has_key? :routes
+      ifset(data, :cors, @data[:routes], :cors)
 
       if data.has_key? :modules then
         @data[:modules].location = '.'
