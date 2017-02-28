@@ -1,7 +1,6 @@
 require 'pathname'
 require 'fileutils'
 require 'yaml'
-require 'MrMurano/dir'
 require 'MrMurano/verbosing'
 require 'MrMurano/Account'
 require 'MrMurano/Config'
