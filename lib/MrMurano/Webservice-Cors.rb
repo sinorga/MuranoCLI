@@ -34,7 +34,6 @@ module MrMurano
           data = YAML.load_file(file)
         else
           data = $project['routes.cors']
-          pp data
           # If it is just a string, then is a file to load.
           data = YAML.load_file(data) if data.kind_of? String
         end
