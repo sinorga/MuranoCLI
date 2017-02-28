@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors     = ['Michael Conrad Tadpol Tilstra']
   s.email       = ['tadpol@tadpol.org']
   s.license     = 'MIT'
-  s.homepage    = 'https://github.com/exosite/MrMurano'
+  s.homepage    = 'https://github.com/exosite/MuranoCLI'
   s.summary     = 'Do more from the command line with Murano'
   s.description = %{Do more from the command line with Murano
 
