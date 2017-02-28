@@ -3,7 +3,7 @@ require 'open3'
 require 'pathname'
 require 'cmd_common'
 
-RSpec.describe 'murano config' do
+RSpec.describe 'murano config', :cmd do
   include_context "CI_CMD"
 
   it "Needs a key" do
