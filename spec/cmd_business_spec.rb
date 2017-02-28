@@ -26,11 +26,33 @@ RSpec.describe 'murano business', :cmd, :needs_password do
     end
 
     it "only ids" do
-      out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--idonly', ))
+      out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--idonly'))
       expect(err).to eq("")
       expect(out).to match(/^(\S+\s)*\S+$/)
       expect(status.exitstatus).to eq(0)
     end
+
+    it "output to file" do
+      out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--idonly', '-o', 'bob'))
+      expect(err).to eq("")
+      expect(out).to eq('')
+      expect(status.exitstatus).to eq(0)
+      expect(File.exist?('bob')).to be true
+      data = IO.read('bob')
+      expect(data).to match(/^(\S+\s)*\S+$/)
+    end
+
+    it "all fields" do
+      out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--all'))
+      expect(err).to eq("")
+      olines = out.lines
+      expect(olines[0]).to match(/^(\+-+)+\+$/)
+      expect(olines[1]).to match(/^(\| \S+\s+)+\|$/)
+      expect(olines[2]).to match(/^(\+-+)+\+$/)
+      expect(olines[-1]).to match(/^(\+-+)+\+$/)
+      expect(status.exitstatus).to eq(0)
+    end
+
   end
 end
 
