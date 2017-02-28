@@ -25,12 +25,14 @@ RSpec.describe 'murano config', :cmd do
   end
 
   it "Sets a user key" do
+    userCfg = File.join(ENV['HOME'], '.murano', 'config')
+    File.unlink(userCfg) if File.exist? userCfg
     out, err, status = Open3.capture3(capcmd(%w{murano config bob build --user}))
     expect(status).to eq(0)
     expect(out).to eq('')
     expect(err).to eq('')
 
-    afile = IO.read(File.join(ENV['HOME'], '.murano', 'config'))
+    afile = IO.read(userCfg)
     bfile = (@testdir + 'spec' + 'fixtures' + 'mrmuranorc_tool_bob').read
     expect(afile).to eq(bfile)
   end
