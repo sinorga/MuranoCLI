@@ -8,6 +8,8 @@ RSpec.describe MrMurano::Product1PDevice, '#sn_rid tests' do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
     $cfg['product.spec'] = 'XYZ.yaml'
@@ -68,6 +70,8 @@ RSpec.describe MrMurano::Product1PDevice do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
     $cfg['product.spec'] = 'XYZ.yaml'

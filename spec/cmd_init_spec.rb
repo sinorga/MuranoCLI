@@ -16,13 +16,15 @@ RSpec.describe 'mr init' do
     end
   end
 
-  it "Asks to import if Solutionfile exists" do
-    FileUtils.touch('Solutionfile.json')
-    out, err, status = Open3.capture3(capcmd('murano', 'init', '--trace'), :stdin_data=>'y')
-    expect(out).to eq("\nA Solutionfile.json exists, Do you want exit and run `murano config import` instead? [yN]\n")
-    expect(err).to eq("")
-    expect(status.exitstatus).to eq(0)
-  end
+# TODO The way init works is changing with the ProjectFile
+# So hold off on this test.
+#  it "Asks to import if Solutionfile exists" do
+#    FileUtils.touch('Solutionfile.json')
+#    out, err, status = Open3.capture3(capcmd('murano', 'init', '--trace'), :stdin_data=>'y')
+#    expect(out).to eq("\nA Solutionfile.json exists, Do you want exit and run `murano config import` instead? [yN]\n")
+#    expect(err).to eq("")
+#    expect(status.exitstatus).to eq(0)
+#  end
 
 end
 #  vim: set ai et sw=2 ts=2 :

@@ -7,6 +7,8 @@ RSpec.describe MrMurano::ProductBase, "#product_base" do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
 

@@ -33,10 +33,12 @@ module MrMurano
       raise "Missing name!" if name.nil?
       raise "Empty name!" if name.empty?
       ret = get('/'+CGI.escape(name))
+      error "Unexpected result type, assuming empty instead: #{ret}" unless ret.kind_of? Hash
+      ret = {} unless ret.kind_of? Hash
       if block_given? then
-        yield ret[:script]
+        yield (ret[:script] or '')
       else
-        ret[:script]
+        ret[:script] or ''
       end
     end
 
@@ -156,7 +158,7 @@ module MrMurano
       super
       @uriparts << 'library'
       @itemkey = :alias
-      @location = $cfg['location.modules']
+      @project_section = :modules
     end
 
     def tolocalname(item, key)
@@ -180,14 +182,6 @@ module MrMurano
       end
     end
 
-    def searchFor
-      ($cfg['modules.searchFor'] or '').split
-    end
-
-    def ignoring
-      ($cfg['modules.ignoring'] or '').split
-    end
-
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
       {:name => name}
@@ -205,7 +199,7 @@ module MrMurano
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
-      @location = $cfg['location.eventhandlers']
+      @project_section = :services
       @match_header = /--#EVENT (?<service>\S+) (?<event>\S+)/
     end
 
@@ -223,14 +217,6 @@ module MrMurano
       else
         raise "Missing parts! #{remote.to_json}"
       end
-    end
-
-    def searchFor
-      ($cfg['eventhandler.searchFor'] or '').split
-    end
-
-    def ignoring
-      ($cfg['eventhandler.ignoring'] or '').split
     end
 
     def list
@@ -270,6 +256,8 @@ module MrMurano
     end
 
     def toRemoteItem(from, path)
+      # This allows multiple events to be in the same file.
+      # :legacy support doesn't allow for that. but that's ok.
       path = Pathname.new(path) unless path.kind_of? Pathname
       cur = nil
       lineno=0
@@ -288,6 +276,24 @@ module MrMurano
         lineno += 1
       end
       cur[:line_end] = lineno unless cur.nil?
+
+      # If cur is nil here, then we need to do a :legacy check.
+      if cur.nil? and $project['services.legacy'].kind_of? Hash then
+        spath = path.relative_path_from(from)
+        debug "No headers: #{spath}"
+        service, event = $project['services.legacy'][spath.to_s]
+        debug "Legacy lookup #{spath} => [#{service}, #{event}]"
+        unless service.nil? or event.nil? then
+          warning "Event in #{spath} missing header, but has legacy support."
+          warning "Please add the header \"--#EVENT #{service} #{event}\""
+          cur = {:service=>service,
+                 :event=>event,
+                 :local_path=>path,
+                 :line=>0,
+                 :line_end => lineno,
+                 :script=>path.read()} # FIXME: ick, fix this.
+        end
+      end
       cur
     end
 

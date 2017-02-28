@@ -20,27 +20,6 @@ module MrMurano
       @model_rid = nil
 
       @itemkey = :rid # this is the key that is the identifier used by murano
-      @location = location
-    end
-
-    ## Get the location of the product spec file
-    def location
-      # If location.specs is defined, then all spec files are assume to be relative
-      # to that and location.base, otherwise they're relative to only location.base
-      #
-      # If there is a p-<product.id>.spec key, then that is the file name.
-      # Otherwise use product.spec
-
-      name = $cfg['product.spec']
-      prid = $cfg['product.id']
-      name = $cfg["p-#{prid}.spec"] unless prid.nil? or $cfg["p-#{prid}.spec"].nil?
-      raise "No spec file named; run `mr config product.spec <specfile>`" if name.nil?
-
-      unless $cfg['location.specs'].nil? then
-        name = ::File.join($cfg['location.specs'], name)
-      end
-      debug " spec file name => #{name}"
-      name
     end
 
     ## Get 1P info about the prodcut

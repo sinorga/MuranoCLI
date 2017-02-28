@@ -11,7 +11,7 @@ module MrMurano
       def initialize
         super
         @uriparts << 'endpoint'
-        @location = $cfg['location.endpoints']
+        @project_section = :routes
 
         @match_header = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/
       end
@@ -103,14 +103,6 @@ module MrMurano
       # Delete an endpoint
       def remove(id)
         delete('/' + id.to_s)
-      end
-
-      def searchFor
-        ($cfg['endpoints.searchFor'] or '').split
-      end
-
-      def ignoring
-        ($cfg['endpoints.ignoring'] or '').split
       end
 
       def tolocalname(item, key)

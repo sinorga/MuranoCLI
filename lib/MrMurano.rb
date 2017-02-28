@@ -4,6 +4,8 @@ require 'MrMurano/hash'
 require 'MrMurano/http'
 
 require 'MrMurano/Config'
+require 'MrMurano/ProjectFile'
+
 require 'MrMurano/Account'
 
 require 'MrMurano/Solution'

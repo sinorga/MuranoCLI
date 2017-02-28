@@ -7,6 +7,8 @@ RSpec.describe MrMurano::Webservice::File do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['project.id'] = 'XYZ'
 

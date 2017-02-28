@@ -13,8 +13,7 @@ module MrMurano
       @uriparts = [:project, @sid]
 #      @uriparts = [:solution, @sid]
       @itemkey = :id
-      @locationbase = $cfg['location.base']
-      @location = nil
+      @project_section = nil
     end
 
     include Http
@@ -53,6 +52,10 @@ module MrMurano
 
     def log
       get('/logs')
+    end
+
+    def usage
+      get('/usage')
     end
 
   end
