@@ -36,6 +36,12 @@ RSpec.shared_context "CI_CMD" do
             io << "name = #{ENV['MURANO_USER']}\n"
           end
         end
+        unless ENV['MURANO_BUSINESS'].nil? then
+          File.open(File.join('.murano', 'config'), 'a') do |io|
+            io << "[business]\n"
+            io << "id = #{ENV['MURANO_BUSINESS']}\n"
+          end
+        end
         @tmpdir = File.join(hdir, 'project')
         Dir.mkdir(@tmpdir)
         Dir.chdir(@tmpdir) do

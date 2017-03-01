@@ -7,17 +7,6 @@ RSpec.describe 'murano content', :cmd, :needs_password do
   include_context "CI_CMD"
 
   before(:example) do
-      out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--idonly'))
-      aout = out.split.first
-      expect(aout).to match(/^[a-zA-Z0-9]+$/)
-      expect(err).to eq('')
-      expect(status.exitstatus).to eq(0)
-
-      out, err, status = Open3.capture3(capcmd('murano', 'config', 'business.id', aout))
-      expect(out).to eq('')
-      expect(err).to eq('')
-      expect(status.exitstatus).to eq(0)
-
       out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', 'contentTest', '--save'))
       expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
       expect(err).to eq('')
