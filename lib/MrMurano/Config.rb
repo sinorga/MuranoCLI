@@ -118,7 +118,7 @@ module MrMurano
       set('location.endpoints', '.', :defaults)
       set('location.modules', '.', :defaults)
       set('location.eventhandlers', '.', :defaults)
-      set('location.specs', 'specs', :defaults)
+      set('location.specs', 'specs/resources.yaml', :defaults)
       set('location.cors', 'cors.yaml', :defaults)
 
       set('sync.bydefault', SyncRoot.bydefault.join(' '), :defaults) if defined? SyncRoot
@@ -136,8 +136,6 @@ module MrMurano
 
       set('modules.searchFor', 'modules/*.lua modules/*/*.lua', :defaults)
       set('modules.ignoring', '*_test.lua *_spec.lua .*', :defaults)
-
-      set('product.spec', 'resources.yaml', :defaults)
 
       if Gem.win_platform? then
         set('diff.cmd', 'fc', :defaults)
