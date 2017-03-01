@@ -1,7 +1,8 @@
 
 command 'solution create' do |c|
   c.syntax = %{murano solution create <name>}
-  c.description = %{Create a new solution}
+  c.summary = %{Create a new solution}
+  c.option '--save', %{Save new solution id to config}
 
   c.action do |args, options|
     acc = MrMurano::Account.new
@@ -19,7 +20,11 @@ command 'solution create' do |c|
 
     # create doesn't return anything, so we need to go look for it.
     ret = acc.solutions.select{|i| i[:domain] =~ /#{name}\./}
-    acc.outf ret.first[:apiId]
+    sid = ret.first[:apiId]
+    if options.save then
+      $cfg.set('solution.id', sid)
+    end
+    acc.outf sid
 
   end
 end

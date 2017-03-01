@@ -1,7 +1,8 @@
 
 command 'product create' do |c|
   c.syntax = %{murano product create <name>}
-  c.description = %{Create a new product}
+  c.summary = %{Create a new product}
+  c.option '--save', %{Save new product id to config}
 
   c.action do |args, options|
     acc = MrMurano::Account.new
@@ -19,7 +20,11 @@ command 'product create' do |c|
 
     # create doesn't return anything, so we need to go look for it.
     ret = acc.products.select{|i| i[:label] == name}
-    acc.outf ret.first[:modelId]
+    pid = ret.first[:modelId]
+    if options.save then
+      $cfg.set('product.id', pid)
+    end
+    acc.outf pid
 
   end
 end
