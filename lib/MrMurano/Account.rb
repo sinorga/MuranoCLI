@@ -73,7 +73,7 @@ module MrMurano
     ## Get all hosts and usernames. (does not return the passwords)
     def list
       ret = {}
-      @data.each_pair{|key,value| ret[key] = value.keys}
+      @data.each_pair{|key,value| ret[key] = value.keys} unless @data.nil?
       ret
     end
   end
