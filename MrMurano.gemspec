@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_runtime_dependency('commander', '~> 4.4.0')
+  s.add_runtime_dependency('certified', '1.0.0')
   s.add_runtime_dependency('dotenv', '~> 2.1.1')
   s.add_runtime_dependency('highline', '~> 1.7.8')
   s.add_runtime_dependency('http-form_data', '~> 1.0.1')

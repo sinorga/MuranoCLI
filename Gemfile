@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 #gemspec
 
 gem 'commander', '~> 4.4.0'
+gem 'certified', '1.0.0'
 gem 'dotenv', '~> 2.1.1'
 gem 'highline', '~> 1.7.8'
 gem 'http-form_data', '~> 1.0.1'
