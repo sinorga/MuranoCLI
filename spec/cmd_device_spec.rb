@@ -36,7 +36,34 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "writes and reads"
+  it "activates" do
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'enable', '12345'))
+    expect(out).to eq('')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'activate', '12345'))
+    expect(out.chomp).to match(/^\h{40}$/)
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+  end
+
+  it "writes and reads" do
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'enable', '12345'))
+    expect(out).to eq('')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'activate', '12345'))
+    expect(out.chomp).to match(/^\h{40}$/)
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'twee', '12345', '--trace'))
+    expect(out).to eq('')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+  end
 
 end
 

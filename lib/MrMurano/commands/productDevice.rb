@@ -44,6 +44,7 @@ command 'product device twee' do |c|
     snid = args.shift
     prd = MrMurano::Product1PDevice.new
     data = prd.twee(snid)
+    exit 2 if data.empty?
 
     io=nil
     io = File.open(options.output, 'w') if options.output
