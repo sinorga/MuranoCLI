@@ -142,9 +142,34 @@ module MrMurano
       @@token = value
     end
 
+    def new_account(email, name, company="")
+      post('/key/', {
+        :email=>email,
+        :name=>name,
+        :company=>company,
+        :source=>'signup',
+      })
+    end
+
+    def reset_account(email)
+      post('/key/', { :email=>email, :source=>'reset' })
+    end
+
+    def accept_account(token, password)
+      post("/key/#{token}", {:password=>password})
+    end
+
     def businesses
       _loginInfo if $cfg['user.name'].nil?
       get('user/' + $cfg['user.name'] + '/membership/')
+    end
+
+    def new_business(name)
+      post('/business/', {:name=>name})
+    end
+
+    def delete_business(id)
+      delete("/business/#{id}")
     end
 
     def products
