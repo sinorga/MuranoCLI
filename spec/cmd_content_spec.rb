@@ -50,7 +50,9 @@ RSpec.describe 'murano content', :cmd, :needs_password do
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
       expect(File.exist?('testDown')).to be true
-      expect(FileUtils.cmp('dumped_config', 'testDown')).to be true
+      dcf = IO.read('dumped_config')
+      tdf = IO.read('testDown')
+      expect(tdf).to eq(dcf)
 
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'delete', 'myFile'))
       expect(out).to eq('')
