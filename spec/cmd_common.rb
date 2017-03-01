@@ -39,7 +39,7 @@ RSpec.shared_context "CI_CMD" do
         @tmpdir = File.join(hdir, 'project')
         Dir.mkdir(@tmpdir)
         Dir.chdir(@tmpdir) do
-          Timeout::timeout(20) do
+          Timeout::timeout(300) do
             ex.run
           end
         end
