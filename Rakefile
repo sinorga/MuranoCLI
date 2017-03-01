@@ -130,8 +130,7 @@ if Gem.win_platform? then
     task :murano_exe_test => ['murano.exe'] do
         Dir.mkdir("report") unless File.directory?("report")
         ENV['CI_MR_EXE'] = '1'
-        files = Dir[File.join('spec', 'cmd_*_spec.rb')]
-        sh %{rspec --format html --out report/murano_exe.html --format progress #{files.join(' ')}}
+        sh %{rspec --format html --out report/murano_exe.html --format progress --tag cmd}
     end
     task :test => [:murano_exe_test]
 
