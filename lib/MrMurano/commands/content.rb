@@ -59,7 +59,8 @@ command 'content delete' do |c|
     if args[0].nil? then
       prd.error "Missing <content id>"
     else
-      prd.outf prd.remove(args[0])
+      ret = prd.remove(args[0])
+      prd.outf(ret) unless ret.nil? or ret.empty?
     end
   end
 end
@@ -86,10 +87,12 @@ command 'content upload' do |c|
 
       ret = prd.info(args[0])
       if ret.nil? then
-        prd.outf prd.create(args[0], options.meta)
+        ret = prd.create(args[0], options.meta)
+        prd.outf(ret) unless ret.nil? or ret.empty?
       end
 
-      prd.outf prd.upload(args[0], args[1])
+      ret = prd.upload(args[0], args[1])
+      prd.outf(ret) unless ret.nil? or ret.empty?
     end
   end
 end
