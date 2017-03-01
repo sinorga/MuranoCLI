@@ -14,7 +14,7 @@ files = files
 endpoints = .
 modules = .
 eventhandlers = .
-specs = specs
+specs = specs/resources.yaml
 cors = cors.yaml
 
 [sync]
@@ -37,9 +37,6 @@ skiplist = websocket webservice device.service_call
 [modules]
 searchFor = modules/*.lua modules/*/*.lua
 ignoring = *_test.lua *_spec.lua .*
-
-[product]
-spec = resources.yaml
 
 [diff]
 cmd = <%= Gem.win_platform? ? 'fc' : 'diff -u' %>
