@@ -2,7 +2,8 @@ require 'MrMurano/Account'
 
 command 'project create' do |c|
   c.syntax = %{murano project create <name>}
-  c.description = %{Create a new project}
+  c.summary = %{Create a new project}
+  c.option '--save', %{Save new project id to config}
 
   c.action do |args, options|
     acc = MrMurano::Account.new
@@ -20,7 +21,11 @@ command 'project create' do |c|
 
     # create doesn't return anything, so we need to go look for it.
     ret = acc.projects.select{|i| i[:domain] =~ /#{name}\./}
-    acc.outf ret.first[:apiId]
+    pid = ret.first[:apiId]
+    if options.save then
+      $cfg.set('project.id', pid)
+    end
+    acc.outf pid
 
   end
 end
