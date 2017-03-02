@@ -79,6 +79,17 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
+  it "can call other commands" do
+    out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'command', 'lpush', 'another', 'value'))
+    expect(out.chomp).to eq('1')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
+    out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'command', 'rpop', 'another'))
+    expect(out.chomp).to eq('value')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+  end
 
 end
 
