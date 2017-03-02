@@ -174,6 +174,8 @@ module MrMurano
       end
 
       ## All devices (pagination?)
+      # @param limit [Number,String] How many devices to return
+      # @param before [Number,String] timestamp for something. TODO: want offset.
       def list(limit=nil, before=nil)
         pr = {}
         pr[:limit] = limit unless limit.nil?
@@ -242,6 +244,7 @@ module MrMurano
       end
 
       ## Delete a device
+      # @param identifier [String] Who to delete.
       def remove(identifier)
         delete("/#{CGI.escape(identifier.to_s)}")
       end
