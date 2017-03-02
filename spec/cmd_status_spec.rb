@@ -50,10 +50,10 @@ RSpec.describe 'murano status', :cmd, :needs_password do
  + M  modules/table_util.lua
 Deleteing:
  - M  my_library
- - E  timer_timer
+ - E  user_account
 Changing:
  M E  services/devdata.lua
- M E  services/timersAndUsers.lua:3
+ M E  services/timers.lua
 })
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)

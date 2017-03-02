@@ -256,7 +256,8 @@ module MrMurano
     end
 
     def toRemoteItem(from, path)
-      # This allows multiple events to be in the same file.
+      # This allows multiple events to be in the same file. This is a lie.
+      # This only finds the last event in a file.
       # :legacy support doesn't allow for that. but that's ok.
       path = Pathname.new(path) unless path.kind_of? Pathname
       cur = nil
