@@ -14,6 +14,7 @@ RSpec.shared_context "CI_CMD" do
     else
       args[0] = File.join(testdir, (args[0] + '.exe'))
     end
+    args.push '--trace'
 
     if Gem.win_platform? then
       cmd = args.map{|i| if i =~ / / then %{"#{i}"} else i end}.join(' ')

@@ -52,7 +52,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     FileUtils.mkpath('specs')
     FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
 
-    out, err, status = Open3.capture3(capcmd('murano', 'syncup', '--specs', '--trace'))
+    out, err, status = Open3.capture3(capcmd('murano', 'syncup', '--specs'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
@@ -67,7 +67,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'twee', '12345', '--trace'))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'twee', '12345'))
     expect(err).to eq('')
     olines = out.lines
     expect(olines[0]).to match(/^(\+-+){4}\+$/)
@@ -78,7 +78,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(olines[-1]).to match(/^(\+-+){4}\+$/)
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'write', '12345', 'state', '42', '--trace'))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'write', '12345', 'state', '42'))
     expect(out).to eq("state: ok\n")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
