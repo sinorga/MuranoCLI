@@ -116,7 +116,7 @@ command 'device write' do |c|
     set.each_pair{|k,v| set[k] = '' if v.nil?}
 
     ret = prd.write(snid, set)
-    pp ret
+    prd.outf ret unless ret.empty?
   end
 end
 

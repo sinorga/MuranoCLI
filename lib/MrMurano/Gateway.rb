@@ -278,17 +278,17 @@ module MrMurano
         end
       end
 
-      # Read & write State.
-
+      # Write the set point for aliases on a device
+      # @param identifier [String] The identifier for the device to write.
+      # @param values [Hash] Aliases and the values to write.
       def write(identifier, values)
-
         wvalues = Hash[ values.map{|k,v| [k, {:set=>v}]} ]
+        debug "Will Write: #{wvalues}"
         put("/#{identifier}/state", wvalues)
-        #put("/#{identifier}/state", {'bob'=>{:set=>'fuddle'}})
-        # XXX fails with 404: Could not find entry
-        # XXX or with 400: Value is not settable
       end
 
+      # Read the current state for a device
+      # @param identifier [String] The identifier for the device to read.
       def read(identifier)
         get("/#{identifier}/state")
       end
