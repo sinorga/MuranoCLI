@@ -149,7 +149,7 @@ module MrMurano
         'services.location' => 'location.eventhandlers',
         'services.include' => 'eventhandler.searchFor',
         'services.exclude' => 'eventhandler.ignoring',
-        'resources.location' => 'location.specs',
+        'resources.location' => 'location.resources',
         'resources.include' => 'product.spec',
         'resources.exclude' => 'product.ignoring',
       }.freeze

@@ -17,8 +17,6 @@ module MrMurano
         raise "No project id!" if @pid.nil?
         @uriparts = [:service, @pid, :gateway]
         @itemkey = :id
-        @locationbase = $cfg['location.base']
-        @location = nil
       end
 
       include Http
@@ -49,7 +47,7 @@ module MrMurano
       def initialize
         super
         @itemkey = :alias
-        @location = $cfg['location.resources']
+        @project_section = :resources
       end
 
       def list()
