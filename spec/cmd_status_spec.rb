@@ -8,13 +8,13 @@ RSpec.describe 'murano status', :cmd, :needs_password do
 
   before(:example) do
     out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', 'statustest', '--save'))
-    expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(err).to eq('')
+    expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', 'statustest', '--save'))
-    expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(err).to eq('')
+    expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
