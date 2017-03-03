@@ -32,7 +32,8 @@ end
 desc 'Run RSpec'
 task :rspec do
     Dir.mkdir("report") unless File.directory?("report")
-    sh %{rspec --format html --out report/index.html --format progress}
+    rv=RUBY_VERSION.gsub(/\./,'_')
+    sh %{rspec --format html --out report/index-#{rv}.html --format progress}
 end
 task :test => [:rspec]
 
