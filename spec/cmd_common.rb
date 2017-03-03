@@ -15,6 +15,7 @@ RSpec.shared_context "CI_CMD" do
       args[0] = File.join(testdir, (args[0] + '.exe'))
     end
     args.push '--trace'
+    args.push '-c', 'fullerror'
 
     if Gem.win_platform? then
       cmd = args.map{|i| if i =~ / / then %{"#{i}"} else i end}.join(' ')
@@ -23,6 +24,10 @@ RSpec.shared_context "CI_CMD" do
     end
     #pp cmd
     cmd
+  end
+
+  def rname(name)
+    "#{name}-#{Random.new.rand.hash.abs.to_s(16)}"
   end
 
   around(:example) do |ex|

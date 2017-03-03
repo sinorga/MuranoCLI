@@ -7,23 +7,24 @@ RSpec.describe 'murano status', :cmd, :needs_password do
   include_context "CI_CMD"
 
   before(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', 'statustest', '--save'))
+    @project_name = rname('statusTest')
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', @project_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', 'statustest', '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @project_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', 'statustest'))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', 'statustest'))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)

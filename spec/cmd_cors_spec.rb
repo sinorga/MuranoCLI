@@ -8,13 +8,14 @@ RSpec.describe 'murano cors', :cmd, :needs_password do
   include_context "CI_CMD"
 
   before(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', 'corstest', '--save'))
+    @project_name = rname('corstest')
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', @project_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', 'corstest'))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
