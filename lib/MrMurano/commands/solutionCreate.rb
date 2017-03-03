@@ -13,6 +13,11 @@ command 'solution create' do |c|
     name = args[0]
 
     ret = acc.new_solution(name)
+    pp ret
+    if ret.nil? then
+      acc.error "Create failed"
+      exit 5
+    end
     if not ret.kind_of?(Hash) and not ret.empty? then
       acc.error "Create failed: #{ret.to_s}"
       exit 2
