@@ -15,7 +15,7 @@ directory are synced up (or down) from Murano.
 
 !!!!! *IMPORTANT*
 
-The upcoming release of 2.0 will include some breaking changes.  The most noticable
+The upcoming release of 2.0 will include some breaking changes.  The most noticeable
 of which is the command will be renamed from `mr` to `murano`.
 
 
@@ -86,7 +86,7 @@ to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 ### Windows Install
 
 The MrMurano gem will install on Windows.  There is also a single Windows binary
-Setup installer availible in [releases](https://github.com/exosite/MuranoCLI/releases)
+Setup installer available in [releases](https://github.com/exosite/MuranoCLI/releases)
 
 If you do not already use Ruby on Windows, then you should use the binary
 installer.
@@ -141,7 +141,7 @@ MURANO_CONFIGFILE=.murano.dev
 EOF
 ```
 
-This also allows for keeping private things in a seperate config file and having
+This also allows for keeping private things in a separate config file and having
 the shared things checked into source control.
 
 ### Direct Service Access
@@ -200,7 +200,7 @@ When submitting pull requests, please do them against the develop branch.
 All test for MuranoCLI are done with rspec.
 
 The tests are internal (`--tag ~cmd`) or command (`--tag cmd`).  The internal tests
-are for the object that build up the internals. The command tests run `murano` form
+are for the object that build up the internals. The command tests run `murano` from
 the shell and are for testing the user facing components.  A subset of the command
 tests work with the live Murano servers (`--tag needs_password`).
 
@@ -209,7 +209,7 @@ To use these the following environment variables need to be set:
 - `MURNO_PASSWORD` : Password for that user
 - `MURANO_BUSINESS` : Business id to run tests within.
 
-A free account on Murano is sufficent for these tests.
+A free account on Murano is sufficient for these tests.
 
 
 
