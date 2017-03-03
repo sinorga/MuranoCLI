@@ -36,6 +36,24 @@ task :rspec do
 end
 task :test => [:rspec]
 
+task :test_clean_up do
+    return if ENV['MURANO_USER'].nil?
+    return if ENV['MURANO_BUSINESS'].nil?
+    return if ENV['MURANO_PASSWORD'].nil?
+
+    ids = `ruby -Ilib bin/murano product list --idonly -c user.name=$MURANO_USER -c net.host=bizapi.hosted.exosite.io -c business.id=$MURANO_BUSINESS`.chomp
+    puts "Found prodcuts #{ids}; deleteing"
+    ids.split.each do |id|
+        sh %{ruby -Ilib bin/murano product delete #{id} -c user.name=$MURANO_USER -c net.host=bizapi.hosted.exosite.io -c business.id=$MURANO_BUSINESS}
+    end
+
+    ids = `ruby -Ilib bin/murano solution list --idonly -c user.name=$MURANO_USER -c net.host=bizapi.hosted.exosite.io -c business.id=$MURANO_BUSINESS`.chomp
+    puts "Found solutions #{ids}; deleteing"
+    ids.split.each do |id|
+        sh %{ruby -Ilib bin/murano solution delete #{id} -c user.name=$MURANO_USER -c net.host=bizapi.hosted.exosite.io -c business.id=$MURANO_BUSINESS}
+    end
+end
+
 ###
 # When new tags are pushed to upstream, the CI will kick-in and build the release
 namespace :git do
