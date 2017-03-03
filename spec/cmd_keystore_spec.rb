@@ -9,8 +9,8 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
 
   before(:example) do
     out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', 'keystoretest', '--save'))
-    expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(err).to eq('')
+    expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'set', 'bob', 'built'))
@@ -45,8 +45,8 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
     expect(out).to match(
-      'quota'=>{'keys' => an_instance_of(Fixnum)},
-      'usage'=>{'keys' => 1, 'size' => an_instance_of(Fixnum)},
+      'quota'=>{'keys' => a_kind_of(Integer)},
+      'usage'=>{'keys' => 1, 'size' => a_kind_of(Integer)},
     )
   end
 
