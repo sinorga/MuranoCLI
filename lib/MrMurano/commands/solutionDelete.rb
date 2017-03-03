@@ -14,7 +14,7 @@ command 'solution delete' do |c|
 
 
     # Need to convert what we got into the internal PID.
-    ret = acc.solutions.select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
+    ret = (acc.solutions or []).select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
 
     if $cfg['tool.debug'] then
       say "Matches found:"

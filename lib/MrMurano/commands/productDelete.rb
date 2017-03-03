@@ -15,7 +15,7 @@ command 'product delete' do |c|
 
 
     # Need to convert what we got into the internal PID.
-    ret = acc.products.select{|i| i.has_value? name }
+    ret = (acc.products or []).select{|i| i.has_value? name }
 
     acc.debug "Matches found:"
     acc.outf(ret) if $cfg['tool.debug']
