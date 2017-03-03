@@ -196,3 +196,20 @@ MuranoCLI also uses [bundler](http://bundler.io).
 
 When submitting pull requests, please do them against the develop branch.
 
+### Tests
+All test for MuranoCLI are done with rspec.
+
+The tests are internal (`--tag ~cmd`) or command (`--tag cmd`).  The internal tests
+are for the object that build up the internals. The command tests run `murano` form
+the shell and are for testing the user facing components.  A subset of the command
+tests work with the live Murano servers (`--tag needs_password`).
+
+To use these the following environment variables need to be set:
+- `MURANO_USER` : User name to log into Murano with
+- `MURNO_PASSWORD` : Password for that user
+- `MURANO_BUSINESS` : Business id to run tests within.
+
+A free account on Murano is sufficent for these tests.
+
+
+
