@@ -39,23 +39,32 @@ RSpec.describe 'murano status', :cmd, :needs_password do
 
     it "status" do
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
-      expect(out).to eq( %{Adding:
- + A  routes/manyRoutes.lua
- + A  routes/manyRoutes.lua:4
- + A  routes/manyRoutes.lua:7
- + A  routes/singleRoute.lua
- + S  files/icon.png
- + S  files/index.html
- + S  files/js/script.js
- + M  modules/table_util.lua
-Deleteing:
- - M  my_library
- - E  user_account
-Changing:
- M E  services/devdata.lua
- M E  services/timers.lua
-})
       expect(err).to eq('')
+      # Two problems with this output.
+      # 1: Order of files is not set
+      # 2: Path prefixes could be different.
+      olines = out.lines
+      expect(olines[0]).to eq("Adding:\n")
+      expect(olines[1..8]).to include(
+        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua/),
+        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/),
+        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:7/),
+        a_string_matching(/ \+ A  .*routes\/singleRoute\.lua/),
+        a_string_matching(/ \+ S  .*files\/icon\.png/),
+        a_string_matching(/ \+ S  .*files\/index\.html/),
+        a_string_matching(/ \+ S  .*files\/js\/script\.js/),
+        a_string_matching(/ \+ M  .*modules\/table_util\.lua/),
+      )
+      expect(olines[9]).to eq("Deleteing:\n")
+      expect(olines[10..11]).to include(
+        " - M  my_library\n",
+        " - E  user_account\n",
+      )
+      expect(olines[12]).to eq("Changing:\n")
+      expect(olines[13..14]).to include(
+        a_string_matching(/ M E  .*services\/devdata\.lua/),
+        a_string_matching(/ M E  .*services\/timers\.lua/),
+      )
       expect(status.exitstatus).to eq(0)
     end
   end
