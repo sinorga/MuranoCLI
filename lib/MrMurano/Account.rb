@@ -196,7 +196,7 @@ module MrMurano
     ## Create a new solution
     def new_solution(name, type='dataApi')
       raise "Missing Business ID" if $cfg['business.id'].nil?
-      raise "Solution name must be lowercase" if name.match(/[A-Z]/)
+      raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
     end
 
