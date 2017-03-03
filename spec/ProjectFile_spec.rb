@@ -215,6 +215,17 @@ RSpec.describe MrMurano::ProjectFile do
         $stderr = saved
     end
 
+    it "loads with truncated version" do
+        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.json')
+        dst = File.join(@projectDir, 'Solutionfile.json')
+        FileUtils.copy(src, dst)
+        saved = $stderr
+        $stderr = StringIO.new
+        @pjf.load
+        expect($stderr.string).to eq('')
+        $stderr = saved
+    end
+
     context "loads" do
       before(:example) do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0.json')
@@ -243,8 +254,6 @@ RSpec.describe MrMurano::ProjectFile do
         expect(@pjf['services.include']).to match_array(["event_handler/product.lua", "event_handler/timer.lua"])
       end
 
-      # XXX event_handler migration ???
-      # XXX cors migration ???
     end
   end
 
@@ -266,6 +275,17 @@ RSpec.describe MrMurano::ProjectFile do
         $stderr = StringIO.new
         @pjf.load
         expect($stderr.string).to match(%r{The property '#/' did not contain a required property of 'routes'})
+        $stderr = saved
+    end
+
+    it "loads with truncated version" do
+        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.json')
+        dst = File.join(@projectDir, 'Solutionfile.json')
+        FileUtils.copy(src, dst)
+        saved = $stderr
+        $stderr = StringIO.new
+        @pjf.load
+        expect($stderr.string).to eq('')
         $stderr = saved
     end
 
@@ -297,8 +317,6 @@ RSpec.describe MrMurano::ProjectFile do
         expect(@pjf['services.include']).to match_array(["event_handler/product.lua", "event_handler/timer.lua"])
       end
 
-      # XXX event_handler migration ???
-      # XXX cors migration ???
     end
   end
 end
