@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'open3'
 require 'pathname'
+require 'json'
 require 'cmd_common'
 
 RSpec.describe 'murano status', :cmd, :needs_password do
@@ -130,7 +131,57 @@ RSpec.describe 'murano status', :cmd, :needs_password do
     end
   end
 
-  # TODO: With Solutionfile 0.2.0
+  context "with Solutionfile 0.2.0" do
+    before(:example) do
+      FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
+      FileUtils.move('assets','files')
+      FileUtils.mkpath('specs')
+      FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
+      File.open('Solutionfile.json', 'wb') do |io|
+        io << {
+          :default_page => 'index.html',
+          :file_dir => 'files',
+          :custom_api => 'routes/manyRoutes.lua',
+          :modules => {
+            :table_util => 'modules/table_util.lua'
+          },
+          :event_handler => {
+            :device => {
+              :datapoint => 'services/devdata.lua'
+            }
+          }
+        }.to_json
+      end
+    end
+
+    it "status" do
+      out, err, status = Open3.capture3(capcmd('murano', 'status'))
+      expect(err).to eq('')
+      olines = out.lines
+      expect(olines[0]).to eq("Adding:\n")
+      expect(olines[1..7]).to include(
+        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua/),
+        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/),
+        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:7/),
+        a_string_matching(/ \+ S  .*files\/icon\.png/),
+        a_string_matching(/ \+ S  .*files\/index\.html/),
+        a_string_matching(/ \+ S  .*files\/js\/script\.js/),
+        a_string_matching(/ \+ M  .*modules\/table_util\.lua/),
+      )
+      expect(olines[8]).to eq("Deleteing:\n")
+      expect(olines[9..11]).to include(
+        " - M  my_library\n",
+        " - E  user_account\n",
+        " - E  timer_timer\n",
+      )
+      expect(olines[12]).to eq("Changing:\n")
+      expect(olines[13..14]).to include(
+        a_string_matching(/ M E  .*services\/devdata\.lua/),
+      )
+      expect(status.exitstatus).to eq(0)
+    end
+  end
+
   # TODO: With Solutionfile 0.3.0
 end
 
