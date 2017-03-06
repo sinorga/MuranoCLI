@@ -26,7 +26,9 @@ end
 command :timeseries do |c|
   c.syntax = %{murano timeseries}
   c.summary = %{About Timeseries}
-  c.description = %{The timeseries sub-commands let you interact directly with the Timeseries
+  c.description = %{These commands are deprecated.
+
+The timeseries sub-commands let you interact directly with the Timeseries
 instance in a solution.  This allows for easier debugging, being able to
 quickly try out different queries or write test data.}
 
@@ -38,7 +40,10 @@ end
 
 command 'timeseries query' do |c|
   c.syntax = %{murano timeseries query <query string>}
-  c.description = %{Query the timeseries database}
+  c.summary = %{Query the timeseries database}
+  c.description = %{This command is deprecated.
+
+Query the timeseries database}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
   c.option '--[no-]json', %{Display results as raw json}
   c.option '--[no-]csv', %{Display results as CSV}
@@ -75,7 +80,10 @@ alias_command :tsq, 'timeseries query'
 
 command 'timeseries write' do |c|
   c.syntax = %{murano timeseries <write string>}
-  c.description = %{Write data into the timeseries database}
+  c.summary = %{Write data into the timeseries database}
+  c.description = %{This command is deprecated.
+
+Write data into the timeseries database}
   c.option '--[no-]json', %{Display results as raw json}
   c.action do |args,options|
     options.defalts :json=>false
@@ -89,7 +97,10 @@ alias_command :tsw, 'timeseries write'
 
 command 'timeseries command' do |c|
   c.syntax = %{murano timeseries command <db command>}
-  c.description = %{Execute a non-query command in the database}
+  c.summary = %{Execute a non-query command in the database}
+  c.description = %{This command is deprecated.
+
+Execute a non-query command in the database}
   c.option '--[no-]json', %{Display results as raw json}
   c.action do |args,options|
     options.defalts :json=>false
