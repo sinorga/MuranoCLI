@@ -244,7 +244,7 @@ command 'tsdb list tags' do |c|
 end
 
 command 'tsdb list metrics' do |c|
-  c.syntax = %{murano tsdb list metrics [options]}
+  c.syntax = %{murano tsdb list metrics}
   c.summary = %{List metrics}
 
   c.action do |args, options|
