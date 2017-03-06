@@ -40,7 +40,7 @@ module MrMurano
 end
 
 command 'tsdb write' do |c|
-  c.syntax = %{mr tsdb write [options] <metric=value>|@<tag=value> … }
+  c.syntax = %{murano tsdb write [options] <metric=value>|@<tag=value> … }
   c.summary = %{write data}
   c.description = %{Write data
 
@@ -51,7 +51,7 @@ Also, many date-time formats can be parsed and will be converted to microseconds
   }
   c.option '--when TIMESTAMP', %{When this data happened. (defaults to now)}
   # TODO: add option to take data from STDIN.
-  c.example 'mr tsdb write hum=45 lux=12765 @sn=44', %{Write two metrics (hum and lux) with a tag (sn)}
+  c.example 'murano tsdb write hum=45 lux=12765 @sn=44', %{Write two metrics (hum and lux) with a tag (sn)}
 
   c.action do |args, options|
     sol = MrMurano::ServiceConfigs::Tsdb.new
@@ -82,7 +82,7 @@ Also, many date-time formats can be parsed and will be converted to microseconds
 end
 
 command 'tsdb query' do |c|
-  c.syntax = %{mr tsdb query [options] <metric>|@<tag=value> …}
+  c.syntax = %{murano tsdb query [options] <metric>|@<tag=value> …}
   c.summary = %{query data}
   c.description =%{Query data from the TSDB.
 
@@ -114,14 +114,14 @@ Also, many date-time formats can be parsed and will be converted to microseconds
 
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
-  c.example 'mr tsdb query hum', 'Get all hum metric entries'
-  c.example 'mr tsdb query hum @sn=45', 'Get all hum metric entries for tag sn=45'
-  c.example 'mr tsdb query hum --limit 1', 'Get just the most recent entry'
-  c.example 'mr tsdb query hum --relative_start 1h', 'Get last hour of hum entries'
-  c.example 'mr tsdb query hum --relative_start -1h', 'Get last hour of hum entries'
-  c.example 'mr tsdb query hum --relative_start 2h --relative_end 1h', 'Get hum entries of two hours ago, but not the last hours'
-  c.example 'mr tsdb query hum --sampling_size 30m', 'Get one hum entry from each 30 minute chunk of time'
-  c.example 'mr tsdb query hum --sampling_size 30m --aggregate avg', 'Get average hum entry from each 30 minute chunk of time'
+  c.example 'murano tsdb query hum', 'Get all hum metric entries'
+  c.example 'murano tsdb query hum @sn=45', 'Get all hum metric entries for tag sn=45'
+  c.example 'murano tsdb query hum --limit 1', 'Get just the most recent entry'
+  c.example 'murano tsdb query hum --relative_start 1h', 'Get last hour of hum entries'
+  c.example 'murano tsdb query hum --relative_start -1h', 'Get last hour of hum entries'
+  c.example 'murano tsdb query hum --relative_start 2h --relative_end 1h', 'Get hum entries of two hours ago, but not the last hours'
+  c.example 'murano tsdb query hum --sampling_size 30m', 'Get one hum entry from each 30 minute chunk of time'
+  c.example 'murano tsdb query hum --sampling_size 30m --aggregate avg', 'Get average hum entry from each 30 minute chunk of time'
 
 
   c.action do |args, options|
@@ -214,7 +214,7 @@ Also, many date-time formats can be parsed and will be converted to microseconds
 end
 
 command 'tsdb list tags' do |c|
-  c.syntax = %{mr tsdb list tags [options]}
+  c.syntax = %{murano tsdb list tags [options]}
   c.summary = %{List tags}
   c.option '--values', %{Also return the known tag values}
 
@@ -244,7 +244,7 @@ command 'tsdb list tags' do |c|
 end
 
 command 'tsdb list metrics' do |c|
-  c.syntax = %{mr tsdb list metrics [options]}
+  c.syntax = %{murano tsdb list metrics}
   c.summary = %{List metrics}
 
   c.action do |args, options|
@@ -256,7 +256,7 @@ command 'tsdb list metrics' do |c|
 end
 
 command :tsdb do |c|
-  c.syntax = %{mr tsdb}
+  c.syntax = %{murano tsdb}
   c.summary = %{About TSDB}
   c.description = %{The tsdb sub-commands let you interact directly with the TSDB instance in a
 solution.  This allows for easier debugging, being able to quickly try out

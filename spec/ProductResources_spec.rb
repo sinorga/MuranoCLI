@@ -8,6 +8,8 @@ RSpec.describe MrMurano::ProductResources do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
     $cfg['product.spec'] = 'XYZ.yaml'
@@ -21,38 +23,6 @@ RSpec.describe MrMurano::ProductResources do
     uri = @prd.endPoint('')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/product/XYZ/proxy/onep:v1/rpc/process")
   end
-
-  context "location" do
-    it "Gets a product.spec, with location.specs" do
-      loc = @prd.location
-      expect(loc).to eq("specs/XYZ.yaml")
-    end
-    it "Gets a product.spec, without location.specs" do
-      $cfg.set('location.specs', nil, :defaults)
-      loc = @prd.location
-      expect(loc).to eq("XYZ.yaml")
-    end
-
-    it "Gets a p-FOO.spec, with location.specs" do
-      $cfg['p-XYZ.spec'] = 'magical.file'
-      loc = @prd.location
-      expect(loc).to eq("specs/magical.file")
-    end
-
-    it "Gets a p-FOO.spec, without location.specs" do
-      $cfg['p-XYZ.spec'] = 'magical.file'
-      $cfg.set('location.specs', nil, :defaults)
-      loc = @prd.location
-      expect(loc).to eq("magical.file")
-    end
-
-    it "Uses default spec file name" do
-      $cfg['product.spec'] = nil
-      $cfg['product.id'] = nil
-      expect(@prd.location).to eq('specs/resources.yaml')
-    end
-  end
-
 
   context "queries" do
     it "gets info" do
@@ -242,9 +212,9 @@ RSpec.describe MrMurano::ProductResources do
   context "local resoruces" do
     before(:example) do
       # pull over test file.
-      FileUtils.mkpath($cfg['location.specs'])
+      FileUtils.mkpath(File.dirname($cfg['location.specs']))
       lb = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
-      @spec_path = File.join($cfg['location.specs'], $cfg['product.spec'])
+      @spec_path = $cfg['location.specs']
       FileUtils.copy(lb.to_path, @spec_path)
     end
 
@@ -260,13 +230,13 @@ RSpec.describe MrMurano::ProductResources do
       end
 
       it "is missing" do
-        expect(@prd).to receive(:warning).once.with("Skipping missing specs/XYZ.yaml-h")
+        expect(@prd).to receive(:warning).once.with("Skipping missing specs/resources.yaml-h")
         ret = @prd.localitems(@spec_path + '-h')
         expect(ret).to eq([])
       end
 
       it "isn't a file" do
-        expect(@prd).to receive(:warning).once.with("Cannot read from specs/XYZ.yaml-h")
+        expect(@prd).to receive(:warning).once.with("Cannot read from specs/resources.yaml-h")
         FileUtils.mkpath(@spec_path + '-h')
         ret = @prd.localitems(@spec_path + '-h')
         expect(ret).to eq([])
@@ -276,7 +246,7 @@ RSpec.describe MrMurano::ProductResources do
         File.open(@spec_path + '-h', 'w') do |io|
           io << ['a','b','c'].to_yaml
         end
-        expect(@prd).to receive(:warning).once.with("Unexpected data in specs/XYZ.yaml-h")
+        expect(@prd).to receive(:warning).once.with("Unexpected data in specs/resources.yaml-h")
         ret = @prd.localitems(@spec_path + '-h')
         expect(ret).to eq([])
       end

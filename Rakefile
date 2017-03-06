@@ -23,6 +23,42 @@ task :echo do
     puts builtGem
 end
 
+desc "Prints a cmd to test this in another directory"
+task :testwith do
+    pwd=Dir.pwd.sub(Dir.home, '~')
+    puts "ruby -I#{pwd}/lib #{pwd}/bin/murano "
+end
+
+desc 'Run RSpec'
+task :rspec do
+    Dir.mkdir("report") unless File.directory?("report")
+    rv=RUBY_VERSION.gsub(/\./,'_')
+    sh %{rspec --format html --out report/index-#{rv}.html --format progress}
+end
+task :test => [:test_clean_up, :rspec]
+
+desc "Clean out junk from prior hot tests"
+task :test_clean_up do
+    if not ENV['MURANO_USER'].nil? and
+            not ENV['MURANO_BUSINESS'].nil? and
+            not ENV['MURANO_PASSWORD'].nil? then
+
+        ids = `ruby -Ilib bin/murano product list --idonly -c "user.name=#{ENV['MURANO_USER']}" -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}`.chomp
+        puts "Found prodcuts #{ids}; deleteing"
+        ids.split.each do |id|
+            sh %{ruby -Ilib bin/murano product delete #{id} -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}}
+        end
+
+        ids = `ruby -Ilib bin/murano solution list --idonly -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}`.chomp
+        puts "Found solutions #{ids}; deleteing"
+        ids.split.each do |id|
+            sh %{ruby -Ilib bin/murano solution delete #{id} -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}}
+        end
+    end
+end
+
+###
+# When new tags are pushed to upstream, the CI will kick-in and build the release
 namespace :git do
     desc "Push only develop, master, and tags to origin"
     task :origin do
@@ -42,6 +78,7 @@ namespace :git do
     task :all => [:origin, :upstream]
 end
 
+desc "Build, install locally, and push gem"
 task :gemit do
     mrt=Bundler::GemHelper.gemspec.version
     sh %{git checkout v#{mrt}}
@@ -51,6 +88,8 @@ task :gemit do
     sh %{git checkout develop}
 end
 
+###########################################
+# Tasks below are largly used by CI systems
 namespace :push do
     desc 'Push gem up to RubyGems'
     task :gem do
@@ -90,19 +129,6 @@ namespace :push do
     end
 end
 
-desc "Prints a cmd to test this in another directory"
-task :testwith do
-    pwd=Dir.pwd.sub(Dir.home, '~')
-    puts "ruby -I#{pwd}/lib #{pwd}/bin/mr "
-end
-
-desc 'Run RSpec'
-task :rspec do
-    Dir.mkdir("report") unless File.directory?("report")
-    sh %{rspec --format html --out report/index.html --format progress}
-end
-task :test => [:rspec]
-
 file "ReadMe.txt" => ['README.markdown'] do |t|
     File.open(t.prerequisites.first) do |rio|
         File.open(t.name, 'w') do |wio|
@@ -112,34 +138,33 @@ file "ReadMe.txt" => ['README.markdown'] do |t|
 end
 
 if Gem.win_platform? then
-    file 'mr.exe' => Dir['lib/MrMurano/**/*.rb'] do
+    file 'murano.exe' => Dir['lib/MrMurano/**/*.rb'] do
         # Need to find all dlls, because ocra isn't finding them for some reason.
         gemdir = `gem env gemdir`.chomp
         gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
         ENV['RUBYLIB'] = 'lib'
-        sh %{ocra bin/mr #{gemdlls.join(' ')}}
+        sh %{ocra bin/murano #{gemdlls.join(' ')}}
     end
-    task :wexe => ['mr.exe']
+    task :wexe => ['murano.exe']
 
-    desc 'Run rspec on cmd tests using mr.exe'
-    task :mr_exe_test => ['mr.exe'] do
+    desc 'Run rspec on cmd tests using murano.exe'
+    task :murano_exe_test => ['murano.exe'] do
         Dir.mkdir("report") unless File.directory?("report")
         ENV['CI_MR_EXE'] = '1'
-        files = Dir[File.join('spec', 'cmd_*_spec.rb')]
-        sh %{rspec --format html --out report/mr_exe.html --format progress #{files.join(' ')}}
+        sh %{rspec --format html --out report/murano_exe.html --format progress --tag cmd}
     end
-    task :test => [:mr_exe_test]
+    task :test => [:murano_exe_test]
 
-    installerName = "Output/MrMurano-#{Bundler::GemHelper.gemspec.version.to_s}-Setup.exe"
+    installerName = "Output/MuranoCLI-#{Bundler::GemHelper.gemspec.version.to_s}-Setup.exe"
 
-    desc "Build a Windows installer for MrMurano"
+    desc "Build a Windows installer for MuranoCLI"
     task :inno => [installerName]
 
-    file "Output/MrMuranoSetup.exe" => ['mr.exe', 'ReadMe.txt'] do
+    file "Output/MuranoCLISetup.exe" => ['murano.exe', 'ReadMe.txt'] do
         ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version.to_s
-        sh %{"C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MrMurano.iss}
+        sh %{"C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MuranoCLI.iss}
     end
-    file installerName => ['Output/MrMuranoSetup.exe'] do |t|
+    file installerName => ['Output/MuranoCLISetup.exe'] do |t|
         FileUtils.move t.prerequisites.first, t.name, :verbose=>true
     end
 

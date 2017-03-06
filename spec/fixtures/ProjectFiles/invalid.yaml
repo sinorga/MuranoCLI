@@ -1,0 +1,9 @@
+---
+info:
+  name: tested
+  summary: My little test project
+  authors: ["a person with <an@email.address>"]
+  version: 1.56.12
+routes:
+  include: custom_api.lua
+formatversion: 1.0.0

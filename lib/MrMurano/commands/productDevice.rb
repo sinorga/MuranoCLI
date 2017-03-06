@@ -1,9 +1,9 @@
 require 'MrMurano/Product-1P-Device'
 
 command 'product device' do |c|
-  c.syntax = %{mr product device}
+  c.syntax = %{murano product device}
   c.summary = %{Interact with a device in a product}
-  c.description = %{}
+  c.description = %{Interact with a device in a product}
 
   c.action do |a,o|
     ::Commander::UI.enable_paging
@@ -12,7 +12,7 @@ command 'product device' do |c|
 end
 
 command 'product device read' do |c|
-  c.syntax = %{mr product device read <identifier> (<resources>)}
+  c.syntax = %{murano product device read <identifier> (<resources>)}
   c.summary = %{Read recources on a device}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
@@ -35,7 +35,7 @@ command 'product device read' do |c|
 end
 
 command 'product device twee' do |c|
-  c.syntax = %{mr product device twee <identifier>}
+  c.syntax = %{murano product device twee <identifier>}
   c.summary = %{Show info about a device}
 
 
@@ -44,6 +44,7 @@ command 'product device twee' do |c|
     snid = args.shift
     prd = MrMurano::Product1PDevice.new
     data = prd.twee(snid)
+    exit 2 if data.empty?
 
     io=nil
     io = File.open(options.output, 'w') if options.output
@@ -65,7 +66,7 @@ command 'product device twee' do |c|
 end
 
 command 'product device delete' do |c|
-  c.syntax = %{mr product device delete <identifier>}
+  c.syntax = %{murano product device delete <identifier>}
   c.summary = %{Delete a device}
 
   c.action do |args,options|

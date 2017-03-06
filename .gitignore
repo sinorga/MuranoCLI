@@ -14,15 +14,9 @@ pkg/
 report/
 coverage/
 
-.mrmurano/
-.mrmuranorc
-.mrmuranorc.private
-files/
-endpoints/
-modules/
-eventhandlers/
-roles.yaml
-users.yaml
+.murano/
+
+_testProject/
 
 # Thumbnails
 ._*

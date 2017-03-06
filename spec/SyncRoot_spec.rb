@@ -1,5 +1,6 @@
 require 'MrMurano/version'
 require 'MrMurano/Config'
+require 'MrMurano/ProjectFile'
 require 'MrMurano/SyncUpDown'
 require '_workspace'
 
@@ -22,6 +23,8 @@ RSpec.describe MrMurano::SyncRoot do
     # This must happen after all syncables have been added.
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
 
     @options = {}
     @options.define_singleton_method(:method_missing) do |mid,*args|

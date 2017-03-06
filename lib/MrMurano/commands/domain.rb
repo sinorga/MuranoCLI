@@ -1,6 +1,6 @@
 require 'MrMurano/Solution'
 command :domain do |c|
-  c.syntax = %{mr domain}
+  c.syntax = %{murano domain}
   c.summary = %{Print the domain for this solution}
   c.option '--[no-]raw', %{Don't add scheme}
   c.action do |args,options|

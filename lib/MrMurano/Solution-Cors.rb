@@ -1,5 +1,6 @@
 require 'yaml'
 require 'json'
+require 'MrMurano/hash'
 require 'MrMurano/Solution'
 
 module MrMurano
@@ -7,13 +8,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'cors'
-      @location = $cfg['location.cors']
-    end
-
-    def list()
-      data = fetch()
-      data[:id] = 'cors'
-      [data]
+      @project_section = :cors
     end
 
     def fetch(id=nil, &block)
@@ -31,56 +26,21 @@ module MrMurano
       end
     end
 
-    def remove(id)
-      # Not really anything to do here. Return to defaults? maybe?
-    end
-
     ##
     # Upload CORS
-    # :local path to file to push
-    # :remote hash of method and endpoint path (ignored for now)
-    # @param modify Bool: True if item exists already and this is changing it
-    def upload(local, remote, modify=false)
-      remote.reject!{|k,v| k==:synckey or k==:bundled or k==:id}
-      put('', remote)
-    end
-
-    def tolocalpath(into, item)
-      into
-    end
-
-    def removelocal(dest, item)
-      # this is a nop.
-    end
-#
-    def localitems(from)
-      from = Pathname.new(from) unless from.kind_of? Pathname
-      if not from.exist? then
-        warning "Skipping missing #{from.to_s}"
-        return []
+    # @param file [String,Nil] File path to upload other than defaults
+    def upload(file=nil)
+      unless file.nil? then
+        data = YAML.load_file(file)
+      else
+        data = $project['routes.cors']
+        # If it is just a string, then is a file to load.
+        data = YAML.load_file(data) if data.kind_of? String
       end
-      unless from.file? then
-        warning "Cannot read from #{from.to_s}"
-        return []
-      end
-
-      here = {}
-      from.open {|io| here = YAML.load(io) }
-      return [] if here == false
-
-      here[:id] = 'cors'
-      here[:local_path] = from
-      [ Hash.transform_keys_to_symbols(here) ]
-    end
-
-    ##
-    # True if itemA and itemB are different
-    def docmp(itemA, itemB)
-      itemA != itemB
+      put('', data)
     end
 
   end
-  SyncRoot.add('cors', Cors, 'Z', %{CORS settings})
 end
 
 #  vim: set ai et sw=2 ts=2 :

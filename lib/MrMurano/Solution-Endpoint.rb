@@ -10,7 +10,7 @@ module MrMurano
     def initialize
       super
       @uriparts << 'endpoint'
-      @location = $cfg['location.endpoints']
+      @project_section = :routes
 
       @match_header = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/
     end
@@ -104,14 +104,6 @@ module MrMurano
       delete('/' + id.to_s)
     end
 
-    def searchFor
-      ($cfg['endpoints.searchFor'] or '').split
-    end
-
-    def ignoring
-      ($cfg['endpoints.ignoring'] or '').split
-    end
-
     def tolocalname(item, key)
       name = ''
       name << item[:path].split('/').reject{|i|i.empty?}.join('-')
@@ -121,7 +113,7 @@ module MrMurano
     end
 
     def toRemoteItem(from, path)
-      # Path could be have multiple endpoints in side, so a loop.
+      # Path could be have multiple endpoints inside, so a loop.
       items = []
       path = Pathname.new(path) unless path.kind_of? Pathname
       cur = nil
@@ -146,6 +138,22 @@ module MrMurano
       cur[:line_end] = lineno unless cur.nil?
       items << cur unless cur.nil?
       items
+    end
+
+    def match(item, pattern)
+      # Pattern is: #{method}#{path glob}
+      pattern_pattern = /^#(?<method>[^#]*)#(?<path>.*)/i
+      md = pattern_pattern.match(pattern)
+      return false if md.nil?
+      debug "match pattern: '#{md[:method]}' '#{md[:path]}'"
+
+      unless md[:method].empty? then
+        return false unless item[:method].downcase == md[:method].downcase
+      end
+
+      return true if md[:path].empty?
+
+      ::File.fnmatch(md[:path],item[:path])
     end
 
     def synckey(item)

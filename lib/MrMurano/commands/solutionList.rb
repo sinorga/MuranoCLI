@@ -2,7 +2,7 @@ require 'MrMurano/Account'
 require 'terminal-table'
 
 command 'solution list' do |c|
-  c.syntax = %{mr solution list [options]}
+  c.syntax = %{murano solution list [options]}
   c.description = %{List solutions}
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'

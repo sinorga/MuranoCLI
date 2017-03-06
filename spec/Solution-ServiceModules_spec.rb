@@ -8,6 +8,8 @@ RSpec.describe MrMurano::Library do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['solution.id'] = 'XYZ'
 
@@ -37,49 +39,82 @@ RSpec.describe MrMurano::Library do
     expect(ret).to eq(body[:items])
   end
 
-  it "fetches" do
-    body = {:id=>"9K0",
-             :name=>"debug",
-             :alias=>"XYZ_debug",
-             :solution_id=>"XYZ",
-             :created_at=>"2016-07-07T19:16:19.479Z",
-             :updated_at=>"2016-09-12T13:26:55.868Z",
-             :script=>%{-- lua code is here
-    function foo(bar)
-      return bar + 1
+  context "fetching" do
+    it "fetches" do
+      body = {:id=>"9K0",
+               :name=>"debug",
+               :alias=>"XYZ_debug",
+               :solution_id=>"XYZ",
+               :created_at=>"2016-07-07T19:16:19.479Z",
+               :updated_at=>"2016-09-12T13:26:55.868Z",
+               :script=>%{-- lua code is here
+      function foo(bar)
+        return bar + 1
+      end
+      }
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+        to_return(body: body.to_json)
+
+      ret = @srv.fetch('9K0')
+      expect(ret).to eq(body[:script])
     end
-    }
-    }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
 
-    ret = @srv.fetch('9K0')
-    expect(ret).to eq(body[:script])
-  end
+    it "fetches with block" do
+      body = {:id=>"9K0",
+               :name=>"debug",
+               :alias=>"XYZ_debug",
+               :solution_id=>"XYZ",
+               :created_at=>"2016-07-07T19:16:19.479Z",
+               :updated_at=>"2016-09-12T13:26:55.868Z",
+               :script=>%{-- lua code is here
+      function foo(bar)
+        return bar + 1
+      end
+      }
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+        to_return(body: body.to_json)
 
-  it "fetches with block" do
-    body = {:id=>"9K0",
-             :name=>"debug",
-             :alias=>"XYZ_debug",
-             :solution_id=>"XYZ",
-             :created_at=>"2016-07-07T19:16:19.479Z",
-             :updated_at=>"2016-09-12T13:26:55.868Z",
-             :script=>%{-- lua code is here
-    function foo(bar)
-      return bar + 1
+      ret = nil
+      @srv.fetch('9K0') {|sc| ret = sc}
+      expect(ret).to eq(body[:script])
     end
-    }
-    }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
 
-    ret = nil
-    @srv.fetch('9K0') {|sc| ret = sc}
-    expect(ret).to eq(body[:script])
+    it "Returns empty if script missing" do
+      body = {:id=>"9K0",
+               :name=>"debug",
+               :alias=>"XYZ_debug",
+               :solution_id=>"XYZ",
+               :created_at=>"2016-07-07T19:16:19.479Z",
+               :updated_at=>"2016-09-12T13:26:55.868Z",
+      }
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+        to_return(body: body.to_json)
+
+      ret = @srv.fetch('9K0')
+      expect(ret).to eq('')
+    end
+
+    it "Displays error if wrong result type" do
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+        with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+        to_return(body: "this isn't what we expected")
+
+      saved = $stderr
+      $stderr = StringIO.new
+      ret = @srv.fetch('9K0')
+      expect(ret).to eq('')
+      expect($stderr.string).to eq(%{\e[31mUnexpected result type, assuming empty instead: this isn't what we expected\e[0m\n})
+      $stderr = saved
+    end
   end
 
   it "removes" do

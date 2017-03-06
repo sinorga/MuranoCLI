@@ -1,7 +1,7 @@
 require 'MrMurano/Account'
 
 command 'business list' do |c|
-  c.syntax = %{mr business list [options]}
+  c.syntax = %{murano business list [options]}
   c.description = %{List businesses}
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'

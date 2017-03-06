@@ -1,7 +1,7 @@
 require 'MrMurano/Account'
 
 command 'solution delete' do |c|
-  c.syntax = %{mr solution delete <solution id>}
+  c.syntax = %{murano solution delete <solution id>}
   c.description = %{Delete a solution}
 
   c.action do |args, options|
@@ -14,7 +14,7 @@ command 'solution delete' do |c|
 
 
     # Need to convert what we got into the internal PID.
-    ret = acc.solutions.select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
+    ret = (acc.solutions or []).select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
 
     if $cfg['tool.debug'] then
       say "Matches found:"

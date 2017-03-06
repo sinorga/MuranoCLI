@@ -8,6 +8,8 @@ RSpec.describe MrMurano::EventHandler do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['solution.id'] = 'XYZ'
 
@@ -344,5 +346,40 @@ end
 
   end
 
+  context "Matching" do
+    before(:example) do
+      @an_item = {
+        :service=>'bob',
+        :event=>'built',
+        :local_path=>Pathname.new('a/relative/path.lua'),
+      }
+    end
+    context "service" do
+      it "any event" do
+        ret = @srv.match(@an_item, '#bob#')
+        expect(ret).to be true
+        ret = @srv.match(@an_item, '#email#')
+        expect(ret).to be false
+      end
+      it "exact event" do
+        ret = @srv.match(@an_item, '#bob#built')
+        expect(ret).to be true
+        ret = @srv.match(@an_item, '#email#built')
+        expect(ret).to be false
+      end
+    end
+    context "any service" do
+      it "any event" do
+        ret = @srv.match(@an_item, '##')
+        expect(ret).to be true
+      end
+      it "exact event" do
+        ret = @srv.match(@an_item, '##built')
+        expect(ret).to be true
+        ret = @srv.match(@an_item, '##sent')
+        expect(ret).to be false
+      end
+    end
+  end
 end
 #  vim: set ai et sw=2 ts=2 :

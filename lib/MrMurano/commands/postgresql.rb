@@ -14,7 +14,7 @@ module MrMurano
 end
 
 command :postgresql do |c|
-  c.syntax = %{mr postgresql <SQL Commands>}
+  c.syntax = %{murano postgresql <SQL Commands>}
   c.summary = %{Query the relational database}
 
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}

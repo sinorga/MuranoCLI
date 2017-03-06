@@ -1,0 +1,18 @@
+{
+  "default_page": "index.html",
+  "file_dir": "public",
+  "custom_api_hook": "_init",
+  "modules": {
+    "auth": "modules/util.lua",
+    "debug": "modules/debug.lua",
+    "listen": "modules/listen.lua"
+  },
+  "event_handler": {
+    "device": {
+      "datapoint": "event_handler/product.lua"
+    },
+    "timer": {
+      "timer": "event_handler/timer.lua"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 require 'MrMurano/Account'
 
 command 'product list' do |c|
-  c.syntax = %{mr product list [options]}
+  c.syntax = %{murano product list [options]}
   c.description = %{List products}
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'

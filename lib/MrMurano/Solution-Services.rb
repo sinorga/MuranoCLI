@@ -158,7 +158,7 @@ module MrMurano
       super
       @uriparts << 'library'
       @itemkey = :alias
-      @location = $cfg['location.modules']
+      @project_section = :modules
     end
 
     def tolocalname(item, key)
@@ -182,14 +182,6 @@ module MrMurano
       end
     end
 
-    def searchFor
-      ($cfg['modules.searchFor'] or '').split
-    end
-
-    def ignoring
-      ($cfg['modules.ignoring'] or '').split
-    end
-
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
       {:name => name}
@@ -207,7 +199,7 @@ module MrMurano
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
-      @location = $cfg['location.eventhandlers']
+      @project_section = :services
       @match_header = /--#EVENT (?<service>\S+) (?<event>\S+)/
     end
 
@@ -225,14 +217,6 @@ module MrMurano
       else
         raise "Missing parts! #{remote.to_json}"
       end
-    end
-
-    def searchFor
-      ($cfg['eventhandler.searchFor'] or '').split
-    end
-
-    def ignoring
-      ($cfg['eventhandler.ignoring'] or '').split
     end
 
     def list
@@ -272,6 +256,9 @@ module MrMurano
     end
 
     def toRemoteItem(from, path)
+      # This allows multiple events to be in the same file. This is a lie.
+      # This only finds the last event in a file.
+      # :legacy support doesn't allow for that. but that's ok.
       path = Pathname.new(path) unless path.kind_of? Pathname
       cur = nil
       lineno=0
@@ -290,7 +277,43 @@ module MrMurano
         lineno += 1
       end
       cur[:line_end] = lineno unless cur.nil?
+
+      # If cur is nil here, then we need to do a :legacy check.
+      if cur.nil? and $project['services.legacy'].kind_of? Hash then
+        spath = path.relative_path_from(from)
+        debug "No headers: #{spath}"
+        service, event = $project['services.legacy'][spath.to_s]
+        debug "Legacy lookup #{spath} => [#{service}, #{event}]"
+        unless service.nil? or event.nil? then
+          warning "Event in #{spath} missing header, but has legacy support."
+          warning "Please add the header \"--#EVENT #{service} #{event}\""
+          cur = {:service=>service,
+                 :event=>event,
+                 :local_path=>path,
+                 :line=>0,
+                 :line_end => lineno,
+                 :script=>path.read()} # FIXME: ick, fix this.
+        end
+      end
       cur
+    end
+
+    def match(item, pattern)
+      # Pattern is: #{service}#{event}
+      pattern_pattern = /^#(?<service>[^#]*)#(?<event>.*)/i
+      md = pattern_pattern.match(pattern)
+      return false if md.nil?
+      debug "match pattern: '#{md[:service]}' '#{md[:event]}'"
+
+      unless md[:service].empty? then
+        return false unless item[:service].downcase == md[:service].downcase
+      end
+
+      unless md[:event].empty? then
+        return false unless item[:event].downcase == md[:event].downcase
+      end
+
+      true # Both match (or are empty.)
     end
 
     def synckey(item)

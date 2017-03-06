@@ -93,10 +93,14 @@ module MrMurano
     end
 
     ## Get a tree of info for a device and its resources.
-    # +sn+:: Identifier for a device
+    # @param sn [String] Identifier for a device
+    # @return [Hash]
     def twee(sn)
       inf = info(sn)
-
+      return {} if inf.nil?
+      return {} unless inf.kind_of? Hash
+      return {} unless inf.has_key? :aliases
+      return {} unless inf[:aliases].kind_of? Hash
       aliases = inf[:aliases].keys
       # information for all
       info_calls = aliases.map do |rid|

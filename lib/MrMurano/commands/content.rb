@@ -1,7 +1,7 @@
 require 'MrMurano/Product'
 
 command :content do |c|
-  c.syntax = %{mr content}
+  c.syntax = %{murano content}
   c.summary = %{About Content Area}
   c.description = %{This set of commands let you interact with the content area for a product.
 
@@ -15,12 +15,12 @@ This is where OTA data can be stored so that devices can easily download it.
 end
 
 command 'content list' do |c|
-  c.syntax = %{mr content list}
+  c.syntax = %{murano content list}
   c.summary = %{List downloadable content for a product}
   c.description = %{List downloadable content for a product
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.action do |args, options|
     prd = MrMurano::ProductContent.new
@@ -29,12 +29,12 @@ command 'content list' do |c|
 end
 
 command 'content info' do |c|
-  c.syntax = %{mr content info <content id>}
+  c.syntax = %{murano content info <content id>}
   c.summary = %{Show more info for a content item}
   c.description = %{Show more info for a content item
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.action do |args, options|
     prd = MrMurano::ProductContent.new
@@ -47,30 +47,31 @@ command 'content info' do |c|
 end
 
 command 'content delete' do |c|
-  c.syntax = %{mr content delete <content id>}
+  c.syntax = %{murano content delete <content id>}
   c.summary = %{Delete a content item}
   c.description = %{Delete a content item
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.action do |args, options|
     prd = MrMurano::ProductContent.new
     if args[0].nil? then
       prd.error "Missing <content id>"
     else
-      prd.outf prd.remove(args[0])
+      ret = prd.remove(args[0])
+      prd.outf(ret) unless ret.nil? or ret.empty?
     end
   end
 end
 
 command 'content upload' do |c|
-  c.syntax = %{mr content upload <content id> <file>}
+  c.syntax = %{murano content upload <content id> <file>}
   c.summary = %{Upload content}
   c.description = %{Upload a content item
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.option '--meta STRING', %{Add extra meta info to the content item}
 
@@ -86,21 +87,23 @@ command 'content upload' do |c|
 
       ret = prd.info(args[0])
       if ret.nil? then
-        prd.outf prd.create(args[0], options.meta)
+        ret = prd.create(args[0], options.meta)
+        prd.outf(ret) unless ret.nil? or ret.empty?
       end
 
-      prd.outf prd.upload(args[0], args[1])
+      ret = prd.upload(args[0], args[1])
+      prd.outf(ret) unless ret.nil? or ret.empty?
     end
   end
 end
 
 command 'content download' do |c|
-  c.syntax = %{mr content download <content id>}
+  c.syntax = %{murano content download <content id>}
   c.summary = %{Download a content item}
   c.description = %{Download a content item
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.option '-o','--output FILE',%{save to this file}
   c.action do |args, options|

@@ -6,7 +6,7 @@ require 'pp'
 # - ln gb.rb ~/.mrmurano/plugins
 
 command :_gb do |c|
-  c.syntax = %{mr _gb <class> <method> (<args>)}
+  c.syntax = %{murano _gb <class> <method> (<args>)}
   c.summary = %{Call internal class methods directly.}
   c.description = %{Call internal class methods directly.}
 

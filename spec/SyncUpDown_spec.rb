@@ -9,17 +9,28 @@ class TSUD
   include MrMurano::SyncUpDown
   def initialize
     @itemkey = :name
-    @locationbase = $cfg['location.base']
-    @location = 'tsud'
+    @project_section = :routes
   end
   def fetch(id)
   end
 end
+
+RSpec::Matchers.define :pathname_globs do |glob|
+  match do |pthnm|
+    pthnm.fnmatch(glob)
+  end
+end
+
 RSpec.describe MrMurano::SyncUpDown do
   include_context "WORKSPACE"
   before(:example) do
+    MrMurano::SyncRoot.reset
     $cfg = MrMurano::Config.new
     $cfg.load
+    $project = MrMurano::ProjectFile.new
+    $project.load
+    $project['routes.location'] = 'tsud'
+    $project['routes.include'] = ['*.lua', '*/*.lua']
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['solution.id'] = 'XYZ'
   end
@@ -157,6 +168,126 @@ RSpec.describe MrMurano::SyncUpDown do
         :todel=>[],
         :toadd=>[],
         :unchg=>[]})
+    end
+
+    context "Filtering" do
+      before(:example) do
+        FileUtils.mkpath(@projectDir + '/tsud/ga')
+        FileUtils.mkpath(@projectDir + '/tsud/gb')
+        FileUtils.touch(@projectDir + '/tsud/one.lua')     # tomod
+        FileUtils.touch(@projectDir + '/tsud/ga/two.lua')  # tomod
+        FileUtils.touch(@projectDir + '/tsud/three.lua')   # unchg
+        FileUtils.touch(@projectDir + '/tsud/gb/four.lua') # unchg
+        FileUtils.touch(@projectDir + '/tsud/five.lua')    # toadd
+        FileUtils.touch(@projectDir + '/tsud/ga/six.lua')  # toadd
+        @t = TSUD.new
+        expect(@t).to receive(:list).once.and_return([
+          {:name=>'one.lua'},{:name=>'two.lua'},         # tomod
+          {:name=>'three.lua'},{:name=>'four.lua'},      # unchg
+          {:name=>'seven.lua'},{:name=>'eight.lua'},     # todel
+        ])
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/one.lua')).
+          and_return({:name=>'one.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/two.lua')).
+          and_return({:name=>'two.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/three.lua')).
+          and_return({:name=>'three.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/four.lua')).
+          and_return({:name=>'four.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/five.lua')).
+          and_return({:name=>'five.lua'})
+        expect(@t).to receive(:toRemoteItem).
+          with(anything(), pathname_globs('**/six.lua')).
+          and_return({:name=>'six.lua'})
+
+        expect(@t).to receive(:docmp).with(include({:name=>'one.lua'}),anything()).and_return(true)
+        expect(@t).to receive(:docmp).with(include({:name=>'two.lua'}),anything()).and_return(true)
+        expect(@t).to receive(:docmp).with(include({:name=>'three.lua'}),anything()).and_return(false)
+        expect(@t).to receive(:docmp).with(include({:name=>'four.lua'}),anything()).and_return(false)
+      end
+
+      it "Returns all with no filter" do
+        ret = @t.status
+        expect(ret).to match({
+          :unchg=>[
+            {:name=>'three.lua', :synckey=>'three.lua',
+             :local_path=> pathname_globs('**/three.lua')},
+            {:name=>'four.lua', :synckey=>'four.lua',
+             :local_path=>pathname_globs('**/four.lua')},
+          ],
+          :toadd=>[
+            {:name=>'five.lua', :synckey=>'five.lua',
+             :local_path=>pathname_globs('**/five.lua')},
+            {:name=>'six.lua', :synckey=>'six.lua',
+             :local_path=>pathname_globs('**/six.lua')},
+          ],
+          :todel=>[
+            {:name=>'seven.lua', :synckey=>'seven.lua'},
+            {:name=>'eight.lua', :synckey=>'eight.lua'},
+          ],
+          :tomod=>[
+            {:name=>'one.lua', :synckey=>'one.lua',
+             :local_path=>pathname_globs('**/one.lua')},
+            {:name=>'two.lua', :synckey=>'two.lua',
+             :local_path=>pathname_globs('**/two.lua')},
+          ]})
+      end
+
+      it "Finds local path globs" do
+        ret = @t.status({}, ['**/ga/*.lua'])
+        expect(ret).to match({
+          :unchg=>[ ],
+          :toadd=>[
+            {:name=>'six.lua', :synckey=>'six.lua',
+             :local_path=>an_instance_of(Pathname)},
+          ],
+          :todel=>[ ],
+          :tomod=>[
+            {:name=>'two.lua', :synckey=>'two.lua',
+             :local_path=>an_instance_of(Pathname)},
+          ]})
+      end
+
+      it "Finds nothing with specific matcher" do
+        ret = @t.status({}, ['#foo'])
+        expect(ret).to match({
+          :unchg=>[ ],
+          :toadd=>[ ],
+          :todel=>[ ],
+          :tomod=>[ ]})
+      end
+
+      it "gets all the details" do
+        ret = @t.status({:unselected=>true})
+        expect(ret).to match({
+          :unchg=>[
+            {:name=>'three.lua', :synckey=>'three.lua', :selected=>true,
+             :local_path=> pathname_globs('**/three.lua')},
+            {:name=>'four.lua', :synckey=>'four.lua', :selected=>true,
+             :local_path=>pathname_globs('**/four.lua')},
+          ],
+          :toadd=>[
+            {:name=>'five.lua', :synckey=>'five.lua', :selected=>true,
+             :local_path=>pathname_globs('**/five.lua')},
+            {:name=>'six.lua', :synckey=>'six.lua', :selected=>true,
+             :local_path=>pathname_globs('**/six.lua')},
+          ],
+          :todel=>[
+            {:name=>'seven.lua', :selected=>true, :synckey=>'seven.lua'},
+            {:name=>'eight.lua', :selected=>true, :synckey=>'eight.lua'},
+          ],
+          :tomod=>[
+            {:name=>'one.lua', :synckey=>'one.lua', :selected=>true,
+             :local_path=>pathname_globs('**/one.lua')},
+            {:name=>'two.lua', :synckey=>'two.lua', :selected=>true,
+             :local_path=>pathname_globs('**/two.lua')},
+          ]})
+      end
     end
   end
 
@@ -334,22 +465,22 @@ RSpec.describe MrMurano::SyncUpDown do
       @t = TSUD.new
     end
 
-    it "finds items in bundles." do
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      FileUtils.touch(@projectDir + '/bundles/mybun/tsud/two.lua')
-
-      expect(@t).to receive(:toRemoteItem).and_return(
-        {:name=>'two.lua'},{:name=>'one.lua'}
-      )
-      ret = @t.locallist
-      expect(ret).to match([
-        {:name=>'two.lua',
-         :bundled=>true,
-         :local_path=>an_instance_of(Pathname)},
-        {:name=>'one.lua',
-         :local_path=>an_instance_of(Pathname)},
-      ])
-    end
+#    it "finds items in bundles." do
+#      FileUtils.touch(@projectDir + '/tsud/one.lua')
+#      FileUtils.touch(@projectDir + '/bundles/mybun/tsud/two.lua')
+#
+#      expect(@t).to receive(:toRemoteItem).and_return(
+#        {:name=>'two.lua'},{:name=>'one.lua'}
+#      )
+#      ret = @t.locallist
+#      expect(ret).to match([
+#        {:name=>'two.lua',
+#         :bundled=>true,
+#         :local_path=>an_instance_of(Pathname)},
+#        {:name=>'one.lua',
+#         :local_path=>an_instance_of(Pathname)},
+#      ])
+#    end
 
     it "Doesn't download a bundled item" do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
