@@ -22,8 +22,9 @@ RSpec.shared_context "CI_CMD" do
         case i
         when /[ ]/
           %{"#{i}"}
-        when /[\*#]/
-          i.gsub(/([\*#])/,'^\1')
+        when /[\*]/
+          #i.gsub(/([\*])/,'^\1')
+          %{'#{i}'}
         else
           i
         end
