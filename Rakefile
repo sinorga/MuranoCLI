@@ -35,7 +35,7 @@ task :rspec do
     rv=RUBY_VERSION.gsub(/\./,'_')
     sh %{rspec --format html --out report/index-#{rv}.html --format progress}
 end
-task :test => [:rspec]
+task :test => [:test_clean_up, :rspec]
 
 desc "Clean out junk from prior hot tests"
 task :test_clean_up do
