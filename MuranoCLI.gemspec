@@ -3,10 +3,10 @@ $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 require_relative 'lib/MrMurano/version.rb'
 
 Gem::Specification.new do |s|
-  s.name        = 'MrMurano'
+  s.name        = 'MuranoCLI'
   s.version     = MrMurano::VERSION
   s.authors     = ['Michael Conrad Tadpol Tilstra']
-  s.email       = ['tadpol@tadpol.org']
+  s.email       = ['miketilstra@exosite.com']
   s.license     = 'MIT'
   s.homepage    = 'https://github.com/exosite/MuranoCLI'
   s.summary     = 'Do more from the command line with Murano'
@@ -17,6 +17,8 @@ Gem::Specification.new do |s|
   See a diff of the changes before you push.
 
   and so much more.
+
+  This gem was formerly known as MrMurano.
   }
   s.required_ruby_version = '~> 2.0'
 

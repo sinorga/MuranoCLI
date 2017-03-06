@@ -153,16 +153,16 @@ if Gem.win_platform? then
     end
     task :test => [:murano_exe_test]
 
-    installerName = "Output/MrMurano-#{Bundler::GemHelper.gemspec.version.to_s}-Setup.exe"
+    installerName = "Output/MuranoCLI-#{Bundler::GemHelper.gemspec.version.to_s}-Setup.exe"
 
-    desc "Build a Windows installer for MrMurano"
+    desc "Build a Windows installer for MuranoCLI"
     task :inno => [installerName]
 
-    file "Output/MrMuranoSetup.exe" => ['murano.exe', 'ReadMe.txt'] do
+    file "Output/MuranoCLISetup.exe" => ['murano.exe', 'ReadMe.txt'] do
         ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version.to_s
-        sh %{"C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MrMurano.iss}
+        sh %{"C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MuranoCLI.iss}
     end
-    file installerName => ['Output/MrMuranoSetup.exe'] do |t|
+    file installerName => ['Output/MuranoCLISetup.exe'] do |t|
         FileUtils.move t.prerequisites.first, t.name, :verbose=>true
     end
 
