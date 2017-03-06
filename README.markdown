@@ -1,6 +1,7 @@
 # MuranoCLI
 
-[![Gem Version](https://badge.fury.io/rb/MrMurano.svg)](https://badge.fury.io/rb/MrMurano)
+[![Gem
+Version](https://badge.fury.io/rb/MuranoCLI.svg)](https://badge.fury.io/rb/MuranoCLI)
 [![Build Status](https://travis-ci.org/tadpol/MrMurano.svg?branch=master)](https://travis-ci.org/tadpol/MrMurano)
 [![Inline docs](http://inch-ci.org/github/exosite/MuranoCLI.svg?branch=master)](http://inch-ci.org/github/exosite/MuranoCLI)
 
@@ -12,11 +13,6 @@ product definitions at once, set up endpoints and APIs, and more.
 
 MuranoCLI works around the idea of syncing, much like rsync.  Files from your project
 directory are synced up (or down) from Murano.
-
-!!!!! *IMPORTANT*
-
-The upcoming release of 2.0 will include some breaking changes.  The most noticeable
-of which is the command will be renamed from `mr` to `murano`.
 
 
 ## Usage
@@ -36,16 +32,14 @@ Then deploy with `murano syncup`
 There are a few steps and pieces to getting a solution with a product up and
 running in Murano. Here is the list.
 
-- Pick a business: `murano account --business`
+- Pick a business: `murano business list`
 	If this is the first time you've run `murano` it will ask for your Murano username
 	and password.
 - Set it: `murano config business.id ZZZZZZZZZ`
-- Create a product: `murano product create myawesomeproduct`
-- Save the result: `murano config product.id YYYYYYYYY`
+- Create a product: `murano product create myawesomeproduct --save`
 - Add resource aliases to specs/resources.yaml
 - Sync the product definition up: `murano syncup -V --specs`
-- Create a solution: `murano solution create myawesomesolution`
-- Save the result: `murano config solution.id XXXXXX`
+- Create a solution: `murano solution create myawesomesolution --save`
 - Sync solution code up: `murano syncup -V`
 - Assign the product to the solution: `murano assign set`
 
@@ -59,24 +53,24 @@ Then deploy with `murano syncup`
 When upgrading from a 1.\* version to a 2.0, you should uninstall the old versions
 first.
 ```
-> gem uninstall MrMurano`
+> gem uninstall MuranoCLI`
 ```
 
 And then install:
 
 ```
-> gem install MrMurano
+> gem install MuranoCLI
 ```
 Or
 ```
-> gem update MrMurano
+> gem update MuranoCLI
 ```
 
 You will likely need to be root for the above commands.  If you would rather not
 install as root, you can install gems in the user directory.
 
 ```
-> gem install MrMurano --user-install
+> gem install MuranoCLI --user-install
 ```
 
 Your `PATH` may need to be updated to find the installed `murano` command.  See the
@@ -85,7 +79,7 @@ to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
 
 ### Windows Install
 
-The MrMurano gem will install on Windows.  There is also a single Windows binary
+The MuranoCLI gem will install on Windows.  There is also a single Windows binary
 Setup installer available in [releases](https://github.com/exosite/MuranoCLI/releases)
 
 If you do not already use Ruby on Windows, then you should use the binary
@@ -151,7 +145,6 @@ solution.
 
 Currently these are:
 - Keystore: `murano keystore`
-- Timeseries: `murano timeseries`
 - TSDB: `murano tsdb`
 
 ### Output Format
@@ -200,11 +193,11 @@ When submitting pull requests, please do them against the develop branch.
 All test for MuranoCLI are done with rspec.
 
 The tests are internal (`--tag ~cmd`) or command (`--tag cmd`).  The internal tests
-are for the object that build up the internals. The command tests run `murano` from
+are for the objects that build up the internals. The command tests run `murano` from
 the shell and are for testing the user facing components.  A subset of the command
 tests work with the live Murano servers (`--tag needs_password`).
 
-To use these the following environment variables need to be set:
+To use the live tests, the following environment variables need to be set:
 - `MURANO_USER` : User name to log into Murano with
 - `MURNO_PASSWORD` : Password for that user
 - `MURANO_BUSINESS` : Business id to run tests within.
