@@ -3,7 +3,7 @@ require 'MrMurano/Product-1P-Device'
 command 'product device' do |c|
   c.syntax = %{murano product device}
   c.summary = %{Interact with a device in a product}
-  c.description = %{}
+  c.description = %{Interact with a device in a product}
 
   c.action do |a,o|
     ::Commander::UI.enable_paging
