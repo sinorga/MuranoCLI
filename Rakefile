@@ -4,7 +4,7 @@ require 'shellwords'
 task :default => [:test]
 
 tagName = "v#{Bundler::GemHelper.gemspec.version}"
-gemName = "MrMurano-#{Bundler::GemHelper.gemspec.version}.gem"
+gemName = "MuranoCLI-#{Bundler::GemHelper.gemspec.version}.gem"
 builtGem = "pkg/#{gemName}"
 
 desc "Install gem in user dir"
