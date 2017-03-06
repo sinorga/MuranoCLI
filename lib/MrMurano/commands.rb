@@ -1,4 +1,3 @@
-require 'MrMurano/commands/account'
 require 'MrMurano/commands/assign'
 require 'MrMurano/commands/businessList'
 require 'MrMurano/commands/config'
