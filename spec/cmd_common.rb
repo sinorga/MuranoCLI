@@ -18,7 +18,16 @@ RSpec.shared_context "CI_CMD" do
     args.push '-c', 'fullerror'
 
     if Gem.win_platform? then
-      cmd = args.map{|i| if i =~ /[ \*]/ then %{"#{i}"} else i end}.join(' ')
+      cmd = args.map do |i|
+        case i
+        when /[ ]/
+          %{"#{i}"}
+        when /[\*#]/
+          i.gsub(/([\*#])/,'^\1')
+        else
+          i
+        end
+      end.join(' ')
     else
       cmd = Shellwords.join(args)
     end
