@@ -45,6 +45,10 @@ global_option('-c', '--config KEY=VALUE', %{Set a single config key}) {|param|
 default_command :help
 #default_command :syncup
 
+msg = %{The 'MrMurano' gem has been deprecated and has been replaced by 'MuranoCLI'.}
+$stderr.puts HighLine.color(msg, :yellow)
+$stderr.puts HighLine.color('Please upgrade.', :yellow)
+
 $cfg = MrMurano::Config.new
 $cfg.load
 
