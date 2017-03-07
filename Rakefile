@@ -138,12 +138,14 @@ file "ReadMe.txt" => ['README.markdown'] do |t|
 end
 
 if Gem.win_platform? then
-    file 'murano.exe' => Dir['lib/MrMurano/**/*.rb'] do
+    file 'murano.exe' => Dir['lib/**/*.{rb,erb,yaml}'] do
         # Need to find all dlls, because ocra isn't finding them for some reason.
         gemdir = `gem env gemdir`.chomp
         gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
+        dataFiles = Dir['lib/**/*.{erb,yaml}']
+        others = gemdlls + dataFiles
         ENV['RUBYLIB'] = 'lib'
-        sh %{ocra bin/murano #{gemdlls.join(' ')}}
+        sh %{ocra bin/murano #{others.join(' ')}}
     end
     task :wexe => ['murano.exe']
 

@@ -315,13 +315,13 @@ RSpec.describe MrMurano::ProductResources do
     it "it exists and has item" do
       @prd.removelocal(@spec_path, {:alias=>"state"})
       lbns = (@testdir + 'spec/fixtures/product_spec_files/lightbulb-no-state.yaml').realpath
-      expect(FileUtils.cmp(@spec_path.to_path, lbns.to_path)).to be true
+      expect(lbns.read).to eq(@spec_path.read)
     end
 
     it "it exists and does not have item" do
       @prd.removelocal(@spec_path, {:alias=>"ThisAliasDoesNotExistInHere"})
       # nothing changed
-      expect(FileUtils.cmp(@spec_path.to_path, @lb.to_path)).to be true
+      expect(@lb.read).to eq(@spec_path.read)
     end
   end
 end
