@@ -197,7 +197,6 @@ module MrMurano
       ## Get one device
       # @param id [String] The identity to fetch
       def fetch(id)
-        # MRMUR-54
         get("/#{CGI.escape(id.to_s)}")
       end
 
@@ -205,6 +204,11 @@ module MrMurano
       # @param id [String] The new identity
       def enable(id)
         put("/#{CGI.escape(id.to_s)}")
+        # { :auth => {
+        #     :key => "",
+        #     :expire => '',
+        #   }
+        # }
       end
       alias whitelist enable
       alias create enable
