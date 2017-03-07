@@ -27,6 +27,9 @@ command :init do |c|
     # Try to import a .Solutionfile.secret
     MrMurano::ConfigMigrate.new.import_secret
 
+    # Setup for selfcalls.
+    _commands = ::Commander::Runner.instance.instance_variable_get(:@commands)
+
     # If they have never logged in, then asking for the business.id will also ask
     # for their username and password.
     say "Using account #{$cfg['user.name']}"
@@ -42,6 +45,9 @@ command :init do |c|
         say "You are only part of one business; using #{bizid[:name]}"
         $cfg.set('businesses.id', bizid[:bizid], :project)
 
+      elsif bizz.count == 0 then
+        acc.warning "You don't have any businesses; Log into the webUI and create one."
+        exit 3
       else
         choose do |menu|
           menu.prompt = "Select which Business to use:"
@@ -65,6 +71,12 @@ command :init do |c|
         sol = solz.first
         say "You only have one solution; using #{sol[:domain]}"
         $cfg.set('solution.id', sol[:apiId], :project)
+
+      elsif solz.count == 0 then
+        say "You don't have any solutions; lets create one"
+        solname = ask("Solution Name? ")
+        _commands['solution create'].call([solname, '--save'])
+
       else
         choose do |menu|
           menu.prompt = "Select which Solution to use:"
@@ -88,6 +100,12 @@ command :init do |c|
         prd = podz.first
         say "You only have one product; using #{prd[:label]}"
         $cfg.set('product.id', prd[:modelId], :project)
+
+      elsif podz.count == 0 then
+        say "You don't have any products; lets create one"
+        podname = ask("Product Name? ")
+        _commands['product create'].call([podname, '--save'])
+
       else
         choose do |menu|
           menu.prompt = "Select which Product to use:"
