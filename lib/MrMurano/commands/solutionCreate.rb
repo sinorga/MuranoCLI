@@ -13,7 +13,6 @@ command 'solution create' do |c|
     name = args[0]
 
     ret = acc.new_solution(name)
-    pp ret
     if ret.nil? then
       acc.error "Create failed"
       exit 5
