@@ -39,7 +39,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('terminal-table', '~> 1.4.5')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
-  s.add_development_dependency('ocra', '~> 1.3.6')
+  s.add_development_dependency('ocra', '~> 1.3.8')
   s.add_development_dependency('rake', '~> 10.1.1')
   s.add_development_dependency('rspec', '~> 3.5')
   s.add_development_dependency('simplecov')

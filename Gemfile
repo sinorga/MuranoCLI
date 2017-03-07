@@ -22,6 +22,6 @@ group :test do
 end
 
 group :windows do
-  gem 'ocra', '~> 1.3.6'
+  gem 'ocra', '~> 1.3.8'
 end
 
