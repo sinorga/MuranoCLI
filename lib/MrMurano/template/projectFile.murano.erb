@@ -22,30 +22,36 @@ info:
 #
 # The sections routes, assets, modules, and services are all optional.
 #
-# They all have defaults values (show below) that should work for a majority of the
-# projects out there.  But they are all fully configurable to fit the way you want
-# your project to be.
+# They all have defaults values that should work for a majority of the projects out
+# there.  But they are all fully configurable to fit the way you want your project
+# to be.
+#
+# Examples follow.
 #
 #
 #routes:
-#   #To get all of the routes, first find all files that come from this array of globs.
-#   #If using single glob, then can be just the string.
-#  include: ['{routes,endpoints}/*.lua', '{routes,endpoints}/*/*.lua']
+#  #Start off with the directory name we want to keep everything in.
+#  location: routes
 #
-#   #Then remove all that match these globs. Again, if a single, can drop the array.
-#   #If not excluding, use empty array [], or empty node.
+#  #Then use globs to find all of the files that can contain route code.
+#  #If using single glob, then can be just the string.
+#  include: ['{,../endpoints}/*.lua', '{,../endpoints}/*/*.lua']
+#  #include: '**/*.lua'
+#
+#  #Then remove all that match these globs. Again, if a single, can drop the array.
+#  #If not excluding, use empty array [], or empty node.
 #  exclude: ['*_test.lua', '*_spec.lua', '**/.*']
 #
-#   #That leaves a list of files with API routes in them.  Each Route file can
-#   #contain one or more actual routes that are synced with Murano.
+#  #That leaves a list of files with API routes in them.  Each Route file can
+#  #contain one or more actual routes that are synced with Murano.
 #
 #
-#   #If you are hosting your website somewhere other than on Murano, and you want to
-#   #tighten up what Cross Origin calls are allowed, you can set that here.
+#  #If you are hosting your website somewhere other than on Murano, and you want to
+#  #tighten up what Cross Origin calls are allowed, you can set that here.
 #
-#   #Either point to a YAML file
+#  #Either point to a YAML file
 #  cors: "cors.yaml"
-#   #Or include it directly
+#  #Or include it directly
 #  cors: {"origin":true,"methods":["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],"headers":["Content-Type","Cookie","Authorization"],"credentials":true}
 #
 #assets:
@@ -55,13 +61,17 @@ info:
 #  default_page: index.html
 #
 #modules:
-#  include: ['modules/*.lua', 'modules/*/*.lua']
+#  location: modules
+#  include: ['*.lua', '*/*.lua']
 #  exclude: ['*_test.lua', '*_spec.lua', '**/.*']
 #
 #services:
+#  location: services
 #  include:
-#    - '{services,eventhandlers,event_handler}/*.lua'
-#    - '{services,eventhandlers,event_handler}/*/*.lua'
+#    - '*.lua'
+#    - '*/*.lua'
+#    - '{../eventhandlers,../event_handler}/*.lua'
+#    - '{../eventhandlers,../event_handler}/*/*.lua'
 #  exclude: ['*_test.lua', '*_spec.lua', '**/.*']
 
 
