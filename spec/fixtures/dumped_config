@@ -14,8 +14,7 @@ files = files
 endpoints = routes
 modules = modules
 eventhandlers = services
-resources = resources.yaml
-specs = specs/resources.yaml
+resources = specs/resources.yaml
 cors = cors.yaml
 
 [sync]

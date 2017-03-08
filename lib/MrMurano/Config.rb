@@ -118,7 +118,7 @@ module MrMurano
       set('location.endpoints', 'routes', :defaults)
       set('location.modules', 'modules', :defaults)
       set('location.eventhandlers', 'services', :defaults)
-      set('location.resources', 'resources.yaml', :defaults)
+      set('location.resources', 'specs/resources.yaml', :defaults)
       set('location.cors', 'cors.yaml', :defaults)
 
       set('sync.bydefault', SyncRoot.bydefault.join(' '), :defaults) if defined? SyncRoot

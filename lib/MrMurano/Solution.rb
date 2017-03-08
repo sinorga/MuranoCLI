@@ -54,10 +54,6 @@ module MrMurano
       get('/logs')
     end
 
-    def usage
-      get('/usage')
-    end
-
   end
 
 end

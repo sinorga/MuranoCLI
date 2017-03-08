@@ -6,6 +6,7 @@ require '_workspace'
 RSpec.describe MrMurano::ProductResources do
   include_context "WORKSPACE"
   before(:example) do
+    MrMurano::SyncRoot.reset
     $cfg = MrMurano::Config.new
     $cfg.load
     $project = MrMurano::ProjectFile.new
@@ -209,12 +210,12 @@ RSpec.describe MrMurano::ProductResources do
     end
   end
 
-  context "local resoruces" do
+  context "local resources" do
     before(:example) do
       # pull over test file.
-      FileUtils.mkpath(File.dirname($cfg['location.specs']))
+      FileUtils.mkpath(File.dirname($cfg['location.resources']))
       lb = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
-      @spec_path = $cfg['location.specs']
+      @spec_path = $cfg['location.resources']
       FileUtils.copy(lb.to_path, @spec_path)
     end
 
@@ -255,9 +256,9 @@ RSpec.describe MrMurano::ProductResources do
 
   context "downloads" do
     before(:example) do
-      FileUtils.mkpath($cfg['location.specs'])
+      FileUtils.mkpath(File.dirname($cfg['location.resources']))
       @lb = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
-      @spec_path = Pathname.new(File.join($cfg['location.specs'], $cfg['product.spec']))
+      @spec_path = Pathname.new($cfg['location.resources'])
     end
 
     it "when nothing is there" do
@@ -305,9 +306,9 @@ RSpec.describe MrMurano::ProductResources do
   context "removes local items" do
     before(:example) do
       # pull over test file.
-      FileUtils.mkpath($cfg['location.specs'])
+      FileUtils.mkpath(File.dirname($cfg['location.resources']))
       @lb = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
-      @spec_path = File.join($cfg['location.specs'], $cfg['product.spec'])
+      @spec_path = $cfg['location.resources']
       FileUtils.copy(@lb.to_path, @spec_path)
       @spec_path = Pathname.new(@spec_path)
     end
