@@ -146,12 +146,15 @@ module MrMurano
     #
     # Children objects should override this.
     #
-    # @param root Pathname: Root path for this resource type from config files
-    # @param path Pathname: Path to local item
-    # @return Hash: hash of the details for the remote item for this path
+    # @param root [Pathname,String] Root path for this resource type from config files
+    # @param path [Pathname,String] Path to local item
+    # @return [Hash] hash of the details for the remote item for this path
     def toRemoteItem(root, path)
-      path = Pathname.new(path) unless path.kind_of? Pathname
-      root = Pathname.new(root) unless root.kind_of? Pathname
+      # This mess brought to you by Windows short path names.
+      path = Dir.glob(path.to_s).first
+      root = Dir.glob(root.to_s).first
+      path = Pathname.new(path)
+      root = Pathname.new(root)
       {:name => path.realpath.relative_path_from(root.realpath).to_s}
     end
 

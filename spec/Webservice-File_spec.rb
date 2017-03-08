@@ -203,7 +203,7 @@ RSpec.describe MrMurano::Webservice::File do
       ret = @srv.toRemoteItem(prj, @lp)
       expect(ret).to eq({
         :path=>"/files/one.text",
-        :mime_type=>"application/octet-stream",
+        :mime_type=>"text/plain",
         :checksum=>"d1af3dadf08479a1d43b282f95d61dda8efda5e7"
       })
     end

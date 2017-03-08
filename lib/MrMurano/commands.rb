@@ -1,4 +1,3 @@
-require 'MrMurano/commands/account'
 require 'MrMurano/commands/assign'
 require 'MrMurano/commands/businessList'
 #require 'MrMurano/commands/completion'
@@ -13,12 +12,10 @@ require 'MrMurano/commands/logs'
 require 'MrMurano/commands/mock'
 require 'MrMurano/commands/postgresql'
 require 'MrMurano/commands/password'
-
 require 'MrMurano/commands/project'
 require 'MrMurano/commands/projectCreate'
 require 'MrMurano/commands/projectDelete'
 require 'MrMurano/commands/projectList'
-
 require 'MrMurano/commands/show'
 require 'MrMurano/commands/status'
 require 'MrMurano/commands/sync'

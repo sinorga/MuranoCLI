@@ -19,8 +19,8 @@ command 'content list' do |c|
   c.summary = %{List downloadable content for a product}
   c.description = %{List downloadable content for a product
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
 
   c.option '-l', '--long', %{Include more info for each file}
@@ -46,8 +46,8 @@ command 'content info' do |c|
   c.summary = %{Show more info for a content item}
   c.description = %{Show more info for a content item
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
@@ -66,15 +66,16 @@ command 'content delete' do |c|
   c.summary = %{Delete a content item}
   c.description = %{Delete a content item
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
     if args[0].nil? then
       prd.error "Missing <content name>"
     else
-      prd.outf prd.remove(args[0])
+      ret = prd.remove(args[0])
+      prd.outf(ret) unless ret.nil? or ret.empty?
     end
   end
 end
@@ -85,8 +86,8 @@ command 'content upload' do |c|
   c.summary = %{Upload content}
   c.description = %{Upload a content item
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.option('--tags KEY=VALUE', %{Add extra meta info to the content item}) do |ec|
     key, value = ec.split('=', 2)
@@ -125,8 +126,8 @@ command 'content download' do |c|
   c.summary = %{Download a content item}
   c.description = %{Download a content item
 
-  Data uploaded to a product's content area can be downloaded by devices using the
-  HTTP Device API. (http://docs.exosite.com/http/#list-available-content)
+Data uploaded to a product's content area can be downloaded by devices using
+the HTTP Device API.
   }
   c.option '-o','--output FILE',%{save to this file}
   c.action do |args, options|

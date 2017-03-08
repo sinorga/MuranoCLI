@@ -226,7 +226,27 @@ RSpec.describe MrMurano::Account do
   end
 
   it "creates solution; with upper case" do
-    expect { @acc.new_solution("ONe") }.to raise_error("Solution name must be lowercase")
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      with(:body => {:label=>'ONe', :type=>'dataApi'}).
+      to_return(body: "" )
+
+    expect { @acc.new_solution("ONe") }.to_not raise_error
+  end
+
+  it "creates solution; with numbers and dashes" do
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      with(:body => {:label=>'ONe-8796-gkl', :type=>'dataApi'}).
+      to_return(body: "" )
+
+    expect { @acc.new_solution("ONe-8796-gkl") }.to_not raise_error
+  end
+
+  it "creates solution; that is too long" do
+    expect { @acc.new_solution("o"*70) }.to raise_error("Solution name must be a valid domain name component")
+  end
+
+  it "creates solution; with underscore" do
+    expect { @acc.new_solution("one_two") }.to raise_error("Solution name must be a valid domain name component")
   end
 
   it "creates solution; without biz.id" do

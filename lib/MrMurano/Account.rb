@@ -73,7 +73,7 @@ module MrMurano
     ## Get all hosts and usernames. (does not return the passwords)
     def list
       ret = {}
-      @data.each_pair{|key,value| ret[key] = value.keys}
+      @data.each_pair{|key,value| ret[key] = value.keys} unless @data.nil?
       ret
     end
   end
@@ -142,12 +142,36 @@ module MrMurano
       @@token = value
     end
 
+    def new_account(email, name, company="")
+      post('/key/', {
+        :email=>email,
+        :name=>name,
+        :company=>company,
+        :source=>'signup',
+      })
+    end
+
+    def reset_account(email)
+      post('/key/', { :email=>email, :source=>'reset' })
+    end
+
+    def accept_account(token, password)
+      post("/key/#{token}", {:password=>password})
+    end
+
     def businesses
       _loginInfo if $cfg['user.name'].nil?
       get('user/' + $cfg['user.name'] + '/membership/')
     end
 
-    #------------------------------------------------------------------------
+    def new_business(name)
+      post('/business/', {:name=>name})
+    end
+
+    def delete_business(id)
+      delete("/business/#{id}")
+    end
+
     def products
       raise "Missing Business ID" if $cfg['business.id'].nil?
       get('business/' + $cfg['business.id'] + '/product/')
@@ -173,7 +197,7 @@ module MrMurano
     ## Create a new solution in the current business
     def new_solution(name, type='dataApi')
       raise "Missing Business ID" if $cfg['business.id'].nil?
-      raise "Solution name must be lowercase" if name.match(/[A-Z]/)
+      raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
     end
 

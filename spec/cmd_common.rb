@@ -14,9 +14,21 @@ RSpec.shared_context "CI_CMD" do
     else
       args[0] = File.join(testdir, (args[0] + '.exe'))
     end
+    args.push '--trace'
+    args.push '-c', 'fullerror'
 
     if Gem.win_platform? then
-      cmd = args.map{|i| if i =~ / / then %{"#{i}"} else i end}.join(' ')
+      cmd = args.map do |i|
+        case i
+        when /[ ]/
+          %{"#{i}"}
+        when /[\*]/
+          #i.gsub(/([\*])/,'^\1')
+          %{'#{i}'}
+        else
+          i
+        end
+      end.join(' ')
     else
       cmd = Shellwords.join(args)
     end
@@ -24,15 +36,32 @@ RSpec.shared_context "CI_CMD" do
     cmd
   end
 
+  def rname(name)
+    "#{name}-#{Random.new.rand.hash.abs.to_s(16)}"
+  end
+
   around(:example) do |ex|
     @testdir = Pathname.new(Dir.pwd).realpath
     Dir.mktmpdir do |hdir|
       ENV['HOME'] = hdir
       Dir.chdir(hdir) do
+        Dir.mkdir('.murano')
+        unless ENV['MURANO_USER'].nil? then
+          File.open(File.join('.murano', 'config'), 'a') do |io|
+            io << "[user]\n"
+            io << "name = #{ENV['MURANO_USER']}\n"
+          end
+        end
+        unless ENV['MURANO_BUSINESS'].nil? then
+          File.open(File.join('.murano', 'config'), 'a') do |io|
+            io << "[business]\n"
+            io << "id = #{ENV['MURANO_BUSINESS']}\n"
+          end
+        end
         @tmpdir = File.join(hdir, 'project')
         Dir.mkdir(@tmpdir)
         Dir.chdir(@tmpdir) do
-          Timeout::timeout(20) do
+          Timeout::timeout(300) do
             ex.run
           end
         end

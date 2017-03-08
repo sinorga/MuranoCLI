@@ -1,6 +1,7 @@
 require 'uri'
 require 'net/http'
 require 'json'
+require('certified') if Gem.win_platform?
 
 module MrMurano
   module Http

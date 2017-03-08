@@ -3,6 +3,14 @@ require 'MrMurano/Account'
 require 'tempfile'
 
 RSpec.describe MrMurano::Passwords, "#pwd" do
+  before(:example) do
+    @saved_pwd = ENV['MURANO_PASSWORD']
+    ENV['MURANO_PASSWORD'] = nil
+  end
+  after(:example) do
+    ENV['MURANO_PASSWORD'] = @saved_pwd
+  end
+
   it "Creates a file " do
     tmpfile = Dir.tmpdir + '/pwtest' # This way because Tempfile.new creates.
     begin

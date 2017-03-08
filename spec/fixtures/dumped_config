@@ -11,11 +11,11 @@ host = bizapi.hosted.exosite.io
 [location]
 base = <%= File.realpath(@projectDir) %>
 files = files
-endpoints = .
-modules = .
-eventhandlers = .
+endpoints = routes
+modules = modules
+eventhandlers = services
 resources = resources.yaml
-specs = specs
+specs = specs/resources.yaml
 cors = cors.yaml
 
 [sync]
@@ -27,20 +27,17 @@ searchFor = **/*
 ignoring = 
 
 [endpoints]
-searchFor = {routes,endpoints}/*.lua {route,endpoints}s/*/*.lua
+searchFor = {,../endpoints}/*.lua {,../endpoints}s/*/*.lua
 ignoring = *_test.lua *_spec.lua .*
 
 [eventhandler]
-searchFor = {services,eventhandlers,event_handler}/*.lua {services,eventhandlers,event_handler}/*/*.lua
+searchFor = *.lua */*.lua {../eventhandlers,../event_handler}/*.lua {../eventhandlers,../event_handler}/*/*.lua
 ignoring = *_test.lua *_spec.lua .*
 skiplist = websocket webservice device.service_call
 
 [modules]
-searchFor = modules/*.lua modules/*/*.lua
+searchFor = *.lua */*.lua
 ignoring = *_test.lua *_spec.lua .*
-
-[product]
-spec = resources.yaml
 
 [diff]
 cmd = <%= Gem.win_platform? ? 'fc' : 'diff -u' %>

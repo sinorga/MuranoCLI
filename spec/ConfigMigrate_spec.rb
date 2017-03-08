@@ -8,6 +8,9 @@ require '_workspace'
 RSpec.describe MrMurano::ConfigMigrate do
   include_context "WORKSPACE"
   before(:example) do
+    @saved_pwd = ENV['MURANO_PASSWORD']
+    ENV['MURANO_PASSWORD'] = nil
+
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
@@ -23,6 +26,7 @@ RSpec.describe MrMurano::ConfigMigrate do
 
   after(:example) do
     $stdout, $stderr = @stdsaved
+    ENV['MURANO_PASSWORD'] = @saved_pwd
   end
 
   it "imports all" do

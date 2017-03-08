@@ -212,9 +212,9 @@ RSpec.describe MrMurano::ProductResources do
   context "local resoruces" do
     before(:example) do
       # pull over test file.
-      FileUtils.mkpath($cfg['location.specs'])
+      FileUtils.mkpath(File.dirname($cfg['location.specs']))
       lb = (@testdir + 'spec/fixtures/product_spec_files/lightbulb.yaml').realpath
-      @spec_path = File.join($cfg['location.specs'], $cfg['product.spec'])
+      @spec_path = $cfg['location.specs']
       FileUtils.copy(lb.to_path, @spec_path)
     end
 
@@ -230,13 +230,13 @@ RSpec.describe MrMurano::ProductResources do
       end
 
       it "is missing" do
-        expect(@prd).to receive(:warning).once.with("Skipping missing specs/XYZ.yaml-h")
+        expect(@prd).to receive(:warning).once.with("Skipping missing specs/resources.yaml-h")
         ret = @prd.localitems(@spec_path + '-h')
         expect(ret).to eq([])
       end
 
       it "isn't a file" do
-        expect(@prd).to receive(:warning).once.with("Cannot read from specs/XYZ.yaml-h")
+        expect(@prd).to receive(:warning).once.with("Cannot read from specs/resources.yaml-h")
         FileUtils.mkpath(@spec_path + '-h')
         ret = @prd.localitems(@spec_path + '-h')
         expect(ret).to eq([])
@@ -246,7 +246,7 @@ RSpec.describe MrMurano::ProductResources do
         File.open(@spec_path + '-h', 'w') do |io|
           io << ['a','b','c'].to_yaml
         end
-        expect(@prd).to receive(:warning).once.with("Unexpected data in specs/XYZ.yaml-h")
+        expect(@prd).to receive(:warning).once.with("Unexpected data in specs/resources.yaml-h")
         ret = @prd.localitems(@spec_path + '-h')
         expect(ret).to eq([])
       end
@@ -315,13 +315,13 @@ RSpec.describe MrMurano::ProductResources do
     it "it exists and has item" do
       @prd.removelocal(@spec_path, {:alias=>"state"})
       lbns = (@testdir + 'spec/fixtures/product_spec_files/lightbulb-no-state.yaml').realpath
-      expect(FileUtils.cmp(@spec_path.to_path, lbns.to_path)).to be true
+      expect(lbns.read).to eq(@spec_path.read)
     end
 
     it "it exists and does not have item" do
       @prd.removelocal(@spec_path, {:alias=>"ThisAliasDoesNotExistInHere"})
       # nothing changed
-      expect(FileUtils.cmp(@spec_path.to_path, @lb.to_path)).to be true
+      expect(@lb.read).to eq(@spec_path.read)
     end
   end
 end

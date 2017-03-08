@@ -115,9 +115,9 @@ module MrMurano
 
       set('location.base', @projectDir, :defaults) unless @projectDir.nil?
       set('location.files', 'files', :defaults)
-      set('location.endpoints', '.', :defaults)
-      set('location.modules', '.', :defaults)
-      set('location.eventhandlers', '.', :defaults)
+      set('location.endpoints', 'routes', :defaults)
+      set('location.modules', 'modules', :defaults)
+      set('location.eventhandlers', 'services', :defaults)
       set('location.resources', 'resources.yaml', :defaults)
       set('location.cors', 'cors.yaml', :defaults)
 
@@ -127,14 +127,14 @@ module MrMurano
       set('files.searchFor', '**/*', :defaults)
       set('files.ignoring', '', :defaults)
 
-      set('endpoints.searchFor', '{routes,endpoints}/*.lua {route,endpoints}s/*/*.lua', :defaults)
+      set('endpoints.searchFor', '{,../endpoints}/*.lua {,../endpoints}s/*/*.lua', :defaults)
       set('endpoints.ignoring', '*_test.lua *_spec.lua .*', :defaults)
 
-      set('eventhandler.searchFor', '{services,eventhandlers,event_handler}/*.lua {services,eventhandlers,event_handler}/*/*.lua', :defaults)
+      set('eventhandler.searchFor', '*.lua */*.lua {../eventhandlers,../event_handler}/*.lua {../eventhandlers,../event_handler}/*/*.lua', :defaults)
       set('eventhandler.ignoring', '*_test.lua *_spec.lua .*', :defaults)
       set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
 
-      set('modules.searchFor', 'modules/*.lua modules/*/*.lua', :defaults)
+      set('modules.searchFor', '*.lua */*.lua', :defaults)
       set('modules.ignoring', '*_test.lua *_spec.lua .*', :defaults)
 
       if Gem.win_platform? then
