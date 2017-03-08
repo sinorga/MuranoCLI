@@ -58,8 +58,6 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
       expect(status.exitstatus).to eq(0)
 
       after = Dir['**/*'].sort
-      pp @projectDir
-      pp after
       expect(after).to include("files",
                            "files/icon.png",
                            "files/index.html",
