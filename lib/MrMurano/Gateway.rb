@@ -34,10 +34,54 @@ module MrMurano
       # …
       #include SyncUpDown
 
+      # Get info for this gateway interface.
       def info
         get()
       end
 
+      # Change how devices are identified and connected
+      # @param name [String] One of: onep, mqtt, cbor  (only onep for now)
+      # @param auth_type [String] One of: certificate, cik, hash, password, signature
+      # @param dev_mode [Boolean] Leave as false.
+      def protocol(name='onep', auth_type='cik', dev_mode=false)
+        patch('', {
+          :protocol => {
+            :name => name,
+            :auth_type => auth_type,
+            :dev_mode => dev_mode,
+          }
+        })
+      end
+
+      # Set how device IDs are validated.
+      # @param type [String] One of: mac:48, mac-48, mac.48, uuidv4, base10, base16, opaque
+      # @param casing [String] One of: lower, upper, mixed
+      # @param length [Integer] Required length of identity. 0 for any lengths.
+      # @param prefix [String] ?
+      def identity_format(type='opaque', casing='mixed', length=0, prefix='')
+        patch('', {
+          :identity_format => {
+            :type => type,
+            :prefix => prefix,
+            :options => {
+              :casing => casing,
+              :length => length,
+            }
+          }
+        })
+      end
+
+      # TODO
+      def provisioning()
+        patch('', {
+          :provisioning=>
+          {:enabled=>true,
+           :generate_identity=>true,
+           :presenter_identity=>true,
+           :ip_whitelisting=>{:enabled=>false, :allowed=>[]}
+          }
+        })
+      end
     end
 
     ##############################################################################
