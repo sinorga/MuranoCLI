@@ -49,7 +49,12 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
 
       out, err, status = Open3.capture3(capcmd('murano', 'syncdown'))
       expect(out).to eq('')
-      expect(err).to eq('')
+      expect(err.lines).to include(
+        a_string_ending_with("routes\e[0m\n"),
+        a_string_ending_with("files\e[0m\n"),
+        a_string_ending_with("modules\e[0m\n"),
+        a_string_ending_with("services\e[0m\n"),
+      )
       expect(status.exitstatus).to eq(0)
 
       after = Dir['**/*'].sort
