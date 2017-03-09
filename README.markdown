@@ -17,18 +17,23 @@ directory are synced up (or down) from Murano.
 
 ## Usage
 
-### To start from an existing project in Murano
 ```
 mkdir myproject
 cd myproject
-murano config solution.id XXXXXX
-murano syncdown -V
+murano init
 ```
 
-Do stuff, see what changed: `murano status` or `murano diff`.
+Update `myproject.murano` with the info about your project.
+
+If this is a new project, you will also need to run `murano assign set` to connect
+the product and solution.
+
+If this is an existing project, you want to run `murano syncdown -V`
+
+Now do stuff, see what changed: `murano status` or `murano diff`.
 Then deploy with `murano syncup`
 
-### To start a brand new project
+### To start a brand new project the hard way.
 There are a few steps and pieces to getting a solution with a product up and
 running in Murano. Here is the list.
 
