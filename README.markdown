@@ -1,11 +1,11 @@
-# MuranoCLI
+# Murano Command Line Interface (CLI)
 
 [![Gem
 Version](https://badge.fury.io/rb/MuranoCLI.svg)](https://badge.fury.io/rb/MuranoCLI)
 [![Build Status](https://travis-ci.org/tadpol/MrMurano.svg?branch=master)](https://travis-ci.org/tadpol/MrMurano)
 [![Inline docs](http://inch-ci.org/github/exosite/MuranoCLI.svg?branch=master)](http://inch-ci.org/github/exosite/MuranoCLI)
 
-Do more from the command line with [Murano](https://exosite.com/platform/)
+Do more from the command line with [Murano](https://exosite.com/platform/).
 
 MuranoCLI is the command-line tool that interacts with Murano and makes different
 tasks easier. MuranoCLI makes it easy to deploy code to a solution, import many
@@ -95,6 +95,8 @@ installing the new version.
 
 
 ## Features
+
+### Project File
 
 ### Logs
 
