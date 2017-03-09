@@ -172,6 +172,31 @@ return myimport_module.import(request)
 return Tsdb.deleteAll()
 ```
 
+### Writing Service Event Handlers
+
+All of the event handlers you add to your solution are identified by which service
+they are watching and which event in that service triggers the script.
+
+This is set with the following line:
+```lua
+--#EVENT SERVICE EVENT
+```
+
+For example, the event handler that processes all data coming from your devices
+could be:
+```lua
+--#EVENT device datapoint
+local stamped = nil
+if data.api == "record" then
+	stamped = tostring(data.value[1]) .. 's'
+end
+Tsdb.write{
+	tags = {sn=data.device_sn},
+	metrics = {[data.alias] = tonumber(data.value[2])},
+	ts = stamped
+}
+```
+
 ### MURANO_CONFIGFILE environment and Dotenv
 
 The environment variable `MURANO_CONFIGFILE` is checked for an additional config to
