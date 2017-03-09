@@ -1,4 +1,4 @@
---#EVENT device datapoint
+--#EVENT gateway data_in
 -- luacheck: globals data (magic variable from Murano)
 
 -- Get the timestamp for this data if a record action.
