@@ -135,6 +135,43 @@ routes:
 
 Then use `murano cors set` to push these options up to your solution.
 
+### Writing Routes (or endpoints)
+
+All of the routes that you create in your solution are identified by their method
+and path.  You set this with the following line:
+
+```lua
+--#ENDPOINT METHOD PATH
+```
+
+Optionally, you can set what the expected content type is too. (If you don't set
+this, the value is application/json)
+
+```lua
+--#ENDPOINT METHOD PATH CONTENT_TYPE
+```
+
+An example of a route that puts csv data:
+```lua
+--#ENDPOINT PUT /api/upload text/csv
+```
+
+After this header line, the script to handle the route follows.  Since many routes
+end up being a couple of lines or less, you can put multiple routes into a single
+file.
+
+Which looks like this:
+```lua
+--#ENDPOINT GET /api/somedata
+return Tsdb.query(…)
+
+--#ENDPOINT PUT /api/somedata text/csv
+return myimport_module.import(request)
+
+--#ENDPOINT DELETE /api/startover
+return Tsdb.deleteAll()
+```
+
 ### MURANO_CONFIGFILE environment and Dotenv
 
 The environment variable `MURANO_CONFIGFILE` is checked for an additional config to
