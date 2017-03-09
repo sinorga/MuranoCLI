@@ -75,7 +75,7 @@ the HTTP Device API.
       prd.error "Missing <content name>"
     else
       ret = prd.remove(args[0])
-      prd.outf(ret) unless ret.nil? or ret.empty?
+      prd.outf(ret) if not ret.nil? and ret.count > 1
     end
   end
 end
