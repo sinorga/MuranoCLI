@@ -14,6 +14,10 @@ command 'project create' do |c|
     name = args[0]
 
     ret = acc.new_project(name)
+    if ret.nil? then
+      acc.error "Create failed"
+      exit 5
+    end
     if not ret.kind_of?(Hash) and not ret.empty? then
       acc.error "Create failed: #{ret.to_s}"
       return
@@ -22,6 +26,10 @@ command 'project create' do |c|
     # create doesn't return anything, so we need to go look for it.
     ret = acc.projects.select{|i| i[:domain] =~ /#{name}\./}
     pid = ret.first[:apiId]
+    if pid.nil? or pid.empty? then
+      acc.error "Didn't find an apiId!!!!  #{ret}"
+      exit 3
+    end
     if options.save then
       $cfg.set('project.id', pid)
     end
