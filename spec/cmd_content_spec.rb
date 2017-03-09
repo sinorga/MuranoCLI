@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'open3'
 require 'pathname'
+require 'yaml'
 require 'cmd_common'
 
 RSpec.describe 'murano content', :cmd, :needs_password do
@@ -8,13 +9,13 @@ RSpec.describe 'murano content', :cmd, :needs_password do
 
   before(:example) do
     @project_name = rname('contestTest')
-      out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @project_name, '--save'))
+      out, err, status = Open3.capture3(capcmd('murano', 'project', 'create', @project_name, '--save'))
       expect(err).to eq('')
       expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
       expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-      out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
+      out, err, status = Open3.capture3(capcmd('murano', 'project', 'delete', @project_name))
       expect(out).to eq('')
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
@@ -23,27 +24,45 @@ RSpec.describe 'murano content', :cmd, :needs_password do
 
   it "life cycle" do
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'list'))
-      expect(out).to eq('')
+      expect(out.lines).to match([
+        a_string_matching(/^(\+-+){2}\+$/),
+        a_string_matching(/^\| Name\s+\| Size\s+\|$/),
+        a_string_matching(/^(\+-+){2}\+$/),
+        a_string_matching(/^(\+-+){2}\+$/),
+      ])
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
-      FileUtils.copy(File.join(@testdir, 'spec/fixtures/dumped_config'), 'dumped_config')
-      out, err, status = Open3.capture3(capcmd('murano', 'content', 'upload', 'myFile', 'dumped_config', '--meta', 'random junk'))
+      FileUtils.copy(File.join(@testdir, 'spec/fixtures/dumped_config'), 'myFile')
+      out, err, status = Open3.capture3(capcmd('murano', 'content', 'upload', 'myFile', '--tags', 'random=junk'))
       expect(out).to eq('')
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'list'))
-      expect(out).to eq("myFile\n")
       expect(err).to eq('')
+      expect(out.lines).to match([
+        a_string_matching(/^(\+-+){2}\+$/),
+        a_string_matching(/^\| Name\s+\| Size\s+\|$/),
+        a_string_matching(/^(\+-+){2}\+$/),
+        a_string_matching(/^\| myFile\s+\| \d+\s+\|$/),
+        a_string_matching(/^(\+-+){2}\+$/),
+      ])
       expect(status.exitstatus).to eq(0)
 
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'info', 'myFile'))
       expect(err).to eq('')
-      olines = out.lines
-      expect(olines[0]).to match(/^(\+-+){5}\+$/)
-      expect(olines[1]).to match(/^\| \S+\s+\| \d+\s+\| \d+\s+\| random junk\s+\| (false|true)\s+\|$/)
-      expect(olines[2]).to match(/^(\+-+){5}\+$/)
+      expect{out = YAML.load(out)}.to_not raise_error
+      expect(out).to match(
+        'type' => a_kind_of(String),
+        'size' => a_kind_of(Integer),
+        'mtime' => a_kind_of(String),
+        'id' => a_kind_of(String),
+        'tags' => {
+          'name' => 'myFile',
+          'random' => 'junk',
+        }
+      )
       expect(status.exitstatus).to eq(0)
 
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'download', 'myFile', '-o', 'testDown'))
@@ -51,7 +70,7 @@ RSpec.describe 'murano content', :cmd, :needs_password do
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
       expect(File.exist?('testDown')).to be true
-      dcf = IO.read('dumped_config')
+      dcf = IO.read('myFile')
       tdf = IO.read('testDown')
       expect(tdf).to eq(dcf)
 
@@ -61,8 +80,13 @@ RSpec.describe 'murano content', :cmd, :needs_password do
       expect(status.exitstatus).to eq(0)
 
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'list'))
-      expect(out).to eq('')
       expect(err).to eq('')
+      expect(out.lines).to match([
+        a_string_matching(/^(\+-+){2}\+$/),
+        a_string_matching(/^\| Name\s+\| Size\s+\|$/),
+        a_string_matching(/^(\+-+){2}\+$/),
+        a_string_matching(/^(\+-+){2}\+$/),
+      ])
       expect(status.exitstatus).to eq(0)
   end
 
