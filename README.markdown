@@ -103,6 +103,33 @@ MuranoCLI does a few things to make your log output easier to follow.
 
 All of these can be toggled with command line options.
 
+### CORS
+
+If you are developing you UI on seperate services and you need cross-origin
+resource sharing, you will need to set the
+[CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) options.
+
+The current CORS options can be fetched with `murano cors`
+
+There are three opitons for setting, the first and preferred way is to put your CORS
+opitons into a file named `cors.yaml`.
+
+Second and third are to put the CORS opitons in your project file.  In the `routes`
+section, add a `cors` sub-section with either the name of the file to read, or the
+CORS options inline.
+
+```yaml
+routes:
+	cors: my_cors_file.json
+```
+OR:
+```yaml
+routes:
+	cors: {"origin": true}
+```
+
+Then use `murano cors set` to push these options up to your solution.
+
 ### MURANO_CONFIGFILE environment and Dotenv
 
 The environment variable `MURANO_CONFIGFILE` is checked for an additional config to
