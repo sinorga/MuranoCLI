@@ -172,6 +172,7 @@ RSpec.describe MrMurano::Config do
     end
 
     it "dumps" do
+      ENV['MURANO_CONFIGFILE'] = nil
       cfg = MrMurano::Config.new
       cfg.load
       cfg['sync.bydefault'] = 'files'
