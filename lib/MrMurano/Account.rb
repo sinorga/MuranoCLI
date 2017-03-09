@@ -142,6 +142,7 @@ module MrMurano
       @@token = value
     end
 
+    #------------------------------------------------------------------------
     def new_account(email, name, company="")
       post('/key/', {
         :email=>email,
@@ -159,6 +160,7 @@ module MrMurano
       post("/key/#{token}", {:password=>password})
     end
 
+    #------------------------------------------------------------------------
     def businesses
       _loginInfo if $cfg['user.name'].nil?
       get('user/' + $cfg['user.name'] + '/membership/')
@@ -172,6 +174,7 @@ module MrMurano
       delete("/business/#{id}")
     end
 
+    #------------------------------------------------------------------------
     def products
       raise "Missing Business ID" if $cfg['business.id'].nil?
       get('business/' + $cfg['business.id'] + '/product/')
@@ -215,9 +218,7 @@ module MrMurano
     ## Create a new solution in the current business
     def new_project(name)
       raise "Missing Business ID" if $cfg['business.id'].nil?
-      # TODO name must be valid for domain names.
-      #raise "Solution name must be lowercase" if name.match(/[A-Z]/)
-
+      raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
       post('business/' + $cfg['business.id'] + '/project/', {:label=>name})
     end
 
