@@ -60,25 +60,27 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(status.exitstatus).to eq(0)
     end
 
-    it "matches file path" do
+    it "matches file path", :broken_on_windows do
       out, err, status = Open3.capture3(capcmd('murano', 'status', '**/icon.png'))
       expect(err).to eq('')
-      olines = out.lines
-      expect(olines[0]).to eq("Adding:\n")
-      expect(olines[1]).to a_string_matching(/ \+ S  .*files\/icon\.png/)
-      expect(olines[2]).to eq("Deleteing:\n")
-      expect(olines[3]).to eq("Changing:\n")
+      expect(out.lines).to match([
+        "Adding:\n",
+        a_string_matching(/ \+ S  .*files\/icon\.png/),
+        "Deleteing:\n",
+        "Changing:\n",
+      ])
       expect(status.exitstatus).to eq(0)
     end
 
-    it "matches route" do
+    it "matches route", :broken_on_windows do
       out, err, status = Open3.capture3(capcmd('murano', 'status', '#put#'))
       expect(err).to eq('')
-      olines = out.lines
-      expect(olines[0]).to eq("Adding:\n")
-      expect(olines[1]).to a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/)
-      expect(olines[2]).to eq("Deleteing:\n")
-      expect(olines[3]).to eq("Changing:\n")
+      expect(out.lines).to match([
+        "Adding:\n",
+        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/),
+        "Deleteing:\n",
+        "Changing:\n",
+      ])
       expect(status.exitstatus).to eq(0)
     end
   end

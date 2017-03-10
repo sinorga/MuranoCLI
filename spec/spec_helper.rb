@@ -32,6 +32,9 @@ RSpec.configure do |config|
   if ENV['MURANO_PASSWORD'].nil? then
     config.filter_run_excluding :needs_password
   end
+  if Gem.win_platform? then
+    config.filter_run_excluding :broken_on_windows
+  end
 
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
