@@ -19,8 +19,7 @@ require 'MrMurano/commands/projectList'
 require 'MrMurano/commands/show'
 require 'MrMurano/commands/status'
 require 'MrMurano/commands/sync'
-require 'MrMurano/commands/timeseries'
 require 'MrMurano/commands/tsdb'
 require 'MrMurano/commands/usage'
 
-
+#  vim: set ai et sw=2 ts=2 :
