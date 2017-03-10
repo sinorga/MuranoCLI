@@ -17,6 +17,7 @@ coverage/
 .murano/
 
 _testProject/
+test.*
 
 # Thumbnails
 ._*
