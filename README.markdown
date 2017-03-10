@@ -295,7 +295,7 @@ tests work with the live Murano servers (`--tag needs_password`).
 
 To use the live tests, the following environment variables need to be set:
 - `MURANO_USER` : User name to log into Murano with
-- `MURNO_PASSWORD` : Password for that user
+- `MURANO_PASSWORD` : Password for that user
 - `MURANO_BUSINESS` : Business id to run tests within.
 
 A free account on Murano is sufficient for these tests.
