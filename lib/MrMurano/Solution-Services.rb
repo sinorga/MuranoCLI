@@ -26,6 +26,7 @@ module MrMurano
 
     def list
       ret = get()
+      raise "Unexpected return type. got: #{ret}" unless ret.kind_of? Hash
       ret[:items]
     end
 
