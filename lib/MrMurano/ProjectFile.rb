@@ -277,6 +277,7 @@ module MrMurano
       schema = YAML.load_file(schemaPath.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
+      $cfg['tool.usingSolutionfile'] = true
 
       ifset(data, :default_page, @data[:assets], :default_page)
       ifset(data, :file_dir, @data[:assets], :location)
@@ -318,6 +319,7 @@ module MrMurano
       schema = YAML.load_file(schemaPath.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
+      $cfg['tool.usingSolutionfile'] = true
 
       ifset(data, :default_page, @data[:assets], :default_page)
       ifset(data, :assets, @data[:assets], :location)
