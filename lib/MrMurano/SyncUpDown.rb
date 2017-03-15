@@ -88,6 +88,11 @@ module MrMurano
     end
   end
 
+  ## The functionality of a Syncable thing.
+  #
+  # This provides the logic for computing what things have changed, and pushing and
+  # pulling those things.
+  #
   module SyncUpDown
     #######################################################################
     # Methods that must be overridden
@@ -97,7 +102,7 @@ module MrMurano
     #
     # Children objects Must override this
     #
-    # @return Array: of Hashes of item details
+    # @return [Array] of Hashes of item details
     def list()
       []
     end
@@ -106,7 +111,7 @@ module MrMurano
     #
     # Children objects Must override this
     #
-    # @param itemkey String: The identifying key for this item
+    # @param itemkey [String] The identifying key for this item
     def remove(itemkey)
       # :nocov:
       raise "Forgotten implementation"
@@ -117,9 +122,9 @@ module MrMurano
     #
     # Children objects Must override this
     #
-    # @param src Pathname: Full path of where to upload from
-    # @param item Hash: The item details to upload
-    # @param modify Bool: True if item exists already and this is changing it
+    # @param src [Pathname] Full path of where to upload from
+    # @param item [Hash] The item details to upload
+    # @param modify [Bool] True if item exists already and this is changing it
     def upload(src, item, modify)
       # :nocov:
       raise "Forgotten implementation"
@@ -163,8 +168,8 @@ module MrMurano
     #
     # Children objects should override this or #tolocalpath
     #
-    # @param item Hash: listing details for the item.
-    # @param itemkey Symbol: Key for look up.
+    # @param item [Hash] listing details for the item.
+    # @param itemkey [Symbol] Key for look up.
     def tolocalname(item, itemkey)
       item[itemkey].to_s
     end
@@ -177,9 +182,9 @@ module MrMurano
     #
     # Children objects should override this or #tolocalname
     #
-    # @param into Pathname: Root path for this resource type from config files
-    # @param item Hash: listing details for the item.
-    # @return Pathname: path to save (or merge) remote item into
+    # @param into [Pathname] Root path for this resource type from config files
+    # @param item [Hash] listing details for the item.
+    # @return [Pathname] path to save (or merge) remote item into
     def tolocalpath(into, item)
       return item[:local_path] if item.has_key? :local_path
       itemkey = @itemkey.to_sym
@@ -196,7 +201,7 @@ module MrMurano
     #
     # Check child specific patterns against item
     #
-    # @returns true or false
+    # @returns [Bool] true or false
     def match(item, pattern)
       false
     end
@@ -205,8 +210,8 @@ module MrMurano
     #
     # Children objects should override this if synckey is not @itemkey
     #
-    # @param item Hash: The item to get a key from
-    # @returns Object: The object to use a comparison key
+    # @param item [Hash] The item to get a key from
+    # @returns [Object] The object to use a comparison key
     def synckey(item)
       key = @itemkey.to_sym
       item[key]
@@ -216,8 +221,8 @@ module MrMurano
     #
     # Children objects should override this or implement #fetch()
     #
-    # @param local Pathname: Full path of where to download to
-    # @param item Hash: The item to download
+    # @param local [Pathname] Full path of where to download to
+    # @param item [Hash] The item to download
     def download(local, item)
       if item[:bundled] then
         warning "Not downloading into bundled item #{synckey(item)}"
@@ -243,8 +248,8 @@ module MrMurano
     # Children objects should override this if move than just unlinking the local
     # item.
     #
-    # @param dest Pathname: Full path of item to be removed
-    # @param item Hash: Full details of item to be removed
+    # @param dest [Pathname] Full path of item to be removed
+    # @param item [Hash] Full details of item to be removed
     def removelocal(dest, item)
       dest.unlink
     end
@@ -253,8 +258,7 @@ module MrMurano
     #######################################################################
 
 
-    ##
-    # So, for bundles this needs to look at all the places and build up the mered
+    # So, for bundles this needs to look at all the places and build up the merged
     # stack of local items.
     #
     # Which means it needs the from to be split into the base and the sub so we can
@@ -267,7 +271,7 @@ module MrMurano
     # #localitems
     #
     # This collects items in the project and all bundles.
-    # @return Array: of Hashes of items
+    # @return [Array] of Hashes of items
     def locallist()
       # so. if @locationbase/bundles exists
       #  gather and merge: @locationbase/bundles/*/@location
@@ -303,6 +307,7 @@ module MrMurano
 
     ##
     # Get the full path for the local versions
+    # @return [Pathname] Location for local items
     def location
       raise "Missing @project_section" if @project_section.nil?
       Pathname.new($cfg['location.base']) + $project["#{@project_section}.location"]
@@ -310,12 +315,14 @@ module MrMurano
 
     ##
     # Returns array of globs to search for files
+    # @return [Array] of Strings that are globs
     def searchFor
       raise "Missing @project_section" if @project_section.nil?
       $project["#{@project_section}.include"]
     end
 
     ## Returns array of globs of files to ignore
+    # @return [Array] of Strings that are globs
     def ignoring
       raise "Missing @project_section" if @project_section.nil?
       $project["#{@project_section}.exclude"]
@@ -327,8 +334,8 @@ module MrMurano
     # Children rarely need to override this. Only when the locallist is not a set
     # of files in a directory will they need to override it.
     #
-    # @param from Pathname: Directory of items to scan
-    # @return Array: of Hashes of item details
+    # @param from [Pathname] Directory of items to scan
+    # @return [Array] of Hashes of item details
     def localitems(from)
       # TODO: Profile this.
       debug "#{self.class.to_s}: Getting local items from: #{from}"
@@ -357,6 +364,8 @@ module MrMurano
     ##
     # Take a hash or something (a Commander::Command::Options) and return a hash
     #
+    # @param hsh [Hash, Commander::Command::Options] Thing we want to be a Hash
+    # @return [Hash] an actual Hash with default value of false
     def elevate_hash(hsh)
       # Commander::Command::Options stripped all of the methods from parent
       # objects. I have not nice thoughts about that.
@@ -374,6 +383,9 @@ module MrMurano
     #
     # This creates, uploads, and deletes things as needed up in Murano to match
     # what is in the local project directory.
+    #
+    # @param options [Hash, Commander::Command::Options] Options on opertation
+    # @param selected [Array] Filters for _matcher
     def syncup(options={}, selected=[])
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
@@ -413,6 +425,9 @@ module MrMurano
     #
     # This creates, downloads, and deletes things as needed up in the local project
     # directory to match what is in Murano.
+    #
+    # @param options [Hash, Commander::Command::Options] Options on opertation
+    # @param selected [Array] Filters for _matcher
     def syncdown(options={}, selected=[])
       options = elevate_hash(options)
       options[:asdown] = true
@@ -452,9 +467,11 @@ module MrMurano
     end
 
     ## Call external diff tool on item
+    #
     # WARNING: This will download the remote item to do the diff.
-    # @param item Hash: The item to get a diff of
-    # @return String: The diff output
+    #
+    # @param item [Hash] The item to get a diff of
+    # @return [String] The diff output
     def dodiff(item)
       trmt = Tempfile.new([tolocalname(item, @itemkey)+'_remote_', '.lua'])
       tlcl = Tempfile.new([tolocalname(item, @itemkey)+'_local_', '.lua'])
@@ -487,6 +504,8 @@ module MrMurano
 
     ##
     # Check if an item matches a pattern.
+    # @param items [Array] Of items to filter
+    # @param patterns [Array] Filters for _matcher
     def _matcher(items, patterns)
       items.map do |item|
         if patterns.empty? then
@@ -508,6 +527,10 @@ module MrMurano
     private :_matcher
 
     ## Get status of things here verses there
+    #
+    # @param options [Hash, Commander::Command::Options] Options on opertation
+    # @param selected [Array] Filters for _matcher
+    # @return [Hash] Of items grouped by the action that should be taken
     def status(options={}, selected=[])
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
