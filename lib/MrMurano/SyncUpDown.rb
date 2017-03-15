@@ -95,6 +95,53 @@ module MrMurano
   #
   module SyncUpDown
     #######################################################################
+    # Need to at least document the item Hash.
+    # Might be worth turning it into a Structure.
+    #######################################################################
+
+    # Lots here.  Need to think if making it a Struct is really the right idea.
+    # OR should it be its own tree of classes? (Item; RouteItem<Item;
+    # FileItem<Item; etc)
+    Item = Struct.new(
+      :name,        # String
+      :local_path,  # Pathanme
+      :bundled, # XXX going away.
+      :id,          # String
+      :script,      # String
+      :selected,    # Boolean
+      :synckey,
+      :diff,
+
+      # For Resources.
+      :rid,
+      :alias,
+      :format,
+
+      # Crap-ton for CORS.
+
+      # For Endpoint
+      :content_type,
+      :method,
+      :path,
+      :line_end,
+      :line,
+
+      # For Files
+      :mime_type,
+      :checksum,
+
+      # For Modules and EventHandlers
+      :solution_id,
+      :updated_at,
+
+      # For EventHandlers
+      :service,
+      :event,
+
+    ) do
+    end
+
+    #######################################################################
     # Methods that must be overridden
 
     ##
