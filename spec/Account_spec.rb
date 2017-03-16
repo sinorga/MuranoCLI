@@ -7,6 +7,7 @@ require '_workspace'
 RSpec.describe MrMurano::Account, "token" do
   include_context "WORKSPACE"
   before(:example) do
+    ENV['MURANO_CONFIGFILE'] = nil
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
