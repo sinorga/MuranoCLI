@@ -19,7 +19,7 @@ module MrMurano
     ##
     # Get a list of all of the static content
     def list
-      get()
+      get().map{|i| FileItem.new(i)}
     end
 
     ##

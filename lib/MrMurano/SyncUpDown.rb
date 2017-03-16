@@ -690,18 +690,16 @@ module MrMurano
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
 
-      there = _matcher(list(), selected)
-      here = _matcher(locallist(), selected)
+      there = _matcher(list(), selected)     # Array<Item>
+      here = _matcher(locallist(), selected) # Array<Item>
 
       therebox = {}
       there.each do |item|
-        item = Hash.transform_keys_to_symbols(item)
         item[:synckey] = synckey(item)
         therebox[ item[:synckey] ] = item
       end
       herebox = {}
       here.each do |item|
-        item = Hash.transform_keys_to_symbols(item)
         item[:synckey] = synckey(item)
         herebox[ item[:synckey] ] = item
       end

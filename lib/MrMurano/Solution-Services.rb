@@ -24,11 +24,6 @@ module MrMurano
       # :nocov:
     end
 
-    def list
-      ret = get()
-      ret[:items]
-    end
-
     def fetch(name)
       raise "Missing name!" if name.nil?
       raise "Empty name!" if name.empty?
@@ -182,6 +177,12 @@ module MrMurano
       end
     end
 
+    def list
+      ret = get()
+      return [] unless ret.has_key? :items
+      ret[:items].map{|i| LibraryItem.new(i)}
+    end
+
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
       LibraryItem.new(:name => name)
@@ -229,7 +230,7 @@ module MrMurano
         ( skiplist.include? i[:service] or
           skiplist.include? "#{i[:service]}.#{i[:event]}"
         )
-      }
+      }.map{|i| EventHandlerItem.new(i)}
     end
 
     def fetch(name)
