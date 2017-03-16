@@ -72,7 +72,7 @@ module MrMurano
       raise "no file" unless local.exist?
 
       # we assume these are small enough to slurp.
-      unless remote.has_key? :script then
+      if remote.script.nil? then
         script = local.read
         remote[:script] = script
       end

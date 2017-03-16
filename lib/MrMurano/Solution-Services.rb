@@ -167,18 +167,18 @@ module MrMurano
     end
 
     def mkalias(remote)
-      if remote.has_key? :name then
+      unless remote.name.nil? then
         [$cfg['solution.id'], remote[:name]].join('_')
       else
-        raise "Missing parts! #{remote.to_json}"
+        raise "Missing parts! #{remote.to_h.to_json}"
       end
     end
 
     def mkname(remote)
-      if remote.has_key? :name then
+      unless remote.name.nil? then
         remote[:name]
       else
-        raise "Missing parts! #{remote.to_json}"
+        raise "Missing parts! #{remote.to_h.to_json}"
       end
     end
 
@@ -204,18 +204,18 @@ module MrMurano
     end
 
     def mkalias(remote)
-      if remote.has_key? :service and remote.has_key? :event then
-        [$cfg['solution.id'], remote[:service], remote[:event]].join('_')
+      if remote.service.nil? or remote.event.nil? then
+        raise "Missing parts! #{remote.to_h.to_json}"
       else
-        raise "Missing parts! #{remote.to_json}"
+        [$cfg['solution.id'], remote[:service], remote[:event]].join('_')
       end
     end
 
     def mkname(remote)
-      if remote.has_key? :service and remote.has_key? :event then
-        [remote[:service], remote[:event]].join('_')
+      if remote.service.nil? or remote.event.nil? then
+        raise "Missing parts! #{remote.to_h.to_json}"
       else
-        raise "Missing parts! #{remote.to_json}"
+        [remote[:service], remote[:event]].join('_')
       end
     end
 
