@@ -192,6 +192,28 @@ module MrMurano
         end
         self
       end
+
+      # Delete items in self that block returns true.
+      # @yieldparam key [Symbol] The name of the key
+      # @yieldparam value [Object] The value for that key
+      # @yieldreturn [Boolean] True to delete this key
+      # @return [Item] Ourself.
+      def reject!(&block)
+        instance_variables.each do |key|
+          drop = yield as_sym(key), instance_variable_get(key)
+          delete(key) if drop
+        end
+        self
+      end
+
+      # A new Item with keys deleted where block is true
+      # @yieldparam key [Symbol] The name of the key
+      # @yieldparam value [Object] The value for that key
+      # @yieldreturn [Boolean] True to delete this key
+      # @return [Item] New Item with keys deleted
+      def reject(&block)
+        dup.reject!(&block)
+      end
     end
     class ResourceItem < Item
       attr_accessor :rid
