@@ -144,14 +144,14 @@ module MrMurano
       # @param key [String,Symbol] attribute name
       # @return [Object] The value
       def [](key)
-        instance_variable_get(as_inst(key))
+        public_send(key.to_sym)
       end
 
       # Set attribute as if this was a Hash
       # @param key [String,Symbol] attribute name
       # @param value [Object] value to set
       def []=(key,value)
-        instance_variable_set(as_inst(key), value)
+        public_send("#{key}=", value)
       end
 
       # @return [Hash{Symbol=>Object}] A hash that represents this Item
