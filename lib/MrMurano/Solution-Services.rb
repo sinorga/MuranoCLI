@@ -55,7 +55,7 @@ module MrMurano
       # we assume these are small enough to slurp.
       script = local.read
 
-      pst = remote.merge ({
+      pst = remote.to_h.merge ({
         :solution_id => $cfg['solution.id'],
         :script => script,
         :alias=>mkalias(remote),
@@ -184,7 +184,7 @@ module MrMurano
 
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
-      {:name => name}
+      LibraryItem.new(:name => name)
     end
 
     def synckey(item)
@@ -266,11 +266,11 @@ module MrMurano
         md = @match_header.match(line)
         if not md.nil? then
           # header line.
-          cur = {:service=>md[:service],
-                 :event=>md[:event],
-                 :local_path=>path,
-                 :line=>lineno,
-                 :script=>line}
+          cur = EventHandlerItem.new(:service=>md[:service],
+                                     :event=>md[:event],
+                                     :local_path=>path,
+                                     :line=>lineno,
+                                     :script=>line)
         elsif not cur.nil? and not cur[:script].nil? then
           cur[:script] << line
         end
@@ -287,12 +287,13 @@ module MrMurano
         unless service.nil? or event.nil? then
           warning "Event in #{spath} missing header, but has legacy support."
           warning "Please add the header \"--#EVENT #{service} #{event}\""
-          cur = {:service=>service,
-                 :event=>event,
-                 :local_path=>path,
-                 :line=>0,
-                 :line_end => lineno,
-                 :script=>path.read()} # FIXME: ick, fix this.
+          cur = EventHandlerItem.new(:service=>service,
+                                     :event=>event,
+                                     :local_path=>path,
+                                     :line=>0,
+                                     :line_end => lineno,
+                                     :script=>path.read() # FIXME: ick, fix this.
+                                    )
         end
       end
       cur

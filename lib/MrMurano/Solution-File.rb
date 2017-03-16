@@ -132,7 +132,7 @@ module MrMurano
       end
       debug "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
 
-      {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest}
+      FileItem.new(:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest)
     end
 
     def synckey(item)

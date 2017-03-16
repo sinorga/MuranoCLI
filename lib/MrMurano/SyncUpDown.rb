@@ -270,14 +270,14 @@ module MrMurano
     #
     # @param root [Pathname,String] Root path for this resource type from config files
     # @param path [Pathname,String] Path to local item
-    # @return [Hash] hash of the details for the remote item for this path
+    # @return [Item] hash of the details for the remote item for this path
     def toRemoteItem(root, path)
       # This mess brought to you by Windows short path names.
       path = Dir.glob(path.to_s).first
       root = Dir.glob(root.to_s).first
       path = Pathname.new(path)
       root = Pathname.new(root)
-      {:name => path.realpath.relative_path_from(root.realpath).to_s}
+      Item.new(:name => path.realpath.relative_path_from(root.realpath).to_s)
     end
 
     ##
@@ -285,7 +285,7 @@ module MrMurano
     #
     # Children objects should override this or #tolocalpath
     #
-    # @param item [Hash] listing details for the item.
+    # @param item [Item] listing details for the item.
     # @param itemkey [Symbol] Key for look up.
     def tolocalname(item, itemkey)
       item[itemkey].to_s
@@ -300,10 +300,10 @@ module MrMurano
     # Children objects should override this or #tolocalname
     #
     # @param into [Pathname] Root path for this resource type from config files
-    # @param item [Hash] listing details for the item.
+    # @param item [Item] listing details for the item.
     # @return [Pathname] path to save (or merge) remote item into
     def tolocalpath(into, item)
-      return item[:local_path] if item.has_key? :local_path
+      return item[:local_path] unless item.local_path.nil?
       itemkey = @itemkey.to_sym
       name = tolocalname(item, itemkey)
       raise "Bad key(#{itemkey}) for #{item}" if name.nil?
@@ -318,6 +318,8 @@ module MrMurano
     #
     # Check child specific patterns against item
     #
+    # @param item [Item] Item to be checked
+    # @param pattern [String] pattern to check with
     # @return [Bool] true or false
     def match(item, pattern)
       false
@@ -327,7 +329,7 @@ module MrMurano
     #
     # Children objects should override this if synckey is not @itemkey
     #
-    # @param item [Hash] The item to get a key from
+    # @param item [Item] The item to get a key from
     # @return [Object] The object to use a comparison key
     def synckey(item)
       key = @itemkey.to_sym
@@ -339,7 +341,7 @@ module MrMurano
     # Children objects should override this or implement #fetch()
     #
     # @param local [Pathname] Full path of where to download to
-    # @param item [Hash] The item to download
+    # @param item [Item] The item to download
     def download(local, item)
 #      if item[:bundled] then
 #        warning "Not downloading into bundled item #{synckey(item)}"
@@ -366,7 +368,7 @@ module MrMurano
     # item.
     #
     # @param dest [Pathname] Full path of item to be removed
-    # @param item [Hash] Full details of item to be removed
+    # @param item [Item] Full details of item to be removed
     def removelocal(dest, item)
       dest.unlink
     end
@@ -388,7 +390,7 @@ module MrMurano
     # #localitems
     #
     # This collects items in the project and all bundles.
-    # @return [Array] of Hashes of items
+    # @return [Array<Item>] items found
     def locallist()
       # so. if @locationbase/bundles exists
       #  gather and merge: @locationbase/bundles/*/@location
@@ -432,14 +434,14 @@ module MrMurano
 
     ##
     # Returns array of globs to search for files
-    # @return [Array] of Strings that are globs
+    # @return [Array<String>] of Strings that are globs
     def searchFor
       raise "Missing @project_section" if @project_section.nil?
       $project["#{@project_section}.include"]
     end
 
     ## Returns array of globs of files to ignore
-    # @return [Array] of Strings that are globs
+    # @return [Array<String>] of Strings that are globs
     def ignoring
       raise "Missing @project_section" if @project_section.nil?
       $project["#{@project_section}.exclude"]
@@ -452,7 +454,7 @@ module MrMurano
     # of files in a directory will they need to override it.
     #
     # @param from [Pathname] Directory of items to scan
-    # @return [Array] of Hashes of item details
+    # @return [Array<Item>] Items found
     def localitems(from)
       # TODO: Profile this.
       debug "#{self.class.to_s}: Getting local items from: #{from}"
@@ -502,7 +504,7 @@ module MrMurano
     # what is in the local project directory.
     #
     # @param options [Hash, Commander::Command::Options] Options on opertation
-    # @param selected [Array] Filters for _matcher
+    # @param selected [Array<String>] Filters for _matcher
     def syncup(options={}, selected=[])
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
@@ -544,7 +546,7 @@ module MrMurano
     # directory to match what is in Murano.
     #
     # @param options [Hash, Commander::Command::Options] Options on opertation
-    # @param selected [Array] Filters for _matcher
+    # @param selected [Array<String>] Filters for _matcher
     def syncdown(options={}, selected=[])
       options = elevate_hash(options)
       options[:asdown] = true
@@ -587,7 +589,7 @@ module MrMurano
     #
     # WARNING: This will download the remote item to do the diff.
     #
-    # @param item [Hash] The item to get a diff of
+    # @param item [Item] The item to get a diff of
     # @return [String] The diff output
     def dodiff(item)
       trmt = Tempfile.new([tolocalname(item, @itemkey)+'_remote_', '.lua'])
@@ -621,8 +623,8 @@ module MrMurano
 
     ##
     # Check if an item matches a pattern.
-    # @param items [Array] Of items to filter
-    # @param patterns [Array] Filters for _matcher
+    # @param items [Array<Item>] Of items to filter
+    # @param patterns [Array<String>] Filters for _matcher
     def _matcher(items, patterns)
       items.map do |item|
         if patterns.empty? then
@@ -646,8 +648,8 @@ module MrMurano
     ## Get status of things here verses there
     #
     # @param options [Hash, Commander::Command::Options] Options on opertation
-    # @param selected [Array] Filters for _matcher
-    # @return [Hash] Of items grouped by the action that should be taken
+    # @param selected [Array<String>] Filters for _matcher
+    # @return [Hash{Symbol=>Array<Item>}] Items grouped by the action that should be taken
     def status(options={}, selected=[])
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym

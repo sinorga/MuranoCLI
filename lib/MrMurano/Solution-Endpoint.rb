@@ -23,7 +23,7 @@ module MrMurano
           item[:content_type] = 'application/json'
         end
         # XXX should this update the script header?
-        item
+        item.map{|i| RouteItem.new(i)}
       end
     end
 
@@ -64,9 +64,9 @@ module MrMurano
 
     ##
     # Upload endpoint
-    # :local path to file to push
-    # :remote hash of method and endpoint path
-    # @param modify Bool: True if item exists already and this is changing it
+    # @param local [Pathname] path to file to push
+    # @param remote [RouteItem] of method and endpoint path
+    # @param modify [Boolean] True if item exists already and this is changing it
     def upload(local, remote, modify)
       local = Pathname.new(local) unless local.kind_of? Pathname
       raise "no file" unless local.exist?
@@ -77,7 +77,7 @@ module MrMurano
         remote[:script] = script
       end
       limitkeys = [:method, :path, :script, :content_type, @itemkey]
-      remote = remote.select{|k,v| limitkeys.include? k }
+      remote = remote.to_h.select{|k,v| limitkeys.include? k }
 #      post('', remote)
       if remote.has_key? @itemkey then
         put('/' + remote[@itemkey], remote) do |request, http|
@@ -124,12 +124,12 @@ module MrMurano
           # header line.
           cur[:line_end] = lineno unless cur.nil?
           items << cur unless cur.nil?
-          cur = {:method=>md[:method],
-                 :path=>md[:path],
-                 :content_type=> (md[:ctype] or 'application/json'),
-                 :local_path=>path,
-                 :line=>lineno,
-                 :script=>line}
+          cur = RouteItem.new(:method=>md[:method],
+                              :path=>md[:path],
+                              :content_type=> (md[:ctype] or 'application/json'),
+                              :local_path=>path,
+                              :line=>lineno,
+                              :script=>line)
         elsif not cur.nil? and not cur[:script].nil? then
           cur[:script] << line
         end
