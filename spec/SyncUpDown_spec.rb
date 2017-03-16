@@ -432,7 +432,8 @@ RSpec.describe MrMurano::SyncUpDown do
 
     it "creates" do
       expect(@t).to receive(:list).once.and_return([
-        {:name=>'one.lua'},{:name=>'two.lua'}
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")

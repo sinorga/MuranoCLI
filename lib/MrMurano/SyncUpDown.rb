@@ -154,6 +154,14 @@ module MrMurano
         public_send("#{key}=", value)
       end
 
+      # Delete a key
+      # @param key [String,Symbol] attribute name
+      # @return [Object] The value
+      def delete(key)
+        inst = as_inst(key)
+        remove_instance_variable(inst) if instance_variable_defined?(inst)
+      end
+
       # @return [Hash{Symbol=>Object}] A hash that represents this Item
       def to_h
         Hash[ instance_variables.map{|k| [ as_sym(k), instance_variable_get(k)]} ]
