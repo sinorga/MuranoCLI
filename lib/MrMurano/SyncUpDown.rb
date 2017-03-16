@@ -248,7 +248,7 @@ module MrMurano
     #
     # Check child specific patterns against item
     #
-    # @returns [Bool] true or false
+    # @return [Bool] true or false
     def match(item, pattern)
       false
     end
@@ -258,7 +258,7 @@ module MrMurano
     # Children objects should override this if synckey is not @itemkey
     #
     # @param item [Hash] The item to get a key from
-    # @returns [Object] The object to use a comparison key
+    # @return [Object] The object to use a comparison key
     def synckey(item)
       key = @itemkey.to_sym
       item[key]
