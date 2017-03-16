@@ -142,11 +142,13 @@ RSpec.describe MrMurano::Library do
         }
         tio.close
 
-        ret = @srv.upload(tio.path, {:id=>"9K0",
-                                     :name=>"debug",
-                                     :alias=>"XYZ_debug",
-                                     :solution_id=>"XYZ",
-        })
+        ret = @srv.upload(tio.path,
+          MrMurano::SyncUpDown::LibraryItem.new(
+            :id=>"9K0",
+            :name=>"debug",
+            :alias=>"XYZ_debug",
+            :solution_id=>"XYZ",
+          ))
         expect(ret)
       end
     end
@@ -169,11 +171,14 @@ RSpec.describe MrMurano::Library do
         }
         tio.close
 
-        ret = @srv.upload(tio.path, {:id=>"9K0",
-                                     :name=>"debug",
-                                     :alias=>"XYZ_debug",
-                                     :solution_id=>"XYZ",
-        })
+        ret = @srv.upload(
+          tio.path,
+          MrMurano::SyncUpDown::LibraryItem.new(
+            :id=>"9K0",
+            :name=>"debug",
+            :alias=>"XYZ_debug",
+            :solution_id=>"XYZ",
+          ))
         expect(ret)
       end
     end
@@ -193,11 +198,13 @@ RSpec.describe MrMurano::Library do
         tio.close
 
         expect(@srv).to receive(:error).and_return(nil)
-        ret = @srv.upload(tio.path, {:id=>"9K0",
-                                     :name=>"debug",
-                                     :alias=>"XYZ_debug",
-                                     :solution_id=>"XYZ",
-        })
+        ret = @srv.upload(tio.path,
+          MrMurano::SyncUpDown::LibraryItem.new(
+            :id=>"9K0",
+            :name=>"debug",
+            :alias=>"XYZ_debug",
+            :solution_id=>"XYZ",
+          ))
         expect(ret)
       end
     end
@@ -218,11 +225,13 @@ RSpec.describe MrMurano::Library do
 
         cacheFile = $cfg.file_at(@srv.cacheFileName)
         FileUtils.touch(cacheFile.to_path)
-        ret = @srv.upload(tio.path, {:id=>"9K0",
-                                     :name=>"debug",
-                                     :alias=>"XYZ_debug",
-                                     :solution_id=>"XYZ",
-        })
+        ret = @srv.upload(tio.path,
+          MrMurano::SyncUpDown::LibraryItem.new(
+            :id=>"9K0",
+            :name=>"debug",
+            :alias=>"XYZ_debug",
+            :solution_id=>"XYZ",
+          ))
         expect(ret)
       end
     end
@@ -247,11 +256,13 @@ RSpec.describe MrMurano::Library do
                               :updated_at=>Time.now.getutc.to_datetime.iso8601(3)}
           }.to_yaml
         end
-        ret = @srv.upload(tio.path, {:id=>"9K0",
-                                     :name=>"debug",
-                                     :alias=>"XYZ_debug",
-                                     :solution_id=>"XYZ",
-        })
+        ret = @srv.upload(tio.path,
+          MrMurano::SyncUpDown::LibraryItem.new(
+            :id=>"9K0",
+            :name=>"debug",
+            :alias=>"XYZ_debug",
+            :solution_id=>"XYZ",
+          ))
         expect(ret)
       end
     end
@@ -431,25 +442,25 @@ RSpec.describe MrMurano::Library do
 
     it "raises on alias without service" do
       expect {
-        @srv.mkname( {:event=>'bob'} )
+        @srv.mkname( MrMurano::SyncUpDown::EventHandlerItem.new({:event=>'bob'}) )
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on alias without event" do
       expect {
-        @srv.mkalias( {:service=>'bob'} )
+        @srv.mkalias( MrMurano::SyncUpDown::EventHandlerItem.new({:service=>'bob'}) )
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
 
     it "raises on name without service" do
       expect {
-        @srv.mkalias( {:event=>'bob'} )
+        @srv.mkalias( MrMurano::SyncUpDown::EventHandlerItem.new({:event=>'bob'}) )
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on name without event" do
       expect {
-        @srv.mkname( {:service=>'bob'} )
+        @srv.mkname( MrMurano::SyncUpDown::EventHandlerItem.new({:service=>'bob'}) )
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
   end

@@ -145,11 +145,13 @@ end
       }
       tio.close
 
-      ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :service=>'data',
-                                   :event=>'datapoint',
-                                   :solution_id=>"XYZ",
-      })
+      ret = @srv.upload(tio.path,
+        MrMurano::SyncUpDown::EventHandlerItem.new(
+          :id=>"9K0",
+          :service=>'data',
+          :event=>'datapoint',
+          :solution_id=>"XYZ",
+      ))
       expect(ret)
     end
   end
@@ -172,11 +174,13 @@ end
       }
       tio.close
 
-      ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :solution_id=>"XYZ",
-                                   :service=>"device",
-                                   :event=>"datapoint",
-      })
+      ret = @srv.upload(tio.path,
+        MrMurano::SyncUpDown::EventHandlerItem.new(
+          :id=>"9K0",
+          :service=>'device',
+          :event=>'datapoint',
+          :solution_id=>"XYZ",
+      ))
       expect(ret)
     end
 
@@ -264,25 +268,25 @@ end
 
     it "raises on alias without service" do
       expect {
-        @srv.mkname( {:event=>'bob'} )
+        @srv.mkname( MrMurano::SyncUpDown::EventHandlerItem.new(:event=>'bob') )
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on alias without event" do
       expect {
-        @srv.mkalias( {:service=>'bob'} )
+        @srv.mkalias( MrMurano::SyncUpDown::EventHandlerItem.new(:service=>'bob') )
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
 
     it "raises on name without service" do
       expect {
-        @srv.mkalias( {:event=>'bob'} )
+        @srv.mkalias( MrMurano::SyncUpDown::EventHandlerItem.new(:event=>'bob') )
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on name without event" do
       expect {
-        @srv.mkname( {:service=>'bob'} )
+        @srv.mkname( MrMurano::SyncUpDown::EventHandlerItem.new(:service=>'bob') )
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
   end

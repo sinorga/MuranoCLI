@@ -290,12 +290,14 @@ RSpec.describe MrMurano::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
 
-        ret = @srv.upload(@tio_.path, {:id=>"9K0",
-                                     :method=>"websocket",
-                                     :path=>"/api/v1/bar",
-                                     :content_type=>"application/json",
-        }, true)
-        expect(ret)
+      ret = @srv.upload(@tio_.path,
+        MrMurano::SyncUpDown::RouteItem.new(
+          :id=>"9K0",
+          :method=>"websocket",
+          :path=>"/api/v1/bar",
+          :content_type=>"application/json",
+      ), true)
+      expect(ret)
     end
 
     it "when nothing is there" do
@@ -308,11 +310,13 @@ RSpec.describe MrMurano::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
 
-      ret = @srv.upload(@tio_.path, {:id=>"9K0",
-                                   :method=>"websocket",
-                                   :path=>"/api/v1/bar",
-                                   :content_type=>"application/json",
-      }, false)
+      ret = @srv.upload(@tio_.path,
+        MrMurano::SyncUpDown::RouteItem.new(
+          :id=>"9K0",
+          :method=>"websocket",
+          :path=>"/api/v1/bar",
+          :content_type=>"application/json",
+      ), false)
       expect(ret)
     end
 
@@ -322,10 +326,12 @@ RSpec.describe MrMurano::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
 
-      ret = @srv.upload(@tio_.path, {:method=>"websocket",
-                                   :path=>"/api/v1/bar",
-                                   :content_type=>"application/json",
-      }, false)
+      ret = @srv.upload(@tio_.path,
+        MrMurano::SyncUpDown::RouteItem.new(
+          :method=>"websocket",
+          :path=>"/api/v1/bar",
+          :content_type=>"application/json",
+      ), false)
       expect(ret)
     end
 
@@ -336,11 +342,13 @@ RSpec.describe MrMurano::Endpoint do
                         to_return(status: 502, body: "{}")
 
       expect(@srv).to receive(:error).and_return(nil)
-      ret = @srv.upload(@tio_.path, {:id=>"9K0",
-                                   :method=>"websocket",
-                                   :path=>"/api/v1/bar",
-                                   :content_type=>"application/json",
-      }, true)
+      ret = @srv.upload(@tio_.path,
+        MrMurano::SyncUpDown::RouteItem.new(
+          :id=>"9K0",
+          :method=>"websocket",
+          :path=>"/api/v1/bar",
+          :content_type=>"application/json",
+      ), true)
       expect(ret)
     end
   end
