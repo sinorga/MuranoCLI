@@ -7,6 +7,7 @@ require '_workspace'
 RSpec.describe MrMurano::Account, "token" do
   include_context "WORKSPACE"
   before(:example) do
+    @saved_cfg = ENV['MURANO_CONFIGFILE']
     ENV['MURANO_CONFIGFILE'] = nil
     $cfg = MrMurano::Config.new
     $cfg.load
@@ -19,6 +20,7 @@ RSpec.describe MrMurano::Account, "token" do
 
   after(:example) do
     @acc.token_reset
+    ENV['MURANO_CONFIGFILE'] = @saved_cfg
   end
 
   context "Get login info" do
@@ -108,6 +110,8 @@ end
 RSpec.describe MrMurano::Account do
   include_context "WORKSPACE"
   before(:example) do
+    @saved_cfg = ENV['MURANO_CONFIGFILE']
+    ENV['MURANO_CONFIGFILE'] = nil
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
@@ -116,6 +120,9 @@ RSpec.describe MrMurano::Account do
 
     @acc = MrMurano::Account.new
     allow(@acc).to receive(:token).and_return("TTTTTTTTTT")
+  end
+  after(:example) do
+    ENV['MURANO_CONFIGFILE'] = @saved_cfg
   end
 
   it "initializes" do

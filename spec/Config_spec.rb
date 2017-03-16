@@ -131,8 +131,11 @@ RSpec.describe MrMurano::Config do
     end
 
     context "ENV['MURANO_CONFIGFILE']" do
+      before(:example) do
+        @saved_cfg = ENV['MURANO_CONFIGFILE']
+      end
       after(:example) do
-        ENV['MURANO_CONFIGFILE'] = nil
+        ENV['MURANO_CONFIGFILE'] = @saved_cfg
         ENV['MR_CONFIGFILE'] = nil
       end
 
@@ -172,6 +175,7 @@ RSpec.describe MrMurano::Config do
     end
 
     it "dumps" do
+      @saved_cfg = ENV['MURANO_CONFIGFILE']
       ENV['MURANO_CONFIGFILE'] = nil
       cfg = MrMurano::Config.new
       cfg.load
@@ -183,6 +187,7 @@ RSpec.describe MrMurano::Config do
       want = template.result(binding)
 
       expect(ret).to eq(want)
+      ENV['MURANO_CONFIGFILE'] = @saved_cfg
     end
 
     context "fixing permissions" do
