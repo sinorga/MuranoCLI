@@ -230,6 +230,7 @@ module MrMurano
       attr_accessor :method
       attr_accessor :path
       attr_accessor :content_type
+      attr_accessor :use_basic_auth
     end
     class FileItem < Item
       attr_accessor :path
@@ -237,12 +238,18 @@ module MrMurano
       attr_accessor :checksum
     end
     class LibraryItem < Item
+      attr_accessor :alias
       attr_accessor :updated_at
+      attr_accessor :created_at
+      attr_accessor :solution_id
     end
     class EventHandlerItem < Item
+      attr_accessor :alias
+      attr_accessor :updated_at
+      attr_accessor :created_at
+      attr_accessor :solution_id
       attr_accessor :service
       attr_accessor :event
-      attr_accessor :updated_at
     end
 
 
