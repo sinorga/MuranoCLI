@@ -9,18 +9,19 @@ require 'MrMurano/hash'
 module MrMurano
   ## Track what things are syncable.
   class SyncRoot
+    # A thing that is syncable.
     Syncable = Struct.new(:name, :class, :type, :desc, :bydefault) do
     end
 
     ##
     # Add a new entry to syncable things
-    # +name+:: The name to use for the long option
-    # +klass+:: The class to instanciate from
-    # +type+:: Single letter for short option and status listing
-    # +desc+:: Summary of what this syncs.
-    # +bydefault+:: Is this part of the default sync group
+    # @param name [String] The name to use for the long option
+    # @param klass [Class] The class to instanciate from
+    # @param type [String] Single letter for short option and status listing
+    # @param desc [String] Summary of what this syncs.
+    # @param bydefault [Boolean] Is this part of the default sync group
     #
-    # returns nil
+    # @return [nil]
     def self.add(name, klass, type, desc, bydefault=false)
       @@syncset = [] unless defined?(@@syncset)
       @@syncset << Syncable.new(name.to_s, klass, type, desc, bydefault)
@@ -35,29 +36,29 @@ module MrMurano
 
     ##
     # Get the list of default syncables.
-    # returns array of names
+    # @return [Array<String>] array of names
     def self.bydefault
       @@syncset.select{|a| a.bydefault }.map{|a| a.name}
     end
 
     ##
     # Iterate over all syncables
-    # +block+:: code to run on each
+    # @param block code to run on each
     def self.each(&block)
       @@syncset.each{|a| yield a.name, a.type, a.class }
     end
 
     ##
     # Iterate over all syncables with option arguments.
-    # +block+:: code to run on each
+    # @param block code to run on each
     def self.each_option(&block)
       @@syncset.each{|a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc}
     end
 
     ##
     # Iterate over just the selected syncables.
-    # +opt+:: Options hash of which to select from
-    # +block+:: code to run on each
+    # @param opt [Hash{Symbol=>Boolean}] Options hash of which to select from
+    # @param block code to run on each
     def self.each_filtered(opt, &block)
       self.checkSAME(opt)
       @@syncset.each do |a|
@@ -70,9 +71,9 @@ module MrMurano
     ## Adjust options based on all or none
     # If none are selected, select the bydefault ones.
     #
-    # +opt+:: Options hash of which to select from
+    # @param opt [Hash{Symbol=>Boolean}] Options hash of which to select from
     #
-    # returns nil
+    # @return [nil]
     def self.checkSAME(opt)
       if opt[:all] then
         @@syncset.each {|a| opt[a.name.to_sym] = true }
@@ -94,52 +95,121 @@ module MrMurano
   # pulling those things.
   #
   module SyncUpDown
-    #######################################################################
-    # Need to at least document the item Hash.
-    # Might be worth turning it into a Structure.
-    #######################################################################
 
-    # Lots here.  Need to think if making it a Struct is really the right idea.
-    # OR should it be its own tree of classes? (Item; RouteItem<Item;
-    # FileItem<Item; etc)
-    Item = Struct.new(
-      :name,        # String
-      :local_path,  # Pathanme
-      :bundled, # XXX going away.
-      :id,          # String
-      :script,      # String
-      :selected,    # Boolean
-      :synckey,
-      :diff,
+    # This is one item that can be synced
+    class Item
+      # @return [String] The name of this item
+      attr_accessor :name
+      # @return [Pathname] Where this item lives
+      attr_accessor :local_path
+      # ??? what is this?
+      attr_accessor :id
+      # @return [String] The lua code for this item. (not all items use this.)
+      attr_accessor :script
+      # @return [Integer] The line in #local_path where this #script starts
+      attr_accessor :line
+      # @return [Integer] The line in #local_path where this #script ends
+      attr_accessor :line_end
+      # @return [String] If requested, the diff output
+      attr_accessor :diff
+      # @return [Boolean] When filtering, did this item pass.
+      attr_accessor :selected
+      # ???? what is this?
+      attr_accessor :synckey
 
-      # For Resources.
-      :rid,
-      :alias,
-      :format,
+      # Initialize a new Item with a few, or all, attributes.
+      # @param hsh [Hash{Symbol=>Object}, Item] Initial values
+      #
+      # @example Initializing with a Hash
+      #  Item.new(:name=>'Bob', :local_path => Pathname.new(…))
+      # @example Initializing with an Item
+      #  item = Item.new(:name => 'get')
+      #  Item.new(item)
+      def initialize(hsh={})
+        hsh.each_pair{|k,v| self[k] = v}
+      end
 
-      # Crap-ton for CORS.
+      def as_inst(key)
+        return key if key.to_s[0] == '@'
+        return "@#{key}"
+      end
+      private :as_inst
+      def as_sym(key)
+        return key.to_sym if key.to_s[0] != '@'
+        return key.to_s[1..-1].to_sym
+      end
+      private :as_sym
 
-      # For Endpoint
-      :content_type,
-      :method,
-      :path,
-      :line_end,
-      :line,
+      # Get attribute as if this was a Hash
+      # @param key [String,Symbol] attribute name
+      # @return [Object] The value
+      def [](key)
+        instance_variable_get(as_inst(key))
+      end
 
-      # For Files
-      :mime_type,
-      :checksum,
+      # Set attribute as if this was a Hash
+      # @param key [String,Symbol] attribute name
+      # @param value [Object] value to set
+      def []=(key,value)
+        instance_variable_set(as_inst(key), value)
+      end
 
-      # For Modules and EventHandlers
-      :solution_id,
-      :updated_at,
+      # @return [Hash{Symbol=>Object}] A hash that represents this Item
+      def to_h
+        Hash[ instance_variables.map{|k| [ as_sym(k), instance_variable_get(k)]} ]
+      end
 
-      # For EventHandlers
-      :service,
-      :event,
+      # Adds the contents of item to self.
+      # @param item [Item,Hash] Stuff to merge
+      # @return [Item] ourself
+      def merge!(item)
+        item.each_pair{|k,v| self[k] = v}
+        self
+      end
 
-    ) do
+      # A new Item containing our plus items.
+      # @param item [Item,Hash] Stuff to merge
+      # @return [Item] New item with contents of both
+      def merge(item)
+        dup.merge!(item)
+      end
+
+      # Calls block once for each non-nil key
+      # @yieldparam key [Symbol] The name of the key
+      # @yieldparam value [Object] The value for that key
+      # @return [Item]
+      def each_pair(&block)
+        instance_variables.each do |key|
+          yield as_sym(key), instance_variable_get(key)
+        end
+        self
+      end
     end
+    class ResourceItem < Item
+      attr_accessor :rid
+      attr_accessor :alias
+      attr_accessor :format
+    end
+    class RouteItem < Item
+      attr_accessor :method
+      attr_accessor :path
+      attr_accessor :content_type
+    end
+    class FileItem < Item
+      attr_accessor :path
+      attr_accessor :mime_type
+      attr_accessor :checksum
+    end
+    class LibraryItem < Item
+      attr_accessor :updated_at
+    end
+    class EventHandlerItem < Item
+      attr_accessor :service
+      attr_accessor :event
+      attr_accessor :updated_at
+    end
+
+
 
     #######################################################################
     # Methods that must be overridden
@@ -271,10 +341,10 @@ module MrMurano
     # @param local [Pathname] Full path of where to download to
     # @param item [Hash] The item to download
     def download(local, item)
-      if item[:bundled] then
-        warning "Not downloading into bundled item #{synckey(item)}"
-        return
-      end
+#      if item[:bundled] then
+#        warning "Not downloading into bundled item #{synckey(item)}"
+#        return
+#      end
       local.dirname.mkpath
       id = item[@itemkey.to_sym]
       if id.nil? then
