@@ -676,7 +676,7 @@ module MrMurano
           item[:selected] = patterns.any? do |pattern|
             if pattern.to_s[0] == '#' then
               match(item, pattern)
-            elsif not item.has_key? :local_path then
+            elsif item.local_path.nil? then
               false
             else
               item[:local_path].fnmatch(pattern)
