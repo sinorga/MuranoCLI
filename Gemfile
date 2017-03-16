@@ -19,6 +19,7 @@ group :test do
   gem 'rspec', '~> 3.5'
   gem 'simplecov', :require => false
   gem 'webmock', '~> 2.3.0'
+  gem 'yard'
 end
 
 group :windows do
