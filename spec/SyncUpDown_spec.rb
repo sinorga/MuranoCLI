@@ -396,7 +396,7 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
 
-      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(Hash), false)
+      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(MrMurano::SyncUpDown::Item), false)
       @t.syncup({:create=>true})
     end
 
@@ -404,10 +404,11 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
       expect(@t).to receive(:list).once.and_return([
-        {:name=>'one.lua'},{:name=>'two.lua'}
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
       ])
 
-      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(Hash), true)
+      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(MrMurano::SyncUpDown::Item), true)
       expect(@t).to receive(:toRemoteItem).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
@@ -446,12 +447,14 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
       expect(@t).to receive(:list).once.and_return([
-        {:name=>'one.lua'},{:name=>'two.lua'}
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
       expect(@t).to receive(:toRemoteItem).and_return(
-        {:name=>'one.lua'},{:name=>'two.lua'}
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
       )
       @t.syncdown({:update=>true})
       expect(FileTest.exist?(@projectDir + '/tsud/one.lua')).to be true
