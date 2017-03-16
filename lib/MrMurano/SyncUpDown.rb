@@ -214,6 +214,12 @@ module MrMurano
       def reject(&block)
         dup.reject!(&block)
       end
+
+      # For unit testing.
+      include Comparable
+      def <=>(anOther)
+        self.to_h <=> anOther.to_h
+      end
     end
     class ResourceItem < Item
       attr_accessor :rid
