@@ -23,7 +23,7 @@ module MrMurano
           item[:content_type] = 'application/json'
         end
         # XXX should this update the script header?
-        item.map{|i| RouteItem.new(i)}
+        RouteItem.new(item)
       end
     end
 
