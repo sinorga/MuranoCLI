@@ -225,7 +225,7 @@ module MrMurano
         pr[:limit] = limit unless limit.nil?
         pr[:before] = before unless before.nil?
         pr = nil if pr.empty?
-        get('', pr)
+        get('/', pr)
       end
 
       def query(args)

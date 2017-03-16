@@ -47,7 +47,7 @@ RSpec.describe MrMurano::Gateway::Device do
           :status=>"provisioned",
           :online=>false},
         ]}
-       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device").
+       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/").
          to_return(:body=>body.to_json)
 
       ret = @gw.list
@@ -69,7 +69,7 @@ RSpec.describe MrMurano::Gateway::Device do
           :status=>"provisioned",
           :online=>false},
         ]}
-       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device").
+       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/").
          with(:query=>{:limit=>'1'}).
          to_return(:body=>body.to_json)
 
@@ -92,7 +92,7 @@ RSpec.describe MrMurano::Gateway::Device do
           :status=>"provisioned",
           :online=>false},
         ]}
-       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device").
+       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/").
          with(:query=>{:limit=>'1', :before=>'1487021743864000'}).
          to_return(:body=>body.to_json)
 
