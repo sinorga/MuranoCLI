@@ -334,13 +334,15 @@ end
         tio.close
 
         ret = @srv.toRemoteItem(nil, tio.path)
-        expect(ret).to eq({:service=>'device',
-                           :event=>'datapoint',
-                           :line=>1,
-                           :line_end=>3,
-                           :local_path=>Pathname.new(tio.path),
-                           :script=>%{--#EVENT device datapoint\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
-        })
+        expect(ret).to eq(
+          MrMurano::SyncUpDown::EventHandlerItem.new(
+            :service=>'device',
+            :event=>'datapoint',
+            :line=>1,
+            :line_end=>3,
+            :local_path=>Pathname.new(tio.path),
+            :script=>%{--#EVENT device datapoint\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
+          ))
       end
     end
 
