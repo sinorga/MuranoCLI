@@ -168,8 +168,17 @@ RSpec.describe MrMurano::Config do
       end
 
       it "warns about migrating old ENV name" do
+        ENV['MURANO_CONFIGFILE'] = nil
         ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
         expect_any_instance_of(MrMurano::Config).to receive(:warning).once
+        MrMurano::Config.new
+      end
+
+      it "errors if both are defined" do
+        ENV['MURANO_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
+        ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
+        expect_any_instance_of(MrMurano::Config).to receive(:warning).once
+        expect_any_instance_of(MrMurano::Config).to receive(:error).once
         MrMurano::Config.new
       end
     end
