@@ -291,7 +291,7 @@ RSpec.describe MrMurano::Endpoint do
                         to_return(body: "")
 
       ret = @srv.upload(@tio_.path,
-        MrMurano::SyncUpDown::RouteItem.new(
+        MrMurano::Endpoint::RouteItem.new(
           :id=>"9K0",
           :method=>"websocket",
           :path=>"/api/v1/bar",
@@ -311,7 +311,7 @@ RSpec.describe MrMurano::Endpoint do
                         to_return(body: "")
 
       ret = @srv.upload(@tio_.path,
-        MrMurano::SyncUpDown::RouteItem.new(
+        MrMurano::Endpoint::RouteItem.new(
           :id=>"9K0",
           :method=>"websocket",
           :path=>"/api/v1/bar",
@@ -327,7 +327,7 @@ RSpec.describe MrMurano::Endpoint do
                         to_return(body: "")
 
       ret = @srv.upload(@tio_.path,
-        MrMurano::SyncUpDown::RouteItem.new(
+        MrMurano::Endpoint::RouteItem.new(
           :method=>"websocket",
           :path=>"/api/v1/bar",
           :content_type=>"application/json",
@@ -343,7 +343,7 @@ RSpec.describe MrMurano::Endpoint do
 
       expect(@srv).to receive(:error).and_return(nil)
       ret = @srv.upload(@tio_.path,
-        MrMurano::SyncUpDown::RouteItem.new(
+        MrMurano::Endpoint::RouteItem.new(
           :id=>"9K0",
           :method=>"websocket",
           :path=>"/api/v1/bar",

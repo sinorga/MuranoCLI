@@ -143,7 +143,7 @@ RSpec.describe MrMurano::Library do
         tio.close
 
         ret = @srv.upload(tio.path,
-          MrMurano::SyncUpDown::LibraryItem.new(
+          MrMurano::Library::LibraryItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -173,7 +173,7 @@ RSpec.describe MrMurano::Library do
 
         ret = @srv.upload(
           tio.path,
-          MrMurano::SyncUpDown::LibraryItem.new(
+          MrMurano::Library::LibraryItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -199,7 +199,7 @@ RSpec.describe MrMurano::Library do
 
         expect(@srv).to receive(:error).and_return(nil)
         ret = @srv.upload(tio.path,
-          MrMurano::SyncUpDown::LibraryItem.new(
+          MrMurano::Library::LibraryItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -226,7 +226,7 @@ RSpec.describe MrMurano::Library do
         cacheFile = $cfg.file_at(@srv.cacheFileName)
         FileUtils.touch(cacheFile.to_path)
         ret = @srv.upload(tio.path,
-          MrMurano::SyncUpDown::LibraryItem.new(
+          MrMurano::Library::LibraryItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -257,7 +257,7 @@ RSpec.describe MrMurano::Library do
           }.to_yaml
         end
         ret = @srv.upload(tio.path,
-          MrMurano::SyncUpDown::LibraryItem.new(
+          MrMurano::Library::LibraryItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -440,28 +440,16 @@ RSpec.describe MrMurano::Library do
       expect(ret).to eq(["a", "b", "c/**/d/*.bob"])
     end
 
-    it "raises on alias without service" do
+    it "raises on alias without name" do
       expect {
-        @srv.mkname( MrMurano::SyncUpDown::EventHandlerItem.new({:event=>'bob'}) )
-      }.to raise_error %{Missing parts! {"event":"bob"}}
+        @srv.mkname( MrMurano::Library::EventHandlerItem.new() )
+      }.to raise_error(NameError)
     end
 
-    it "raises on alias without event" do
+    it "raises on name without name" do
       expect {
-        @srv.mkalias( MrMurano::SyncUpDown::EventHandlerItem.new({:service=>'bob'}) )
-      }.to raise_error %{Missing parts! {"service":"bob"}}
-    end
-
-    it "raises on name without service" do
-      expect {
-        @srv.mkalias( MrMurano::SyncUpDown::EventHandlerItem.new({:event=>'bob'}) )
-      }.to raise_error %{Missing parts! {"event":"bob"}}
-    end
-
-    it "raises on name without event" do
-      expect {
-        @srv.mkname( MrMurano::SyncUpDown::EventHandlerItem.new({:service=>'bob'}) )
-      }.to raise_error %{Missing parts! {"service":"bob"}}
+        @srv.mkalias( MrMurano::Library::EventHandlerItem.new() )
+      }.to raise_error(NameError)
     end
   end
 

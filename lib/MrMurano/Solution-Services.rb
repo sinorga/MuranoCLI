@@ -147,8 +147,20 @@ module MrMurano
     end
   end
 
-  # …/library
+  # Libraries or better known as Modules.
   class Library < ServiceBase
+    # Module Specific details on an Item
+    class LibraryItem < Item
+      # @return [String] Internal Alias name
+      attr_accessor :alias
+      # @return [String] Timestamp when this was updated.
+      attr_accessor :updated_at
+      # @return [String] Timestamp when this was created.
+      attr_accessor :created_at
+      # @return [String] The solution.id that this is in
+      attr_accessor :solution_id
+    end
+
     def initialize
       super
       @uriparts << 'library'
@@ -194,8 +206,24 @@ module MrMurano
   end
   SyncRoot.add('modules', Library, 'M', %{Modules}, true)
 
-  # …/eventhandler
+  # Services aka EventHandlers
   class EventHandler < ServiceBase
+    # EventHandler Specific details on an Item
+    class EventHandlerItem < Item
+      # @return [String] Internal Alias name
+      attr_accessor :alias
+      # @return [String] Timestamp when this was updated.
+      attr_accessor :updated_at
+      # @return [String] Timestamp when this was created.
+      attr_accessor :created_at
+      # @return [String] The solution.id that this is in
+      attr_accessor :solution_id
+      # @return [String] Which service triggers this script
+      attr_accessor :service
+      # @return [String] Which event triggers this script
+      attr_accessor :event
+    end
+
     def initialize
       super
       @uriparts << 'eventhandler'

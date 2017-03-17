@@ -221,38 +221,6 @@ module MrMurano
         self.to_h <=> anOther.to_h
       end
     end
-    class ResourceItem < Item
-      attr_accessor :rid
-      attr_accessor :alias
-      attr_accessor :format
-    end
-    class RouteItem < Item
-      attr_accessor :method
-      attr_accessor :path
-      attr_accessor :content_type
-      attr_accessor :use_basic_auth
-    end
-    class FileItem < Item
-      attr_accessor :path
-      attr_accessor :mime_type
-      attr_accessor :checksum
-    end
-    class LibraryItem < Item
-      attr_accessor :alias
-      attr_accessor :updated_at
-      attr_accessor :created_at
-      attr_accessor :solution_id
-    end
-    class EventHandlerItem < Item
-      attr_accessor :alias
-      attr_accessor :updated_at
-      attr_accessor :created_at
-      attr_accessor :solution_id
-      attr_accessor :service
-      attr_accessor :event
-    end
-
-
 
     #######################################################################
     # Methods that must be overridden

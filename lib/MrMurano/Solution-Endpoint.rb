@@ -7,6 +7,18 @@ require 'MrMurano/Solution'
 module MrMurano
   # …/endpoint
   class Endpoint < SolutionBase
+    # Route Specific details on an Item
+    class RouteItem < Item
+      # @return [String] HTTP method for this endpoint
+      attr_accessor :method
+      # @return [String] path for URL maps to this endpoint
+      attr_accessor :path
+      # @return [String] Acceptable Content-Type for this endpoint
+      attr_accessor :content_type
+      # ???? What is this?
+      attr_accessor :use_basic_auth
+    end
+
     def initialize
       super
       @uriparts << 'endpoint'

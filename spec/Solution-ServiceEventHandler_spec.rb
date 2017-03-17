@@ -146,7 +146,7 @@ end
       tio.close
 
       ret = @srv.upload(tio.path,
-        MrMurano::SyncUpDown::EventHandlerItem.new(
+        MrMurano::EventHandler::EventHandlerItem.new(
           :id=>"9K0",
           :service=>'data',
           :event=>'datapoint',
@@ -175,7 +175,7 @@ end
       tio.close
 
       ret = @srv.upload(tio.path,
-        MrMurano::SyncUpDown::EventHandlerItem.new(
+        MrMurano::EventHandler::EventHandlerItem.new(
           :id=>"9K0",
           :service=>'device',
           :event=>'datapoint',
@@ -268,25 +268,25 @@ end
 
     it "raises on alias without service" do
       expect {
-        @srv.mkname( MrMurano::SyncUpDown::EventHandlerItem.new(:event=>'bob') )
+        @srv.mkname( MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob') )
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on alias without event" do
       expect {
-        @srv.mkalias( MrMurano::SyncUpDown::EventHandlerItem.new(:service=>'bob') )
+        @srv.mkalias( MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob') )
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
 
     it "raises on name without service" do
       expect {
-        @srv.mkalias( MrMurano::SyncUpDown::EventHandlerItem.new(:event=>'bob') )
+        @srv.mkalias( MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob') )
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on name without event" do
       expect {
-        @srv.mkname( MrMurano::SyncUpDown::EventHandlerItem.new(:service=>'bob') )
+        @srv.mkname( MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob') )
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
   end
@@ -339,7 +339,7 @@ end
 
         ret = @srv.toRemoteItem(nil, tio.path)
         expect(ret).to eq(
-          MrMurano::SyncUpDown::EventHandlerItem.new(
+          MrMurano::EventHandler::EventHandlerItem.new(
             :service=>'device',
             :event=>'datapoint',
             :line=>1,

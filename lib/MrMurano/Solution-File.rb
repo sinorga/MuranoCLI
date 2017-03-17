@@ -9,6 +9,15 @@ require 'MrMurano/Solution'
 module MrMurano
   # …/file
   class File < SolutionBase
+    # File Specific details on an Item
+    class FileItem < Item
+      # @return [String] path for URL maps to this static file
+      attr_accessor :path
+      # @return [String] The MIME-Type for this content
+      attr_accessor :mime_type
+      # @return [String] Checksum for the content.
+      attr_accessor :checksum
+    end
     def initialize
       super
       @uriparts << 'file'
