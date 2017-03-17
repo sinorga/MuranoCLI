@@ -10,6 +10,8 @@ RSpec.describe MrMurano::ConfigMigrate do
   before(:example) do
     @saved_pwd = ENV['MURANO_PASSWORD']
     ENV['MURANO_PASSWORD'] = nil
+    @saved_cfg = ENV['MURANO_CONFIGFILE']
+    ENV['MURANO_CONFIGFILE'] = nil
 
     $cfg = MrMurano::Config.new
     $cfg.load
@@ -27,6 +29,7 @@ RSpec.describe MrMurano::ConfigMigrate do
   after(:example) do
     $stdout, $stderr = @stdsaved
     ENV['MURANO_PASSWORD'] = @saved_pwd
+    ENV['MURANO_CONFIGFILE'] = @saved_cfg
   end
 
   it "imports all" do

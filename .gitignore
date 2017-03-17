@@ -15,6 +15,7 @@ report/
 coverage/
 
 .murano/
+.rspec_examples.txt
 
 _testProject/
 test.*
