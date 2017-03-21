@@ -182,59 +182,62 @@ RSpec.describe MrMurano::SyncUpDown do
         FileUtils.touch(@projectDir + '/tsud/ga/six.lua')  # toadd
         @t = TSUD.new
         expect(@t).to receive(:list).once.and_return([
-          {:name=>'one.lua'},{:name=>'two.lua'},         # tomod
-          {:name=>'three.lua'},{:name=>'four.lua'},      # unchg
-          {:name=>'seven.lua'},{:name=>'eight.lua'},     # todel
+          MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),   # tomod
+          MrMurano::SyncUpDown::Item.new({:name=>'two.lua'}),   # tomod
+          MrMurano::SyncUpDown::Item.new({:name=>'three.lua'}), # unchg
+          MrMurano::SyncUpDown::Item.new({:name=>'four.lua'}),  # unchg
+          MrMurano::SyncUpDown::Item.new({:name=>'seven.lua'}), # todel
+          MrMurano::SyncUpDown::Item.new({:name=>'eight.lua'}), # todel
         ])
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/one.lua')).
-          and_return({:name=>'one.lua'})
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/two.lua')).
-          and_return({:name=>'two.lua'})
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'two.lua'}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/three.lua')).
-          and_return({:name=>'three.lua'})
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'three.lua'}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/four.lua')).
-          and_return({:name=>'four.lua'})
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'four.lua'}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/five.lua')).
-          and_return({:name=>'five.lua'})
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'five.lua'}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/six.lua')).
-          and_return({:name=>'six.lua'})
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'six.lua'}))
 
-        expect(@t).to receive(:docmp).with(include({:name=>'one.lua'}),anything()).and_return(true)
-        expect(@t).to receive(:docmp).with(include({:name=>'two.lua'}),anything()).and_return(true)
-        expect(@t).to receive(:docmp).with(include({:name=>'three.lua'}),anything()).and_return(false)
-        expect(@t).to receive(:docmp).with(include({:name=>'four.lua'}),anything()).and_return(false)
+        expect(@t).to receive(:docmp).with(have_attributes({:name=>'one.lua'}),anything()).and_return(true)
+        expect(@t).to receive(:docmp).with(have_attributes({:name=>'two.lua'}),anything()).and_return(true)
+        expect(@t).to receive(:docmp).with(have_attributes({:name=>'three.lua'}),anything()).and_return(false)
+        expect(@t).to receive(:docmp).with(have_attributes({:name=>'four.lua'}),anything()).and_return(false)
       end
 
       it "Returns all with no filter" do
         ret = @t.status
         expect(ret).to match({
           :unchg=>[
-            {:name=>'three.lua', :synckey=>'three.lua',
-             :local_path=> pathname_globs('**/three.lua')},
-            {:name=>'four.lua', :synckey=>'four.lua',
-             :local_path=>pathname_globs('**/four.lua')},
+            have_attributes({:name=>'three.lua', :synckey=>'three.lua',
+             :local_path=> pathname_globs('**/three.lua')}),
+            have_attributes({:name=>'four.lua', :synckey=>'four.lua',
+             :local_path=>pathname_globs('**/four.lua')}),
           ],
           :toadd=>[
-            {:name=>'five.lua', :synckey=>'five.lua',
-             :local_path=>pathname_globs('**/five.lua')},
-            {:name=>'six.lua', :synckey=>'six.lua',
-             :local_path=>pathname_globs('**/six.lua')},
+            have_attributes({:name=>'five.lua', :synckey=>'five.lua',
+             :local_path=>pathname_globs('**/five.lua')}),
+            have_attributes({:name=>'six.lua', :synckey=>'six.lua',
+             :local_path=>pathname_globs('**/six.lua')}),
           ],
           :todel=>[
-            {:name=>'seven.lua', :synckey=>'seven.lua'},
-            {:name=>'eight.lua', :synckey=>'eight.lua'},
+            have_attributes({:name=>'seven.lua', :synckey=>'seven.lua'}),
+            have_attributes({:name=>'eight.lua', :synckey=>'eight.lua'}),
           ],
           :tomod=>[
-            {:name=>'one.lua', :synckey=>'one.lua',
-             :local_path=>pathname_globs('**/one.lua')},
-            {:name=>'two.lua', :synckey=>'two.lua',
-             :local_path=>pathname_globs('**/two.lua')},
+            have_attributes({:name=>'one.lua', :synckey=>'one.lua',
+             :local_path=>pathname_globs('**/one.lua')}),
+            have_attributes({:name=>'two.lua', :synckey=>'two.lua',
+             :local_path=>pathname_globs('**/two.lua')}),
           ]})
       end
 
@@ -243,13 +246,13 @@ RSpec.describe MrMurano::SyncUpDown do
         expect(ret).to match({
           :unchg=>[ ],
           :toadd=>[
-            {:name=>'six.lua', :synckey=>'six.lua',
-             :local_path=>an_instance_of(Pathname)},
+            have_attributes(:name=>'six.lua', :synckey=>'six.lua',
+             :local_path=>an_instance_of(Pathname)),
           ],
           :todel=>[ ],
           :tomod=>[
-            {:name=>'two.lua', :synckey=>'two.lua',
-             :local_path=>an_instance_of(Pathname)},
+            have_attributes(:name=>'two.lua', :synckey=>'two.lua',
+             :local_path=>an_instance_of(Pathname)),
           ]})
       end
 
@@ -266,26 +269,26 @@ RSpec.describe MrMurano::SyncUpDown do
         ret = @t.status({:unselected=>true})
         expect(ret).to match({
           :unchg=>[
-            {:name=>'three.lua', :synckey=>'three.lua', :selected=>true,
-             :local_path=> pathname_globs('**/three.lua')},
-            {:name=>'four.lua', :synckey=>'four.lua', :selected=>true,
-             :local_path=>pathname_globs('**/four.lua')},
+            have_attributes(:name=>'three.lua', :synckey=>'three.lua', :selected=>true,
+                            :local_path=> pathname_globs('**/three.lua')),
+          have_attributes(:name=>'four.lua', :synckey=>'four.lua', :selected=>true,
+                          :local_path=>pathname_globs('**/four.lua')),
           ],
           :toadd=>[
-            {:name=>'five.lua', :synckey=>'five.lua', :selected=>true,
-             :local_path=>pathname_globs('**/five.lua')},
-            {:name=>'six.lua', :synckey=>'six.lua', :selected=>true,
-             :local_path=>pathname_globs('**/six.lua')},
+            have_attributes(:name=>'five.lua', :synckey=>'five.lua', :selected=>true,
+                            :local_path=>pathname_globs('**/five.lua')),
+          have_attributes(:name=>'six.lua', :synckey=>'six.lua', :selected=>true,
+                          :local_path=>pathname_globs('**/six.lua')),
           ],
           :todel=>[
-            {:name=>'seven.lua', :selected=>true, :synckey=>'seven.lua'},
-            {:name=>'eight.lua', :selected=>true, :synckey=>'eight.lua'},
+            have_attributes(:name=>'seven.lua', :selected=>true, :synckey=>'seven.lua'),
+            have_attributes(:name=>'eight.lua', :selected=>true, :synckey=>'eight.lua'),
           ],
           :tomod=>[
-            {:name=>'one.lua', :synckey=>'one.lua', :selected=>true,
-             :local_path=>pathname_globs('**/one.lua')},
-            {:name=>'two.lua', :synckey=>'two.lua', :selected=>true,
-             :local_path=>pathname_globs('**/two.lua')},
+            have_attributes(:name=>'one.lua', :synckey=>'one.lua', :selected=>true,
+                            :local_path=>pathname_globs('**/one.lua')),
+          have_attributes(:name=>'two.lua', :synckey=>'two.lua', :selected=>true,
+                          :local_path=>pathname_globs('**/two.lua')),
           ]})
       end
     end
@@ -396,7 +399,7 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
 
-      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(Hash), false)
+      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(MrMurano::SyncUpDown::Item), false)
       @t.syncup({:create=>true})
     end
 
@@ -404,10 +407,11 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
       expect(@t).to receive(:list).once.and_return([
-        {:name=>'one.lua'},{:name=>'two.lua'}
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
       ])
 
-      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(Hash), true)
+      expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(MrMurano::SyncUpDown::Item), true)
       expect(@t).to receive(:toRemoteItem).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
@@ -432,7 +436,8 @@ RSpec.describe MrMurano::SyncUpDown do
 
     it "creates" do
       expect(@t).to receive(:list).once.and_return([
-        {:name=>'one.lua'},{:name=>'two.lua'}
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
@@ -445,12 +450,14 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
       expect(@t).to receive(:list).once.and_return([
-        {:name=>'one.lua'},{:name=>'two.lua'}
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
       expect(@t).to receive(:toRemoteItem).and_return(
-        {:name=>'one.lua'},{:name=>'two.lua'}
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
       )
       @t.syncdown({:update=>true})
       expect(FileTest.exist?(@projectDir + '/tsud/one.lua')).to be true
@@ -458,13 +465,13 @@ RSpec.describe MrMurano::SyncUpDown do
     end
   end
 
-  context "bundles" do
-    before(:example) do
-      FileUtils.mkpath(@projectDir + '/tsud')
-      FileUtils.mkpath(@projectDir + '/bundles/mybun/tsud')
-      @t = TSUD.new
-    end
-
+#  context "bundles" do
+#    before(:example) do
+#      FileUtils.mkpath(@projectDir + '/tsud')
+#      FileUtils.mkpath(@projectDir + '/bundles/mybun/tsud')
+#      @t = TSUD.new
+#    end
+#
 #    it "finds items in bundles." do
 #      FileUtils.touch(@projectDir + '/tsud/one.lua')
 #      FileUtils.touch(@projectDir + '/bundles/mybun/tsud/two.lua')
@@ -481,15 +488,15 @@ RSpec.describe MrMurano::SyncUpDown do
 #         :local_path=>an_instance_of(Pathname)},
 #      ])
 #    end
-
-    it "Doesn't download a bundled item" do
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      lp = Pathname.new(@projectDir + '/tsud/one.lua').realpath
-
-      expect(@t).to receive(:warning).once.with(/Not downloading into bundled item.*/)
-
-      @t.download(lp, {:bundled=>true, :name=>'one.lua'})
-    end
-  end
+#
+#    it "Doesn't download a bundled item" do
+#      FileUtils.touch(@projectDir + '/tsud/one.lua')
+#      lp = Pathname.new(@projectDir + '/tsud/one.lua').realpath
+#
+#      expect(@t).to receive(:warning).once.with(/Not downloading into bundled item.*/)
+#
+#      @t.download(lp, {:bundled=>true, :name=>'one.lua'})
+#    end
+#  end
 end
 #  vim: set ai et sw=2 ts=2 :

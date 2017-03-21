@@ -11,10 +11,6 @@ end
 
 alias_command 'password current', :config, 'user.name'
 
-class Outter
-  include MrMurano::Verbose
-end
-
 command 'password list' do |c|
   c.syntax = %{murano password list}
   c.summary = %{List the usernames with saved passwords}
@@ -24,19 +20,16 @@ command 'password list' do |c|
     psd.load
 
     ret = psd.list
-    outter = Outter.new
-    outter.outf(ret) do |dd, ios|
+    psd.outf(ret) do |dd, ios|
       rows=[]
       dd.each_pair do |key, value|
         value.each{|v| rows << [key, v] }
       end
-      outter.tabularize({
+      psd.tabularize({
         :rows=>rows, :headers => [:Host, :Username]
       }, ios)
     end
-
   end
-
 end
 
 command 'password set' do |c|
@@ -49,6 +42,11 @@ command 'password set' do |c|
   c.action do |args, options|
     psd = MrMurano::Passwords.new
     psd.load
+
+    if args.count < 1 then
+      psd.error "Missing username"
+      exit 1
+    end
 
     username = args.shift
     host = args.shift
@@ -75,6 +73,11 @@ command 'password delete' do |c|
   c.action do |args, options|
     psd = MrMurano::Passwords.new
     psd.load
+
+    if args.count < 1 then
+      psd.error "Missing username"
+      exit 1
+    end
 
     username = args.shift
     host = args.shift

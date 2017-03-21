@@ -145,11 +145,13 @@ end
       }
       tio.close
 
-      ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :service=>'data',
-                                   :event=>'datapoint',
-                                   :solution_id=>"XYZ",
-      })
+      ret = @srv.upload(tio.path,
+        MrMurano::EventHandler::EventHandlerItem.new(
+          :id=>"9K0",
+          :service=>'data',
+          :event=>'datapoint',
+          :solution_id=>"XYZ",
+      ))
       expect(ret)
     end
   end
@@ -172,11 +174,13 @@ end
       }
       tio.close
 
-      ret = @srv.upload(tio.path, {:id=>"9K0",
-                                   :solution_id=>"XYZ",
-                                   :service=>"device",
-                                   :event=>"datapoint",
-      })
+      ret = @srv.upload(tio.path,
+        MrMurano::EventHandler::EventHandlerItem.new(
+          :id=>"9K0",
+          :service=>'device',
+          :event=>'datapoint',
+          :solution_id=>"XYZ",
+      ))
       expect(ret)
     end
 
@@ -264,25 +268,25 @@ end
 
     it "raises on alias without service" do
       expect {
-        @srv.mkname( {:event=>'bob'} )
+        @srv.mkname( MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob') )
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on alias without event" do
       expect {
-        @srv.mkalias( {:service=>'bob'} )
+        @srv.mkalias( MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob') )
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
 
     it "raises on name without service" do
       expect {
-        @srv.mkalias( {:event=>'bob'} )
+        @srv.mkalias( MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob') )
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on name without event" do
       expect {
-        @srv.mkname( {:service=>'bob'} )
+        @srv.mkname( MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob') )
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
   end
@@ -334,13 +338,15 @@ end
         tio.close
 
         ret = @srv.toRemoteItem(nil, tio.path)
-        expect(ret).to eq({:service=>'device',
-                           :event=>'datapoint',
-                           :line=>1,
-                           :line_end=>3,
-                           :local_path=>Pathname.new(tio.path),
-                           :script=>%{--#EVENT device datapoint\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
-        })
+        expect(ret).to eq(
+          MrMurano::EventHandler::EventHandlerItem.new(
+            :service=>'device',
+            :event=>'datapoint',
+            :line=>1,
+            :line_end=>3,
+            :local_path=>Pathname.new(tio.path),
+            :script=>%{--#EVENT device datapoint\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
+          ))
       end
     end
 

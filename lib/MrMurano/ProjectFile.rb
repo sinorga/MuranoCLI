@@ -12,6 +12,8 @@ module MrMurano
   class ProjectFile
     include Verbose
 
+    attr_reader :usingProjectfile, :usingSolutionfile
+
     # Methods that are common to various internal structs.
     module PrjStructCommonMethods
       ## Load data from Hash into self
@@ -85,6 +87,8 @@ module MrMurano
     end
 
     def initialize()
+      @usingProjectfile = false
+      @usingSolutionfile = false
       @prjFile = nil
       tname = $cfg['location.base'].basename.to_s.gsub(/[^A-Za-z0-9]/, '')
       @data = PrfFile.new(
@@ -259,6 +263,7 @@ module MrMurano
       schema = YAML.load_file(schemaPath.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
+      @usingProjectfile = true
 
       @data.each_pair do |key, str|
         str.load(data[key]) if data.has_key? key
@@ -277,7 +282,7 @@ module MrMurano
       schema = YAML.load_file(schemaPath.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
-      $cfg['tool.usingSolutionfile'] = true
+      @usingSolutionfile = true
 
       ifset(data, :default_page, @data[:assets], :default_page)
       ifset(data, :file_dir, @data[:assets], :location)
@@ -319,7 +324,7 @@ module MrMurano
       schema = YAML.load_file(schemaPath.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
-      $cfg['tool.usingSolutionfile'] = true
+      @usingSolutionfile = true
 
       ifset(data, :default_page, @data[:assets], :default_page)
       ifset(data, :assets, @data[:assets], :location)

@@ -11,6 +11,16 @@ module MrMurano
     include SyncUpDown
     include ProductOnePlatformRpcShim
 
+    # Resource Specific details on an Item
+    class ResourceItem < Item
+      # @return [String] Reasource Identifier, internal use only.
+      attr_accessor :rid
+      # @return [String] The name of this resource
+      attr_accessor :alias
+      # @return [String] The format of thie resource.
+      attr_accessor :format
+    end
+
     def initialize
       super
       @uriparts << :proxy
