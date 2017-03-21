@@ -5,6 +5,7 @@ Icon
 *.sw[a-z]
 cookies
 .jiramulerc
+.yardoc/
 tags
 mr.exe
 
@@ -13,6 +14,7 @@ Pods/
 pkg/
 report/
 coverage/
+doc/
 
 .murano/
 .rspec_examples.txt
