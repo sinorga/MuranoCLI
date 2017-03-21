@@ -8,6 +8,19 @@ module MrMurano
   # …/endpoint
   module Webservice
     class Endpoint < Base
+
+      # Route Specific details on an Item
+      class RouteItem < Item
+        # @return [String] HTTP method for this endpoint
+        attr_accessor :method
+        # @return [String] path for URL maps to this endpoint
+        attr_accessor :path
+        # @return [String] Acceptable Content-Type for this endpoint
+        attr_accessor :content_type
+        # ???? What is this?
+        attr_accessor :use_basic_auth
+      end
+
       def initialize
         super
         @uriparts << 'endpoint'
@@ -24,7 +37,7 @@ module MrMurano
             item[:content_type] = 'application/json'
           end
           # XXX should this update the script header?
-          item
+          RouteItem.new(item)
         end
       end
 
@@ -48,8 +61,8 @@ module MrMurano
           # header missing.
           script.unshift rheader
         elsif md[:method] != ret[:method] or
-              md[:path] != ret[:path] or
-              md[:ctype] != ret[:content_type] then
+          md[:path] != ret[:path] or
+          md[:ctype] != ret[:content_type] then
           # header is wrong.
           script[0] = rheader
         end
@@ -65,21 +78,21 @@ module MrMurano
 
       ##
       # Upload endpoint
-      # :local path to file to push
-      # :remote hash of method and endpoint path
-      # @param modify Bool: True if item exists already and this is changing it
+      # @param local [Pathname] path to file to push
+      # @param remote [RouteItem] of method and endpoint path
+      # @param modify [Boolean] True if item exists already and this is changing it
       def upload(local, remote, modify)
         local = Pathname.new(local) unless local.kind_of? Pathname
         raise "no file" unless local.exist?
 
         # we assume these are small enough to slurp.
-        unless remote.has_key? :script then
+        if remote.script.nil? then
           script = local.read
           remote[:script] = script
         end
         limitkeys = [:method, :path, :script, :content_type, @itemkey]
-        remote = remote.select{|k,v| limitkeys.include? k }
-  #      post('', remote)
+        remote = remote.to_h.select{|k,v| limitkeys.include? k }
+        #      post('', remote)
         if remote.has_key? @itemkey then
           put('/' + remote[@itemkey], remote) do |request, http|
             response = http.request(request)
@@ -95,7 +108,7 @@ module MrMurano
           end
         else
           verbose "\tNo itemkey, creating"
-          post('', remote)
+          post('/', remote)
         end
       end
 
@@ -125,12 +138,12 @@ module MrMurano
             # header line.
             cur[:line_end] = lineno unless cur.nil?
             items << cur unless cur.nil?
-            cur = {:method=>md[:method],
-                   :path=>md[:path],
-                   :content_type=> (md[:ctype] or 'application/json'),
-                   :local_path=>path,
-                   :line=>lineno,
-                   :script=>line}
+            cur = RouteItem.new(:method=>md[:method],
+                                :path=>md[:path],
+                                :content_type=> (md[:ctype] or 'application/json'),
+                                :local_path=>path,
+                                :line=>lineno,
+                                :script=>line)
           elsif not cur.nil? and not cur[:script].nil? then
             cur[:script] << line
           end
