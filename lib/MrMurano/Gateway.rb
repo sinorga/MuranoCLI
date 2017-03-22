@@ -114,7 +114,7 @@ module MrMurano
           res[key] = value.reject{|k,v| k==:alias}
         end
 
-        patch('/', {:resources=>res})
+        patch('', {:resources=>res})
       end
 
       ###################################################

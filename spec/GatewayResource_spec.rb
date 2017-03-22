@@ -50,7 +50,7 @@ RSpec.describe MrMurano::Gateway::Resources do
       :fuzz=>{:format=>"string", :unit=>"c", :settable=>true},
       :gruble=>{:format=>"string", :unit=>"bits", :settable=>true}
     }
-    stub_request(:patch, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/').
+    stub_request(:patch, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway').
       with(:body=>{:resources=>res_after}.to_json)
 
     ret = @gw.upload_all(res_before)
