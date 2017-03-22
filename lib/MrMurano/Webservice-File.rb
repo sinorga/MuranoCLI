@@ -78,7 +78,7 @@ module MrMurano
       def upload(local, remote, modify)
         local = Pathname.new(local) unless local.kind_of? Pathname
 
-        uri = endPoint('upload' + remote[:path])
+        uri = endPoint('upload/' + URI.encode_www_form_component(remote[:path]))
         # kludge past for a bit.
         #`curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
 
