@@ -94,15 +94,17 @@ module MrMurano
     end
 
     ## Get list of call operations from a schema
-    def callable(id=sid)
+    def callable(id=sid, all=false)
       scm = schema(id)
       calls = []
       scm[:paths].each do |path, methods|
         methods.each do |method, params|
-          if params.kind_of?(Hash) and
-              not params['x-internal-use'.to_sym] and
-              params.has_key?(:operationId) then
-            calls << [method, params[:operationId]]
+          if params.kind_of?(Hash) then
+            call = [method]
+            call << path.to_s if all
+            call << params[:operationId]
+            call << (params['x-internal-use'.to_sym] or false) if all
+            calls << call
           end
         end
       end
