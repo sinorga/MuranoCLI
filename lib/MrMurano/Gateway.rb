@@ -260,6 +260,7 @@ module MrMurano
       ## Create a bunch of devices at once
       # @param local [String, Pathname] CSV file of identifiers
       # @param expire [Number] Expire time for all identities (ignored)
+      # @return [void]
       def enable_batch(local, expire=nil)
         uri = endPoint('s/')
         file = HTTP::FormData::File.new(local.to_s, {:mime_type=>'text/csv'})
@@ -270,6 +271,7 @@ module MrMurano
         req.content_length = form.content_length
         req.body = form.to_s
         workit(req)
+        nil
       end
 
       ## Delete a device

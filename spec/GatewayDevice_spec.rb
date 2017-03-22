@@ -201,11 +201,42 @@ RSpec.describe MrMurano::Gateway::Device do
   end
 
   context "enables batch" do
-    # FIXME do these
-    it "enables from cvs"
-    it "but file is missing"
-    it "but file is not text"
-    it "but file is malformed csv"
+    it "enables from cvs" do
+      File.open('ids.csv', 'w') {|io| io << "ID\n1\n2\n3\n4\n5"}
+      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/devices/').
+        with(:headers=>{'Content-Type'=>%r{^multipart/form-data.*}}) do |request|
+          request.body.to_s =~ %r{Content-Type: text/csv\r\n\r\nID\n1\n2\n3\n4\n5}
+      end
+      @gw.enable_batch('ids.csv')
+    end
+
+    it "but file is missing" do
+      expect{@gw.enable_batch('ids.csv')}.to raise_error(Errno::ENOENT)
+    end
+
+    it "but file is not text" do
+      File.open('ids.csv', 'wb') {|io| io << "\0\0\0\0"}
+      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/devices/').
+        to_return(:status=>400, :body => "CSV file format invalid")
+      saved = $stderr
+      $stderr = StringIO.new
+      @gw.enable_batch('ids.csv')
+      expect($stderr.string).to eq(%{\e[31mRequest Failed: 400: CSV file format invalid\e[0m\n})
+      $stderr = saved
+    end
+
+    it "but file is missing header" do
+      File.open('ids.csv', 'w') {|io| io << "1\n2\n3\n4\n5"}
+      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/devices/').
+        with(:headers=>{'Content-Type'=>%r{^multipart/form-data.*}}) do |request|
+          request.body.to_s =~ %r{Content-Type: text/csv\r\n\r\n1\n2\n3\n4\n5}
+      end.to_return(:status=>400, :body => "CSV file format invalid")
+      saved = $stderr
+      $stderr = StringIO.new
+      @gw.enable_batch('ids.csv')
+      expect($stderr.string).to eq(%{\e[31mRequest Failed: 400: CSV file format invalid\e[0m\n})
+      $stderr = saved
+    end
   end
 
   it "reads state" do
