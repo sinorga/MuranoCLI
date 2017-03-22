@@ -230,7 +230,7 @@ module MrMurano
     #
     # Children objects Must override this
     #
-    # @return [Array] of Hashes of item details
+    # @return [Array<Item>] of item details
     def list()
       []
     end

@@ -3,13 +3,22 @@ require 'net/http'
 require "http/form_data"
 require 'digest/sha1'
 require 'mime/types'
-require 'pp'
 require 'MrMurano/Webservice'
 
 module MrMurano
-  # …/file
   module Webservice
+    # Static File content
     class File < Base
+      # File Specific details on an Item
+      class FileItem < Item
+        # @return [String] path for URL maps to this static file
+        attr_accessor :path
+        # @return [String] The MIME-Type for this content
+        attr_accessor :mime_type
+        # @return [String] Checksum for the content.
+        attr_accessor :checksum
+      end
+
       def initialize
         super
         @uriparts << 'file'
@@ -19,8 +28,9 @@ module MrMurano
 
       ##
       # Get a list of all of the static content
+      # @return [Array<FileItem>] List of items on server
       def list
-        get()
+        get().map{|i| FileItem.new(i)}
       end
 
       ##
@@ -47,6 +57,7 @@ module MrMurano
 
       ##
       # Delete a file
+      # @param path [String] The identifying key for this item
       def remove(path)
         delete('/'+path)
       end
@@ -61,7 +72,9 @@ module MrMurano
 
       ##
       # Upload a file
-      # @param modify Bool: True if item exists already and this is changing it
+      # @param src [Pathname] Full path of where to upload from
+      # @param item [Hash] The item details to upload
+      # @param modify [Boolean] True if item exists already and this is changing it
       def upload(local, remote, modify)
         local = Pathname.new(local) unless local.kind_of? Pathname
 
@@ -107,12 +120,17 @@ module MrMurano
         end
       end
 
+      # @param item [Item] listing details for the item.
+      # @param itemkey [Symbol] Key for look up.
       def tolocalname(item, key)
         name = item[key]
         name = $cfg['files.default_page'] if name == '/'
         name
       end
 
+      # @param root [Pathname,String] Root path for this resource type from config files
+      # @param path [Pathname,String] Path to local item
+      # @return [Item] hash of the details for the remote item for this path
       def toRemoteItem(from, path)
         item = super(from, path)
         name = item[:name]
@@ -132,13 +150,18 @@ module MrMurano
         end
         debug "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
 
-        {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest}
+        FileItem.new(:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest)
       end
 
+      # @param item [FileItem] The item to get a key from
+      # @return [Object] The object to use a comparison key
       def synckey(item)
         item[:path]
       end
 
+      # Compare items.
+      # @param itemA [FileItem]
+      # @param itemB [FileItem]
       def docmp(itemA, itemB)
         return (itemA[:mime_type] != itemB[:mime_type] or
           itemA[:checksum] != itemB[:checksum])
