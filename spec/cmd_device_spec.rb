@@ -30,9 +30,9 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(err).to eq('')
     olines = out.lines
     expect(olines[0]).to match(/^(\+-+){3}\+$/)
-    expect(olines[1]).to match(/^\| SN\s+\| Status\s+\| RID\s+\|$/)
+    expect(olines[1]).to match(/^\| Identifier\s+\| Status\s+\| Online\s+\|$/)
     expect(olines[2]).to match(/^(\+-+){3}\+$/)
-    expect(olines[3]).to match(/^\| 12345\s+\| notactivated\s+\| \h{40}\s+\|$/)
+    expect(olines[3]).to match(/^\| 12345\s+\| whitelisted\s+\| false\s+\|$/)
     expect(olines[4]).to match(/^(\+-+){3}\+$/)
     expect(status.exitstatus).to eq(0)
   end
@@ -53,7 +53,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     FileUtils.mkpath('specs')
     FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
 
-    out, err, status = Open3.capture3(capcmd('murano', 'syncup', '--specs'))
+    out, err, status = Open3.capture3(capcmd('murano', 'syncup', '--resources'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
@@ -79,14 +79,21 @@ RSpec.describe 'murano device', :cmd, :needs_password do
 #    expect(olines[-1]).to match(/^(\+-+){4}\+$/)
 #    expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'write', '12345', 'state', '42'))
-    expect(out).to eq("state: ok\n")
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'write', '12345', 'state=42'))
+    expect(out).to eq("")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'read', '12345', 'state'))
-    expect(out.strip).to eq('42')
+    #expect(out.strip).to eq('42')
     expect(err).to eq('')
+    expect(out.lines).to match_array([
+      /^(\+-+){4}\+$/,
+      /^\| Alias\s+\| Reported\s+\| Set\s+\| Timestamp\s+\|$/,
+      /^(\+-+){4}\+$/,
+      /^\| state\s+\| \s+\| 42\s+\| \d+\s+\|$/,
+      /^(\+-+){4}\+$/,
+    ])
     expect(status.exitstatus).to eq(0)
 
   end
