@@ -102,9 +102,12 @@ command 'device write' do |c|
   c.syntax = %{murano device write <identifier> <Alias=Value> [<Alias=Value>...]}
   c.summary = %{Write to 'set' of aliases on devices}
   c.description = %{Write to 'set' of aliases on devices
+
+  If an alias is not settable, this will fail.
   }
 
   c.action do |args,options|
+    resources = (MrMurano::Gateway::Base.new.info or {})[:resources]
     prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
       prd.error "Identifier missing"
@@ -113,10 +116,24 @@ command 'device write' do |c|
     snid = args.shift
 
     set = Hash[ args.map{|i| i.split('=')} ]
-    set.each_pair{|k,v| set[k] = '' if v.nil?}
+    set.each_pair do |k,v|
+      fmt = ((resources[k.to_sym] or {})[:format] or 'string')
+      case fmt
+      when 'number'
+        if v.to_f.to_i == v.to_i then
+          set[k] = v.to_i
+        else
+          set[k] = v.to_f
+        end
+      when 'string'
+        set[k] = '' if v.nil?
+      when 'boolean'
+        set[k] = ['1', 'yes', 'true', 'on'].include?(v.downcase)
+      end
+    end
 
     ret = prd.write(snid, set)
-    prd.outf ret unless ret.empty?
+    prd.outf ret unless ret.nil? or ret.empty?
   end
 end
 
