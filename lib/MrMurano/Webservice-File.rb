@@ -59,7 +59,8 @@ module MrMurano
       # Delete a file
       # @param path [String] The identifying key for this item
       def remove(path)
-        delete('/'+path)
+        path = path[1..-1] if path[0] == '/'
+        delete('/' + URI.encode_www_form_component(path))
       end
 
       def curldebug(request)
@@ -78,7 +79,9 @@ module MrMurano
       def upload(local, remote, modify)
         local = Pathname.new(local) unless local.kind_of? Pathname
 
-        uri = endPoint('upload/' + URI.encode_www_form_component(remote[:path]))
+        path = remote[:path]
+        path = path[1..-1] if path[0] == '/'
+        uri = endPoint('upload/' + URI.encode_www_form_component(path))
         # kludge past for a bit.
         #`curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
 
