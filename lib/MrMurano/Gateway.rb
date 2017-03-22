@@ -266,28 +266,10 @@ module MrMurano
         form = HTTP::FormData.create(:identities=>file)
         req = Net::HTTP::Post.new(uri)
         set_def_headers(req)
-        workit(req) do |request,http|
-          request.content_type = form.content_type
-          request.content_length = form.content_length
-          request.body = form.to_s
-
-          if $cfg['tool.curldebug'] then
-            a = []
-            a << %{curl -s -H 'Authorization: #{request['authorization']}'}
-            a << %{-H 'User-Agent: #{request['User-Agent']}'}
-            a << %{-X #{request.method}}
-            a << %{'#{request.uri.to_s}'}
-            a << %{-F identities=@#{local.to_s}}
-            puts a.join(' ')
-          end
-
-          response = http.request(request)
-          case response
-          when Net::HTTPSuccess
-          else
-            showHttpError(request, response)
-          end
-        end
+        req.content_type = form.content_type
+        req.content_length = form.content_length
+        req.body = form.to_s
+        workit(req)
       end
 
       ## Delete a device

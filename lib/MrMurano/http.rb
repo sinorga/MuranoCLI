@@ -23,16 +23,24 @@ module MrMurano
 
     def curldebug(request)
       if $cfg['tool.curldebug'] then
+        formp = (request.content_type =~ %r{multipart/form-data})
         a = []
-        a << %{curl -s }
+        a << %{curl -s}
         if request.key?('Authorization') then
           a << %{-H 'Authorization: #{request['Authorization']}'}
         end
         a << %{-H 'User-Agent: #{request['User-Agent']}'}
-        a << %{-H 'Content-Type: #{request.content_type}'}
+        a << %{-H 'Content-Type: #{request.content_type}'} unless formp
         a << %{-X #{request.method}}
         a << %{'#{request.uri.to_s}'}
-        a << %{-d '#{request.body}'} unless request.body.nil?
+        unless request.body.nil? then
+          if formp then
+            m = request.body.match(%r{form-data;\s+name="(?<name>[^"]+)";\s+filename="(?<filename>[^"]+)"})
+            a << %{-F #{m[:name]}=@#{m[:filename]}} unless m.nil?
+          else
+            a << %{-d '#{request.body}'}
+          end
+        end
         puts a.join(' ')
       end
     end
