@@ -28,13 +28,14 @@ the HTTP Device API.
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
     items = prd.list
+    exit 2 if items.nil?
     prd.outf(items) do |dd, ios|
       if options.long then
-        headers = [:Name, :Id, :Size, :MTime, :MIME]
-        rows = dd.map{|d| [d[:tags][:name], d[:id], d[:size], d[:mtime], d[:type]]}
+        headers = [:Name, :Size, 'Last Modified', :MIME]
+        rows = dd.map{|d| [d[:id], d[:length], d[:last_modified], d[:type]]}
       else
         headers = [:Name, :Size]
-        rows = dd.map{|d| [d[:tags][:name], d[:size]]}
+        rows = dd.map{|d| [d[:id], d[:length]]}
       end
       prd.tabularize({:headers=>headers, :rows=>rows}, ios)
     end

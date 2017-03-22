@@ -15,7 +15,7 @@ module MrMurano
       def initialize
         @pid = $cfg['project.id']
         raise "No project id!" if @pid.nil?
-        @uriparts = [:service, @pid, :content]
+        @uriparts = [:service, @pid, :content, :item]
         @itemkey = :id
         @locationbase = $cfg['location.base']
         @location = nil
@@ -36,18 +36,18 @@ module MrMurano
 
       # List of what is in the content area?
       def list
-        get('/list')
+        get('?full=true')
       end
 
       # Delete Everything in you content area
       def clear_all
-        delete('/clear')
+        delete('')
       end
 
       # Get details of a single item in content area
       # @param name [String] Name of content
       def fetch(name)
-        get("/info?name=#{CGI.escape(name)}")
+        get("/#{CGI.escape(name)}")
       end
       alias info fetch
 
@@ -70,13 +70,12 @@ module MrMurano
           :sha256 => sha256.hexdigest,
           :expires_in => 30,
           :type => mime,
-          :name => name,
         }
         if not tags.nil? and tags.kind_of? Hash then
           params[:tags] = tags.to_json
         end
 
-        ret = get("/upload?#{URI.encode_www_form(params)}")
+        ret = get("/#{CGI.escape(name)}/upload?#{URI.encode_www_form(params)}")
         debug "POST instructions: #{ret}"
         raise "Method isn't POST!!!" unless ret[:method] == 'POST'
         raise "EncType isn't multipart/form-data" unless ret[:enctype] == 'multipart/form-data'
@@ -119,7 +118,7 @@ module MrMurano
       # Remove content by name
       # @param name [String] Name of content to be deleted
       def remove(name)
-        delete("/delete?name=#{CGI.escape(name)}")
+        delete("/#{CGI.escape(name)}")
       end
 
       # Download content
@@ -129,7 +128,7 @@ module MrMurano
         # This is a two step process.
         # 1: Get the get instructions for S3.
         # 2: fetch from S3.
-        ret = get("/download?name=#{CGI.escape(name)}")
+        ret = get("/#{CGI.escape(name)}/download")
         debug "GET instructions: #{ret}"
         raise "Method isn't GET!!!" unless ret[:method] == 'GET'
 

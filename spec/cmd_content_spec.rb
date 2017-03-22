@@ -55,11 +55,10 @@ RSpec.describe 'murano content', :cmd, :needs_password do
       expect{out = YAML.load(out)}.to_not raise_error
       expect(out).to match(
         'type' => a_kind_of(String),
-        'size' => a_kind_of(Integer),
-        'mtime' => a_kind_of(String),
-        'id' => a_kind_of(String),
+        'length' => a_kind_of(Integer),
+        'last_modified' => a_kind_of(String),
+        'id' => 'myFile',
         'tags' => {
-          'name' => 'myFile',
           'random' => 'junk',
         }
       )

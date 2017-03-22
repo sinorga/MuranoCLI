@@ -18,19 +18,18 @@ RSpec.describe MrMurano::Content::Base do
 
   it "initializes" do
     uri = @ct.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/")
   end
 
   it "lists" do
     body = [{
       :type=> "binary/octet-stream",
-      :tags=> { :name=> "TODO.taskpaper" },
-      :size=> 5622,
-      :mtime=> "2017-02-10T17:43:45.000Z",
-      :id=> "8076e5d091844814d7f5cd97a1a730aa"
+      :length=> 5622,
+      :last_modified=> "2017-02-10T17:43:45.000Z",
+      :id=> "TODO.taskpaper"
     }]
 
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/list").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item?full=true").
       to_return(:body => body.to_json)
 
     ret = @ct.list
@@ -38,7 +37,7 @@ RSpec.describe MrMurano::Content::Base do
   end
 
   it "clears all" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/clear")
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item")
     ret = @ct.clear_all
     expect(ret).to eq({})
   end
@@ -46,13 +45,12 @@ RSpec.describe MrMurano::Content::Base do
   it "fetches info for one" do
     body = {
       :type=> "binary/octet-stream",
-      :tags=> { :name=> "TODO.taskpaper" },
-      :size=> 5622,
-      :mtime=> "2017-02-10T17:43:45.000Z",
-      :id=> "8076e5d091844814d7f5cd97a1a730aa"
+      :length=> 5622,
+      :last_modified=> "2017-02-10T17:43:45.000Z",
+      :id=> "TODO.taskpaper"
     }
 
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/info?name=TODO.taskpaper").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/TODO.taskpaper").
       to_return(:body => body.to_json)
 
     ret = @ct.fetch('TODO.taskpaper')
@@ -60,7 +58,7 @@ RSpec.describe MrMurano::Content::Base do
   end
 
   it "removes one" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/delete?name=TODO.taskpaper")
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/TODO.taskpaper")
 
     ret = @ct.remove('TODO.taskpaper')
     expect(ret).to eq({})
@@ -90,10 +88,9 @@ RSpec.describe MrMurano::Content::Base do
         :field=>"file",
         :enctype=>"multipart/form-data"
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/Solutionfile.json/upload").
         with(:query=>{
           :expires_in=>30,
-          :name=>'Solutionfile.json',
           :sha256=>'018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136',
           :type=>'application/json'}).
         to_return(:body => body.to_json)
@@ -126,10 +123,9 @@ RSpec.describe MrMurano::Content::Base do
         :enctype=>"multipart/form-data"
       }
       tags = {:one=>12, :four=>'bob'}
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/Solutionfile.json/upload").
         with(:query=>{
           :expires_in=>30,
-          :name=>'Solutionfile.json',
           :sha256=>'018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136',
           :type=>'application/json',
           :tags => tags.to_json}).
@@ -162,10 +158,9 @@ RSpec.describe MrMurano::Content::Base do
         :field=>"file",
         :enctype=>"multipart/form-data"
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/Solutionfile.json/upload").
         with(:query=>{
           :expires_in=>30,
-          :name=>'Solutionfile.json',
           :sha256=>'018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136',
           :type=>'application/json'}).
         to_return(:body => body.to_json)
@@ -202,7 +197,11 @@ RSpec.describe MrMurano::Content::Base do
         :field=>"file",
         :enctype=>"multipart/form-data"
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload?expires_in=30&name=Solutionfile.json&sha256=018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136&type=application/json").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/Solutionfile.json/upload").
+        with(:query=>{
+          :expires_in=>30,
+          :sha256=>'018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136',
+          :type=>'application/json'}).
         to_return(:body => body.to_json)
 
       $cfg['tool.dry'] = true
@@ -227,10 +226,9 @@ RSpec.describe MrMurano::Content::Base do
         :field=>"file",
         :enctype=>"multipart/form-data"
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/upload").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/Solutionfile.json/upload").
         with(:query=>{
           :expires_in=>30,
-          :name=>'Solutionfile.json',
           :sha256=>'018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136',
           :type=>'application/json'}).
         to_return(:body => body.to_json)
@@ -246,7 +244,7 @@ RSpec.describe MrMurano::Content::Base do
 
       $cfg['tool.curldebug'] = true
       @ct.upload('Solutionfile.json', @tup.to_path)
-      expect($stdout.string).to match(%r{curl -s -H 'Authorization: token TTTTTTTTTT' -H 'User-Agent: MrMurano/[^']+' -H 'Content-Type: application/json' -X GET 'https://bizapi\.hosted\.exosite\.io/api:1/service/XYZ/content/upload\?sha256=018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136&expires_in=30&type=application%2Fjson&name=Solutionfile\.json'\ncurl -s -H 'User-Agent: MrMurano/[^']+' -X POST 'https://s3-us-west-1\.amazonaws\.com/murano-content-service-staging' -F 'x-amz-meta-name=Solutionfile\.json' -F 'x-amz-signature=Bunch of Hex' -F 'x-amz-date=20170214T200752Z' -F 'x-amz-credential=AAA/BBB/us-west-1/s3/aws4_request' -F 'x-amz-algorithm=AWS4-HMAC-SHA256' -F 'policy=something base64 encoded\.' -F 'key=XXX/ZZZ' -F 'acl=authenticated-read' -F file=@.*/home/work/project/Solutionfile\.json\n})
+      expect($stdout.string).to match(%r{curl -s -H 'Authorization: token TTTTTTTTTT' -H 'User-Agent: MrMurano/[^']+' -H 'Content-Type: application/json' -X GET 'https://bizapi\.hosted\.exosite\.io/api:1/service/XYZ/content/item/Solutionfile\.json/upload\?sha256=018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136&expires_in=30&type=application%2Fjson'\ncurl -s -H 'User-Agent: MrMurano/[^']+' -X POST 'https://s3-us-west-1\.amazonaws\.com/murano-content-service-staging' -F 'x-amz-meta-name=Solutionfile\.json' -F 'x-amz-signature=Bunch of Hex' -F 'x-amz-date=20170214T200752Z' -F 'x-amz-credential=AAA/BBB/us-west-1/s3/aws4_request' -F 'x-amz-algorithm=AWS4-HMAC-SHA256' -F 'policy=something base64 encoded\.' -F 'key=XXX/ZZZ' -F 'acl=authenticated-read' -F file=@.*/home/work/project/Solutionfile\.json\n})
       $stdout = saved
     end
   end
@@ -259,7 +257,7 @@ RSpec.describe MrMurano::Content::Base do
         :id=>"8076e5d091844814d7f5cd97a1a730aa"
       }
 
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/download?name=TODO.taskpaper").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/TODO.taskpaper/download").
         to_return(:body => body.to_json)
 
       stub_request(:get , "https://s3-us-west-1.amazonaws.com/murano-content-service-staging/XXX/ZZZ").
@@ -280,7 +278,7 @@ RSpec.describe MrMurano::Content::Base do
         :id=>"8076e5d091844814d7f5cd97a1a730aa"
       }
 
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/download?name=TODO.taskpaper").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/TODO.taskpaper/download").
         to_return(:body => body.to_json)
 
       stub_request(:get , "https://s3-us-west-1.amazonaws.com/murano-content-service-staging/XXX/ZZZ").
@@ -297,7 +295,7 @@ RSpec.describe MrMurano::Content::Base do
         :id=>"8076e5d091844814d7f5cd97a1a730aa"
       }
 
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/download?name=Notthere").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/Notthere/download").
         to_return(:body => body.to_json)
 
       resp = %{
@@ -323,7 +321,7 @@ RSpec.describe MrMurano::Content::Base do
         :id=>"8076e5d091844814d7f5cd97a1a730aa"
       }
 
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/download?name=TODO.taskpaper").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/TODO.taskpaper/download").
         to_return(:body => body.to_json)
 
       stub_request(:get , "https://s3-us-west-1.amazonaws.com/murano-content-service-staging/XXX/ZZZ").
@@ -334,7 +332,7 @@ RSpec.describe MrMurano::Content::Base do
 
       $cfg['tool.curldebug'] = true
       @ct.download('TODO.taskpaper')
-      expect($stdout.string).to match(%r{curl -s -H 'Authorization: token TTTTTTTTTT' -H 'User-Agent: MrMurano/[^']+' -H 'Content-Type: application/json' -X GET 'https://bizapi\.hosted\.exosite\.io/api:1/service/XYZ/content/download\?name=TODO\.taskpaper'\ncurl -s -H 'User-Agent: MrMurano/[^']+' -X GET 'https://s3-us-west-1\.amazonaws\.com/murano-content-service-staging/XXX/ZZZ'\nFOOOOOOOOOOOO})
+      expect($stdout.string).to match(%r{curl -s -H 'Authorization: token TTTTTTTTTT' -H 'User-Agent: MrMurano/[^']+' -H 'Content-Type: application/json' -X GET 'https://bizapi\.hosted\.exosite\.io/api:1/service/XYZ/content/item/TODO\.taskpaper/download'\ncurl -s -H 'User-Agent: MrMurano/[^']+' -X GET 'https://s3-us-west-1\.amazonaws\.com/murano-content-service-staging/XXX/ZZZ'\nFOOOOOOOOOOOO})
       $stdout = saved
     end
 
@@ -345,7 +343,7 @@ RSpec.describe MrMurano::Content::Base do
         :id=>"8076e5d091844814d7f5cd97a1a730aa"
       }
 
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/download?name=TODO.taskpaper").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/TODO.taskpaper/download").
         to_return(:body => body.to_json)
 
       $cfg['tool.dry'] = true
