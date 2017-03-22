@@ -131,6 +131,17 @@ command 'device enable' do |c|
   c.action do |args,options|
     prd = MrMurano::Gateway::Device.new
     if options.file then
+      # Check file for headers.
+      header = File.new(options.file).gets
+      if header.nil? then
+        prd.error "Nothing in file!"
+        exit 1
+      end
+      if not header =~ /\s*ID\s*(,SSL Client Certificate\s*)?/ then
+        prd.error "Missing column headers in file \"#{options.file}\""
+        prd.error %{First line in file should be either "ID" or "ID, SSL Client Certificate"}
+        exit 2
+      end
       prd.enable_batch(options.file)
     elsif args.count > 0 then
       prd.enable(args[0])

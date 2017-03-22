@@ -261,11 +261,10 @@ module MrMurano
       # @param local [String, Pathname] CSV file of identifiers
       # @param expire [Number] Expire time for all identities (ignored)
       def enable_batch(local, expire=nil)
-        # MRMUR-52
         uri = endPoint('s/')
         file = HTTP::FormData::File.new(local.to_s, {:mime_type=>'text/csv'})
         form = HTTP::FormData.create(:identities=>file)
-        req = Net::HTTP::Put.new(uri)
+        req = Net::HTTP::Post.new(uri)
         set_def_headers(req)
         workit(req) do |request,http|
           request.content_type = form.content_type
