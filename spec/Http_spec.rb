@@ -64,7 +64,7 @@ RSpec.describe MrMurano::Http do
       $cfg['tool.curldebug'] = true
       $stdout = StringIO.new
       @tst.curldebug(@req)
-      expect($stdout.string).to eq(%{curl -s  -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test'\n})
+      expect($stdout.string).to eq(%{curl -s -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test'\n})
     end
 
     it "puts something with Auth" do
@@ -72,7 +72,7 @@ RSpec.describe MrMurano::Http do
       $stdout = StringIO.new
       @req['Authorization'] = 'LetMeIn'
       @tst.curldebug(@req)
-      expect($stdout.string).to eq(%{curl -s  -H 'Authorization: LetMeIn' -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test'\n})
+      expect($stdout.string).to eq(%{curl -s -H 'Authorization: LetMeIn' -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test'\n})
     end
 
     it "puts something with Body" do
@@ -80,7 +80,7 @@ RSpec.describe MrMurano::Http do
       $stdout = StringIO.new
       @req.body = "builder"
       @tst.curldebug(@req)
-      expect($stdout.string).to eq(%{curl -s  -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test' -d 'builder'\n})
+      expect($stdout.string).to eq(%{curl -s -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test' -d 'builder'\n})
     end
   end
 
