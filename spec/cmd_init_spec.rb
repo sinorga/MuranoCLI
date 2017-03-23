@@ -136,6 +136,9 @@ RSpec.describe 'mr init', :cmd do
 
   context "in existing project directory" do
     before(:example) do
+      FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
+      FileUtils.move('assets','files')
+
       @project_name = rname('initEmpty')
       out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', @project_name, '--save'))
       expect(err).to eq('')
@@ -148,18 +151,20 @@ RSpec.describe 'mr init', :cmd do
       expect(status.exitstatus).to eq(0)
     end
     after(:example) do
-      out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
-      expect(out).to eq('')
-      expect(err).to eq('')
-      expect(status.exitstatus).to eq(0)
+      Dir.chdir(ENV['HOME']) do
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
+        expect(out).to eq('')
+        expect(err).to eq('')
+        expect(status.exitstatus).to eq(0)
 
-      out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
-      expect(out).to eq('')
-      expect(err).to eq('')
-      expect(status.exitstatus).to eq(0)
+        out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
+        expect(out).to eq('')
+        expect(err).to eq('')
+        expect(status.exitstatus).to eq(0)
+      end
     end
 
-    it "with only .murano/config" do
+    it "without ProjectFile" do
       # The test account will have one business, one product, and one solution.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
@@ -190,10 +195,129 @@ RSpec.describe 'mr init', :cmd do
       expect(File.directory?("specs")).to be true
     end
 
-    it "without ProjectFile"
-    it "with ProjectFile"
-    it "with SolutionFile 0.2.0"
-    it "with SolutionFile 0.3.0"
+    it "with ProjectFile" do
+      FileUtils.copy(File.join(@testdir, 'spec/fixtures/ProjectFiles/only_meta.yaml'), 'test.murano')
+      # The test account will have one business, one product, and one solution.
+      # So it won't ask any questions.
+      out, err, status = Open3.capture3(capcmd('murano', 'init'))
+      expect(out.lines).to match_array([
+        "\n",
+        a_string_starting_with('Found project base directory at '),
+        "\n",
+        a_string_starting_with('Using account '),
+        a_string_starting_with('Using Business ID already set to '),
+        "\n",
+        a_string_starting_with('Using Solution ID already set to '),
+        "\n",
+        a_string_starting_with('Using Product ID already set to '),
+        "\n",
+        a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+        "Default directories created\n",
+      ])
+      expect(err).to eq("")
+      expect(status.exitstatus).to eq(0)
+
+      expect(File.directory?(".murano")).to be true
+      expect(File.exist?(".murano/config")).to be true
+      expect(File.directory?("routes")).to be true
+      expect(File.directory?("services")).to be true
+      expect(File.directory?("files")).to be true
+      expect(File.directory?("modules")).to be true
+      expect(File.directory?("specs")).to be true
+    end
+
+    it "with SolutionFile 0.2.0" do
+      File.open('Solutionfile.json', 'wb') do |io|
+        io << {
+          :default_page => 'index.html',
+          :file_dir => 'files',
+          :custom_api => 'routes/manyRoutes.lua',
+          :modules => {
+            :table_util => 'modules/table_util.lua'
+          },
+          :event_handler => {
+            :device => {
+              :datapoint => 'services/devdata.lua'
+            }
+          }
+        }.to_json
+      end
+      # The test account will have one business, one product, and one solution.
+      # So it won't ask any questions.
+      out, err, status = Open3.capture3(capcmd('murano', 'init'))
+      expect(out.lines).to match_array([
+        "\n",
+        a_string_starting_with('Found project base directory at '),
+        "\n",
+        a_string_starting_with('Using account '),
+        a_string_starting_with('Using Business ID already set to '),
+        "\n",
+        a_string_starting_with('Using Solution ID already set to '),
+        "\n",
+        a_string_starting_with('Using Product ID already set to '),
+        "\n",
+        a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+        "Writing an initial Project file: project.murano\n",
+        "Default directories created\n",
+      ])
+      expect(err).to eq("")
+      expect(status.exitstatus).to eq(0)
+
+      expect(File.directory?(".murano")).to be true
+      expect(File.exist?(".murano/config")).to be true
+      expect(File.directory?("routes")).to be true
+      expect(File.directory?("services")).to be true
+      expect(File.directory?("files")).to be true
+      expect(File.directory?("modules")).to be true
+      expect(File.directory?("specs")).to be true
+    end
+
+    it "with SolutionFile 0.3.0" do
+      File.open('Solutionfile.json', 'wb') do |io|
+        io << {
+          :default_page => 'index.html',
+          :assets => 'files',
+          :routes => 'routes/manyRoutes.lua',
+          :modules => {
+            :table_util => 'modules/table_util.lua'
+          },
+          :services => {
+            :device => {
+              :datapoint => 'services/devdata.lua'
+            }
+          },
+          :version => '0.3.0',
+        }.to_json
+      end
+      # The test account will have one business, one product, and one solution.
+      # So it won't ask any questions.
+      out, err, status = Open3.capture3(capcmd('murano', 'init'))
+      expect(out.lines).to match_array([
+        "\n",
+        a_string_starting_with('Found project base directory at '),
+        "\n",
+        a_string_starting_with('Using account '),
+        a_string_starting_with('Using Business ID already set to '),
+        "\n",
+        a_string_starting_with('Using Solution ID already set to '),
+        "\n",
+        a_string_starting_with('Using Product ID already set to '),
+        "\n",
+        a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+        "Writing an initial Project file: project.murano\n",
+        "Default directories created\n",
+      ])
+      expect(err).to eq("")
+      expect(status.exitstatus).to eq(0)
+
+      expect(File.directory?(".murano")).to be true
+      expect(File.exist?(".murano/config")).to be true
+      expect(File.directory?("routes")).to be true
+      expect(File.directory?("services")).to be true
+      expect(File.directory?("files")).to be true
+      expect(File.directory?("modules")).to be true
+      expect(File.directory?("specs")).to be true
+    end
   end
 
 end
