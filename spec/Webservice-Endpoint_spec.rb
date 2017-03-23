@@ -321,7 +321,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
     end
 
     it "without an itemkey" do
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint/").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")

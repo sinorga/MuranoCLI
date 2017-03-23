@@ -108,7 +108,7 @@ module MrMurano
           end
         else
           verbose "\tNo itemkey, creating"
-          post('/', remote)
+          post('', remote)
         end
       end
 
