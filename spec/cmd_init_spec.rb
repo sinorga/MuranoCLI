@@ -16,7 +16,7 @@ RSpec.describe 'mr init', :cmd do
     end
   end
 
-  context "in empty directory" do
+  context "in empty directory", :needs_password do
     context "with" do
       # Setup a solution and product to use.
       # Doing this in a context with before&after so that after runs even when test
@@ -80,7 +80,7 @@ RSpec.describe 'mr init', :cmd do
       end
     end
 
-    context "without" do
+    context "without", :needs_password do
       before(:example) do
         @project_name = rname('initCreating')
       end
@@ -134,7 +134,7 @@ RSpec.describe 'mr init', :cmd do
     end
   end
 
-  context "in existing project directory" do
+  context "in existing project directory", :needs_password do
     before(:example) do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
       FileUtils.move('assets','files')
