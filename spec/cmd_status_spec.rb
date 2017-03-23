@@ -125,7 +125,8 @@ RSpec.describe 'murano status', :cmd, :needs_password do
     end
   end
 
-  context "with Solutionfile 0.2.0" do
+  # XXX wait, should a Solutionfile even work with Okami?
+  context "with Solutionfile 0.2.0", :not_in_okami do
     before(:example) do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
       FileUtils.move('assets','files')
@@ -178,7 +179,8 @@ RSpec.describe 'murano status', :cmd, :needs_password do
     end
   end
 
-  context "with Solutionfile 0.3.0" do
+  # XXX wait, should a Solutionfile even work with Okami?
+  context "with Solutionfile 0.3.0", :not_in_okami do
     before(:example) do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
       FileUtils.move('assets','files')
