@@ -28,7 +28,8 @@ Update `myproject.murano` with the info about your project.
 If this is a new project, you will also need to run `murano assign set` to connect
 the product and solution.
 
-If this is an existing project, you want to run `murano syncdown -V`
+If this is an existing project, you want to run `murano syncdown -V` after
+running `murano init`.
 
 Now do stuff, see what changed: `murano status` or `murano diff`.
 Then deploy with `murano syncup`
