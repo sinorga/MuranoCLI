@@ -70,7 +70,11 @@ command :status do |c|
     def gmerge(ret, type, options)
       if options.grouped then
         [:toadd, :todel, :tomod, :unchg].each do |kind|
-          ret[kind].each{|item| item[:pp_type] = type; @grouped[kind] << item}
+          ret[kind].each do |item|
+            item = item.to_h
+            item[:pp_type] = type
+            @grouped[kind] << item
+          end
         end
       else
         pretty(ret, options)

@@ -9,6 +9,15 @@ require 'MrMurano/Solution'
 module MrMurano
   # …/file
   class File < SolutionBase
+    # File Specific details on an Item
+    class FileItem < Item
+      # @return [String] path for URL maps to this static file
+      attr_accessor :path
+      # @return [String] The MIME-Type for this content
+      attr_accessor :mime_type
+      # @return [String] Checksum for the content.
+      attr_accessor :checksum
+    end
     def initialize
       super
       @uriparts << 'file'
@@ -19,7 +28,7 @@ module MrMurano
     ##
     # Get a list of all of the static content
     def list
-      get()
+      get().map{|i| FileItem.new(i)}
     end
 
     ##
@@ -47,8 +56,8 @@ module MrMurano
     ##
     # Delete a file
     def remove(path)
-      # TODO test
-      delete('/'+path)
+      path = path[1..-1] if path[0] == '/'
+      delete('/'+ URI.encode_www_form_component(path))
     end
 
     def curldebug(request)
@@ -65,7 +74,10 @@ module MrMurano
     def upload(local, remote, modify)
       local = Pathname.new(local) unless local.kind_of? Pathname
 
-      uri = endPoint('upload' + remote[:path])
+      path = remote[:path]
+      path = path[1..-1] if path[0] == '/'
+      uri = endPoint('upload/' + URI.encode_www_form_component(path))
+
       # kludge past for a bit.
       #`curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
 
@@ -132,7 +144,7 @@ module MrMurano
       end
       debug "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
 
-      {:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest}
+      FileItem.new(:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest)
     end
 
     def synckey(item)

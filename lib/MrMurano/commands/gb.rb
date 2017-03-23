@@ -2,8 +2,8 @@ require 'pp'
 
 # You don't need this.
 # To use this:
-# - mkdir -p ~/.mrmurano/plugins
-# - ln gb.rb ~/.mrmurano/plugins
+# - mkdir -p ~/.murano/plugins
+# - ln gb.rb ~/.murano/plugins
 
 command :_gb do |c|
   c.syntax = %{murano _gb <class> <method> (<args>)}
@@ -18,7 +18,8 @@ command :_gb do |c|
     begin
       gb = Object::const_get("MrMurano::#{cls}").new
       if gb.respond_to? meth then
-        pp gb.__send__(meth, *args)
+        ret = gb.__send__(meth, *args)
+        gb.outf(ret) {|o,i| pp o}
       else
         say_error "'#{cls}' doesn't '#{meth}'"
       end
