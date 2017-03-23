@@ -145,7 +145,10 @@ command :init do |c|
         path = $cfg[cfgi]
         path = Pathname.new(path) unless path.kind_of? Pathname
         path = base + path
-        path.mkpath unless path.exist?
+        unless path.exist? then
+          path = path.dirname unless path.extname.empty?
+          path.mkpath
+        end
       end
       say "Default directories created"
     end
