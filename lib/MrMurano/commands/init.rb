@@ -122,8 +122,8 @@ command :init do |c|
     puts ''
     say "Ok, In business ID: #{$cfg['business.id']} using Solution ID: #{$cfg['solution.id']} with Product ID: #{$cfg['product.id']}"
 
-    # If no ProjectFile or Solutionfile, then write a ProjectFile
-    if $project.project_file.nil? then
+    # If no ProjectFile, then write a ProjectFile
+    if not $project.usingProjectfile then
       tmpl = File.read(File.join(File.dirname(__FILE__),'..','template','projectFile.murano.erb'))
       tmpl = ERB.new(tmpl)
       res = tmpl.result($project.data_binding)
