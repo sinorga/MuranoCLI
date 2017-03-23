@@ -58,7 +58,7 @@ Then deploy with `murano syncup`
 When upgrading from a 1.\* version to a 2.0, you should uninstall the old versions
 first.
 ```
-> gem uninstall MuranoCLI`
+> gem uninstall MuranoCLI
 ```
 
 And then install:
