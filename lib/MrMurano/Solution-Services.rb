@@ -24,11 +24,6 @@ module MrMurano
       # :nocov:
     end
 
-    def list
-      ret = get()
-      ret[:items]
-    end
-
     def fetch(name)
       raise "Missing name!" if name.nil?
       raise "Empty name!" if name.empty?
@@ -55,7 +50,7 @@ module MrMurano
       # we assume these are small enough to slurp.
       script = local.read
 
-      pst = remote.merge ({
+      pst = remote.to_h.merge ({
         :solution_id => $cfg['solution.id'],
         :script => script,
         :alias=>mkalias(remote),
@@ -152,8 +147,20 @@ module MrMurano
     end
   end
 
-  # …/library
+  # Libraries or better known as Modules.
   class Library < ServiceBase
+    # Module Specific details on an Item
+    class LibraryItem < Item
+      # @return [String] Internal Alias name
+      attr_accessor :alias
+      # @return [String] Timestamp when this was updated.
+      attr_accessor :updated_at
+      # @return [String] Timestamp when this was created.
+      attr_accessor :created_at
+      # @return [String] The solution.id that this is in
+      attr_accessor :solution_id
+    end
+
     def initialize
       super
       @uriparts << 'library'
@@ -167,24 +174,30 @@ module MrMurano
     end
 
     def mkalias(remote)
-      if remote.has_key? :name then
+      unless remote.name.nil? then
         [$cfg['solution.id'], remote[:name]].join('_')
       else
-        raise "Missing parts! #{remote.to_json}"
+        raise "Missing parts! #{remote.to_h.to_json}"
       end
     end
 
     def mkname(remote)
-      if remote.has_key? :name then
+      unless remote.name.nil? then
         remote[:name]
       else
-        raise "Missing parts! #{remote.to_json}"
+        raise "Missing parts! #{remote.to_h.to_json}"
       end
+    end
+
+    def list
+      ret = get()
+      return [] unless ret.has_key? :items
+      ret[:items].map{|i| LibraryItem.new(i)}
     end
 
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
-      {:name => name}
+      LibraryItem.new(:name => name)
     end
 
     def synckey(item)
@@ -193,8 +206,24 @@ module MrMurano
   end
   SyncRoot.add('modules', Library, 'M', %{Modules}, true)
 
-  # …/eventhandler
+  # Services aka EventHandlers
   class EventHandler < ServiceBase
+    # EventHandler Specific details on an Item
+    class EventHandlerItem < Item
+      # @return [String] Internal Alias name
+      attr_accessor :alias
+      # @return [String] Timestamp when this was updated.
+      attr_accessor :updated_at
+      # @return [String] Timestamp when this was created.
+      attr_accessor :created_at
+      # @return [String] The solution.id that this is in
+      attr_accessor :solution_id
+      # @return [String] Which service triggers this script
+      attr_accessor :service
+      # @return [String] Which event triggers this script
+      attr_accessor :event
+    end
+
     def initialize
       super
       @uriparts << 'eventhandler'
@@ -204,18 +233,18 @@ module MrMurano
     end
 
     def mkalias(remote)
-      if remote.has_key? :service and remote.has_key? :event then
-        [$cfg['solution.id'], remote[:service], remote[:event]].join('_')
+      if remote.service.nil? or remote.event.nil? then
+        raise "Missing parts! #{remote.to_h.to_json}"
       else
-        raise "Missing parts! #{remote.to_json}"
+        [$cfg['solution.id'], remote[:service], remote[:event]].join('_')
       end
     end
 
     def mkname(remote)
-      if remote.has_key? :service and remote.has_key? :event then
-        [remote[:service], remote[:event]].join('_')
+      if remote.service.nil? or remote.event.nil? then
+        raise "Missing parts! #{remote.to_h.to_json}"
       else
-        raise "Missing parts! #{remote.to_json}"
+        [remote[:service], remote[:event]].join('_')
       end
     end
 
@@ -229,7 +258,7 @@ module MrMurano
         ( skiplist.include? i[:service] or
           skiplist.include? "#{i[:service]}.#{i[:event]}"
         )
-      }
+      }.map{|i| EventHandlerItem.new(i)}
     end
 
     def fetch(name)
@@ -266,11 +295,11 @@ module MrMurano
         md = @match_header.match(line)
         if not md.nil? then
           # header line.
-          cur = {:service=>md[:service],
-                 :event=>md[:event],
-                 :local_path=>path,
-                 :line=>lineno,
-                 :script=>line}
+          cur = EventHandlerItem.new(:service=>md[:service],
+                                     :event=>md[:event],
+                                     :local_path=>path,
+                                     :line=>lineno,
+                                     :script=>line)
         elsif not cur.nil? and not cur[:script].nil? then
           cur[:script] << line
         end
@@ -287,12 +316,13 @@ module MrMurano
         unless service.nil? or event.nil? then
           warning "Event in #{spath} missing header, but has legacy support."
           warning "Please add the header \"--#EVENT #{service} #{event}\""
-          cur = {:service=>service,
-                 :event=>event,
-                 :local_path=>path,
-                 :line=>0,
-                 :line_end => lineno,
-                 :script=>path.read()} # FIXME: ick, fix this.
+          cur = EventHandlerItem.new(:service=>service,
+                                     :event=>event,
+                                     :local_path=>path,
+                                     :line=>0,
+                                     :line_end => lineno,
+                                     :script=>path.read() # FIXME: ick, fix this.
+                                    )
         end
       end
       cur

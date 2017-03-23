@@ -1,11 +1,11 @@
-# MuranoCLI
+# Murano Command Line Interface (CLI)
 
 [![Gem
 Version](https://badge.fury.io/rb/MuranoCLI.svg)](https://badge.fury.io/rb/MuranoCLI)
-[![Build Status](https://travis-ci.org/tadpol/MrMurano.svg?branch=master)](https://travis-ci.org/tadpol/MrMurano)
+[![Build Status](https://travis-ci.org/exosite/MuranoCLI.svg?branch=master)](https://travis-ci.org/exosite/MuranoCLI)
 [![Inline docs](http://inch-ci.org/github/exosite/MuranoCLI.svg?branch=master)](http://inch-ci.org/github/exosite/MuranoCLI)
 
-Do more from the command line with [Murano](https://exosite.com/platform/)
+Do more from the command line with [Murano](https://exosite.com/platform/).
 
 MuranoCLI is the command-line tool that interacts with Murano and makes different
 tasks easier. MuranoCLI makes it easy to deploy code to a solution, import many
@@ -17,18 +17,23 @@ directory are synced up (or down) from Murano.
 
 ## Usage
 
-### To start from an existing project in Murano
 ```
 mkdir myproject
 cd myproject
-murano config solution.id XXXXXX
-murano syncdown -V
+murano init
 ```
 
-Do stuff, see what changed: `murano status` or `murano diff`.
+Update `myproject.murano` with the info about your project.
+
+If this is a new project, you will also need to run `murano assign set` to connect
+the product and solution.
+
+If this is an existing project, you want to run `murano syncdown -V`
+
+Now do stuff, see what changed: `murano status` or `murano diff`.
 Then deploy with `murano syncup`
 
-### To start a brand new project
+### To start a brand new project the hard way.
 There are a few steps and pieces to getting a solution with a product up and
 running in Murano. Here is the list.
 
@@ -53,7 +58,7 @@ Then deploy with `murano syncup`
 When upgrading from a 1.\* version to a 2.0, you should uninstall the old versions
 first.
 ```
-> gem uninstall MuranoCLI`
+> gem uninstall MuranoCLI
 ```
 
 And then install:
@@ -91,6 +96,8 @@ installing the new version.
 
 ## Features
 
+### Project File
+
 ### Logs
 
 You can monitor the log messages from your solution with the `murano logs --follow`.
@@ -102,6 +109,95 @@ MuranoCLI does a few things to make your log output easier to follow.
 - Finds JSON blobs and pretty prints them.
 
 All of these can be toggled with command line options.
+
+### CORS
+
+If you are developing you UI on seperate services and you need cross-origin
+resource sharing, you will need to set the
+[CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) options.
+
+The current CORS options can be fetched with `murano cors`
+
+There are three opitons for setting, the first and preferred way is to put your CORS
+opitons into a file named `cors.yaml`.
+
+Second and third are to put the CORS opitons in your project file.  In the `routes`
+section, add a `cors` sub-section with either the name of the file to read, or the
+CORS options inline.
+
+```yaml
+routes:
+	cors: my_cors_file.json
+```
+OR:
+```yaml
+routes:
+	cors: {"origin": true}
+```
+
+Then use `murano cors set` to push these options up to your solution.
+
+### Writing Routes (or endpoints)
+
+All of the routes that you create in your solution are identified by their method
+and path.  You set this with the following line:
+
+```lua
+--#ENDPOINT METHOD PATH
+```
+
+Optionally, you can set what the expected content type is too. (If you don't set
+this, the value is application/json)
+
+```lua
+--#ENDPOINT METHOD PATH CONTENT_TYPE
+```
+
+An example of a route that puts csv data:
+```lua
+--#ENDPOINT PUT /api/upload text/csv
+```
+
+After this header line, the script to handle the route follows.  Since many routes
+end up being a couple of lines or less, you can put multiple routes into a single
+file.
+
+Which looks like this:
+```lua
+--#ENDPOINT GET /api/somedata
+return Tsdb.query(…)
+
+--#ENDPOINT PUT /api/somedata text/csv
+return myimport_module.import(request)
+
+--#ENDPOINT DELETE /api/startover
+return Tsdb.deleteAll()
+```
+
+### Writing Service Event Handlers
+
+All of the event handlers you add to your solution are identified by which service
+they are watching and which event in that service triggers the script.
+
+This is set with the following line:
+```lua
+--#EVENT SERVICE EVENT
+```
+
+For example, the event handler that processes all data coming from your devices
+could be:
+```lua
+--#EVENT device datapoint
+local stamped = nil
+if data.api == "record" then
+	stamped = tostring(data.value[1]) .. 's'
+end
+Tsdb.write{
+	tags = {sn=data.device_sn},
+	metrics = {[data.alias] = tonumber(data.value[2])},
+	ts = stamped
+}
+```
 
 ### MURANO_CONFIGFILE environment and Dotenv
 
@@ -199,7 +295,7 @@ tests work with the live Murano servers (`--tag needs_password`).
 
 To use the live tests, the following environment variables need to be set:
 - `MURANO_USER` : User name to log into Murano with
-- `MURNO_PASSWORD` : Password for that user
+- `MURANO_PASSWORD` : Password for that user
 - `MURANO_BUSINESS` : Business id to run tests within.
 
 A free account on Murano is sufficient for these tests.

@@ -131,8 +131,11 @@ RSpec.describe MrMurano::Config do
     end
 
     context "ENV['MURANO_CONFIGFILE']" do
+      before(:example) do
+        @saved_cfg = ENV['MURANO_CONFIGFILE']
+      end
       after(:example) do
-        ENV['MURANO_CONFIGFILE'] = nil
+        ENV['MURANO_CONFIGFILE'] = @saved_cfg
         ENV['MR_CONFIGFILE'] = nil
       end
 
@@ -165,13 +168,24 @@ RSpec.describe MrMurano::Config do
       end
 
       it "warns about migrating old ENV name" do
+        ENV['MURANO_CONFIGFILE'] = nil
         ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
         expect_any_instance_of(MrMurano::Config).to receive(:warning).once
+        MrMurano::Config.new
+      end
+
+      it "errors if both are defined" do
+        ENV['MURANO_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
+        ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
+        expect_any_instance_of(MrMurano::Config).to receive(:warning).once
+        expect_any_instance_of(MrMurano::Config).to receive(:error).once
         MrMurano::Config.new
       end
     end
 
     it "dumps" do
+      @saved_cfg = ENV['MURANO_CONFIGFILE']
+      ENV['MURANO_CONFIGFILE'] = nil
       cfg = MrMurano::Config.new
       cfg.load
       cfg['sync.bydefault'] = 'files'
@@ -182,6 +196,7 @@ RSpec.describe MrMurano::Config do
       want = template.result(binding)
 
       expect(ret).to eq(want)
+      ENV['MURANO_CONFIGFILE'] = @saved_cfg
     end
 
     context "fixing permissions" do

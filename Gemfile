@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 #gemspec
 
-gem 'commander', '~> 4.4.0'
+gem 'commander', '~> 4.4.3'
 gem 'certified', '1.0.0'
 gem 'dotenv', '~> 2.1.1'
 gem 'highline', '~> 1.7.8'
@@ -11,7 +11,7 @@ gem 'inifile', '~> 3.0'
 gem 'json-schema', '~> 2.7.0'
 gem 'mime-types', '~> 3.1'
 gem 'mime-types-data', '~> 3.2016.0521'
-gem 'terminal-table', '~> 1.4.5'
+gem 'terminal-table', '~> 1.7.3'
 
 group :test do
   gem 'coderay', :require => false
@@ -19,6 +19,7 @@ group :test do
   gem 'rspec', '~> 3.5'
   gem 'simplecov', :require => false
   gem 'webmock', '~> 2.3.0'
+  gem 'yard'
 end
 
 group :windows do
