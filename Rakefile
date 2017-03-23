@@ -23,6 +23,20 @@ task :echo do
     puts builtGem
 end
 
+desc "display remind of how to release"
+task :release_reminder do
+    puts <<EOR
+git flow release start <newversion>
+gvim lib/MrMurano/version.rb
+git commit -a -m 'version bump'
+git flow release finish <newversion>
+# When editing message for tag, add release notes.
+rake git:all
+# Wait for all tests to complete.
+# if all passed: rake gemit
+EOR
+end
+
 desc "Prints a cmd to test this in another directory"
 task :testwith do
     pwd=Dir.pwd.sub(Dir.home, '~')

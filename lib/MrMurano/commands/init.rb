@@ -42,6 +42,9 @@ command :init do |c|
         say "You are only part of one business; using #{bizid[:name]}"
         $cfg.set('businesses.id', bizid[:bizid], :project)
 
+      elsif bizz.count == 0 then
+        acc.warning "You don't have any businesses; Log into the webUI and create one."
+        exit 3
       else
         choose do |menu|
           menu.prompt = "Select which Business to use:"
@@ -65,6 +68,29 @@ command :init do |c|
         sol = solz.first
         say "You only have one solution; using #{sol[:domain]}"
         $cfg.set('solution.id', sol[:apiId], :project)
+
+      elsif solz.count == 0 then
+        say "You don't have any solutions; lets create one"
+        solname = ask("Solution Name? ")
+        ret = acc.new_solution(solname)
+        if ret.nil? then
+          acc.error "Create Solution failed"
+          exit 5
+        end
+        if not ret.kind_of?(Hash) and not ret.empty? then
+          acc.error "Create Solution failed: #{ret.to_s}"
+          exit 2
+        end
+
+        # create doesn't return anything, so we need to go look for it.
+        ret = acc.solutions.select{|i| i[:domain] =~ /#{solname}\./}
+        sid = ret.first[:apiId]
+        if sid.nil? or sid.empty? then
+          acc.error "Solution didn't find an apiId!!!!  #{ret}"
+          exit 3
+        end
+        $cfg.set('solution.id', sid, :project)
+
       else
         choose do |menu|
           menu.prompt = "Select which Solution to use:"
@@ -88,6 +114,29 @@ command :init do |c|
         prd = podz.first
         say "You only have one product; using #{prd[:label]}"
         $cfg.set('product.id', prd[:modelId], :project)
+
+      elsif podz.count == 0 then
+        say "You don't have any products; lets create one"
+        podname = ask("Product Name? ")
+        ret = acc.new_product(podname)
+        if ret.nil? then
+          acc.error "Create Product failed"
+          exit 5
+        end
+        if not ret.kind_of?(Hash) and not ret.empty? then
+          acc.error "Create Product failed: #{ret.to_s}"
+          exit 2
+        end
+
+        # create doesn't return anything, so we need to go look for it.
+        ret = acc.products.select{|i| i[:label] == podname}
+        pid = ret.first[:modelId]
+        if pid.nil? or pid.empty? then
+          acc.error "Product didn't find an apiId!!!!  #{ret}"
+          exit 3
+        end
+        $cfg.set('product.id', pid, :project)
+
       else
         choose do |menu|
           menu.prompt = "Select which Product to use:"
@@ -104,8 +153,8 @@ command :init do |c|
     puts ''
     say "Ok, In business ID: #{$cfg['business.id']} using Solution ID: #{$cfg['solution.id']} with Product ID: #{$cfg['product.id']}"
 
-    # If no ProjectFile or Solutionfile, then write a ProjectFile
-    if $project.project_file.nil? then
+    # If no ProjectFile, then write a ProjectFile
+    if not $project.usingProjectfile then
       tmpl = File.read(File.join(File.dirname(__FILE__),'..','template','projectFile.murano.erb'))
       tmpl = ERB.new(tmpl)
       res = tmpl.result($project.data_binding)
@@ -127,7 +176,10 @@ command :init do |c|
         path = $cfg[cfgi]
         path = Pathname.new(path) unless path.kind_of? Pathname
         path = base + path
-        path.mkpath unless path.exist?
+        unless path.exist? then
+          path = path.dirname unless path.extname.empty?
+          path.mkpath
+        end
       end
       say "Default directories created"
     end
