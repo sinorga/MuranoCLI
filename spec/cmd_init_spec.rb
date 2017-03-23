@@ -22,7 +22,7 @@ RSpec.describe 'mr init', :cmd do
       # Doing this in a context with before&after so that after runs even when test
       # fails.
       before(:example) do
-        @project_name = rname('syncdownTest')
+        @project_name = rname('initEmpty')
         out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', @project_name, '--save'))
         expect(err).to eq('')
         expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
@@ -66,10 +66,69 @@ RSpec.describe 'mr init', :cmd do
         ])
         expect(err).to eq("")
         expect(status.exitstatus).to eq(0)
+
+        expect(File.directory?(".murano")).to be true
+        expect(File.exist?(".murano/config")).to be true
+        expect(File.directory?("routes")).to be true
+        expect(File.directory?("services")).to be true
+        expect(File.directory?("files")).to be true
+        expect(File.directory?("modules")).to be true
+        expect(File.directory?("specs")).to be true
       end
     end
 
-    it "creates new solution and product"
+    context "without" do
+      before(:example) do
+        @project_name = rname('initCreating')
+      end
+      after(:example) do
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
+        expect(out).to eq('')
+        expect(err).to eq('')
+        expect(status.exitstatus).to eq(0)
+
+        out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
+        expect(out).to eq('')
+        expect(err).to eq('')
+        expect(status.exitstatus).to eq(0)
+      end
+
+      it "existing solution and product" do
+        # The test account will have one business.
+        # It will ask to create a solution and product.
+        # !!!! the 8 is hardcoded indention here !!!!
+        data = <<-EOT.gsub(/^ {8}/, '')
+        #{@project_name}
+        #{@project_name}
+        EOT
+        out, err, status = Open3.capture3(capcmd('murano', 'init'), :stdin_data=>data)
+        expect(out.lines).to match_array([
+          "\n",
+          a_string_starting_with('Found project base directory at '),
+          "\n",
+          a_string_starting_with('Using account '),
+          a_string_starting_with('Using Business ID already set to '),
+          "\n",
+          "You don't have any solutions; lets create one\n",
+          "Solution Name? \n",
+          "You don't have any products; lets create one\n",
+          "Product Name? \n",
+          a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+          "Writing an initial Project file: project.murano\n",
+          "Default directories created\n",
+        ])
+        expect(err).to eq("")
+        expect(status.exitstatus).to eq(0)
+
+        expect(File.directory?(".murano")).to be true
+        expect(File.exist?(".murano/config")).to be true
+        expect(File.directory?("routes")).to be true
+        expect(File.directory?("services")).to be true
+        expect(File.directory?("files")).to be true
+        expect(File.directory?("modules")).to be true
+        expect(File.directory?("specs")).to be true
+      end
+    end
   end
 
   context "in existing project directory" do
