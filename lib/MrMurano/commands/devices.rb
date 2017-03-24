@@ -144,9 +144,14 @@ command 'device enable' do |c|
   c.description = %{Enables identifiers, creating the digial shadow in Murano.
   }
   c.option '-f', '--file FILE', %{A file of serial numbers, one per line}
+  c.option '--key FILE', %{Public TLS key for this device}
 
   c.action do |args,options|
     prd = MrMurano::Gateway::Device.new
+    if not options.file.nil? and not options.key.nil? then
+      prd.error %{Cannot use both --file and --key}
+      exit 1
+    end
     if options.file then
       # Check file for headers.
       header = File.new(options.file).gets
@@ -161,7 +166,13 @@ command 'device enable' do |c|
       end
       prd.enable_batch(options.file)
     elsif args.count > 0 then
-      prd.enable(args[0])
+      if options.key then
+        File.open(options.key, 'rb') do |io|
+          prd.enable(args[0], :type=>:certificate, :publickey=>io)
+        end
+      else
+        prd.enable(args[0])
+      end
     else
       prd.error "Missing an identifier to enable"
     end
