@@ -8,7 +8,7 @@ module MrMurano
       def initialize
         super
         @uriparts << 'cors'
-        @project_section = :cors
+        #@project_section = :cors
       end
 
       def fetch(id=nil, &block)
