@@ -144,7 +144,7 @@ module MrMurano
 
     #------------------------------------------------------------------------
     def new_account(email, name, company="")
-      post('/key/', {
+      post('key/', {
         :email=>email,
         :name=>name,
         :company=>company,
@@ -153,11 +153,11 @@ module MrMurano
     end
 
     def reset_account(email)
-      post('/key/', { :email=>email, :source=>'reset' })
+      post('key/', { :email=>email, :source=>'reset' })
     end
 
     def accept_account(token, password)
-      post("/key/#{token}", {:password=>password})
+      post("key/#{token}", {:password=>password})
     end
 
     #------------------------------------------------------------------------
@@ -167,11 +167,21 @@ module MrMurano
     end
 
     def new_business(name)
-      post('/business/', {:name=>name})
+      post('business/', {:name=>name})
     end
 
     def delete_business(id)
-      delete("/business/#{id}")
+      delete("business/#{id}")
+    end
+
+    def has_okami?(id)
+      ret = get("business/#{id}/overview")
+      return false unless ret.kind_of? Hash
+      return false unless ret.has_key? :tier
+      tier = ret[:tier]
+      return false unless tier.kind_of? Hash
+      return false unless tier.has_key? :enableProjects
+      return tier[:enableProjects]
     end
 
     #------------------------------------------------------------------------
