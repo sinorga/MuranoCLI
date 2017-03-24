@@ -139,6 +139,46 @@ RSpec.describe MrMurano::Gateway::Device do
     expect(ret).to eq(body)
   end
 
+  it "enables with options" do
+    body = {
+      :identity=>"58",
+      :auth=>{:type=>"cik"},
+      :state=>{},
+      :locked=>false,
+      :reprovision=>false,
+      :devmode=>false,
+      :lastip=>"",
+      :lastseen=>1487021743864000,
+      :status=>"provisioned",
+      :online=>false}
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+      with(:body=>{:type=>:certificate,:expire=>123456}.to_json).
+      to_return(:body=>body.to_json)
+
+    ret = @gw.enable(58, :type=>:certificate, :expire=>123456)
+    expect(ret).to eq(body)
+  end
+
+  it "enables with extra options" do
+    body = {
+      :identity=>"58",
+      :auth=>{:type=>"cik"},
+      :state=>{},
+      :locked=>false,
+      :reprovision=>false,
+      :devmode=>false,
+      :lastip=>"",
+      :lastseen=>1487021743864000,
+      :status=>"provisioned",
+      :online=>false}
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+      with(:body=>{:type=>:certificate,:expire=>123456}.to_json).
+      to_return(:body=>body.to_json)
+
+    ret = @gw.enable(58, :go=>:blueteam, :type=>:certificate, :expire=>123456, :bob=>:built)
+    expect(ret).to eq(body)
+  end
+
   it "removes one" do
     body = {
       :identity=>"58",

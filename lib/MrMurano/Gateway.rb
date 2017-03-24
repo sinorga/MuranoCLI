@@ -246,13 +246,20 @@ module MrMurano
 
       ## Create a device with given Identity
       # @param id [String] The new identity
-      def enable(id)
-        put("/#{CGI.escape(id.to_s)}")
-        # { :auth => {
-        #     :key => "",
-        #     :expire => '',
-        #   }
-        # }
+      # @param opts [Hash] Options for the new device
+      # @option opts [String] :type One of: certificate, hash, password, signature, token
+      # @option opts [String,Pathname,IO] :publickey The certificate, or IO/Pathname to cert file
+      # @option opts [String] :privatekey Shared secret for hash, password, token types
+      # @option opts [String,Integer] :expire For Cert, when it must be reprovisioned, otherwise when the activation window closes.
+      def enable(id, opts=nil)
+        unless opts.nil? then
+          opts.reject!{|k,v| not [:type, :publickey, :privatekey, :expire].include?(k)}
+          if opts.has_key?(:publickey) and not opts[:publickey].kind_of?(String) then
+            io = opts[:publickey]
+            opts[:publickey] = io.read
+          end
+        end
+        put("/#{CGI.escape(id.to_s)}", opts)
       end
       alias whitelist enable
       alias create enable
