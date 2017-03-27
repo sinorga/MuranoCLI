@@ -258,6 +258,8 @@ module MrMurano
             io = opts[:publickey]
             opts[:publickey] = io.read
           end
+        else
+          opts={}
         end
         put("/#{CGI.escape(id.to_s)}", opts)
       end
