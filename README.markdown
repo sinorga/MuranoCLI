@@ -295,9 +295,9 @@ the shell and are for testing the user facing components.  A subset of the comma
 tests work with the live Murano servers (`--tag needs_password`).
 
 To use the live tests, the following environment variables need to be set:
-- `MURANO_USER` : User name to log into Murano with
-- `MURANO_PASSWORD` : Password for that user
-- `MURANO_BUSINESS` : Business id to run tests within.
+- `MURANO_CONFIGFILE` : A Config with the user.name, business.id, and net.host for
+	the intergration tests.
+- `MURANO_PASSWORD` : Password for the user.name above.
 
 A free account on Murano is sufficient for these tests.
 
