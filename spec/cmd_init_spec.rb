@@ -23,12 +23,7 @@ RSpec.describe 'mr init', :cmd do
       # fails.
       before(:example) do
         @project_name = rname('initEmpty')
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', @project_name, '--save'))
-        expect(err).to eq('')
-        expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
-        expect(status.exitstatus).to eq(0)
-
-        out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @project_name, '--save'))
+        out, err, status = Open3.capture3(capcmd('murano', 'project', 'create', @project_name, '--save'))
         expect(err).to eq('')
         expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
         expect(status.exitstatus).to eq(0)
@@ -37,18 +32,13 @@ RSpec.describe 'mr init', :cmd do
         FileUtils.remove_entry('.murano')
       end
       after(:example) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
-        expect(out).to eq('')
-        expect(err).to eq('')
-        expect(status.exitstatus).to eq(0)
-
-        out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'project', 'delete', @project_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
       end
 
-      it "existing solution and product" do
+      it "existing project" do
         # The test account will have one business, one product, and one solution.
         # So it won't ask any questions.
         out, err, status = Open3.capture3(capcmd('murano', 'init'))
@@ -59,11 +49,9 @@ RSpec.describe 'mr init', :cmd do
           a_string_starting_with('Using account '),
           a_string_starting_with('Using Business ID already set to '),
           "\n",
-          a_string_starting_with('You only have one solution; using '),
+          a_string_starting_with('You only have one project; using '),
           "\n",
-          a_string_starting_with('You only have one product; using '),
-          "\n",
-          a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+          a_string_matching(%r{Ok, In business ID: \w+ using Project ID: \w+}),
           "Writing an initial Project file: project.murano\n",
           "Default directories created\n",
         ])
@@ -85,23 +73,17 @@ RSpec.describe 'mr init', :cmd do
         @project_name = rname('initCreating')
       end
       after(:example) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
-        expect(out).to eq('')
-        expect(err).to eq('')
-        expect(status.exitstatus).to eq(0)
-
-        out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'project', 'delete', @project_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
       end
 
-      it "existing solution and product" do
+      it "existing project" do
         # The test account will have one business.
         # It will ask to create a solution and product.
         # !!!! the 8 is hardcoded indention here !!!!
         data = <<-EOT.gsub(/^ {8}/, '')
-        #{@project_name}
         #{@project_name}
         EOT
         out, err, status = Open3.capture3(capcmd('murano', 'init'), :stdin_data=>data)
@@ -112,11 +94,9 @@ RSpec.describe 'mr init', :cmd do
           a_string_starting_with('Using account '),
           a_string_starting_with('Using Business ID already set to '),
           "\n",
-          "You don't have any solutions; lets create one\n",
-          "Solution Name? \n",
-          "You don't have any products; lets create one\n",
-          "Product Name? \n",
-          a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+          "You don't have any projects; lets create one\n",
+          "Project Name? \n",
+          a_string_matching(%r{Ok, In business ID: \w+ using Project ID: \w+}),
           "Writing an initial Project file: project.murano\n",
           "Default directories created\n",
         ])
@@ -140,24 +120,14 @@ RSpec.describe 'mr init', :cmd do
       FileUtils.move('assets','files')
 
       @project_name = rname('initEmpty')
-      out, err, status = Open3.capture3(capcmd('murano', 'solution', 'create', @project_name, '--save'))
-      expect(err).to eq('')
-      expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
-      expect(status.exitstatus).to eq(0)
-
-      out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @project_name, '--save'))
+      out, err, status = Open3.capture3(capcmd('murano', 'project', 'create', @project_name, '--save'))
       expect(err).to eq('')
       expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
       expect(status.exitstatus).to eq(0)
     end
     after(:example) do
       Dir.chdir(ENV['HOME']) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
-        expect(out).to eq('')
-        expect(err).to eq('')
-        expect(status.exitstatus).to eq(0)
-
-        out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'project', 'delete', @project_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -175,11 +145,9 @@ RSpec.describe 'mr init', :cmd do
         a_string_starting_with('Using account '),
         a_string_starting_with('Using Business ID already set to '),
         "\n",
-        a_string_starting_with('Using Solution ID already set to '),
+        a_string_starting_with('Using Project ID already set to '),
         "\n",
-        a_string_starting_with('Using Product ID already set to '),
-        "\n",
-        a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+        a_string_matching(%r{Ok, In business ID: \w+ using Project ID: \w+}),
         "Writing an initial Project file: project.murano\n",
         "Default directories created\n",
       ])
@@ -207,11 +175,9 @@ RSpec.describe 'mr init', :cmd do
         a_string_starting_with('Using account '),
         a_string_starting_with('Using Business ID already set to '),
         "\n",
-        a_string_starting_with('Using Solution ID already set to '),
+        a_string_starting_with('Using Project ID already set to '),
         "\n",
-        a_string_starting_with('Using Product ID already set to '),
-        "\n",
-        a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+        a_string_matching(%r{Ok, In business ID: \w+ using Project ID: \w+}),
         "Default directories created\n",
       ])
       expect(err).to eq("")
@@ -252,11 +218,9 @@ RSpec.describe 'mr init', :cmd do
         a_string_starting_with('Using account '),
         a_string_starting_with('Using Business ID already set to '),
         "\n",
-        a_string_starting_with('Using Solution ID already set to '),
+        a_string_starting_with('Using Project ID already set to '),
         "\n",
-        a_string_starting_with('Using Product ID already set to '),
-        "\n",
-        a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+        a_string_matching(%r{Ok, In business ID: \w+ using Project ID: \w+}),
         "Writing an initial Project file: project.murano\n",
         "Default directories created\n",
       ])
@@ -299,11 +263,9 @@ RSpec.describe 'mr init', :cmd do
         a_string_starting_with('Using account '),
         a_string_starting_with('Using Business ID already set to '),
         "\n",
-        a_string_starting_with('Using Solution ID already set to '),
+        a_string_starting_with('Using Project ID already set to '),
         "\n",
-        a_string_starting_with('Using Product ID already set to '),
-        "\n",
-        a_string_matching(%r{Ok, In business ID: \w+ using Solution ID: \w+ with Product ID: \w+}),
+        a_string_matching(%r{Ok, In business ID: \w+ using Project ID: \w+}),
         "Writing an initial Project file: project.murano\n",
         "Default directories created\n",
       ])

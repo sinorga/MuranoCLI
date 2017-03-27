@@ -8,7 +8,7 @@ command :init do |c|
   c.summary = %{The easy way to start a project}
   c.description = %{}
 
-  c.option '--force', %{Override existing business, solution, or product ids}
+  c.option '--force', %{Override existing business, or project ids}
   c.option '--[no-]mkdirs', %{Create default directories}
 
   c.action do |args, options|
@@ -59,45 +59,45 @@ command :init do |c|
     end
     puts '' # blank line
 
-    # 2. Get Solution id
-    if not options.force and not $cfg['solution.id'].nil? then
-      say "Using Solution ID already set to #{$cfg['solution.id']}"
+    # 2. Get Project id
+    if not options.force and not $cfg['project.id'].nil? then
+      say "Using Project ID already set to #{$cfg['project.id']}"
     else
-      solz = acc.solutions
+      solz = acc.projects
       if solz.count == 1 then
         sol = solz.first
-        say "You only have one solution; using #{sol[:domain]}"
-        $cfg.set('solution.id', sol[:apiId], :project)
+        say "You only have one project; using #{sol[:domain]}"
+        $cfg.set('project.id', sol[:apiId], :project)
 
       elsif solz.count == 0 then
-        say "You don't have any solutions; lets create one"
-        solname = ask("Solution Name? ")
-        ret = acc.new_solution(solname)
+        say "You don't have any projects; lets create one"
+        solname = ask("Project Name? ")
+        ret = acc.new_project(solname)
         if ret.nil? then
-          acc.error "Create Solution failed"
+          acc.error "Create Project failed"
           exit 5
         end
         if not ret.kind_of?(Hash) and not ret.empty? then
-          acc.error "Create Solution failed: #{ret.to_s}"
+          acc.error "Create Project failed: #{ret.to_s}"
           exit 2
         end
 
         # create doesn't return anything, so we need to go look for it.
-        ret = acc.solutions.select{|i| i[:domain] =~ /#{solname}\./}
+        ret = acc.projects.select{|i| i[:domain] =~ /#{solname}\./}
         sid = ret.first[:apiId]
         if sid.nil? or sid.empty? then
-          acc.error "Solution didn't find an apiId!!!!  #{ret}"
+          acc.error "Project didn't find an apiId!!!!  #{ret}"
           exit 3
         end
-        $cfg.set('solution.id', sid, :project)
+        $cfg.set('project.id', sid, :project)
 
       else
         choose do |menu|
-          menu.prompt = "Select which Solution to use:"
+          menu.prompt = "Select which Project to use:"
           menu.flow = :columns_across
           solz.sort{|a,b| a[:domain]<=>b[:domain]}.each do |s|
             menu.choice(s[:domain].sub(/\..*$/,'')) do
-              $cfg.set('solution.id', s[:apiId], :project)
+              $cfg.set('project.id', s[:apiId], :project)
             end
           end
         end
@@ -105,53 +105,7 @@ command :init do |c|
     end
     puts '' # blank line
 
-    # 3. Get Product id
-    if not options.force and not $cfg['product.id'].nil? then
-      say "Using Product ID already set to #{$cfg['product.id']}"
-    else
-      podz = acc.products
-      if podz.count == 1 then
-        prd = podz.first
-        say "You only have one product; using #{prd[:label]}"
-        $cfg.set('product.id', prd[:modelId], :project)
-
-      elsif podz.count == 0 then
-        say "You don't have any products; lets create one"
-        podname = ask("Product Name? ")
-        ret = acc.new_product(podname)
-        if ret.nil? then
-          acc.error "Create Product failed"
-          exit 5
-        end
-        if not ret.kind_of?(Hash) and not ret.empty? then
-          acc.error "Create Product failed: #{ret.to_s}"
-          exit 2
-        end
-
-        # create doesn't return anything, so we need to go look for it.
-        ret = acc.products.select{|i| i[:label] == podname}
-        pid = ret.first[:modelId]
-        if pid.nil? or pid.empty? then
-          acc.error "Product didn't find an apiId!!!!  #{ret}"
-          exit 3
-        end
-        $cfg.set('product.id', pid, :project)
-
-      else
-        choose do |menu|
-          menu.prompt = "Select which Product to use:"
-          menu.flow = :columns_across
-          podz.sort{|a,b| a[:label]<=>b[:label]}.each do |p|
-            menu.choice(p[:label]) do
-              $cfg.set('product.id', p[:modelId], :project)
-            end
-          end
-        end
-      end
-    end
-
-    puts ''
-    say "Ok, In business ID: #{$cfg['business.id']} using Solution ID: #{$cfg['solution.id']} with Product ID: #{$cfg['product.id']}"
+    say "Ok, In business ID: #{$cfg['business.id']} using Project ID: #{$cfg['project.id']}"
 
     # If no ProjectFile, then write a ProjectFile
     if not $project.usingProjectfile then
@@ -171,7 +125,7 @@ command :init do |c|
         location.endpoints
         location.modules
         location.eventhandlers
-        location.specs
+        location.resources
       }.each do |cfgi|
         path = $cfg[cfgi]
         path = Pathname.new(path) unless path.kind_of? Pathname
