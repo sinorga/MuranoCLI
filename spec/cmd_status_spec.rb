@@ -29,7 +29,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
     end
 
-    it "status" do
+    it "status", :not_in_okami do
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       expect(err).to eq('')
       # Two problems with this output.
@@ -95,7 +95,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       FileUtils.copy(File.join(@testdir, 'spec/fixtures/ProjectFiles/only_meta.yaml'), 'test.murano')
     end
 
-    it "status" do
+    it "status", :not_in_okami do
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       expect(err).to eq('')
       olines = out.lines
