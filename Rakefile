@@ -47,7 +47,7 @@ desc 'Run RSpec'
 task :rspec do
     Dir.mkdir("report") unless File.directory?("report")
     rv=RUBY_VERSION.gsub(/\./,'_')
-    sh %{rspec --format html --out report/index-#{rv}.html --format documentation}
+    sh %{rspec --format html --out report/index-#{rv}.html --format documentation --tag '~not_in_okami'}
 end
 task :test => [:test_clean_up, :rspec]
 
