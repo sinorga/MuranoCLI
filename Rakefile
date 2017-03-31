@@ -53,20 +53,18 @@ task :test => [:test_clean_up, :rspec]
 
 desc "Clean out junk from prior hot tests"
 task :test_clean_up do
-    if not ENV['MURANO_USER'].nil? and
-            not ENV['MURANO_BUSINESS'].nil? and
-            not ENV['MURANO_PASSWORD'].nil? then
+    if not ENV['MURANO_CONFIGFILE'].nil? then
 
-        ids = `ruby -Ilib bin/murano product list --idonly -c "user.name=#{ENV['MURANO_USER']}" -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}`.chomp
+        ids = `ruby -Ilib bin/murano product list --idonly`.chomp
         puts "Found prodcuts #{ids}; deleteing"
         ids.split.each do |id|
-            sh %{ruby -Ilib bin/murano product delete #{id} -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}}
+            sh %{ruby -Ilib bin/murano product delete #{id}}
         end
 
-        ids = `ruby -Ilib bin/murano solution list --idonly -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}`.chomp
+        ids = `ruby -Ilib bin/murano solution list --idonly`.chomp
         puts "Found solutions #{ids}; deleteing"
         ids.split.each do |id|
-            sh %{ruby -Ilib bin/murano solution delete #{id} -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}}
+            sh %{ruby -Ilib bin/murano solution delete #{id}}
         end
     end
 end
