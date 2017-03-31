@@ -31,17 +31,20 @@ module Commander
   class Runner
     alias :old_run_active_command :run_active_command
     def run_active_command
-
       section = active_command.name
       hooked = MrMurano::Hooked.new(section)
       hooked.check_run_pre_hook
 
-      #defopts = $cfg["#{section}.options"]
-      #puts ":::: #{defopts} :: #{section}"
-
       old_run_active_command
 
       hooked.check_run_post_hook
+    end
+
+    alias :old_parse_global_options :parse_global_options
+    def parse_global_options
+      defopts = ($cfg["#{active_command.name}.options"] or '').split
+      @args.push( *defopts )
+      old_parse_global_options
     end
   end
 end

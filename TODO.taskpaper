@@ -3,6 +3,9 @@ Readme:
 	- Look into using VCR for testing. @pri(low)
 
 Commands:
+	- Add hooks. @done(2017-03-31)
+	- Add default options for commands. @done(2017-03-31)
+	So you can say to always -V syncup, and nothing else.
 	- Init command. @done(2016-11-28)
 	- Empty sub-commands should return help. @done(2016-11-21)
 	There are a bunch of empty sub-commands that prefix another layer. Such as
@@ -86,13 +89,12 @@ Config:
 	- Think about adding dev,staging,prod system; how would that work? @done(2016-09-16)
 
 SyncUpDown:
-	- Document the hash keys for an item. @pri(high)
+	- Document the hash keys for an item. @pri(high) @done(2017-03-30)
 	Also consider turning that hash into a Struct
 	- Allow specifying local files to limit actions to. @done(2017-03-03)
 
 SolutionBase:
-	- All network traffic is serialized. Make some parallel.
-	This might break some things.
+	- All network traffic is serialized. Make some parallel. not doing this. @done(2017-03-30)
 	- Errors from the server should be displayed prettier. @done(2016-09-26)
 	- JSON parse should use symbols for keys. @done(2016-09-01)
 	- Add the --curl verbose option. @done(2016-08-12)
@@ -103,8 +105,7 @@ Windows:
 	- Look into http://ocra.rubyforge.org for building an exec. @pri(high) @done(2016-12-21)
 
 Bundles:
-	- Revisit this idea. Its complexity may not be worth its value.
-	- Test syncdown behavor.
+	- Revisit this idea. Its complexity may not be worth its value. @done(2017-03-30)
 	- Work on design @done(2016-08-09)
 	Thinking of something like VIM bundles.  A directory of directories. Each with a
 	manafest file? (maybe)  A Bundle is a group of modules, endpoints, static files
