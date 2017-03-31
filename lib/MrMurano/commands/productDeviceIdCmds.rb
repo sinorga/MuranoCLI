@@ -25,6 +25,7 @@ command 'product device list' do |c|
     io.close unless io.nil?
   end
 end
+alias_command 'product device list', 'device list'
 
 command 'product device enable' do |c|
   c.syntax = %{murano product device enable [<sn>|--file <sns>]}
@@ -52,6 +53,7 @@ the activation call within this time, it will need to be enabled again.
     end
   end
 end
+alias_command 'product device enable', 'device enable'
 
 command 'product device activate' do |c|
   c.syntax = %{murano product device activate <sn>}
@@ -78,6 +80,7 @@ CIK again.
 
   end
 end
+alias_command 'product device activate', 'device activate'
 
 alias_command 'sn list', 'product device list'
 alias_command 'sn enable', 'product device enable'
