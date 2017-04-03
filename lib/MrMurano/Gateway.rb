@@ -296,6 +296,7 @@ module MrMurano
       # @param identifier [String] Who to activate.
       def activate(identifier)
         fqdn = Base.new.info()[:fqdn]
+        debug "Found FQDN: #{fqdn}"
         fqdn = "#{@pid}.m2.exosite.io" if fqdn.nil?
 
         uri = URI("https://#{fqdn}/provision/activate")
