@@ -177,7 +177,7 @@ end
 
 if RUBY_VERSION == '2.0.0' then
   module Net
-    class HTTP < Protocol
+    class HTTP
       def connect
         if proxy? then
           conn_address = proxy_address
