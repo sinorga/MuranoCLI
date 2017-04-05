@@ -33,7 +33,7 @@ command 'product device read' do |c|
 
   end
 end
-alias_command 'product device list', 'device list'
+alias_command 'device list', 'product device list'
 
 command 'product device twee' do |c|
   c.syntax = %{murano product device twee <identifier>}
@@ -65,7 +65,7 @@ command 'product device twee' do |c|
     io.close unless io.nil?
   end
 end
-alias_command 'product device twee', 'device twee'
+alias_command 'device twee', 'product device twee'
 
 command 'product device delete' do |c|
   c.syntax = %{murano product device delete <identifier>}
@@ -79,7 +79,7 @@ command 'product device delete' do |c|
     prd.outf ret unless ret.empty?
   end
 end
-alias_command 'product device delete', 'device delete'
+alias_command 'device delete', 'product device delete'
 
 # XXX cannot call this here, since 'sn list' doesn't exist yet.
 #alias_command 'product device list', 'sn list'
