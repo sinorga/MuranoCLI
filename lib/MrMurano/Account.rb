@@ -174,7 +174,7 @@ module MrMurano
       delete("business/#{id}")
     end
 
-    def has_okami?(id)
+    def has_projects?(id)
       ret = get("business/#{id}/overview")
       return false unless ret.kind_of? Hash
       return false unless ret.has_key? :tier
