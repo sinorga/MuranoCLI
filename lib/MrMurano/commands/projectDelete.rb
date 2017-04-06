@@ -24,7 +24,7 @@ command 'project delete' do |c|
     if ret.empty? then
       acc.error "No project matching '#{name}' found. Nothing to delete."
     else
-      ret = acc.delete_project(ret.first[:sid])
+      ret = acc.delete_project(ret.first[:apiId])
       if not ret.kind_of?(Hash) and not ret.empty? then
         acc.error "Delete failed: #{ret.to_s}"
       end
