@@ -142,6 +142,18 @@ module MrMurano
       @@token = value
     end
 
+    def adc_compat_check
+      unless $cfg['business.id'].nil? then
+        if has_projects?($cfg['business.id']) then
+          # This is 2.x which does nto support projects!
+          warning('!'*80)
+          warning "Your business requires MuranoCLI 3.x"
+          warning "Some features may not work correctly."
+          warning('!'*80)
+        end
+      end
+    end
+
     def new_account(email, name, company="")
       post('/key/', {
         :email=>email,
@@ -170,6 +182,16 @@ module MrMurano
 
     def delete_business(id)
       delete("/business/#{id}")
+    end
+
+    def has_projects?(id)
+      ret = get("business/#{id}/overview")
+      return false unless ret.kind_of? Hash
+      return false unless ret.has_key? :tier
+      tier = ret[:tier]
+      return false unless tier.kind_of? Hash
+      return false unless tier.has_key? :enableProjects
+      return tier[:enableProjects]
     end
 
     def products

@@ -7,8 +7,10 @@ module MrMurano
   module Http
     def token
       return @token unless @token.nil?
-      @token = Account.new.token
+      acc = Account.new
+      @token = acc.token
       raise "Not logged in!" if @token.nil?
+      acc.adc_compat_check
       @token
     end
 
