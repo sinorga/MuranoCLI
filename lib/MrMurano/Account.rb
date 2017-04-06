@@ -142,6 +142,18 @@ module MrMurano
       @@token = value
     end
 
+    def adc_compat_check
+      unless $cfg['business.id'].nil? then
+        if has_projects?($cfg['business.id']) then
+          # This is 2.x which does nto support projects!
+          warning('!'*80)
+          warning "Your business requires MuranoCLI 3.x"
+          warning "Some features may not work correctly."
+          warning('!'*80)
+        end
+      end
+    end
+
     #------------------------------------------------------------------------
     def new_account(email, name, company="")
       post('key/', {
