@@ -34,6 +34,8 @@ module MrMurano
     ##
     # Get one item of the static content.
     def fetch(path, &block)
+      path = path[1..-1] if path[0] == '/'
+      path = '/'+ URI.encode_www_form_component(path)
       get(path) do |request, http|
         http.request(request) do |resp|
           case resp
