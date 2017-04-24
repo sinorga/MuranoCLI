@@ -155,7 +155,7 @@ module MrMurano
     end
 
     def new_account(email, name, company="")
-      post('/key/', {
+      post('key/', {
         :email=>email,
         :name=>name,
         :company=>company,
@@ -164,11 +164,11 @@ module MrMurano
     end
 
     def reset_account(email)
-      post('/key/', { :email=>email, :source=>'reset' })
+      post('key/', { :email=>email, :source=>'reset' })
     end
 
     def accept_account(token, password)
-      post("/key/#{token}", {:password=>password})
+      post("key/#{token}", {:password=>password})
     end
 
     def businesses
@@ -177,11 +177,11 @@ module MrMurano
     end
 
     def new_business(name)
-      post('/business/', {:name=>name})
+      post('business/', {:name=>name})
     end
 
     def delete_business(id)
-      delete("/business/#{id}")
+      delete("business/#{id}")
     end
 
     def has_projects?(id)
