@@ -143,15 +143,15 @@ module MrMurano
     end
 
     def adc_compat_check
-      unless $cfg['business.id'].nil? then
-        unless has_projects?($cfg['business.id']) then
-          # This is 3.x which does not support projects!
-          warning('!'*80)
-          warning "Your business requires MuranoCLI 2.x"
-          warning "Some features may not work correctly."
-          warning('!'*80)
-        end
-      end
+#      unless $cfg['business.id'].nil? then
+#        unless has_projects?($cfg['business.id']) then
+#          # This is 3.x which does not support projects!
+#          warning('!'*80)
+#          warning "Your business requires MuranoCLI 2.x"
+#          warning "Some features may not work correctly."
+#          warning('!'*80)
+#        end
+#      end
     end
 
     #------------------------------------------------------------------------
