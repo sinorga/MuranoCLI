@@ -208,8 +208,13 @@ module MrMurano
       raise "Missing Business ID" if $cfg['business.id'].nil?
       raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
       got = get('business/' + $cfg['business.id'] + '/solution/')
-      got.select!{|i| i[:type] == type.to_s} unless type.nil?
+      got.select!{|i| i[:type] == type.to_s}
       got
+    end
+
+    def all_solutions()
+      raise "Missing Business ID" if $cfg['business.id'].nil?
+      get('business/' + $cfg['business.id'] + '/solution/')
     end
 
     ## Create a new solution in the current business
