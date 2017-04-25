@@ -253,19 +253,6 @@ module MrMurano
       delete_solution(modelId)
     end
 
-    #------------------------------------------------------------------------
-    def projects
-      solutions(:product)
-    end
-
-    def new_project(name, type=:product)
-      new_solution(name, type)
-    end
-
-    def delete_project(apiId)
-      delete_solution(apiId)
-    end
-
   end
 end
 
