@@ -186,6 +186,11 @@ module MrMurano
       delete("business/#{id}")
     end
 
+    def overview(id=nil)
+      id = $cfg['business.id'] if id.nil?
+      get("business/#{id}/overview")
+    end
+
     def has_projects?(id)
       ret = get("business/#{id}/overview")
       return false unless ret.kind_of? Hash
@@ -197,31 +202,20 @@ module MrMurano
     end
 
     #------------------------------------------------------------------------
-    def products
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      get('business/' + $cfg['business.id'] + '/product/')
-    end
+    ALLOWED_TYPES = [:domain,:onepApi,:dataApi,:application,:product].freeze
 
-    ## Create a new product in the current business
-    def new_product(name, type='onepModel')
+    def solutions(type=:dataApi)
       raise "Missing Business ID" if $cfg['business.id'].nil?
-      post('business/' + $cfg['business.id'] + '/product/', {:label=>name, :type=>type})
-    end
-
-    def delete_product(modelId)
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      delete('business/' + $cfg['business.id'] + '/product/' + modelId)
-    end
-
-    #------------------------------------------------------------------------
-    def solutions
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      get('business/' + $cfg['business.id'] + '/solution/')
+      raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
+      got = get('business/' + $cfg['business.id'] + '/solution/')
+      got.select!{|i| i[:type] == type.to_s} unless type.nil?
+      got
     end
 
     ## Create a new solution in the current business
-    def new_solution(name, type='dataApi')
+    def new_solution(name, type=:dataApi)
       raise "Missing Business ID" if $cfg['business.id'].nil?
+      raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
       raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
     end
@@ -232,21 +226,44 @@ module MrMurano
     end
 
     #------------------------------------------------------------------------
-    def projects
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      get('business/' + $cfg['business.id'] + '/project/')
+    def products
+      solutions(:product)
     end
 
-    ## Create a new solution in the current business
-    def new_project(name)
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
-      post('business/' + $cfg['business.id'] + '/project/', {:label=>name})
+    ## Create a new product in the current business
+    def new_product(name, type=:product)
+      new_solution(name, type)
+    end
+
+    def delete_product(modelId)
+      delete_solution(modelId)
+    end
+
+    #------------------------------------------------------------------------
+    def applications
+      solutions(:application)
+    end
+
+    ## Create a new application in the current business
+    def new_application(name, type=:application)
+      new_solution(name, type)
+    end
+
+    def delete_application(modelId)
+      delete_solution(modelId)
+    end
+
+    #------------------------------------------------------------------------
+    def projects
+      solutions(:product)
+    end
+
+    def new_project(name, type=:product)
+      new_solution(name, type)
     end
 
     def delete_project(apiId)
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      delete('business/' + $cfg['business.id'] + '/project/' + apiId)
+      delete_solution(apiId)
     end
 
   end
