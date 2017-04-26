@@ -7,6 +7,7 @@ require '_workspace'
 RSpec.describe MrMurano::Role do
   include_context "WORKSPACE"
   before(:example) do
+    MrMurano::SyncRoot.reset
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
@@ -18,14 +19,14 @@ RSpec.describe MrMurano::Role do
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/")
   end
 
   it "lists" do
     body = [{:role_id=>"guest", :parameter=>[{:name=>"did"}]},
             {:role_id=>"admin", :parameter=>[{:name=>"enabled"}]},
             {:role_id=>"owns", :parameter=>[{:name=>"did"}]}]
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
                       to_return(body: body.to_json)
@@ -35,7 +36,7 @@ RSpec.describe MrMurano::Role do
 
   it "fetches" do
     body = {:role_id=>"guest", :parameter=>[{:name=>"did"}]}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/guest").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/guest").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
                       to_return(body: body.to_json)
@@ -44,7 +45,7 @@ RSpec.describe MrMurano::Role do
   end
 
   it "removes" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/guest").
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/guest").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
                       to_return(status: 200, body: "")
@@ -55,11 +56,11 @@ RSpec.describe MrMurano::Role do
   context "uploads" do
     it "updating" do
       body = {:role_id=>"guest", :parameter=>[{:name=>"did"}]}
-      stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/guest").
+      stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/guest").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 200, body: "")
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'},
              :body=>body.to_json
@@ -72,11 +73,11 @@ RSpec.describe MrMurano::Role do
 
     it "creating" do
       body = {:role_id=>"guest", :parameter=>[{:name=>"did"}]}
-      stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/guest").
+      stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/guest").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 404, body: "")
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'},
              :body=>body.to_json
@@ -89,11 +90,11 @@ RSpec.describe MrMurano::Role do
 
     it "with delete error" do
       body = {:role_id=>"guest", :parameter=>[{:name=>"did"}]}
-      stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/guest").
+      stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/guest").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 418, body: "I'm a teapot!")
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/role/").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'},
              :body=>body.to_json

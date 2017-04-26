@@ -19,7 +19,7 @@ RSpec.describe MrMurano::SC_Device do
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/")
   end
 
   it "lists triggers; with scid lookup" do
@@ -35,7 +35,7 @@ RSpec.describe MrMurano::SC_Device do
       :updated_at =>  "2016-08-01T15:44:11.433Z",
       :deleted_at =>  nil
     }], :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -61,7 +61,7 @@ RSpec.describe MrMurano::SC_Device do
       :updated_at =>  "2016-08-01T15:44:11.433Z",
       :deleted_at =>  nil
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/624098f1").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/624098f1").
       with(:headers => {'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
       to_return(:body => body.to_json)
@@ -92,7 +92,7 @@ RSpec.describe MrMurano::SC_Device do
       :updated_at =>  "2016-08-01T15:44:11.433Z",
       :deleted_at =>  nil
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/624098f1").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/624098f1").
       with(:headers => {'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
       to_return(:body => body.to_json)
@@ -123,12 +123,12 @@ RSpec.describe MrMurano::SC_Device do
       :updated_at =>  "2016-08-01T15:44:11.433Z",
       :deleted_at =>  nil
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/624098f1").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/624098f1").
       with(:headers => {'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
       to_return(:body => body.to_json)
 
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/624098f1").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/624098f1").
       with(:headers => {'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
       to_return(:body => '')
@@ -159,12 +159,12 @@ RSpec.describe MrMurano::SC_Device do
       :updated_at =>  "2016-08-01T15:44:11.433Z",
       :deleted_at =>  nil
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/624098f1").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/624098f1").
       with(:headers => {'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
       to_return(:body => body.to_json)
 
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/serviceconfig/624098f1").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/624098f1").
       with(:headers => {'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
       to_return(:body => '')

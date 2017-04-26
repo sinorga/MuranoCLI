@@ -161,7 +161,7 @@ RSpec.describe MrMurano::Account do
   it "lists products" do
     prdlist = [{"bizid"=>"XYZxyz","type"=>"onepModel","pid"=>"ABC","modelId"=>"cde","label"=>"fts"},
                {"bizid"=>"XYZxyz","type"=>"onepModel","pid"=>"fgh","modelId"=>"ijk","label"=>"lua-test"}]
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/product/").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
       to_return(body: prdlist )
 
     ret = @acc.products
@@ -174,8 +174,8 @@ RSpec.describe MrMurano::Account do
   end
 
   it "creates product" do
-    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/product/").
-      with(:body => {:label=>'ONe', :type=>'onepModel'}).
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      with(:body => {:label=>'ONe', :type=>'product'}).
       to_return(body: "" )
 
     ret = @acc.new_product("ONe")
@@ -188,7 +188,7 @@ RSpec.describe MrMurano::Account do
   end
 
   it "deletes product" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/product/ONe").
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/ONe").
       to_return(body: "" )
 
     ret = @acc.delete_product("ONe")

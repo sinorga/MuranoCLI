@@ -19,7 +19,7 @@ RSpec.describe MrMurano::EventHandler do
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/")
   end
 
   it "lists" do
@@ -32,7 +32,7 @@ RSpec.describe MrMurano::EventHandler do
              :created_at=>"2016-07-07T19:16:19.479Z",
              :updated_at=>"2016-09-12T13:26:55.868Z"}],
             :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -57,7 +57,7 @@ RSpec.describe MrMurano::EventHandler do
     end
     }
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler/9K0").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -82,7 +82,7 @@ RSpec.describe MrMurano::EventHandler do
     end
     }
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler/9K0").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -107,7 +107,7 @@ function foo(bar)
 end
 }
     }
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler/9K0").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
@@ -122,7 +122,7 @@ end
   end
 
   it "removes" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler/9K0").
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: "")
@@ -132,7 +132,7 @@ end
   end
 
   it "uploads over old version" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler/XYZ_data_datapoint").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/XYZ_data_datapoint").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: "")
@@ -157,11 +157,11 @@ end
   end
 
   it "uploads when nothing is there" do
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler/XYZ_device_datapoint").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/XYZ_device_datapoint").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(status: 404)
-    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/project/XYZ/eventhandler/").
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: "")
