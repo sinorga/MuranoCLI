@@ -2,14 +2,15 @@ require 'MrMurano/Account'
 
 command 'project list' do |c|
   c.syntax = %{murano project list [options]}
-  c.description = %{List projects}
+  c.summary = %{List projects}
+  c.description = %{List projects in the current business}
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
     acc = MrMurano::Account.new
-    data = acc.projects
+    data = acc.products
 
     io=nil
     if options.output then

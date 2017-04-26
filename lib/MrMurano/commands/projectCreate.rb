@@ -13,7 +13,7 @@ command 'project create' do |c|
     end
     name = args[0]
 
-    ret = acc.new_project(name)
+    ret = acc.new_product(name)
     if ret.nil? then
       acc.error "Create failed"
       exit 5
@@ -24,7 +24,7 @@ command 'project create' do |c|
     end
 
     # create doesn't return anything, so we need to go look for it.
-    ret = acc.projects.select{|i| i[:domain] =~ /#{name}\./}
+    ret = acc.products.select{|i| i[:domain] =~ /#{name}\./}
     pid = ret.first[:apiId]
     if pid.nil? or pid.empty? then
       acc.error "Didn't find an apiId!!!!  #{ret}"

@@ -63,7 +63,7 @@ command :init do |c|
     if not options.force and not $cfg['project.id'].nil? then
       say "Using Project ID already set to #{$cfg['project.id']}"
     else
-      solz = acc.projects
+      solz = acc.products
       if solz.count == 1 then
         sol = solz.first
         say "You only have one project; using #{sol[:domain]}"
@@ -72,7 +72,7 @@ command :init do |c|
       elsif solz.count == 0 then
         say "You don't have any projects; lets create one"
         solname = ask("Project Name? ")
-        ret = acc.new_project(solname)
+        ret = acc.new_product(solname)
         if ret.nil? then
           acc.error "Create Project failed"
           exit 5
@@ -83,7 +83,7 @@ command :init do |c|
         end
 
         # create doesn't return anything, so we need to go look for it.
-        ret = acc.projects.select{|i| i[:domain] =~ /#{solname}\./}
+        ret = acc.products.select{|i| i[:domain] =~ /#{solname}\./}
         sid = ret.first[:apiId]
         if sid.nil? or sid.empty? then
           acc.error "Project didn't find an apiId!!!!  #{ret}"

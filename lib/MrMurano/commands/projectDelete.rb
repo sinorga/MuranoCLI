@@ -2,6 +2,7 @@ require 'MrMurano/Account'
 
 command 'project delete' do |c|
   c.syntax = %{murano project delete <project id>}
+  c.summary = %{Delete a project}
   c.description = %{Delete a project}
 
   c.action do |args, options|
@@ -14,7 +15,7 @@ command 'project delete' do |c|
 
 
     # Need to convert what we got into the internal PID.
-    ret = acc.projects.select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
+    ret = acc.products.select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
 
     if $cfg['tool.debug'] then
       say "Matches found:"
@@ -24,7 +25,7 @@ command 'project delete' do |c|
     if ret.empty? then
       acc.error "No project matching '#{name}' found. Nothing to delete."
     else
-      ret = acc.delete_project(ret.first[:apiId])
+      ret = acc.delete_product(ret.first[:sid])
       if not ret.kind_of?(Hash) and not ret.empty? then
         acc.error "Delete failed: #{ret.to_s}"
       end
