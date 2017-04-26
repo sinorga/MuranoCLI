@@ -15,7 +15,7 @@ module MrMurano
       def initialize
         @pid = $cfg['project.id']
         raise "No project id!" if @pid.nil?
-        @uriparts = [:service, @pid, :gateway]
+        @uriparts = [:service, @pid, :device2]
         @itemkey = :id
       end
 
@@ -214,7 +214,7 @@ module MrMurano
     class Device < Base
       def initialize
         super
-        @uriparts << :device
+        @uriparts << :identity
       end
 
       ## All devices (pagination?)
@@ -271,7 +271,7 @@ module MrMurano
       # @param expire [Number] Expire time for all identities (ignored)
       # @return [void]
       def enable_batch(local, expire=nil)
-        uri = endPoint('s/')
+        uri = endPoint('s/') # FIXME: Evil api.
         file = HTTP::FormData::File.new(local.to_s, {:mime_type=>'text/csv'})
         form = HTTP::FormData.create(:identities=>file)
         req = Net::HTTP::Post.new(uri)
