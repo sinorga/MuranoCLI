@@ -18,7 +18,7 @@ RSpec.describe MrMurano::Gateway::Base do
 
   it "initializes" do
     uri = @gw.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/")
   end
 
   it "gets info" do
@@ -40,7 +40,7 @@ RSpec.describe MrMurano::Gateway::Base do
           :gruble=>{:format=>"string", :unit=>"bits", :settable=>true}
         }
     }
-     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway").
+     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2").
        with(:headers => {'Authorization'=>'token TTTTTTTTTT', 'Content-Type'=>'application/json'}).
        to_return(:status => 200, :body => body.to_json, :headers => {})
 

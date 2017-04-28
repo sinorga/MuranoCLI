@@ -18,7 +18,7 @@ RSpec.describe MrMurano::Gateway::Device do
 
   it "initializes" do
     uri = @gw.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/")
   end
 
   context "listing" do
@@ -47,7 +47,7 @@ RSpec.describe MrMurano::Gateway::Device do
           :status=>"provisioned",
           :online=>false},
         ]}
-       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/").
+       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/").
          to_return(:body=>body.to_json)
 
       ret = @gw.list
@@ -69,7 +69,7 @@ RSpec.describe MrMurano::Gateway::Device do
           :status=>"provisioned",
           :online=>false},
         ]}
-       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/").
+       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/").
          with(:query=>{:limit=>'1'}).
          to_return(:body=>body.to_json)
 
@@ -92,7 +92,7 @@ RSpec.describe MrMurano::Gateway::Device do
           :status=>"provisioned",
           :online=>false},
         ]}
-       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/").
+       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/").
          with(:query=>{:limit=>'1', :before=>'1487021743864000'}).
          to_return(:body=>body.to_json)
 
@@ -113,7 +113,7 @@ RSpec.describe MrMurano::Gateway::Device do
       :lastseen=>1487021743864000,
       :status=>"provisioned",
       :online=>false}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/58").
       to_return(:body=>body.to_json)
 
     ret = @gw.fetch(58)
@@ -132,7 +132,7 @@ RSpec.describe MrMurano::Gateway::Device do
       :lastseen=>1487021743864000,
       :status=>"provisioned",
       :online=>false}
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/58").
       to_return(:body=>body.to_json)
 
     ret = @gw.enable(58)
@@ -151,7 +151,7 @@ RSpec.describe MrMurano::Gateway::Device do
       :lastseen=>1487021743864000,
       :status=>"provisioned",
       :online=>false}
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/58").
       with(:body=>{:type=>:certificate,:expire=>123456}.to_json).
       to_return(:body=>body.to_json)
 
@@ -171,7 +171,7 @@ RSpec.describe MrMurano::Gateway::Device do
       :lastseen=>1487021743864000,
       :status=>"provisioned",
       :online=>false}
-    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+    stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/58").
       with(:body=>{:type=>:certificate,:expire=>123456}.to_json).
       to_return(:body=>body.to_json)
 
@@ -191,7 +191,7 @@ RSpec.describe MrMurano::Gateway::Device do
       :lastseen=>1487021743864000,
       :status=>"provisioned",
       :online=>false}
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/58").
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/58").
       to_return(:body=>body.to_json)
 
     ret = @gw.remove(58)
@@ -204,7 +204,7 @@ RSpec.describe MrMurano::Gateway::Device do
       allow(@bgw).to receive(:token).and_return("TTTTTTTTTT")
       expect(MrMurano::Gateway::Base).to receive(:new).and_return(@bgw)
       allow(@gw).to receive(:token).and_return("TTTTTTTTTT")
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2").
         to_return(:body=>{:fqdn=>"xxxxx.m2.exosite-staging.io"}.to_json)
     end
     it "succeeds" do
@@ -243,7 +243,7 @@ RSpec.describe MrMurano::Gateway::Device do
   context "enables batch" do
     it "enables from cvs" do
       File.open('ids.csv', 'w') {|io| io << "ID\n1\n2\n3\n4\n5"}
-      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/devices/').
+      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identitys/').
         with(:headers=>{'Content-Type'=>%r{^multipart/form-data.*}}) do |request|
           request.body.to_s =~ %r{Content-Type: text/csv\r\n\r\nID\n1\n2\n3\n4\n5}
       end
@@ -256,7 +256,7 @@ RSpec.describe MrMurano::Gateway::Device do
 
     it "but file is not text" do
       File.open('ids.csv', 'wb') {|io| io << "\0\0\0\0"}
-      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/devices/').
+      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identitys/').
         to_return(:status=>400, :body => "CSV file format invalid")
       saved = $stderr
       $stderr = StringIO.new
@@ -267,7 +267,7 @@ RSpec.describe MrMurano::Gateway::Device do
 
     it "but file is missing header" do
       File.open('ids.csv', 'w') {|io| io << "1\n2\n3\n4\n5"}
-      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/devices/').
+      stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identitys/').
         with(:headers=>{'Content-Type'=>%r{^multipart/form-data.*}}) do |request|
           request.body.to_s =~ %r{Content-Type: text/csv\r\n\r\n1\n2\n3\n4\n5}
       end.to_return(:status=>400, :body => "CSV file format invalid")
@@ -281,7 +281,7 @@ RSpec.describe MrMurano::Gateway::Device do
 
   it "reads state" do
     body = {:bob=>{:reported=>"9", :set=>"9", :timestamp=>1487021046160363}}
-    stub_request(:get, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/56/state').
+    stub_request(:get, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/56/state').
       to_return(:body=>body.to_json)
 
     ret = @gw.read(56)
@@ -291,7 +291,7 @@ RSpec.describe MrMurano::Gateway::Device do
   context "writes state" do
     it "succeeds" do
       body = {:bob=>{:set=>"fuzz"}}
-      stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/56/state').
+      stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/56/state').
         with(:body=>body.to_json)
 
       @gw.write(56, :bob=>'fuzz')
@@ -299,7 +299,7 @@ RSpec.describe MrMurano::Gateway::Device do
 
     it "fails" do
       body = {:bob=>{:set=>"fuzz"}}
-      stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/device/56/state').
+      stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/56/state').
         with(:body=>body.to_json).
         to_return(:status=> 400, :body => 'Value is not settable')
 

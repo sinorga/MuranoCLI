@@ -18,7 +18,7 @@ RSpec.describe MrMurano::Gateway::Resources do
 
   it "initializes" do
     uri = @gw.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/")
   end
 
   it "lists" do
@@ -32,7 +32,7 @@ RSpec.describe MrMurano::Gateway::Resources do
       :fuzz=>{:format=>"string", :unit=>"c", :settable=>true},
       :gruble=>{:format=>"string", :unit=>"bits", :settable=>true}
     }}
-    stub_request(:get, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway').
+    stub_request(:get, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2').
       to_return(:body=>body.to_json)
 
     ret = @gw.list
@@ -50,7 +50,7 @@ RSpec.describe MrMurano::Gateway::Resources do
       :fuzz=>{:format=>"string", :unit=>"c", :settable=>true},
       :gruble=>{:format=>"string", :unit=>"bits", :settable=>true}
     }
-    stub_request(:patch, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/gateway').
+    stub_request(:patch, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2').
       with(:body=>{:resources=>res_after}.to_json)
 
     ret = @gw.upload_all(res_before)
