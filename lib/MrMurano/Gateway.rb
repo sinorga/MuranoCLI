@@ -271,7 +271,12 @@ module MrMurano
       # @param expire [Number] Expire time for all identities (ignored)
       # @return [void]
       def enable_batch(local, expire=nil)
-        uri = endPoint('s/') # FIXME: Evil api.
+        # Need to modify @uriparts for just this endPoint call.
+        uriparts = @uriparts
+        @uriparts[-1] = :identities
+        uri = endPoint()
+        @uriparts = uriparts
+
         file = HTTP::FormData::File.new(local.to_s, {:mime_type=>'text/csv'})
         form = HTTP::FormData.create(:identities=>file)
         req = Net::HTTP::Post.new(uri)
