@@ -37,6 +37,32 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
+  it "enables a batch" do
+    File.open('ids.csv', 'w') do |io|
+      io << "ID\n"
+      io << "1234\n"
+      io << "1235\n"
+      io << "1236\n"
+    end
+
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'enable', '--file', 'ids.csv'))
+    expect(out).to eq('')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'list'))
+    expect(err).to eq('')
+    olines = out.lines
+    expect(olines[0]).to match(/^(\+-+){3}\+$/)
+    expect(olines[1]).to match(/^\| Identifier\s+\| Status\s+\| Online\s+\|$/)
+    expect(olines[2]).to match(/^(\+-+){3}\+$/)
+    expect(olines[3]).to match(/^\| 1234\s+\| whitelisted\s+\| false\s+\|$/)
+    expect(olines[4]).to match(/^\| 1235\s+\| whitelisted\s+\| false\s+\|$/)
+    expect(olines[5]).to match(/^\| 1236\s+\| whitelisted\s+\| false\s+\|$/)
+    expect(olines[6]).to match(/^(\+-+){3}\+$/)
+    expect(status.exitstatus).to eq(0)
+  end
+
   it "activates" do
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'enable', '12345'))
     expect(out).to eq('')
