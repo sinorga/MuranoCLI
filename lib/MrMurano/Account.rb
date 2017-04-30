@@ -205,21 +205,19 @@ module MrMurano
     ALLOWED_TYPES = [:domain,:onepApi,:dataApi,:application,:product].freeze
 
     def solutions(type=:dataApi)
+      debug "Getting all solutions of type #{type}"
       raise "Missing Business ID" if $cfg['business.id'].nil?
-      raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
+      type = type.to_sym
+      raise "Unknown type(#{type})" unless type == :all or ALLOWED_TYPES.include? type
       got = get('business/' + $cfg['business.id'] + '/solution/')
-      got.select!{|i| i[:type] == type.to_s}
+      got.select!{|i| i[:type] == type.to_s} unless type == :all
       got
-    end
-
-    def all_solutions()
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      get('business/' + $cfg['business.id'] + '/solution/')
     end
 
     ## Create a new solution in the current business
     def new_solution(name, type=:dataApi)
       raise "Missing Business ID" if $cfg['business.id'].nil?
+      type = type.to_sym
       raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
       raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
