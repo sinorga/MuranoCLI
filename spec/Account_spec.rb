@@ -170,6 +170,7 @@ RSpec.describe MrMurano::Account do
 
   it "lists products; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
+    expect(@acc).to receive(:debug).with("Getting all solutions of type product")
     expect { @acc.products }.to raise_error("Missing Business ID")
   end
 
@@ -221,6 +222,7 @@ RSpec.describe MrMurano::Account do
 
   it "lists solutions; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
+    expect(@acc).to receive(:debug).with("Getting all solutions of type dataApi")
     expect { @acc.solutions }.to raise_error("Missing Business ID")
   end
 
