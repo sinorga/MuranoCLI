@@ -28,11 +28,13 @@ command 'setting read' do |c|
 end
 
 command 'setting write' do |c|
-  c.syntax = %{murano setting write <service>.<setting> <sub-key> (-|<value>...)}
+  c.syntax = %{murano setting write <service>.<setting> <sub-key> [<value>...]}
   c.summary = %{Write a setting on a Service}
   c.description = %{Write a setting on a Service, or just part of a setting.
 
-  This always does a read-modify-write. (?unless sub-key is empty?)
+  if <value> is omitted on command line, then it is read from STDIN.
+
+  This always does a read-modify-write.
 
   If a sub-key doesn't exist, that entire path will be created as dicts.
   }
@@ -71,7 +73,7 @@ command 'setting write' do |c|
     end
 
     # If value is '-', pull from $stdin
-    if value == '-' and args.count == 1 then
+    if value.nil? and args.count == 0 then
       value = $stdin.read
     end
 

@@ -76,6 +76,8 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       expect(json_after).to match(@json_before)
     end
 
+    it "a forced string value on STDIN"
+
 # This may not be testable in integration. (since it does things that get filtered out)
     it "all intermediate keys" #do
 #      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'one.two.three', 'fidget'))
@@ -129,6 +131,8 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
         expect(out).to eq('')
         expect(status.exitstatus).to eq(2)
       end
+
+      it "on STDIN"
     end
 
     it "a json object blob" #do
@@ -326,6 +330,8 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
         @json_before['origin'] = false
         expect(json_after).to match(@json_before)
       end
+
+      it "on STDIN"
     end
 
     it "a json array blob" do
@@ -343,20 +349,20 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       expect(json_after).to match(@json_before)
     end
 
-    it "a json array blob with stdin" #do
-#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers', '--json', '-'), :stdin_data=>'["fidget", "forgotten", "tokens"]')
-#      expect(err).to eq('')
-#      expect(out).to eq('')
-#      expect(status.exitstatus).to eq(0)
-#
-#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Webservice.cors', '-c', 'outformat=json'))
-#      json_after = nil
-#      expect { json_after = JSON.parse(out) }.to_not raise_error
-#      expect(err).to eq('')
-#      expect(status.exitstatus).to eq(0)
-#      @json_before['headers'] = ['fidget', 'forgotten', 'tokens']
-#      expect(json_after).to match(@json_before)
-#    end
+    it "a json array blob with stdin" do
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers', '--json'), :stdin_data=>'["fidget", "forgotten", "tokens"]')
+      expect(err).to eq('')
+      expect(out).to eq('')
+      expect(status.exitstatus).to eq(0)
+
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Webservice.cors', '-c', 'outformat=json'))
+      json_after = nil
+      expect { json_after = JSON.parse(out) }.to_not raise_error
+      expect(err).to eq('')
+      expect(status.exitstatus).to eq(0)
+      @json_before['headers'] = ['fidget', 'forgotten', 'tokens']
+      expect(json_after).to match(@json_before)
+    end
 
     it "an array" do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers', '--array', 'fidget', 'forgotten', 'tokens'))
