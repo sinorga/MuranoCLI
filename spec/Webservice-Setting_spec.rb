@@ -20,7 +20,7 @@ RSpec.describe MrMurano::Webservice::Settings do
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/")
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors/")
   end
 
   context "when server gives string" do
