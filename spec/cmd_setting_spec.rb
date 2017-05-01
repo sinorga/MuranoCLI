@@ -131,6 +131,29 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       end
     end
 
+    it "a json blob" do
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'type', 'base16'))
+      expect(err).to eq('')
+      expect(out).to eq('')
+      expect(status.exitstatus).to eq(0)
+
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options', '--json', '{"casing": "lower", "length": 0}'))
+      expect(err).to eq('')
+      expect(out).to eq('')
+      expect(status.exitstatus).to eq(0)
+
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+      json_after = nil
+      expect { json_after = JSON.parse(out) }.to_not raise_error
+      expect(err).to eq('')
+      expect(status.exitstatus).to eq(0)
+      @json_before['type'] = 'base16'
+      @json_before['options'] = {'casing'=>'lower', 'length'=>0}
+      expect(json_after).to match(@json_before)
+    end
+
+    it "a json blob with stdin"
+
 # This may not be testable in integration.
     it "a dictionary" #do
 #      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options', '--dict', 'casing', 'lower'))
@@ -291,7 +314,35 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       end
     end
 
-    it "a json blob"
+    it "a json blob" do
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers', '--json', '["fidget", "forgotten", "tokens"]'))
+      expect(err).to eq('')
+      expect(out).to eq('')
+      expect(status.exitstatus).to eq(0)
+
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Webservice.cors', '-c', 'outformat=json'))
+      json_after = nil
+      expect { json_after = JSON.parse(out) }.to_not raise_error
+      expect(err).to eq('')
+      expect(status.exitstatus).to eq(0)
+      @json_before['headers'] = ['fidget', 'forgotten', 'tokens']
+      expect(json_after).to match(@json_before)
+    end
+
+    it "a json blob with stdin" #do
+#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers', '--json', '-'), :stdin_data=>'["fidget", "forgotten", "tokens"]')
+#      expect(err).to eq('')
+#      expect(out).to eq('')
+#      expect(status.exitstatus).to eq(0)
+#
+#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Webservice.cors', '-c', 'outformat=json'))
+#      json_after = nil
+#      expect { json_after = JSON.parse(out) }.to_not raise_error
+#      expect(err).to eq('')
+#      expect(status.exitstatus).to eq(0)
+#      @json_before['headers'] = ['fidget', 'forgotten', 'tokens']
+#      expect(json_after).to match(@json_before)
+#    end
 
     it "an array" do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers', '--array', 'fidget', 'forgotten', 'tokens'))
