@@ -13,7 +13,7 @@ module MrMurano
       end
       def cors=(x)
         raise "Not Hash" unless x.kind_of? Hash
-        put('', x)
+        put('/cors', x)
       end
     end
     class Cors < Base
