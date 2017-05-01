@@ -7,7 +7,6 @@ module MrMurano
 
     SERVICE_MAP = {
       'Device2' => 'Gateway',
-      'Webservice' => 'Webservice',
     }.freeze
 
     ## Map service names into actual class names.
@@ -24,6 +23,7 @@ module MrMurano
           return v
         end
       end
+      return service.sub(/(.)(.*)/){"#{$1.upcase}#{$2.downcase}"}
     end
 
     def read(service, setting)
@@ -39,7 +39,7 @@ module MrMurano
           error "Unknown setting '#{setting}' on '#{service}'"
         end
 
-      rescue Exception => e
+      rescue NameError => e
         error "No Settings on \"#{service}\""
         if $cfg['tool.debug'] then
           error e.message
@@ -55,13 +55,13 @@ module MrMurano
         meth = "#{setting}=".to_sym
         debug %{Looking up method "#{meth}"}
         if gb.respond_to? meth then
-          return gb.__send__(meth)
+          return gb.__send__(meth, value)
 
         else
           error "Unknown setting '#{setting}' on '#{service}'"
         end
 
-      rescue Exception => e
+      rescue NameError => e
         error "No Settings on \"#{service}\""
         if $cfg['tool.debug'] then
           error e.message
