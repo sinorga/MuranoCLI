@@ -87,13 +87,13 @@ command 'setting write' do |c|
     elsif options.num then
       begin
         value = Integer(value)
-      rescue e
-        debug e.to_s
+      rescue Exception => e
+        setting.debug e.to_s
         begin
           value = Float(value)
-        rescue e
+        rescue Exception => e
           setting.error %{Value "#{value}" is not a number}
-        debug e.to_s
+          setting.debug e.to_s
           exit 2
         end
       end
@@ -102,9 +102,9 @@ command 'setting write' do |c|
       # product the intended output.
       begin
         value = YAML.load(value)
-      rescue e
+      rescue Exception => e
         setting.error %{Value not valid JSON (or YAML)}
-        debug e.to_s
+        setting.debug e.to_s
         exit 2
       end
 
@@ -115,14 +115,14 @@ command 'setting write' do |c|
     elsif options.dict then
       # take remaining args and convert to hash
       begin
-        value = Hash[args]
+        value = Hash[*args]
       rescue ArgumentError => e
         setting.error %{Odd number of arguments to dictionary}
-        debug e.to_s
+        setting.debug e.to_s
         exit 2
-      rescue e
+      rescue Exception => e
         setting.error %{Cannot make dictionary from args}
-        debug e.to_s
+        setting.debug e.to_s
         exit 2
       end
 

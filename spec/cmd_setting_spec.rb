@@ -37,7 +37,120 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
     expect(File.exist?('testout')).to be true
   end
 
-  context "Writes" do
+  context "Writes (using Device2.identity_format)" do
+    before(:example) do
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+      expect { @json_before = JSON.parse(out) }.to_not raise_error
+      expect(err).to eq('')
+      expect(status.exitstatus).to eq(0)
+    end
+    # {"prefix"=>"", "type"=>"opaque", "options"=>{"casing"=>"mixed", "length"=>0}}
+
+    it "a string value" do
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'prefix', 'fidget'))
+      expect(err).to eq('')
+      expect(out).to eq('')
+      expect(status.exitstatus).to eq(0)
+
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+      json_after = nil
+      expect { json_after = JSON.parse(out) }.to_not raise_error
+      expect(err).to eq('')
+      expect(status.exitstatus).to eq(0)
+      @json_before['prefix'] = 'fidget'
+      expect(json_after).to match(@json_before)
+    end
+
+    it "a forced string value" do
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'prefix', '--string', 'fidget'))
+      expect(err).to eq('')
+      expect(out).to eq('')
+      expect(status.exitstatus).to eq(0)
+
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+      json_after = nil
+      expect { json_after = JSON.parse(out) }.to_not raise_error
+      expect(err).to eq('')
+      expect(status.exitstatus).to eq(0)
+      @json_before['prefix'] = 'fidget'
+      expect(json_after).to match(@json_before)
+    end
+
+# This may not be testable in integration. (since it does things that get filtered out)
+    it "all intermediate keys" #do
+#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'one.two.three', 'fidget'))
+#      expect(err).to eq('')
+#      expect(out).to eq('')
+#      expect(status.exitstatus).to eq(0)
+#
+#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+#      json_after = nil
+#      expect { json_after = JSON.parse(out) }.to_not raise_error
+#      expect(err).to eq('')
+#      expect(status.exitstatus).to eq(0)
+#      @json_before.set('one.two.three', 'figdet')
+#      expect(json_after).to match(@json_before)
+#    end
+
+    context "a number value" do
+      it "integer 12" do
+        out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options.length', '--num', '12'))
+        expect(err).to eq('')
+        expect(out).to eq('')
+        expect(status.exitstatus).to eq(0)
+
+        out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+        json_after = nil
+        expect { json_after = JSON.parse(out) }.to_not raise_error
+        expect(err).to eq('')
+        expect(status.exitstatus).to eq(0)
+        @json_before.set('options.length', 12)
+        expect(json_after).to match(@json_before)
+      end
+
+      it "float 12.67" do
+        out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options.length', '--num', '12.67'))
+        expect(err).to eq('')
+        expect(out).to eq('')
+        expect(status.exitstatus).to eq(0)
+
+        out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+        json_after = nil
+        expect { json_after = JSON.parse(out) }.to_not raise_error
+        expect(err).to eq('')
+        expect(status.exitstatus).to eq(0)
+        @json_before.set('options.length', 12.67)
+        expect(json_after).to match(@json_before)
+      end
+
+      it "fiftyHalf" do
+        out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options.length', '--num', 'fiftyHalf'))
+        expect(err).to eq("\e[31mValue \"fiftyHalf\" is not a number\e[0m\n")
+        expect(out).to eq('')
+        expect(status.exitstatus).to eq(2)
+      end
+    end
+
+# This may not be testable in integration.
+    it "a dictionary" #do
+#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options', '--dict', 'casing', 'lower'))
+#      expect(err).to eq('')
+#      expect(out).to eq('')
+#      expect(status.exitstatus).to eq(0)
+#
+#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+#      json_after = nil
+#      expect { json_after = JSON.parse(out) }.to_not raise_error
+#      expect(err).to eq('')
+#      expect(status.exitstatus).to eq(0)
+#      @json_before['options'] = {'casing'=>'lower', 'length'=>0}
+#      expect(json_after).to match(@json_before)
+#    end
+
+    it "merges into a dictionary" #broken.
+  end
+
+  context "Writes (using Webservice.cors)" do
     before(:example) do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Webservice.cors', '-c', 'outformat=json'))
       expect { @json_before = JSON.parse(out) }.to_not raise_error
@@ -48,41 +161,6 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
     # "methods"=>["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     # "headers"=>["Content-Type", "Cookie", "Authorization"],
     # "credentials"=>true}
-
-    # XXX Not with Webservice.cors
-    it "a string value" do
-      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers.0', 'fidget'))
-      expect(err).to eq('')
-      expect(out).to eq('')
-      expect(status.exitstatus).to eq(0)
-
-      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Webservice.cors', '-c', 'outformat=json'))
-      json_after = nil
-      expect { json_after = JSON.parse(out) }.to_not raise_error
-      expect(err).to eq('')
-      expect(status.exitstatus).to eq(0)
-      @json_before.set('headers.0', 'figdet')
-      expect(json_after).to match(@json_before)
-    end
-
-    # XXX Not with Webservice.cors
-    it "a forced string value"
-
-    # XXX Not with Webservice.cors
-    it "all intermediate keys" do
-      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers.one.two.three', 'fidget'))
-      expect(err).to eq('')
-      expect(out).to eq('')
-      expect(status.exitstatus).to eq(0)
-
-      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Webservice.cors', '-c', 'outformat=json'))
-      json_after = nil
-      expect { json_after = JSON.parse(out) }.to_not raise_error
-      expect(err).to eq('')
-      expect(status.exitstatus).to eq(0)
-      @json_before.set('headers.0', 'figdet')
-      expect(json_after).to match(@json_before)
-    end
 
     context "a bool value" do
       it "Yes" do
@@ -213,9 +291,6 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       end
     end
 
-    # XXX Not with Webservice.cors
-    it "a number value"
-
     it "a json blob"
 
     it "an array" do
@@ -233,9 +308,6 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       expect(json_after).to match(@json_before)
     end
 
-    # XXX Not with Webservice.cors
-    it "a dictionary"
-
     it "appends an array" do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Webservice.cors', 'headers', '--array', '--append', 'fidget', 'forgotten', 'tokens'))
       expect(err).to eq('')
@@ -251,8 +323,6 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       expect(json_after).to match(@json_before)
     end
 
-    # XXX Not with Webservice.cors
-    it "merges into a dictionary" #broken.
   end
 
 end
