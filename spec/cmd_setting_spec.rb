@@ -170,7 +170,21 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
 #      expect(json_after).to match(@json_before)
 #    end
 
-    it "merges into a dictionary" #broken.
+    it "merges into a dictionary" do
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', '.', '--dict', '--merge', 'prefix', 'tix', 'type', 'base10'))
+      expect(err).to eq('')
+      expect(out).to eq('')
+      expect(status.exitstatus).to eq(0)
+
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
+      json_after = nil
+      expect { json_after = JSON.parse(out) }.to_not raise_error
+      expect(err).to eq('')
+      expect(status.exitstatus).to eq(0)
+      @json_before['prefix'] = 'tix'
+      @json_before['type'] = 'base10'
+      expect(json_after).to match(@json_before)
+    end
   end
 
   context "Writes (using Webservice.cors)" do

@@ -1,5 +1,6 @@
 require 'vine'
 require 'yaml'
+require 'MrMurano/hash'
 require 'MrMurano/Setting'
 
 command 'setting read' do |c|
@@ -115,7 +116,7 @@ command 'setting write' do |c|
     elsif options.dict then
       # take remaining args and convert to hash
       begin
-        value = Hash[*args]
+        value = Hash.transform_keys_to_symbols(Hash[*args])
       rescue ArgumentError => e
         setting.error %{Odd number of arguments to dictionary}
         setting.debug e.to_s
@@ -152,7 +153,7 @@ command 'setting write' do |c|
         setting.error %{Cannot append; "#{subkey}" is not a dictionary.}
         exit 3
       end
-      # FIXME: This needs to do a deep_merge.
+      g.deep_merge!(value)
     else
       ret.set(subkey, value)
     end
