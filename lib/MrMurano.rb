@@ -21,5 +21,6 @@ require 'MrMurano/Solution-Users' # service/{pid}/user/
 require 'MrMurano/Gateway'
 require 'MrMurano/Content'
 
+require 'MrMurano/Setting'
 require 'MrMurano/ReCommander'
 require 'MrMurano/commands'

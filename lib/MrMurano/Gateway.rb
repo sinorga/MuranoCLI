@@ -38,49 +38,57 @@ module MrMurano
       def info
         get()
       end
+    end
 
-      # Change how devices are identified and connected
-      # @param name [String] One of: onep, mqtt, cbor  (only onep for now)
-      # @param auth_type [String] One of: certificate, cik, hash, password, signature
-      # @param dev_mode [Boolean] Leave as false.
-      def protocol(name='onep', auth_type='cik', dev_mode=false)
-        patch('', {
-          :protocol => {
-            :name => name,
-            :auth_type => auth_type,
-            :dev_mode => dev_mode,
-          }
-        })
+    class Settings < Base
+      # Get the protocol settings
+      def protocol
+        ret = get()
+        return {} if ret.nil?
+        return {} unless ret.kind_of? Hash
+        return {} unless ret.has_key? :protocol
+        return {} unless ret[:protocol].kind_of? Hash
+        return ret[:protocol]
       end
 
-      # Set how device IDs are validated.
-      # @param type [String] One of: mac:48, mac-48, mac.48, uuidv4, base10, base16, opaque
-      # @param casing [String] One of: lower, upper, mixed
-      # @param length [Integer] Required length of identity. 0 for any lengths.
-      # @param prefix [String] ?
-      def identity_format(type='opaque', casing='mixed', length=0, prefix='')
-        patch('', {
-          :identity_format => {
-            :type => type,
-            :prefix => prefix,
-            :options => {
-              :casing => casing,
-              :length => length,
-            }
-          }
-        })
+      # Set the protocol settings
+      def protocol=(x)
+        raise "Not Hash" unless x.kind_of? Hash
+        x.delete_if {|k,v| not [:name, :devmode].include? k}
+        patch('', {:protocol => x})
       end
 
-      # TODO
-      def provisioning()
-        patch('', {
-          :provisioning=>
-          {:enabled=>true,
-           :generate_identity=>true,
-           :presenter_identity=>true,
-           :ip_whitelisting=>{:enabled=>false, :allowed=>[]}
-          }
-        })
+      def identity_format
+        ret = get()
+        return {} if ret.nil?
+        return {} unless ret.kind_of? Hash
+        return {} unless ret.has_key? :identity_format
+        return {} unless ret[:identity_format].kind_of? Hash
+        return ret[:identity_format]
+      end
+
+      def identity_format=(x)
+        raise "Not Hash" unless x.kind_of? Hash
+        raise "Not Hash" if x.has_key? :options and not x[:options].kind_of? Hash
+        x.delete_if {|k,v| not [:type, :prefix, :options].include? k}
+        x[:options].delete_if {|k,v| not [:casing, :length].include? k}
+        patch('', {:identity_format=>x})
+      end
+
+      def provisioning
+        ret = get()
+        return {} if ret.nil?
+        return {} unless ret.kind_of? Hash
+        return {} unless ret.has_key? :provisioning
+        return {} unless ret[:provisioning].kind_of? Hash
+        return ret[:provisioning]
+      end
+      def provisioning=(x)
+        raise "Not Hash" unless x.kind_of? Hash
+        raise "Not Hash" if x.has_key? :ip_whitelisting and not x[:ip_whitelisting].kind_of? Hash
+        x.delete_if {|k,v| not [:enabled, :auth_type, :generate_identity, :presenter_identity, :ip_whitelisting].include? k}
+        x[:ip_whitelisting].delete_if {|k,v| not [:enabled, :allowed].include? k}
+        patch('', {:provisioning=>x})
       end
     end
 

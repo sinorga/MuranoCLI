@@ -37,6 +37,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('mime-types', '~> 3.1')
   s.add_runtime_dependency('mime-types-data', '~> 3.2016.0521')
   s.add_runtime_dependency('terminal-table', '~> 1.7.3')
+  s.add_runtime_dependency('vine', '~> 0.4')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
   s.add_development_dependency('ocra', '~> 1.3.8')

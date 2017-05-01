@@ -4,6 +4,18 @@ require 'MrMurano/Webservice'
 
 module MrMurano
   module Webservice
+    class Settings < Base
+      def cors
+        ret = get('/cors')
+        return {} if ret.nil?
+        return {} unless ret.kind_of? Hash
+        return ret
+      end
+      def cors=(x)
+        raise "Not Hash" unless x.kind_of? Hash
+        put('', x)
+      end
+    end
     class Cors < Base
       def initialize
         super
