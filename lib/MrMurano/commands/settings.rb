@@ -5,7 +5,8 @@ require 'MrMurano/Setting'
 command 'setting read' do |c|
   c.syntax = %{murano setting read <service>.<setting> [<sub-key>]}
   c.summary = %{Read a setting on a Service}
-  c.description = %{}
+  c.description = %{Read a setting on a Service}
+  c.option '-o', '--output FILE', String, %{File to save output to}
 
   c.action do |args, options|
     service, pref = args[0].split('.')
@@ -16,7 +17,12 @@ command 'setting read' do |c|
 
     ret = ret.access(subkey) unless subkey.nil?
 
-    setting.outf(ret)
+    io=nil
+    if options.output then
+      io = File.open(options.output, 'w')
+    end
+    setting.outf(ret, io)
+    io.close unless io.nil?
   end
 end
 
@@ -138,7 +144,7 @@ command 'setting write' do |c|
         setting.error %{Cannot append; "#{subkey}" is not an array.}
         exit 3
       end
-      g << value
+      g.push(*value)
 
     elsif options.merge then
       g = ret.access(subkey)
@@ -146,6 +152,7 @@ command 'setting write' do |c|
         setting.error %{Cannot append; "#{subkey}" is not a dictionary.}
         exit 3
       end
+      # FIXME: This needs to do a deep_merge.
     else
       ret.set(subkey, value)
     end
