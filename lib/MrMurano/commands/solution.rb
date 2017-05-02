@@ -118,7 +118,7 @@ command 'solution list' do |c|
       headers = [:apiId, :domain]
       data = data.map{|r| [r[:apiId], r[:domain]]}
     else
-      headers = data[0].keys
+      headers = (data.first or {}).keys
       data = data.map{|r| headers.map{|h| r[h]}}
     end
 
