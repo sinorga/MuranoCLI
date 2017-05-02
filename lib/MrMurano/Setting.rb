@@ -69,6 +69,23 @@ module MrMurano
         end
       end
     end
+
+    ##
+    # List all Settings classes and the accessors on them.
+    #
+    # This is for letting users know which things can be read and written in the
+    # settings command.
+    def list
+      result = {}
+      ::MrMurano.constants.each do |maybe|
+        begin
+          gb = Object::const_get("MrMurano::#{maybe}::Settings")
+          result[maybe] = gb.instance_methods(false).select{|i| i.to_s[-1] != '='}
+        rescue
+        end
+      end
+      result
+    end
   end
 
 end

@@ -3,6 +3,20 @@ require 'yaml'
 require 'MrMurano/hash'
 require 'MrMurano/Setting'
 
+command 'setting list' do |c|
+  c.syntax = %{murano setting list}
+  c.summary = %{List which services and settings are avalible.}
+  c.description = %{List which services and settings are avalible.}
+
+  c.action do |args, options|
+    setting = MrMurano::Setting.new
+    ret = setting.list
+    dd=[]
+    ret.each_pair{|k,v| v.each{|s| dd << "#{k}.#{s}"}}
+    setting.outf dd
+  end
+end
+
 command 'setting read' do |c|
   c.syntax = %{murano setting read <service>.<setting> [<sub-key>]}
   c.summary = %{Read a setting on a Service}
