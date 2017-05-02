@@ -32,7 +32,7 @@ RSpec.describe 'mr init', :cmd do
         FileUtils.remove_entry('.murano')
       end
       after(:example) do
-        out, err, status = Open3.capture3(capcmd('murano', 'project', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -73,7 +73,7 @@ RSpec.describe 'mr init', :cmd do
         @project_name = rname('initCreating')
       end
       after(:example) do
-        out, err, status = Open3.capture3(capcmd('murano', 'project', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -127,7 +127,7 @@ RSpec.describe 'mr init', :cmd do
     end
     after(:example) do
       Dir.chdir(ENV['HOME']) do
-        out, err, status = Open3.capture3(capcmd('murano', 'project', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
