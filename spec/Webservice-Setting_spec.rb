@@ -1,0 +1,86 @@
+require 'MrMurano/version'
+require 'MrMurano/Webservice-Cors'
+require 'MrMurano/ProjectFile'
+require 'tempfile'
+require 'yaml'
+require '_workspace'
+
+RSpec.describe MrMurano::Webservice::Settings do
+  include_context "WORKSPACE"
+  before(:example) do
+    MrMurano::SyncRoot.reset
+    $cfg = MrMurano::Config.new
+    $cfg.load
+    $cfg['net.host'] = 'bizapi.hosted.exosite.io'
+    $cfg['project.id'] = 'XYZ'
+
+    @srv = MrMurano::Webservice::Settings.new
+    allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
+  end
+
+  it "initializes" do
+    uri = @srv.endPoint('/')
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors/")
+  end
+
+  context "when server gives string" do
+    context "fetches" do
+      it "as a hash" do
+        cors = {:origin=>true,
+                :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
+                :headers=>["Content-Type","Cookie","Authorization"],
+                :credentials=>true}
+        body = cors
+        stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors").
+          with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                          'Content-Type'=>'application/json'}).
+                          to_return(body: body.to_json)
+
+        ret = @srv.cors
+        expect(ret).to eq(cors)
+      end
+    end
+  end
+
+  context "when server gives object" do
+    context "fetches" do
+      it "as a hash" do
+        cors = {:origin=>true,
+                :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
+                :headers=>["Content-Type","Cookie","Authorization"],
+                :credentials=>true}
+        body = cors
+        stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors").
+          with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                          'Content-Type'=>'application/json'}).
+                          to_return(body: body.to_json)
+
+        ret = @srv.cors
+        expect(ret).to eq(cors)
+      end
+    end
+  end
+
+  context "uploads" do
+    before(:example) do
+      $project = MrMurano::ProjectFile.new
+      $project.load
+      @cors = {:origin=>true,
+               :methods=>["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],
+               :headers=>["Content-Type","Cookie","Authorization"],
+               :credentials=>true}
+    end
+    it "sets" do
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors").
+        with(:body=>@cors.to_json,
+             :headers=>{'Authorization'=>'token TTTTTTTTTT',
+                        'Content-Type'=>'application/json'}).
+                        to_return(body: "")
+
+      ret = @srv.cors=(@cors)
+      expect(ret).to eq(@cors)
+    end
+  end
+
+end
+#  vim: set ai et sw=2 ts=2 :
