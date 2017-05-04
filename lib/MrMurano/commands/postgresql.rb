@@ -78,7 +78,8 @@ command 'postgresql migrate up' do |c|
       pp ret
       exit 1
     end
-    current_version = (((ret[:result] or {})[:rows] or []).first or []).first or 0
+    pg.debug "create/select: #{ret}"
+    current_version = (((((ret[:result] or []).last or {})[:rows] or []).first or []).first or 0).to_i
 
     # Get migrations
     migrations = Dir[File.join(options.dir, '*-up.sql')].sort
@@ -88,25 +89,33 @@ command 'postgresql migrate up' do |c|
     end
 
     if level.nil? then
-      level, _ = migrations.last.split('-')
+      level, _ = File.basename(migrations.last).split('-')
+    end
+    level = level.to_i
+    pg.verbose "Will migrate from version #{current_version} to #{level}"
+    if level <= current_version then
+      say "Nothing to do."
+      exit 0
     end
 
     # Select migrations between current and desired
     migrations.select! do |m|
-      mvrs, _ = m.split('-')
+      mvrs, _ = File.basename(m).split('-')
+      mvrs = mvrs.to_i
       mvrs > current_version and mvrs <= level
     end
 
     # Run migrations.
     migrations.each do |m|
-      mvrs, _ = m.split('-')
-      pg.verbose "Running migration: #{m}"
+      mvrs, _ = File.basename(m).split('-')
+      pg.verbose "Running migration: #{File.basename(m)}"
       unless $cfg['tool.dry'] then
         pg.query 'BEGIN;'
         ret = pg.queries File.read(m)
         unless ret[:error].nil? then
           pg.query 'ROLLBACK;'
           pg.error "Migrations failed at level #{mvrs}"
+          pg.error "Because: #{ret[:error]}"
           exit 5
         else
           pg.queries %{INSERT INTO __murano_cli_migrate__ values (#{mvrs});
