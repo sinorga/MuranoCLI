@@ -55,4 +55,66 @@ command :postgresql do |c|
 
   end
 end
+
+command 'postgresql migrate up' do |c|
+  c.syntax = %{murano postgresql migrate up <level>}
+  c.summary = %{}
+
+  c.option '--dir DIR', %{Directory where migrations live}
+
+  c.action do |args,options|
+    options.default :dir => File.join($cfg['location.base'], 'sql-migrations')
+
+    level = args.first
+
+    pg = MrMurano::Postgresql.new
+
+    # get current version of DB.
+    ret = pg.queries %{
+    CREATE TABLE IF NOT EXISTS __murano_cli_migrate__ (version integer);
+    SELECT version FROM __murano_cli_migrate__;
+    }.gsub(/^\s+/,'')
+    unless ret[:error].nil? then
+      pp ret
+      exit 1
+    end
+    current_version = (((ret[:result] or {})[:rows] or []).first or []).first or 0
+
+    # Get migrations
+    migrations = Dir[File.join(options.dir, '*-up.sql')].sort
+    if migrations.empty? then
+      pg.error "No migrations to run."
+      exit 1
+    end
+
+    if level.nil? then
+      level, _ = migrations.last.split('-')
+    end
+
+    # Select migrations between current and desired
+    migrations.select! do |m|
+      mvrs, _ = m.split('-')
+      mvrs > current_version and mvrs <= level
+    end
+
+    # Run migrations.
+    migrations.each do |m|
+      mvrs, _ = m.split('-')
+      pg.verbose "Running migration: #{m}"
+      unless $cfg['tool.dry'] then
+        pg.query 'BEGIN;'
+        ret = pg.queries File.read(m)
+        unless ret[:error].nil? then
+          pg.query 'ROLLBACK;'
+          pg.error "Migrations failed at level #{mvrs}"
+          exit 5
+        else
+          pg.queries %{INSERT INTO __murano_cli_migrate__ values (#{mvrs});
+          DELETE FROM __murano_cli_migrate__ WHERE version <> #{mvrs};
+          COMMIT;}.gsub(/^\s+/,'')
+        end
+      end
+    end
+  end
+end
 #  vim: set ai et sw=2 ts=2 :
