@@ -34,12 +34,18 @@ command :postgresql do |c|
       ret = pg.query args.join(' ')
     end
 
+    unless ret[:error].nil? then
+      pg.error "Returned error: #{ret[:error]}"
+      exit 1
+    end
+
     io=nil
     if options.output then
       io = File.open(options.output, 'w')
     end
 
     pg.outf(ret, io) do |dd, ios|
+      dd = dd[:result]
       pg.tabularize({
         :headers=>dd[:columns],
         :rows=>dd[:rows]
