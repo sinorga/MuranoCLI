@@ -10,6 +10,10 @@ module MrMurano
     def query(query)
       call(:query, :post, {:sql=>query})
     end
+
+    def queries(query)
+      call(:queries, :post, {:sql=>query})
+    end
   end
 end
 
@@ -17,11 +21,18 @@ command :postgresql do |c|
   c.syntax = %{murano postgresql <SQL Commands>}
   c.summary = %{Query the relational database}
 
+  c.option '-f', '--file FILE', %{File of SQL commands}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args,options|
     pg = MrMurano::Postgresql.new
-    ret = pg.query args.join(' ')
+    if options.file then
+      sqls = File.read(options.file)
+
+      ret = pg.queries sqls
+    else
+      ret = pg.query args.join(' ')
+    end
 
     io=nil
     if options.output then
