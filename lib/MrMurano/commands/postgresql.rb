@@ -56,8 +56,8 @@ command :postgresql do |c|
   end
 end
 
-command 'postgresql migrate up' do |c|
-  c.syntax = %{murano postgresql migrate up <level>}
+command 'postgresql migrate' do |c|
+  c.syntax = %{murano postgresql migrate (up|down) <level>}
   c.summary = %{}
 
   c.option '--dir DIR', %{Directory where migrations live}
@@ -65,7 +65,14 @@ command 'postgresql migrate up' do |c|
   c.action do |args,options|
     options.default :dir => File.join($cfg['location.base'], 'sql-migrations')
 
-    level = args.first
+    direction = args.shift
+    if direction =~ /down/i then
+      direction = 'down'
+    else
+      direction = 'up'
+    end
+
+    want_version = args.first
 
     pg = MrMurano::Postgresql.new
 
@@ -82,28 +89,37 @@ command 'postgresql migrate up' do |c|
     current_version = (((((ret[:result] or []).last or {})[:rows] or []).first or []).first or 0).to_i
 
     # Get migrations
-    migrations = Dir[File.join(options.dir, '*-up.sql')].sort
+    migrations = Dir[File.join(options.dir, "*-#{direction}.sql")].sort
     if migrations.empty? then
       pg.error "No migrations to run."
       exit 1
     end
+    migrations.reverse! if direction == 'down'
 
-    if level.nil? then
-      level, _ = File.basename(migrations.last).split('-')
+    if want_version.nil? then
+      want_version, _ = File.basename(migrations.last).split('-')
     end
-    level = level.to_i
-    pg.verbose "Will migrate from version #{current_version} to #{level}"
-    if level <= current_version then
-      say "Nothing to do."
-      exit 0
+    want_version = want_version.to_i
+    pg.verbose "Will migrate from version #{current_version} to #{want_version}"
+    if direction == 'down' then
+      if want_version >= current_version then
+        say "Nothing to do."
+        exit 0
+      end
+    else
+      if want_version <= current_version then
+        say "Nothing to do."
+        exit 0
+      end
     end
 
     # Select migrations between current and desired
     migrations.select! do |m|
       mvrs, _ = File.basename(m).split('-')
       mvrs = mvrs.to_i
-      mvrs > current_version and mvrs <= level
+      mvrs > current_version and mvrs <= want_version
     end
+
 
     # Run migrations.
     migrations.each do |m|
@@ -126,4 +142,5 @@ command 'postgresql migrate up' do |c|
     end
   end
 end
+
 #  vim: set ai et sw=2 ts=2 :
