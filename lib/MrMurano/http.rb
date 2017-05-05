@@ -10,7 +10,6 @@ module MrMurano
       acc = Account.new
       @token = acc.token
       raise "Not logged in!" if @token.nil?
-      acc.adc_compat_check
       @token
     end
 
