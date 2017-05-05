@@ -110,6 +110,12 @@ module MrMurano
           end
         else
           showHttpError(request, response)
+          return {} if response.body.nil?
+          begin
+            return JSON.parse(response.body, json_opts)
+          rescue
+            return response.body
+          end
         end
       end
     end
