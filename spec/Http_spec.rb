@@ -191,7 +191,7 @@ RSpec.describe MrMurano::Http do
       idhttp = instance_double('Net::HTTP')
       expect(idhttp).to receive(:request).once.and_return(@rsp)
       expect(@tst).to receive(:http).once.and_return(idhttp)
-      expect(@rsp).to receive(:body).and_return(%{{"statusCode": 123, "message": "gone"}})
+      expect(@rsp).to receive(:body).exactly(3).times.and_return(%{{"statusCode": 123, "message": "gone"}})
 
       @tst.workit(@req)
       expect($stdout.string).to eq('')

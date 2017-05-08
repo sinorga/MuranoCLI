@@ -23,6 +23,20 @@ task :echo do
     puts builtGem
 end
 
+desc "display remind of how to release"
+task :release_reminder do
+    puts <<EOR
+git flow release start <newversion>
+gvim lib/MrMurano/version.rb
+git commit -a -m 'version bump'
+git flow release finish <newversion>
+# When editing message for tag, add release notes.
+rake git:all
+# Wait for all tests to complete.
+# if all passed: rake gemit
+EOR
+end
+
 desc "Prints a cmd to test this in another directory"
 task :testwith do
     pwd=Dir.pwd.sub(Dir.home, '~')
@@ -33,26 +47,24 @@ desc 'Run RSpec'
 task :rspec do
     Dir.mkdir("report") unless File.directory?("report")
     rv=RUBY_VERSION.gsub(/\./,'_')
-    sh %{rspec --format html --out report/index-#{rv}.html --format progress}
+    sh %{rspec --format html --out report/index-#{rv}.html --format documentation}
 end
 task :test => [:test_clean_up, :rspec]
 
 desc "Clean out junk from prior hot tests"
 task :test_clean_up do
-    if not ENV['MURANO_USER'].nil? and
-            not ENV['MURANO_BUSINESS'].nil? and
-            not ENV['MURANO_PASSWORD'].nil? then
+    if not ENV['MURANO_CONFIGFILE'].nil? then
 
-        ids = `ruby -Ilib bin/murano product list --idonly -c "user.name=#{ENV['MURANO_USER']}" -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}`.chomp
+        ids = `ruby -Ilib bin/murano product list --idonly`.chomp
         puts "Found prodcuts #{ids}; deleteing"
         ids.split.each do |id|
-            sh %{ruby -Ilib bin/murano product delete #{id} -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}}
+            sh %{ruby -Ilib bin/murano product delete #{id}}
         end
 
-        ids = `ruby -Ilib bin/murano solution list --idonly -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}`.chomp
+        ids = `ruby -Ilib bin/murano solution list --idonly`.chomp
         puts "Found solutions #{ids}; deleteing"
         ids.split.each do |id|
-            sh %{ruby -Ilib bin/murano solution delete #{id} -c user.name=#{ENV['MURANO_USER']} -c net.host=bizapi.hosted.exosite.io -c business.id=#{ENV['MURANO_BUSINESS']}}
+            sh %{ruby -Ilib bin/murano solution delete #{id}}
         end
     end
 end
@@ -153,7 +165,7 @@ if Gem.win_platform? then
     task :murano_exe_test => ['murano.exe'] do
         Dir.mkdir("report") unless File.directory?("report")
         ENV['CI_MR_EXE'] = '1'
-        sh %{rspec --format html --out report/murano_exe.html --format progress --tag cmd}
+        sh %{rspec --format html --out report/murano_exe.html --format documentation --tag cmd}
     end
     task :test => [:murano_exe_test]
 

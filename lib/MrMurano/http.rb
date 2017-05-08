@@ -7,7 +7,8 @@ module MrMurano
   module Http
     def token
       return @token unless @token.nil?
-      @token = Account.new.token
+      acc = Account.new
+      @token = acc.token
       raise "Not logged in!" if @token.nil?
       @token
     end
@@ -108,6 +109,12 @@ module MrMurano
           end
         else
           showHttpError(request, response)
+          return {} if response.body.nil?
+          begin
+            return JSON.parse(response.body, json_opts)
+          rescue
+            return response.body
+          end
         end
       end
     end
