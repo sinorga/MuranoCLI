@@ -126,9 +126,12 @@ command 'postgresql migrate' do |c|
     migrations.select! do |m|
       mvrs, _ = File.basename(m).split('-')
       mvrs = mvrs.to_i
-      mvrs > current_version and mvrs <= want_version
+      if direction == 'down' then
+        mvrs <= current_version and mvrs > want_version
+      else
+        mvrs > current_version and mvrs <= want_version
+      end
     end
-
 
     # Run migrations.
     migrations.each do |m|
