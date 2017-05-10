@@ -25,6 +25,9 @@ module MrMurano
 
     def curldebug(request)
       if $cfg['tool.curldebug'] then
+        if $cfg['tool.curlfile'] and not defined?(@curlfile) then # [lb]
+          @curlfile = File.open($cfg['tool.curlfile'], 'a')
+        end
         formp = (request.content_type =~ %r{multipart/form-data})
         a = []
         a << %{curl -s}
@@ -43,7 +46,13 @@ module MrMurano
             a << %{-d '#{request.body}'}
           end
         end
-        puts a.join(' ')
+        unless defined?(@curlfile) # [lb]
+          puts a.join(' ')
+        else
+          @curlfile << "\n\n" + a.join(' ') + "\n\n"
+          @curlfile.flush
+          # MEH: @curlfile.close() at some point?
+        end
       end
     end
 
@@ -52,6 +61,9 @@ module MrMurano
       if not defined?(@http) or @http.nil? then
         @http = Net::HTTP.new(uri.host, uri.port)
         @http.use_ssl = true
+        if defined?(@curlfile) # [lb]
+          @http.set_debug_output @curlfile
+        end
         @http.start
       end
       @http

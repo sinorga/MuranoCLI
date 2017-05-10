@@ -50,6 +50,12 @@ $cfg.load
 $project = MrMurano::ProjectFile.new
 $project.load
 
+if $cfg['tool.curldebug'] and $cfg['tool.curlfile'] then # [lb]
+  unless defined?(@curlfile)
+    @curlfile = File.open($cfg['tool.curlfile'], 'a')
+  end
+end
+
 # Basic command support is:
 # - read/write config file in [Project, User, System] (all are optional)
 # - TODO: Introspection for tab completion.
