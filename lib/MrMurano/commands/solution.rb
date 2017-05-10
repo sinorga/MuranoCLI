@@ -69,7 +69,6 @@ command 'solution delete' do |c|
     end
     name = args[0]
 
-
     # Need to convert what we got into the internal PID.
     ret = acc.solutions(:all).select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
 
