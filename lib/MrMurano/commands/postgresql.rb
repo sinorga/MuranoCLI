@@ -7,12 +7,16 @@ module MrMurano
       @serviceName = 'postgresql'
     end
 
-    def query(query)
-      call(:query, :post, {:sql=>query})
+    def query(query, params=nil)
+      aqr = {:sql=>query}
+      aqr[:parameters] = params unless params.nil?
+      call(:query, :post, aqr)
     end
 
-    def queries(query)
-      call(:queries, :post, {:sql=>query})
+    def queries(query, params=nil)
+      aqr = {:sql=>query}
+      aqr[:parameters] = params unless params.nil?
+      call(:queries, :post, aqr)
     end
   end
 end
@@ -20,7 +24,12 @@ end
 command :postgresql do |c|
   c.syntax = %{murano postgresql <SQL Commands>}
   c.summary = %{Query the relational database}
+  c.description = %{Query the relational database
+  
+  Queries can include $# escapes that are filled from the --param option.
+  }
 
+  c.option '--param LIST',Array,  %{Values to fill $# with}
   c.option '-f', '--file FILE', %{File of SQL commands}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
@@ -29,9 +38,9 @@ command :postgresql do |c|
     if options.file then
       sqls = File.read(options.file)
 
-      ret = pg.queries sqls
+      ret = pg.queries(sqls, options.param)
     else
-      ret = pg.query args.join(' ')
+      ret = pg.query(args.join(' '), options.param)
     end
 
     unless ret[:error].nil? then
