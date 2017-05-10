@@ -14,7 +14,7 @@ module MrMurano
         # @return [String] path for URL maps to this static file
         attr_accessor :path
         # @return [String] The MIME-Type for this content
-        attr_accessor :mime_type
+        attr_accessor :content_type
         # @return [String] Checksum for the content.
         attr_accessor :checksum
       end
@@ -97,7 +97,7 @@ module MrMurano
         # Most of these pull into ram.  So maybe just go with that. Would guess that
         # truely large static content is rare, and we can optimize/fix that later.
 
-        file = HTTP::FormData::File.new(local.to_s, {:mime_type=>remote[:mime_type]})
+        file = HTTP::FormData::File.new(local.to_s, {:content_type=>remote[:content_type]})
         form = HTTP::FormData.create(:file=>file)
         req = Net::HTTP::Put.new(uri)
         set_def_headers(req)
@@ -155,7 +155,7 @@ module MrMurano
         end
         debug "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
 
-        FileItem.new(:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest)
+        FileItem.new(:path=>name, :content_type=>mime.simplified, :checksum=>sha1.hexdigest)
       end
 
       # @param item [FileItem] The item to get a key from
@@ -168,7 +168,7 @@ module MrMurano
       # @param itemA [FileItem]
       # @param itemB [FileItem]
       def docmp(itemA, itemB)
-        return (itemA[:mime_type] != itemB[:mime_type] or
+        return (itemA[:content_type] != itemB[:content_type] or
           itemA[:checksum] != itemB[:checksum])
       end
 

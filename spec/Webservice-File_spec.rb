@@ -24,13 +24,13 @@ RSpec.describe MrMurano::Webservice::File do
   it "lists" do
     body = [
       {:path=>"/",
-       :mime_type=>"text/html",
+       :content_type=>"text/html",
        :checksum=>"f535dad52b2877a49717a034b4eee5ff1cdb8a18"},
       {:path=>"/batteryMeter.svg",
-       :mime_type=>"image/svg+xml",
+       :content_type=>"image/svg+xml",
        :checksum=>"06a1aab86ba8cb9b3f2913c673d4aa243c553494"},
       {:path=>"/meter.html",
-       :mime_type=>"text/html",
+       :content_type=>"text/html",
        :checksum=>"82e12125c2f1324bbf7bd64bf187f3334416117e"}
     ]
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file").
@@ -138,11 +138,11 @@ RSpec.describe MrMurano::Webservice::File do
   context "compares" do
     before(:example) do
       @iA = {:path=>"/api/v1/bar",
-             :mime_type=>"application/json",
+             :content_type=>"application/json",
              :checksum=>'12',
              }
       @iB = {:path=>"/api/v1/bar",
-             :mime_type=>"application/json",
+             :content_type=>"application/json",
              :checksum=>'12',
              }
     end
@@ -151,7 +151,7 @@ RSpec.describe MrMurano::Webservice::File do
       expect(ret).to be false
     end
     it "different mime" do
-      iA = @iA.merge({:mime_type=>'text/plain'})
+      iA = @iA.merge({:content_type=>'text/plain'})
       ret = @srv.docmp(iA, @iB)
       expect(ret).to be true
     end
@@ -203,7 +203,7 @@ RSpec.describe MrMurano::Webservice::File do
       ret = @srv.toRemoteItem(prj, @lp)
       expect(ret).to eq({
         :path=>"/files/one.text",
-        :mime_type=>"text/plain",
+        :content_type=>"text/plain",
         :checksum=>"d1af3dadf08479a1d43b282f95d61dda8efda5e7"
       })
     end
