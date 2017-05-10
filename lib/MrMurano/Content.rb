@@ -105,6 +105,7 @@ module MrMurano
 
         unless $cfg['tool.dry'] then
           Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
+            curldebug(request) # [lb]
             response = ihttp.request(request)
             case response
             when Net::HTTPSuccess
@@ -147,6 +148,7 @@ module MrMurano
 
         unless $cfg['tool.dry'] then
           Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
+            curldebug(request) # [lb]
             ihttp.request(request) do |response|
               case response
               when Net::HTTPSuccess
