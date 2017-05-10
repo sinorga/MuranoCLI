@@ -126,9 +126,12 @@ command 'postgresql migrate' do |c|
     migrations.select! do |m|
       mvrs, _ = File.basename(m).split('-')
       mvrs = mvrs.to_i
-      mvrs > current_version and mvrs <= want_version
+      if direction == 'down' then
+        mvrs <= current_version and mvrs > want_version
+      else
+        mvrs > current_version and mvrs <= want_version
+      end
     end
-
 
     # Run migrations.
     migrations.each do |m|
@@ -143,9 +146,13 @@ command 'postgresql migrate' do |c|
           pg.error "Because: #{ret[:error]}"
           exit 5
         else
-          pg.queries %{INSERT INTO __murano_cli_migrate__ values (#{mvrs});
-          DELETE FROM __murano_cli_migrate__ WHERE version <> #{mvrs};
-          COMMIT;}.gsub(/^\s+/,'')
+          if direction == 'down' then
+            pg.queries %{DELETE FROM __murano_cli_migrate__ WHERE version = #{mvrs};
+              COMMIT;}.gsub(/^\s+/,'')
+          else
+            pg.queries %{INSERT INTO __murano_cli_migrate__ values (#{mvrs});
+              COMMIT;}.gsub(/^\s+/,'')
+          end
         end
       end
     end
