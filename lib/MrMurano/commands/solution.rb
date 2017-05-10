@@ -105,33 +105,41 @@ command 'solution list' do |c|
     acc = MrMurano::Account.new
     data = acc.solutions(options.type)
 
-    io=nil
-    if options.output then
-      io = File.open(options.output, 'w')
-    end
-
-    if options.idonly then
-      headers = [:apiId]
-      data = data.map{|row| [row[:apiId]]}
-    elsif not options.all then
-      headers = [:apiId, :domain]
-      data = data.map{|r| [r[:apiId], r[:domain]]}
-    else
-      headers = (data.first or {}).keys
-      data = data.map{|r| headers.map{|h| r[h]}}
-    end
-
-    acc.outf(data, io) do |dd, ios|
-      if options.idonly then
-        ios.puts dd.join(' ')
-      else
-        acc.tabularize({
-          :headers=>headers.map{|h| h.to_s},
-          :rows=>dd
-        }, ios)
+# FIXME/2017-05-09: [lb] added the unless check and the stderr msg below.
+#                   Later, [mt] add the data.first check.
+#                   Retest and see if stderr message still needed.
+#    unless data.empty?
+      io = nil
+      if options.output then
+        io = File.open(options.output, 'w')
       end
-    end
-    io.close unless io.nil?
+
+      if options.idonly then
+        headers = [:apiId]
+        data = data.map{|row| [row[:apiId]]}
+      elsif not options.all then
+        headers = [:apiId, :domain]
+        data = data.map{|r| [r[:apiId], r[:domain]]}
+      else
+        headers = (data.first or {}).keys
+        data = data.map{|r| headers.map{|h| r[h]}}
+      end
+
+      acc.outf(data, io) do |dd, ios|
+        if options.idonly then
+          ios.puts dd.join(' ')
+        else
+          acc.tabularize({
+            :headers=>headers.map{|h| h.to_s},
+            :rows=>dd
+          }, ios)
+        end
+      end
+      io.close unless io.nil?
+#    else
+## FIXME: [lb] new to MuranoCLI. Is simple puts okay here? Or do we want stderr?
+#      $stderr.puts HighLine.color('no solutions found', :red)
+#    end
   end
 end
 alias_command 'product list', 'solution list', '--type', 'product', '--no-all'
