@@ -135,8 +135,8 @@ command 'solution list' do |c|
     io.close unless io.nil?
   end
 end
-alias_command 'product list', 'solution list','--type','product', '--no-all'
-alias_command 'project list', 'solution list','--type','product', '--no-all'
-alias_command 'app list', 'solution list','--type','application', '--no-all'
+alias_command 'product list', 'solution list', '--type', 'product', '--no-all'
+alias_command 'project list', 'solution list', '--type', 'product', '--no-all'
+alias_command 'app list', 'solution list', '--type', 'application', '--no-all'
 
 #  vim: set ai et sw=2 ts=2 :
