@@ -1,0 +1,9 @@
+coverage/
+pkg/
+report/
+
+.byebug_history
+.rspec_examples.txt
+Gemfile.lock
+.bundle/
+
