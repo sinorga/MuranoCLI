@@ -90,23 +90,21 @@ module MrMurano
         request.content_length = form.content_length
         request.body = form.to_s
 
-        #if $cfg['tool.curldebug'] then
-        #  a = []
-        #  a << %{curl -s}
-        #  a << %{-H 'User-Agent: #{request['User-Agent']}'}
-        #  a << %{-X #{request.method}}
-        #  a << %{'#{request.uri.to_s}'}
-        #  ret[:inputs].each_pair do |key, value|
-        #    a << %{-F '#{key}=#{value}'}
-        #  end
-        #  a << %{-F #{ret[:field]}=@#{local_path.to_s}}
-        #  puts a.join(' ')
-        #end
-        curldebug(request) # [lb]
+        if $cfg['tool.curldebug'] then
+          a = []
+          a << %{curl -s}
+          a << %{-H 'User-Agent: #{request['User-Agent']}'}
+          a << %{-X #{request.method}}
+          a << %{'#{request.uri.to_s}'}
+          ret[:inputs].each_pair do |key, value|
+            a << %{-F '#{key}=#{value}'}
+          end
+          a << %{-F #{ret[:field]}=@#{local_path.to_s}}
+          puts a.join(' ')
+        end
 
         unless $cfg['tool.dry'] then
           Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
-            curldebug(request) # [lb]
             response = ihttp.request(request)
             case response
             when Net::HTTPSuccess
@@ -138,19 +136,17 @@ module MrMurano
         request = Net::HTTP::Get.new(uri)
         request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
 
-        #if $cfg['tool.curldebug'] then
-        #  a = []
-        #  a << %{curl -s}
-        #  a << %{-H 'User-Agent: #{request['User-Agent']}'}
-        #  a << %{-X #{request.method}}
-        #  a << %{'#{request.uri.to_s}'}
-        #  puts a.join(' ')
-        #end
-        curldebug(request) # [lb]
+        if $cfg['tool.curldebug'] then
+          a = []
+          a << %{curl -s}
+          a << %{-H 'User-Agent: #{request['User-Agent']}'}
+          a << %{-X #{request.method}}
+          a << %{'#{request.uri.to_s}'}
+          puts a.join(' ')
+        end
 
         unless $cfg['tool.dry'] then
           Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
-            curldebug(request) # [lb]
             ihttp.request(request) do |response|
               case response
               when Net::HTTPSuccess

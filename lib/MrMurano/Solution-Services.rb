@@ -59,7 +59,6 @@ module MrMurano
       debug "f: #{local} >> #{pst.reject{|k,_| k==:script}.to_json}"
       # try put, if 404, then post.
       put('/'+mkalias(remote), pst) do |request, http|
-        curldebug(request) # [lb]
         response = http.request(request)
         case response
         when Net::HTTPSuccess

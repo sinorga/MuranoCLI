@@ -95,7 +95,6 @@ module MrMurano
         #      post('', remote)
         if remote.has_key? @itemkey then
           put('/' + remote[@itemkey], remote) do |request, http|
-            curldebug(request) # [lb]
             response = http.request(request)
             case response
             when Net::HTTPSuccess

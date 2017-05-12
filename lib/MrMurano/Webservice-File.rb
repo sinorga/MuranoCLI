@@ -9,7 +9,6 @@ module MrMurano
   module Webservice
     # Static File content
     class File < Base
-      include Http
       # File Specific details on an Item
       class FileItem < Item
         # @return [String] path for URL maps to this static file
@@ -40,7 +39,6 @@ module MrMurano
         path = path[1..-1] if path[0] == '/'
         path = '/'+ URI.encode_www_form_component(path)
         get(path) do |request, http|
-          curldebug(request) # [lb]
           http.request(request) do |resp|
             case resp
             when Net::HTTPSuccess
@@ -108,16 +106,15 @@ module MrMurano
           request.content_length = form.content_length
           request.body = form.to_s
 
-          #if $cfg['tool.curldebug'] then
-          #  a = []
-          #  a << %{curl -s -H 'Authorization: #{request['authorization']}'}
-          #  a << %{-H 'User-Agent: #{request['User-Agent']}'}
-          #  a << %{-X #{request.method}}
-          #  a << %{'#{request.uri.to_s}'}
-          #  a << %{-F file=@#{local.to_s}}
-          #  puts a.join(' ')
-          #end
-          curldebug(request) # [lb]
+          if $cfg['tool.curldebug'] then
+            a = []
+            a << %{curl -s -H 'Authorization: #{request['authorization']}'}
+            a << %{-H 'User-Agent: #{request['User-Agent']}'}
+            a << %{-X #{request.method}}
+            a << %{'#{request.uri.to_s}'}
+            a << %{-F file=@#{local.to_s}}
+            puts a.join(' ')
+          end
 
           response = http.request(request)
           case response

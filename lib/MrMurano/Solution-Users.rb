@@ -25,7 +25,6 @@ module MrMurano
     def upload(local, remote, modify)
       # Roles cannot be modified, so must delete and post.
       delete('/' + remote[@itemkey]) do |request, http|
-        curldebug(request) # [lb]
         response = http.request(request)
         case response
         when Net::HTTPSuccess

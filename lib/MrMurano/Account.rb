@@ -123,7 +123,6 @@ module MrMurano
         curldebug(request)
         #request.basic_auth(username(), password())
         request.body = JSON.generate(_loginInfo)
-        curldebug(request) # [lb]
 
         response = http.request(request)
         case response

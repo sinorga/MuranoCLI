@@ -71,9 +71,6 @@ module MrMurano
       if not defined?(@http) or @http.nil? then
         @http = Net::HTTP.new(uri.host, uri.port)
         @http.use_ssl = true
-        if defined?(@curlfile) # [lb]
-          @http.set_debug_output @curlfile
-        end
         @http.start
       end
       @http

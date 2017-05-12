@@ -22,7 +22,6 @@ command :logs do |c|
       begin
         sol.get('/logs?polling=true') do |request, http|
           request["Accept-Encoding"] = "None"
-          curldebug(request) # [lb]
           http.request(request) do |response|
             remainder=''
             response.read_body do |chunk|
