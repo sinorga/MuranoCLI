@@ -1,3 +1,4 @@
+require 'date'
 require 'uri'
 require 'net/http'
 require 'json'
@@ -25,9 +26,6 @@ module MrMurano
 
     def curldebug(request)
       if $cfg['tool.curldebug'] then
-        if $cfg['tool.curlfile'] and not defined?(@curlfile) then # [lb]
-          @curlfile = File.open($cfg['tool.curlfile'], 'a')
-        end
         formp = (request.content_type =~ %r{multipart/form-data})
         a = []
         a << %{curl -s}
@@ -46,12 +44,23 @@ module MrMurano
             a << %{-d '#{request.body}'}
           end
         end
-        unless defined?(@curlfile) # [lb]
+        unless defined?(@@curlfile) # [lb]
           puts a.join(' ')
         else
-          @curlfile << "\n\n" + a.join(' ') + "\n\n"
-          @curlfile.flush
-          # MEH: @curlfile.close() at some point?
+          @@curlfile << a.join(' ') + "\n\n"
+          # MEH: @@curlfile.close() at some point?
+        end
+      end
+    end
+
+    ## Open a file for capturing curl calls.
+    # Start with the current time and config.
+    def self.initCurlfile
+      if $cfg['tool.curldebug'] and $cfg['tool.curlfile'] then # [lb]
+        unless defined?(@@curlfile)
+          @@curlfile = File.open($cfg['tool.curlfile'], 'a')
+          @@curlfile << Time.now << "\n"
+          @@curlfile << "murano #{ARGV.join(' ')}\n"
         end
       end
     end
