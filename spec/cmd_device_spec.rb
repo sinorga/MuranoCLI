@@ -75,7 +75,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "writes and reads", :landotest1 do # [lb]
+  it "writes and reads" do # [lb]
     FileUtils.mkpath('specs')
     FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
 
