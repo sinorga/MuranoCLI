@@ -50,11 +50,11 @@ module MrMurano
       # we assume these are small enough to slurp.
       script = local.read
 
-      pst = remote.to_h.merge ({
+      pst = remote.to_h.merge({
         :solution_id => $cfg['project.id'],
         :script => script,
-        :alias=>mkalias(remote),
-        :name=>mkname(remote),
+        :alias => mkalias(remote),
+        :name => mkname(remote),
       })
       debug "f: #{local} >> #{pst.reject{|k,_| k==:script}.to_json}"
       # try put, if 404, then post.
