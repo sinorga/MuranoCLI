@@ -20,7 +20,7 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  context "without ProjectFile", :landotest do # [lb]
+  context "without ProjectFile" do
     before(:example) do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
       FileUtils.move('assets','files')

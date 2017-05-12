@@ -44,12 +44,12 @@ module MrMurano
             a << %{-d '#{request.body}'}
           end
         end
-        unless defined?(@@curlfile) # [lb]
+        unless defined?(@@curlfile)
           puts a.join(' ')
         else
           @@curlfile << a.join(' ') + "\n\n"
           @@curlfile.flush
-          # MEH: @@curlfile.close() at some point?
+          # MEH: Call @@curlfile.close() at some point?
         end
       end
     end
@@ -57,7 +57,7 @@ module MrMurano
     ## Open a file for capturing curl calls.
     # Start with the current time and config.
     def self.initCurlfile
-      if $cfg['tool.curldebug'] and $cfg['tool.curlfile'] then # [lb]
+      if $cfg['tool.curldebug'] and $cfg['tool.curlfile'] then
         unless defined?(@@curlfile)
           @@curlfile = File.open($cfg['tool.curlfile'], 'a')
           @@curlfile << Time.now << "\n"
