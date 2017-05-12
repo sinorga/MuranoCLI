@@ -8,8 +8,8 @@ require 'MrMurano/verbosing'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
-  ## The details of talking to the Gateway service.
-  # This where interfacing to real hardware happens.
+  ## The details of talking to the Gateway [Device2] service.
+  # This is where interfacing to real hardware happens.
   module Gateway
     class Base
       def initialize
