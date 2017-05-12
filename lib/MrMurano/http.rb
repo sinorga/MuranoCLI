@@ -48,6 +48,7 @@ module MrMurano
           puts a.join(' ')
         else
           @@curlfile << a.join(' ') + "\n\n"
+          @@curlfile.flush
           # MEH: @@curlfile.close() at some point?
         end
       end
