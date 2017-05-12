@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('certified', '1.0.0')
   s.add_runtime_dependency('dotenv', '~> 2.1.1')
   s.add_runtime_dependency('highline', '~> 1.7.8')
-  s.add_runtime_dependency('http-form_data', '~> 1.0.1')
+  s.add_runtime_dependency('http-form_data', '1.0.2')
   s.add_runtime_dependency('inifile', '~> 3.0')
   s.add_runtime_dependency('json-schema', '~> 2.7.0')
   s.add_runtime_dependency('mime-types', '~> 3.1')
