@@ -285,7 +285,7 @@ module MrMurano
         uri = endPoint()
         @uriparts = uriparts
 
-        file = HTTP::FormData::File.new(local.to_s, {:content_type=>'text/csv'})
+        file = HTTP::FormData::File.new(local.to_s, {:mime_type=>'text/csv'})
         form = HTTP::FormData.create(:identities=>file)
         req = Net::HTTP::Post.new(uri)
         set_def_headers(req)
