@@ -291,7 +291,7 @@ RSpec.describe MrMurano::Gateway::Device do
   context "writes state" do
     it "succeeds" do
       body = {:bob=>{:set=>"fuzz"}}
-      stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/56/state').
+      stub_request(:patch, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/56/state').
         with(:body=>body.to_json)
 
       @gw.write(56, :bob=>'fuzz')
@@ -299,7 +299,7 @@ RSpec.describe MrMurano::Gateway::Device do
 
     it "fails" do
       body = {:bob=>{:set=>"fuzz"}}
-      stub_request(:put, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/56/state').
+      stub_request(:patch, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identity/56/state').
         with(:body=>body.to_json).
         to_return(:status=> 400, :body => 'Value is not settable')
 
