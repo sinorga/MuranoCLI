@@ -339,9 +339,8 @@ module MrMurano
       # @param identifier [String] The identifier for the device to write.
       # @param values [Hash] Aliases and the values to write.
       def write(identifier, values)
-        wvalues = Hash[ values.map{|k,v| [k, {:set=>v}]} ]
-        debug "Will Write: #{wvalues}"
-        put("/#{identifier}/state", wvalues)
+        debug "Will Write: #{values}"
+        patch("/#{identifier}/state", values)
       end
 
       # Read the current state for a device
