@@ -251,7 +251,7 @@ module MrMurano
 
     def list
       ret = get()
-      # eventhandler.skiplist is a list of whitespace seperated dot-paired values.
+      # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] or '').split
       ret[:items].reject { |i|
