@@ -8,3 +8,6 @@ report/
 Gemfile.lock
 .bundle/
 
+# 2017-05-12: Testing!
+*.out
+
