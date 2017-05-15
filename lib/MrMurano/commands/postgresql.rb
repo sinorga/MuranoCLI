@@ -25,7 +25,7 @@ command :postgresql do |c|
   c.syntax = %{murano postgresql <SQL Commands>}
   c.summary = %{Query the relational database}
   c.description = %{Query the relational database
-  
+
   Queries can include $# escapes that are filled from the --param option.
   }
 
@@ -97,7 +97,7 @@ command 'postgresql migrate' do |c|
     # get current version of DB.
     ret = pg.queries %{
     CREATE TABLE IF NOT EXISTS __murano_cli_migrate__ (version integer);
-    SELECT version FROM __murano_cli_migrate__;
+    SELECT version FROM __murano_cli_migrate__ ORDER BY version DESC;
     }.gsub(/^\s+/,'')
     unless ret[:error].nil? then
       pp ret
