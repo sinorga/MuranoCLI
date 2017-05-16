@@ -28,7 +28,9 @@ module MrMurano
     ##
     # Get a list of all of the static content
     def list
-      get().map{|i| FileItem.new(i)}
+      ret = get()
+      return [] if ret.has_key? :error
+      ret.map{|i| FileItem.new(i)}
     end
 
     ##
