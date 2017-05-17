@@ -131,6 +131,7 @@ command 'postgresql migrate' do |c|
       end
     end
 
+    pg.debug "Migrations before: #{migrations}"
     # Select migrations between current and desired
     migrations.select! do |m|
       mvrs, _ = File.basename(m).split('-')
@@ -141,6 +142,7 @@ command 'postgresql migrate' do |c|
         mvrs > current_version and mvrs <= want_version
       end
     end
+    pg.debug "Migrations after: #{migrations}"
 
     # Run migrations.
     migrations.each do |m|
