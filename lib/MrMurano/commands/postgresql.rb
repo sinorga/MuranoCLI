@@ -33,6 +33,11 @@ command :postgresql do |c|
   c.option '-f', '--file FILE', %{File of SQL commands}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
+  c.example %{murano postgresql 'select * from bob'}, %{Run a SQL command}
+  c.example %{murano postgresql 'select * from prices' -c outformat=csv -o prices.csv}, %{Download all values in prices to a CSV file.}
+  c.example %{murano postgresql 'INSERT INTO prices (price, item) VALUES ($1,$2)' --param 1.24,Food}, %{Insert using parameters.}
+  c.example %{murano postgresql -f cmds.sql}, %{Run multiple commands from a file}
+
   c.action do |args,options|
     pg = MrMurano::Postgresql.new
     if options.file then
@@ -69,16 +74,20 @@ command 'postgresql migrate' do |c|
   c.syntax = %{murano postgresql migrate (up|down) <level>}
   c.summary = %{Run database migration scripts.
 
-
   The names of the script files must be in the "<level>-<name>-<up|down>.sql"
-  format.
+  format.  Each file is a series of Postgres SQL commands.
 
   The current version of the migrations (last <level> ran) will be stored in an
-  extra table in your database.  (__murano_cli_migrate__)
+  extra table in your database.  (__murano_cli__.migrate_version)
 
   }
 
   c.option '--dir DIR', %{Directory where migrations live}
+
+  c.example %{murano postgresql migrate up}, %{Run migrations up to largest version.}
+  c.example %{murano postgresql migrate up 2}, %{Run migrations up to version 2.}
+  c.example %{murano postgresql migrate down 1}, %{Run migrations down to version 1.}
+  c.example %{murano postgresql migrate down 0}, %{Run migrations down to version 0.}
 
   c.action do |args,options|
     options.default :dir => File.join($cfg['location.base'], 'sql-migrations')
