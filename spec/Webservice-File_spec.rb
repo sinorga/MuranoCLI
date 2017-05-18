@@ -7,6 +7,7 @@ RSpec.describe MrMurano::Webservice::File do
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
+    MrMurano::Http::initCurlfile $cfg
     $project = MrMurano::ProjectFile.new
     $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
@@ -127,6 +128,9 @@ RSpec.describe MrMurano::Webservice::File do
                         'Content-Type'=>%r{multipart/form-data; boundary=.*}},
             )
       $cfg['tool.curldebug'] = true
+      $cfg['tool.curlfile'] = ""
+      # We setup the curlfile output file already, so whack it.
+      MrMurano::Http::initCurlfile $cfg
       saved = $stdout
       $stdout = StringIO.new
       @srv.upload(@lp, {:path=>'/one.text'}, false)
