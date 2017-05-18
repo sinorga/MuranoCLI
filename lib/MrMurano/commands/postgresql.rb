@@ -96,8 +96,9 @@ command 'postgresql migrate' do |c|
 
     # get current version of DB.
     ret = pg.queries %{
-    CREATE TABLE IF NOT EXISTS __murano_cli_migrate__ (version integer);
-    SELECT version FROM __murano_cli_migrate__ ORDER BY version DESC;
+    CREATE SCHEMA IF NOT EXISTS __murano_cli__;
+    CREATE TABLE IF NOT EXISTS __murano_cli__.migrate_version (version integer);
+    SELECT version FROM __murano_cli__.migrate_version ORDER BY version DESC;
     }.gsub(/^\s+/,'')
     unless ret[:error].nil? then
       pp ret
@@ -158,10 +159,10 @@ command 'postgresql migrate' do |c|
           exit 5
         else
           if direction == 'down' then
-            pg.queries %{DELETE FROM __murano_cli_migrate__ WHERE version = #{mvrs};
+            pg.queries %{DELETE FROM __murano_cli__.migrate_version WHERE version = #{mvrs};
               COMMIT;}.gsub(/^\s+/,'')
           else
-            pg.queries %{INSERT INTO __murano_cli_migrate__ values (#{mvrs});
+            pg.queries %{INSERT INTO __murano_cli__.migrate_version values (#{mvrs});
               COMMIT;}.gsub(/^\s+/,'')
           end
         end
