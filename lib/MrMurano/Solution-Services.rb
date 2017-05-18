@@ -252,6 +252,7 @@ module MrMurano
 
     def list
       ret = get()
+      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
       # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] or '').split
