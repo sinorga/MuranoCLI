@@ -6,6 +6,7 @@ require '_workspace'
 RSpec.describe MrMurano::SC_Device do
   include_context "WORKSPACE"
   before(:example) do
+    MrMurano::SyncRoot.reset
     $cfg = MrMurano::Config.new
     $cfg.load
     $project = MrMurano::ProjectFile.new
