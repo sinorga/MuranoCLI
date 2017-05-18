@@ -1,5 +1,16 @@
 require 'MrMurano/Account'
 
+command :business do |c|
+  c.syntax = %{murano business}
+  c.summary = %{About business}
+  c.description = %{Sub-commands for working with businesses}
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
 command 'business list' do |c|
   c.syntax = %{murano business list [options]}
   c.description = %{List businesses}
