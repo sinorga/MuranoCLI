@@ -1,6 +1,7 @@
 require 'uri'
 require 'cgi'
 require 'net/http'
+require 'mime/types'
 require 'digest'
 require 'http/form_data'
 require 'MrMurano/Config'
