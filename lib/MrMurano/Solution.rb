@@ -7,9 +7,13 @@ require 'MrMurano/SyncUpDown'
 module MrMurano
   class SolutionBase
     def initialize
-      @sid = $cfg['application.id']
-      @sid = $cfg['solution.id'] if @sid.nil?
-      raise "No application id!" if @sid.nil?
+      if @solntype.nil?
+        @solntype = 'application.id'
+      end
+      # Get the application.id or product.id.
+      @sid = $cfg[@solntype]
+      # Maybe raise "No application!" or "No product!".
+      raise MrMurano::ConfigError.new("No #{/(.*).id/.match(@solntype)[1]}!") if @sid.nil?
       @uriparts = [:solution, @sid]
       @itemkey = :id
       @project_section = nil
