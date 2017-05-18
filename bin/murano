@@ -82,6 +82,6 @@ if not ARGV.include? '--skip-plugins' then
 end
 
 # To capture curl calls running rspec, write to a file.
-MrMurano::Http::initCurlfile
+MrMurano::Http::initCurlfile $cfg
 
 #  vim: set ai et sw=2 ts=2 :
