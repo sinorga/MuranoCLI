@@ -90,7 +90,7 @@ command 'postgresql migrate' do |c|
   c.example %{murano postgresql migrate down 0}, %{Run migrations down to version 0.}
 
   c.action do |args,options|
-    options.default :dir => File.join($cfg['location.base'], 'sql-migrations')
+    options.default :dir => File.join($cfg['location.base'], $cfg['postgresql.migrations_dir'])
 
     direction = args.shift
     if direction =~ /down/i then
