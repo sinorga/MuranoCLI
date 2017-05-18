@@ -3,7 +3,7 @@ require 'open3'
 require 'pathname'
 require 'cmd_common'
 
-RSpec.describe 'mr init', :cmd do
+RSpec.describe 'murano init', :cmd do
   include_context "CI_CMD"
 
   it "Won't init in HOME (gracefully)" do
