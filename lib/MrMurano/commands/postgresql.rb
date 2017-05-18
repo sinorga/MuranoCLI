@@ -72,7 +72,8 @@ end
 
 command 'postgresql migrate' do |c|
   c.syntax = %{murano postgresql migrate (up|down) <level>}
-  c.summary = %{Run database migration scripts.
+  c.summary = %{Run database migration scripts.}
+  c.description = %{Run database migration scripts.
 
   The names of the script files must be in the "<level>-<name>-<up|down>.sql"
   format.  Each file is a series of Postgres SQL commands.
