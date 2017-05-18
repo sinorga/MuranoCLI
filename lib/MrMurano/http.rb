@@ -56,13 +56,16 @@ module MrMurano
 
     ## Open a file for capturing curl calls.
     # Start with the current time and config.
-    def self.initCurlfile
-      if $cfg['tool.curldebug'] and $cfg['tool.curlfile'] then
+    def self.initCurlfile(cfg)
+      if cfg['tool.curldebug'] and !cfg['tool.curlfile'].to_s.strip.empty? then
         unless defined?(@@curlfile)
-          @@curlfile = File.open($cfg['tool.curlfile'], 'a')
+          @@curlfile = File.open(cfg['tool.curlfile'], 'a')
           @@curlfile << Time.now << "\n"
           @@curlfile << "murano #{ARGV.join(' ')}\n"
         end
+      elsif defined?(@@curlfile)
+        @@curlfile.close
+        remove_class_variable(:@@curlfile)
       end
     end
 
