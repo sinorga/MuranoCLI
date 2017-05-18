@@ -53,7 +53,7 @@ $project.load
 # Basic command support is:
 # - read/write config file in [Project, User, System] (all are optional)
 # - TODO: Introspection for tab completion.
-# - TODO: Look for tools in PATH that are +x and "mr-foo..."
+# - TODO: Look for tools in PATH that are +x and "murano-foo..."
 
 
 # Look for plug-ins
