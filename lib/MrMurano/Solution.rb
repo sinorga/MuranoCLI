@@ -33,6 +33,15 @@ module MrMurano
     end
     # …
 
+    def get(*args)
+      ret = super
+      if ret.nil?
+        warning "No solution with ID: #{@sid}"
+        exit 1
+      end
+      ret
+    end
+
     include SyncUpDown
   end
 
