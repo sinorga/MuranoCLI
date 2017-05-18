@@ -191,7 +191,7 @@ module MrMurano
 
     def list
       ret = get()
-      return [] unless ret.has_key? :items
+      return [] unless !ret.nil? and ret.has_key? :items
       ret[:items].map{|i| LibraryItem.new(i)}
     end
 
