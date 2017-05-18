@@ -14,7 +14,7 @@ module MrMurano
     class Base
       def initialize
         @pid = $cfg['project.id']
-        raise "No project id!" if @pid.nil?
+        raise MrMurano::ConfigError.new("No project id!") if @pid.nil?
         @uriparts = [:service, @pid, :device2]
         @itemkey = :id
       end
