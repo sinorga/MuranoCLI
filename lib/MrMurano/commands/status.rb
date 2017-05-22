@@ -77,6 +77,16 @@ command :status do |c|
           end
         end
       else
+        # A hack to add the pp_type for pretty().
+        [:toadd, :todel, :tomod, :unchg].each do |kind|
+          newarr = []
+          ret[kind].each do |item|
+            item = item.to_h
+            item[:pp_type] = type
+            newarr << item
+          end
+          ret[kind] = newarr
+        end
         pretty(ret, options)
       end
     end
