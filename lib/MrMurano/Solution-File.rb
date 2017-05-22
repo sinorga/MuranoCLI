@@ -29,7 +29,7 @@ module MrMurano
     # Get a list of all of the static content
     def list
       ret = get()
-      return [] if ret.has_key? :error
+      return [] if ret.is_a? Hash and ret.has_key? :error
       ret.map{|i| FileItem.new(i)}
     end
 
