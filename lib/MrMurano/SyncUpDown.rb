@@ -526,7 +526,7 @@ module MrMurano
     # This creates, uploads, and deletes things as needed up in Murano to match
     # what is in the local project directory.
     #
-    # @param options [Hash, Commander::Command::Options] Options on opertation
+    # @param options [Hash, Commander::Command::Options] Options on operation
     # @param selected [Array<String>] Filters for _matcher
     def syncup(options={}, selected=[])
       options = elevate_hash(options)
