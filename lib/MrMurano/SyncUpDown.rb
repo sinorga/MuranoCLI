@@ -658,7 +658,7 @@ module MrMurano
 
     ## Get status of things here verses there
     #
-    # @param options [Hash, Commander::Command::Options] Options on opertation
+    # @param options [Hash, Commander::Command::Options] Options on operation
     # @param selected [Array<String>] Filters for _matcher
     # @return [Hash{Symbol=>Array<Item>}] Items grouped by the action that should be taken
     def status(options={}, selected=[])
