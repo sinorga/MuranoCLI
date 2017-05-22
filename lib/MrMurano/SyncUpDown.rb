@@ -694,7 +694,7 @@ module MrMurano
         mrg = herebox[key].reject{|k,v| k==itemkey}
         mrg = therebox[key].merge(mrg)
         if docmp(herebox[key], therebox[key]) then
-          mrg[:diff] = dodiff(mrg) if options[:diff] and mrg[:selected]
+          mrg[:diff] = dodiff(mrg.to_h) if options[:diff] and mrg[:selected]
           tomod << mrg
         else
           unchg << mrg
