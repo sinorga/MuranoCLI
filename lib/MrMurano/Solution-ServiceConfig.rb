@@ -11,7 +11,7 @@ module MrMurano
 
     def list
       ret = get()
-      return [] unless ret.has_key? :items
+      return [] if ret.is_a? Hash and ret.has_key? :error
       ret[:items]
     end
     def fetch(id)
@@ -87,7 +87,7 @@ module MrMurano
 
     def list
       ret = get()
-      return [] unless ret.has_key? :items
+      return [] if ret.is_a? Hash and ret.has_key? :error
       ret[:items]
     end
 
