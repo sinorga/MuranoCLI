@@ -140,7 +140,11 @@ module MrMurano
       end
 
       def syncup_after()
-        upload_all(@there)
+        unless @there.empty?
+          upload_all(@there)
+        else
+          error "Nothing to sync"
+        end
         @there = nil
       end
 
