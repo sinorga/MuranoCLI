@@ -219,7 +219,10 @@ module MrMurano
       raise "Missing Business ID" if $cfg['business.id'].nil?
       type = type.to_sym
       raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
-      raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
+      # MUR-2454: Dashes no longer allowed in sol'n name
+      #   (so more restrictive than domain name format).
+      #raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
+      raise MrMurano::ConfigError.new("Solution name must contain only letters and/or numbers") unless name.match(/^[a-zA-Z0-9]{0,62}$/)
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
     end
 
