@@ -44,8 +44,9 @@ command 'solution create' do |c|
       i[:name] == name or i[:domain] =~ /#{name}\./i
     end
     pid = ret.first[:apiId]
+    pid = (ret.first or {})[:apiId]
     if pid.nil? or pid.empty? then
-      acc.error "Didn't find an apiId!!!!  #{ret}"
+      acc.error "Didn't find an apiId!!!! #{name} -> #{ret} "
       exit 3
     end
     if options.save then
