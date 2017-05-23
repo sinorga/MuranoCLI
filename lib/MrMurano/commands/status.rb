@@ -69,25 +69,21 @@ command :status do |c|
     @grouped = {:toadd=>[],:todel=>[],:tomod=>[], :unchg=>[]}
     def gmerge(ret, type, options)
       if options.grouped then
-        [:toadd, :todel, :tomod, :unchg].each do |kind|
-          ret[kind].each do |item|
-            item = item.to_h
-            item[:pp_type] = type
-            @grouped[kind] << item
-          end
-        end
+        out = @grouped
       else
-        # A hack to add the pp_type for pretty().
-        [:toadd, :todel, :tomod, :unchg].each do |kind|
-          newarr = []
-          ret[kind].each do |item|
-            item = item.to_h
-            item[:pp_type] = type
-            newarr << item
-          end
-          ret[kind] = newarr
+        out = {:toadd=>[],:todel=>[],:tomod=>[], :unchg=>[]}
+      end
+
+      [:toadd, :todel, :tomod, :unchg].each do |kind|
+        ret[kind].each do |item|
+          item = item.to_h
+          item[:pp_type] = type
+          out[kind] << item
         end
-        pretty(ret, options)
+      end
+
+      unless options.grouped then
+        pretty(out, options)
       end
     end
 
