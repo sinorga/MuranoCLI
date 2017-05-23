@@ -63,7 +63,7 @@ command :init do |c|
     if not options.force and not $cfg['solution.id'].nil? then
       say "Using Solution ID already set to #{$cfg['solution.id']}"
     else
-      solz = acc.solutions
+      solz = acc.solutions.select{|s| s[:type] == 'dataApi'}
       if solz.count == 1 then
         sol = solz.first
         say "You only have one solution; using #{sol[:domain]}"
@@ -83,10 +83,12 @@ command :init do |c|
         end
 
         # create doesn't return anything, so we need to go look for it.
-        ret = acc.solutions.select{|i| i[:domain] =~ /#{solname}\./}
-        sid = ret.first[:apiId]
+        ret = acc.solutions.select do |i|
+          i[:type] == 'dataApi' and (i[:name] == solname or i[:domain] =~ /#{solname}\./i)
+        end
+        sid = (ret.first or {})[:apiId]
         if sid.nil? or sid.empty? then
-          acc.error "Solution didn't find an apiId!!!!  #{ret}"
+          acc.error "Solution didn't find an apiId!!!! #{name} -> #{ret}"
           exit 3
         end
         $cfg.set('solution.id', sid, :project)
