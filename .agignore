@@ -11,3 +11,5 @@ Gemfile.lock
 # 2017-05-12: Testing!
 *.out
 
+rspec-*.html
+
