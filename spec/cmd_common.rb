@@ -36,7 +36,11 @@ RSpec.shared_context "CI_CMD" do
   end
 
   def rname(name)
-    "#{name}#{Random.new.rand.hash.abs.to_s(16)}"
+    #"#{name}-#{Random.new.rand.hash.abs.to_s(16)}"
+    # MUR-2454: Product name may only contain letters and numbers.
+    #"#{name}#{Random.new.rand.hash.abs.to_s(16)}"
+    # MUR-XXXX: Product name must be same as business ID??
+    $cfg['business.id']
   end
 
   around(:example) do |ex|
