@@ -1,3 +1,4 @@
+require 'MrMurano/Config'
 require 'pathname'
 require 'shellwords'
 require 'timeout'
@@ -41,6 +42,11 @@ RSpec.shared_context "CI_CMD" do
     #"#{name}#{Random.new.rand.hash.abs.to_s(16)}"
     # MUR-XXXX: Product name must be same as business ID??
     $cfg['business.id']
+  end
+
+  before(:example) do
+    $cfg = MrMurano::Config.new
+    $cfg.load
   end
 
   around(:example) do |ex|
