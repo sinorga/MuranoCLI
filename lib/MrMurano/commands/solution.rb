@@ -39,8 +39,8 @@ command 'solution create' do |c|
     end
 
     # create doesn't return anything, so we need to go look for it.
-    ret = acc.solutions.select do |i|
-      i[:type] == 'dataApi' and (i[:name] == name or i[:domain] =~ /#{name}\./i)
+    ret = acc.solutions(options.type).select do |i|
+      i[:type] == 'product' and (i[:name] == name or i[:domain] =~ /#{name}\./i)
     end
     pid = (ret.first or {})[:apiId]
     if pid.nil? or pid.empty? then

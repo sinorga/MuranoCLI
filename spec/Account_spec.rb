@@ -204,12 +204,12 @@ RSpec.describe MrMurano::Account do
 
   it "lists solutions" do
     sollist = [{"bizid"=>"XYZxyz",
-                "type"=>"dataApi",
+                "type"=>"product",
                 "domain"=>"two.apps.exosite.io",
                 "apiId"=>"abc",
                 "sid"=>"def"},
                {"bizid"=>"XYZxyz",
-                "type"=>"dataApi",
+                "type"=>"product",
                 "domain"=>"one.apps.exosite.io",
                 "apiId"=>"ghi",
                 "sid"=>"jkl"}]
@@ -222,13 +222,13 @@ RSpec.describe MrMurano::Account do
 
   it "lists solutions; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect(@acc).to receive(:debug).with("Getting all solutions of type dataApi")
+    expect(@acc).to receive(:debug).with("Getting all solutions of type product")
     expect { @acc.solutions }.to raise_error("Missing Business ID")
   end
 
   it "creates solution" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'one', :type=>'dataApi'}).
+      with(:body => {:label=>'one', :type=>'product'}).
       to_return(body: "" )
 
     ret = @acc.new_solution("one")
@@ -237,7 +237,7 @@ RSpec.describe MrMurano::Account do
 
   it "creates solution; with upper case" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'ONe', :type=>'dataApi'}).
+      with(:body => {:label=>'ONe', :type=>'product'}).
       to_return(body: "" )
 
     expect { @acc.new_solution("ONe") }.to_not raise_error
@@ -245,7 +245,7 @@ RSpec.describe MrMurano::Account do
 
   it "creates solution; with numbers and dashes" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'ONe-8796-gkl', :type=>'dataApi'}).
+      with(:body => {:label=>'ONe-8796-gkl', :type=>'product'}).
       to_return(body: "" )
 
     expect { @acc.new_solution("ONe-8796-gkl") }.to_not raise_error

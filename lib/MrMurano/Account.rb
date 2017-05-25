@@ -202,9 +202,10 @@ module MrMurano
     end
 
     #------------------------------------------------------------------------
-    ALLOWED_TYPES = [:domain,:onepApi,:dataApi,:application,:product].freeze
+    #ALLOWED_TYPES = [:domain,:onepApi,:dataApi,:application,:product].freeze
+    ALLOWED_TYPES = [:application,:product].freeze
 
-    def solutions(type=:dataApi)
+    def solutions(type=:product)
       debug "Getting all solutions of type #{type}"
       raise "Missing Business ID" if $cfg['business.id'].nil?
       type = type.to_sym
@@ -215,7 +216,7 @@ module MrMurano
     end
 
     ## Create a new solution in the current business
-    def new_solution(name, type=:dataApi)
+    def new_solution(name, type=:product)
       raise "Missing Business ID" if $cfg['business.id'].nil?
       type = type.to_sym
       raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
