@@ -84,7 +84,8 @@ command :init do |c|
 
         # create doesn't return anything, so we need to go look for it.
         ret = acc.solutions.select do |i|
-          i[:type] == 'dataApi' and (i[:name] == solname or i[:domain] =~ /#{solname}\./i)
+#          i[:type] == 'dataApi' and (i[:name] == solname or i[:domain] =~ /#{solname}\./i)
+          i[:type] == 'product' and (i[:name] == solname or i[:domain] =~ /#{solname}\./i)
         end
         sid = (ret.first or {})[:apiId]
         if sid.nil? or sid.empty? then
