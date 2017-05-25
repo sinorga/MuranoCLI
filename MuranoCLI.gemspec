@@ -22,6 +22,18 @@ Gem::Specification.new do |s|
   }
   s.required_ruby_version = '~> 2.0'
 
+  # FIXME: 2017-05-25: Remove this message eventually.
+  s.post_install_message = %{
+MuranoCLI v3.0 introduces backwards-incompatible changes.
+
+If your business was created with MuranoCLI v2.x, you will
+want to continue using the old gem, which you can run by
+explicitly specifying the version. For instance,
+
+  murano _2.2.3_ --help
+
+}
+
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
@@ -47,5 +59,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency('webmock', '~> 2.1.0')
   # maybe? s.add_development_dependency('vcr', '~> ???')
 end
-
 
