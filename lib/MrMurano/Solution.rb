@@ -7,10 +7,9 @@ require 'MrMurano/SyncUpDown'
 module MrMurano
   class SolutionBase
     def initialize
-      @sid = $cfg['project.id']
-#      @sid = $cfg['solution.id']
-      raise "No solution!" if @sid.nil?
-#      @uriparts = [:project, @sid]
+      @sid = $cfg['application.id']
+      @sid = $cfg['solution.id'] if @sid.nil?
+      raise "No application id!" if @sid.nil?
       @uriparts = [:solution, @sid]
       @itemkey = :id
       @project_section = nil
