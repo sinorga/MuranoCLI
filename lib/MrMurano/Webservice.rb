@@ -12,7 +12,9 @@ module MrMurano
       def initialize
         @pid = $cfg['project.id']
         raise MrMurano::ConfigError.new("No project id!") if @pid.nil?
-        @uriparts = [:service, @pid, :webservice]
+        # FIXME/2017-05-26/MRMUR-XXXX: Changed back to old endpoint.
+        #@uriparts = [:service, @pid, :webservice]
+        @uriparts = [:solution, @pid]
         @itemkey = :id
         @locationbase = $cfg['location.base']
         @location = nil
