@@ -53,7 +53,7 @@ command :status do |c|
     def pretty(ret, options)
       say "Adding:" if options.grouped
       ret[:toadd].each{|item| say " + #{item[:pp_type]}  #{fmtr(item)}"}
-      say "Deleteing:" if options.grouped
+      say "Deleting:" if options.grouped
       ret[:todel].each{|item| say " - #{item[:pp_type]}  #{fmtr(item)}"}
       say "Changing:" if options.grouped
       ret[:tomod].each{|item|
