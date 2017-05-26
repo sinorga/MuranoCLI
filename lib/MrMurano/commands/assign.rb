@@ -1,6 +1,5 @@
 require 'MrMurano/Account'
 require 'MrMurano/Solution-ServiceConfig'
-require 'terminal-table'
 
 command 'link list' do |c|
   c.syntax = 'murano link list [options]'
