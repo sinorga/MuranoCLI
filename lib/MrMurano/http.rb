@@ -44,12 +44,12 @@ module MrMurano
             a << %{-d '#{request.body}'}
           end
         end
-        unless defined?(@@curlfile)
+        unless defined?($cfg['tool.curlfile_f'])
           puts a.join(' ')
         else
-          @@curlfile << a.join(' ') + "\n\n"
-          @@curlfile.flush
-          # MEH: Call @@curlfile.close() at some point?
+          $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
+          $cfg['tool.curlfile_f'].flush
+          # MEH: Call $cfg['tool.curlfile_f'].close() at some point?
         end
       end
     end
@@ -58,14 +58,14 @@ module MrMurano
     # Start with the current time and config.
     def self.initCurlfile(cfg)
       if cfg['tool.curldebug'] and !cfg['tool.curlfile'].to_s.strip.empty? then
-        unless defined?(@@curlfile)
-          @@curlfile = File.open(cfg['tool.curlfile'], 'a')
-          @@curlfile << Time.now << "\n"
-          @@curlfile << "murano #{ARGV.join(' ')}\n"
+        unless defined?($cfg['tool.curlfile_f'])
+          $cfg['tool.curlfile_f'] = File.open(cfg['tool.curlfile'], 'a')
+          $cfg['tool.curlfile_f'] << Time.now << "\n"
+          $cfg['tool.curlfile_f'] << "murano #{ARGV.join(' ')}\n"
         end
-      elsif defined?(@@curlfile)
-        @@curlfile.close
-        remove_class_variable(:@@curlfile)
+      elsif defined?($cfg['tool.curlfile_f'])
+        $cfg['tool.curlfile_f'].close
+        remove_class_variable(:$cfg['tool.curlfile_f'])
       end
     end
 
