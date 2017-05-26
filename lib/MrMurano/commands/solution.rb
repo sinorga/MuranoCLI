@@ -55,8 +55,8 @@ command 'solution create' do |c|
   end
 end
 alias_command 'product create', 'solution create','--type','product'
-alias_command 'project create', 'solution create','--type','product'
 alias_command 'app create', 'solution create','--type','application'
+alias_command 'application create', 'solution create','--type','application'
 
 command 'solution delete' do |c|
   c.syntax = %{murano solution delete <id>}
@@ -90,8 +90,8 @@ command 'solution delete' do |c|
   end
 end
 alias_command 'product delete', 'solution delete'
-alias_command 'project delete', 'solution delete'
 alias_command 'app delete', 'solution delete'
+alias_command 'application delete', 'solution delete'
 
 command 'solution list' do |c|
   c.syntax = %{murano solution list [options]}
@@ -137,7 +137,7 @@ command 'solution list' do |c|
   end
 end
 alias_command 'product list', 'solution list', '--type', 'product', '--no-all'
-alias_command 'project list', 'solution list', '--type', 'product', '--no-all'
 alias_command 'app list', 'solution list', '--type', 'application', '--no-all'
+alias_command 'application list', 'solution list', '--type', 'application', '--no-all'
 
 #  vim: set ai et sw=2 ts=2 :
