@@ -47,7 +47,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
         a_string_matching(/ \+ S  .*files\/icon\.png/),
         a_string_matching(/ \+ S  .*files\/index\.html/),
       )
-      expect(olines[9]).to eq("Deleteing:\n")
+      expect(olines[9]).to eq("Deleting:\n")
       expect(olines[10..10]).to contain_exactly(
         " - E  user_account\n",
         #" - E  gateway_disconnect\n",
@@ -67,7 +67,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(out.lines).to match([
         "Adding:\n",
         a_string_matching(/ \+ S  .*files\/icon\.png/),
-        "Deleteing:\n",
+        "Deleting:\n",
         "Changing:\n",
       ])
       expect(status.exitstatus).to eq(0)
@@ -79,7 +79,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(out.lines).to match([
         "Adding:\n",
         a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/),
-        "Deleteing:\n",
+        "Deleting:\n",
         "Changing:\n",
       ])
       expect(status.exitstatus).to eq(0)
@@ -110,7 +110,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
         a_string_matching(/ \+ S  .*files\/icon\.png/),
         a_string_matching(/ \+ S  .*files\/index\.html/),
       )
-      expect(olines[9]).to eq("Deleteing:\n")
+      expect(olines[9]).to eq("Deleting:\n")
       expect(olines[10..10]).to include(
         " - E  user_account\n",
         #" - E  gateway_connect\n",
@@ -164,7 +164,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
         a_string_matching(/ \+ S  .*files\/index\.html/),
         a_string_matching(/ \+ S  .*files\/js\/script\.js/),
       )
-      expect(olines[8]).to eq("Deleteing:\n")
+      expect(olines[8]).to eq("Deleting:\n")
       expect(olines[9..10]).to contain_exactly(
         " - E  user_account\n",
         " - E  timer_timer\n",
@@ -218,7 +218,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
         a_string_matching(/ \+ S  .*files\/icon\.png/),
         a_string_matching(/ \+ S  .*files\/index\.html/),
       )
-      expect(olines[8]).to eq("Deleteing:\n")
+      expect(olines[8]).to eq("Deleting:\n")
       expect(olines[9..10]).to contain_exactly(
         " - E  timer_timer\n",
         " - E  user_account\n",
