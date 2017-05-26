@@ -17,6 +17,7 @@ command 'solution create' do |c|
   c.summary = %{Create a new solution}
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES, %{What type of solution to create. (default: product)}
   c.option '--save', %{Save new solution id to config}
+  c.option '--section SECTION', String, %{Which section in config to save id to}
 
   c.action do |args, options|
     options.default :type => :product
@@ -48,7 +49,9 @@ command 'solution create' do |c|
       exit 3
     end
     if options.save then
-      $cfg.set('project.id', pid)
+      section = options.type.to_s
+      section = options.section.to_s unless options.section.nil?
+      $cfg.set("#{section}.id", pid)
     end
     acc.outf pid
 
