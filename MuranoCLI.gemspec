@@ -30,7 +30,7 @@ If your business was created with MuranoCLI v2.x, you will
 want to continue using the old gem, which you can run by
 explicitly specifying the version. For instance,
 
-  murano _2.2.3_ --help
+  murano _2.2.4_ --help
 
 }
 
