@@ -39,7 +39,9 @@ command 'solution create' do |c|
     end
 
     # create doesn't return anything, so we need to go look for it.
-    ret = acc.solutions(options.type).select{|i| i[:domain] =~ /#{name}\./}
+    ret = acc.solutions(options.type).select do |i|
+      i[:name] == name or i[:domain] =~ /#{name}\./i
+    end
     pid = ret.first[:apiId]
     if pid.nil? or pid.empty? then
       acc.error "Didn't find an apiId!!!!  #{ret}"
@@ -70,7 +72,7 @@ command 'solution delete' do |c|
     name = args[0]
 
     # Need to convert what we got into the internal PID.
-    ret = acc.solutions(:all).select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
+    ret = acc.solutions(:all).select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./i }
 
     if $cfg['tool.debug'] then
       say "Matches found:"
@@ -87,9 +89,9 @@ command 'solution delete' do |c|
     end
   end
 end
-alias_command 'product delete', 'solution delete','--type','product'
-alias_command 'project delete', 'solution delete','--type','product'
-alias_command 'app delete', 'solution delete','--type','application'
+alias_command 'product delete', 'solution delete'
+alias_command 'project delete', 'solution delete'
+alias_command 'app delete', 'solution delete'
 
 command 'solution list' do |c|
   c.syntax = %{murano solution list [options]}
