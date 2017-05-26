@@ -12,4 +12,5 @@ Gemfile.lock
 *.out
 
 rspec-*.html
+*.rspec.html
 
