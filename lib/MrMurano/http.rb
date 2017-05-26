@@ -110,9 +110,11 @@ module MrMurano
       if isj then
         if $cfg['tool.fullerror'] then
           resp << JSON.pretty_generate(jsn)
-        else
+        elsif jsn.kind_of? Hash then
           resp << "[#{jsn[:statusCode]}] " if jsn.has_key? :statusCode
           resp << jsn[:message] if jsn.has_key? :message
+        else
+          resp << jsn.to_s
         end
       else
         resp << (jsn or 'nil')
