@@ -15,11 +15,15 @@ RSpec.describe MrMurano::Webservice::File do
 
     @srv = MrMurano::Webservice::File.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
+
+    # FIXME/2017-05-26/MRMUR-XXXX: Changed back to old endpoint.
+    #@baseURI = "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file"
+    @baseURI = "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/file"
   end
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/")
+    expect(uri.to_s).to eq("#{@baseURI}/")
   end
 
   it "lists" do
@@ -34,7 +38,7 @@ RSpec.describe MrMurano::Webservice::File do
        :mime_type=>"text/html",
        :checksum=>"82e12125c2f1324bbf7bd64bf187f3334416117e"}
     ]
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file").
+    stub_request(:get, @baseURI).
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
                       to_return(body: body.to_json)
@@ -44,7 +48,7 @@ RSpec.describe MrMurano::Webservice::File do
   end
 
   it "removes" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/index.html").
+    stub_request(:delete, "#{@baseURI}/index.html").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
                       to_return(status: 200)
@@ -54,7 +58,7 @@ RSpec.describe MrMurano::Webservice::File do
 
   context "fetches" do
     it "gets an error" do
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/bob").
+      stub_request(:get, "#{@baseURI}/bob").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 404, body: "nope")
@@ -67,7 +71,7 @@ RSpec.describe MrMurano::Webservice::File do
     end
 
     it "gets $stdout" do
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/bob").
+      stub_request(:get, "#{@baseURI}/bob").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 200, body: "nope")
@@ -80,7 +84,7 @@ RSpec.describe MrMurano::Webservice::File do
     end
 
     it "gets to block" do
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file/bob").
+      stub_request(:get, "#{@baseURI}/bob").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 200, body: "nope")
@@ -100,7 +104,7 @@ RSpec.describe MrMurano::Webservice::File do
     end
 
     it "an item" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/fileupload/one.text").
+      stub_request(:put, "#{@baseURI}upload/one.text").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>%r{multipart/form-data; boundary=.*}},
             )
@@ -109,7 +113,7 @@ RSpec.describe MrMurano::Webservice::File do
     end
 
     it "gets an error" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/fileupload/one.text").
+      stub_request(:put, "#{@baseURI}upload/one.text").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>%r{multipart/form-data; boundary=.*}},
             ).
@@ -123,7 +127,7 @@ RSpec.describe MrMurano::Webservice::File do
     end
 
     it "an item with curl debug" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/fileupload/one.text").
+      stub_request(:put, "#{@baseURI}upload/one.text").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>%r{multipart/form-data; boundary=.*}},
             )
