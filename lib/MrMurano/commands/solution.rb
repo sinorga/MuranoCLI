@@ -43,7 +43,6 @@ command 'solution create' do |c|
     ret = acc.solutions(options.type).select do |i|
       i[:name] == name or i[:domain] =~ /#{name}\./i
     end
-    pid = ret.first[:apiId]
     pid = (ret.first or {})[:apiId]
     if pid.nil? or pid.empty? then
       acc.error "Didn't find an apiId!!!! #{name} -> #{ret} "
