@@ -28,6 +28,19 @@ module MrMurano
       @scid = scid_for_name(@serviceName)
     end
 
+    def create(pid, name=nil)  #? script_key?
+      name = pid if name.nil?
+      post('', {
+        :solution_id => @sid,
+        :service => pid,
+        :name => name,
+      })
+    end
+
+    def remove(id)
+      delete("/#{id}")
+    end
+
     def info(id=scid)
       get("/#{id}/info")
     end
@@ -113,30 +126,6 @@ module MrMurano
   end
   # :nocov:
 
-  # Device config interface for the assign commands.
-  class SC_Device < ServiceConfig
-    def initialize
-      super
-      @serviceName = 'device'
-    end
-
-    def assignTriggers(products)
-      details = fetch(scid)
-      products = [products] unless products.kind_of? Array
-      details[:triggers] = {:pid=>products}
-      details[:parameters] = {:pid=>products}
-
-      put('/'+scid, details)
-    end
-
-    def showTriggers
-      details = fetch(scid)
-
-      return [] if details[:triggers].nil?
-      details[:triggers][:pid]
-    end
-
-  end
 end
 
 #  vim: set ai et sw=2 ts=2 :
