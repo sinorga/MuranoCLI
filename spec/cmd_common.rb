@@ -36,7 +36,7 @@ RSpec.shared_context "CI_CMD" do
   end
 
   def rname(name)
-    "#{name}-#{Random.new.rand.hash.abs.to_s(16)}"
+    "#{name}#{Random.new.rand.hash.abs.to_s(16)}"
   end
 
   around(:example) do |ex|
