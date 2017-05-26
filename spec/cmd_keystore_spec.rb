@@ -9,7 +9,7 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
 
   before(:example) do
     @project_name = rname('keystoreTest')
-    out, err, status = Open3.capture3(capcmd('murano', 'project', 'create', @project_name, '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @project_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
