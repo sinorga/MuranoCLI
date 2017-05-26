@@ -34,7 +34,7 @@ running `murano init`.
 Now do stuff, see what changed: `murano status` or `murano diff`.
 Then deploy with `murano syncup`
 
-### To start a brand new project
+### To start a brand new project step-by-step
 There are a few steps and pieces to getting a solution with a product up and
 running in Murano. Here is the list.
 
