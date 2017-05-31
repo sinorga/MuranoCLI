@@ -28,7 +28,7 @@ RSpec.describe 'murano cors', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "sets cors" do
+  it "sets CORS" do
     File.open('cors.yaml', 'wb') do |io|
       io << {:origin=>['http://localhost:*']}.to_json
     end
