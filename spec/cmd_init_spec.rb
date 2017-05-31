@@ -22,8 +22,8 @@ RSpec.describe 'murano init', :cmd do
       # Doing this in a context with before&after so that after runs even when test
       # fails.
       before(:example) do
-        @project_name = rname('initEmpty')
-        out, err, status = Open3.capture3(capcmd('murano', 'project', 'create', @project_name, '--save'))
+        @product_name = rname('initEmpty')
+        out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
         expect(err).to eq('')
         expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
         expect(status.exitstatus).to eq(0)
@@ -32,7 +32,7 @@ RSpec.describe 'murano init', :cmd do
         FileUtils.remove_entry('.murano')
       end
       after(:example) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -70,10 +70,10 @@ RSpec.describe 'murano init', :cmd do
 
     context "without", :needs_password do
       before(:example) do
-        @project_name = rname('initCreating')
+        @product_name = rname('initCreating')
       end
       after(:example) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -84,7 +84,7 @@ RSpec.describe 'murano init', :cmd do
         # It will ask to create a solution and product.
         # !!!! the 8 is hardcoded indention here !!!!
         data = <<-EOT.gsub(/^ {8}/, '')
-        #{@project_name}
+        #{@product_name}
         EOT
         out, err, status = Open3.capture3(capcmd('murano', 'init'), :stdin_data=>data)
         expect(out.lines).to match_array([
@@ -119,15 +119,15 @@ RSpec.describe 'murano init', :cmd do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
       FileUtils.move('assets','files')
 
-      @project_name = rname('initEmpty')
-      out, err, status = Open3.capture3(capcmd('murano', 'project', 'create', @project_name, '--save'))
+      @product_name = rname('initEmpty')
+      out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
       expect(err).to eq('')
       expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
       expect(status.exitstatus).to eq(0)
     end
     after(:example) do
       Dir.chdir(ENV['HOME']) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
