@@ -243,8 +243,7 @@ RSpec.describe MrMurano::Content::Base do
       $stdout = StringIO.new
 
       $cfg['tool.curldebug'] = true
-      $cfg['tool.curlfile'] = ""
-      MrMurano::Http::initCurlfile $cfg
+      $cfg['tool']['curlfile_f'] = nil
       @ct.upload('Solutionfile.json', @tup.to_path)
       expect($stdout.string).to match(%r{curl -s -H 'Authorization: token TTTTTTTTTT' -H 'User-Agent: MrMurano/[^']+' -H 'Content-Type: application/json' -X GET 'https://bizapi\.hosted\.exosite\.io/api:1/service/XYZ/content/item/Solutionfile\.json/upload\?sha256=018d1e072e1e9734cbc804c27121d00a2912fe14bcc11244e3fc20c5b72ab136&expires_in=30&type=application%2Fjson'\ncurl -s -H 'User-Agent: MrMurano/[^']+' -X POST 'https://s3-us-west-1\.amazonaws\.com/murano-content-service-staging' -F 'x-amz-meta-name=Solutionfile\.json' -F 'x-amz-signature=Bunch of Hex' -F 'x-amz-date=20170214T200752Z' -F 'x-amz-credential=AAA/BBB/us-west-1/s3/aws4_request' -F 'x-amz-algorithm=AWS4-HMAC-SHA256' -F 'policy=something base64 encoded\.' -F 'key=XXX/ZZZ' -F 'acl=authenticated-read' -F file=@.*/home/work/project/Solutionfile\.json\n})
       $stdout = saved
@@ -333,8 +332,7 @@ RSpec.describe MrMurano::Content::Base do
       $stdout = StringIO.new
 
       $cfg['tool.curldebug'] = true
-      $cfg['tool.curlfile'] = ""
-      MrMurano::Http::initCurlfile $cfg
+      $cfg['tool']['curlfile_f'] = nil
       @ct.download('TODO.taskpaper')
       expect($stdout.string).to match(%r{curl -s -H 'Authorization: token TTTTTTTTTT' -H 'User-Agent: MrMurano/[^']+' -H 'Content-Type: application/json' -X GET 'https://bizapi\.hosted\.exosite\.io/api:1/service/XYZ/content/item/TODO\.taskpaper/download'\ncurl -s -H 'User-Agent: MrMurano/[^']+' -X GET 'https://s3-us-west-1\.amazonaws\.com/murano-content-service-staging/XXX/ZZZ'\nFOOOOOOOOOOOO})
       $stdout = saved

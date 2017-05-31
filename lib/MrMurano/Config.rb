@@ -19,6 +19,7 @@ module MrMurano
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
         self[:data].restore
+        self.initCurlfile()
       end
 
       def write()
@@ -29,6 +30,22 @@ module MrMurano
         self[:data].save
         path.chmod(0600)
       end
+
+      # To capture curl calls when running rspec, write to a file.
+      def initCurlfile()
+        if self[:data]['tool']['curldebug'] and !self[:data]['tool']['curlfile'].to_s.strip.empty? then
+          if self[:data]['tool']['curlfile_f'].nil?
+            self[:data]['tool']['curlfile_f'] = File.open(self[:data]['tool']['curlfile'], 'a')
+            # MEH: Call $cfg['tool.curlfile_f'].close() at some point? Or let Ruby do on exit.
+            self[:data]['tool']['curlfile_f'] << Time.now << "\n"
+            self[:data]['tool']['curlfile_f'] << "murano #{ARGV.join(' ')}\n"
+          end
+        elsif not self[:data]['tool']['curlfile_f'].nil?
+          self[:data]['tool']['curlfile_f'].close
+          self[:data]['tool']['curlfile_f'] = nil
+        end
+      end
+
     end
 
     attr :paths
