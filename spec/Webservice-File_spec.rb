@@ -15,9 +15,8 @@ RSpec.describe MrMurano::Webservice::File do
     @srv = MrMurano::Webservice::File.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
 
-    # FIXME/2017-05-26/MRMUR-XXXX: Changed back to old endpoint.
-    #@baseURI = "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/file"
     @baseURI = "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/file"
+    @fileuploadURI = "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/fileupload"
   end
 
   it "initializes" do
@@ -135,7 +134,7 @@ RSpec.describe MrMurano::Webservice::File do
       saved = $stdout
       $stdout = StringIO.new
       @srv.upload(@lp, {:path=>'/one.text'}, false)
-      expect($stdout.string).to match(%r{^curl -s -H 'Authorization: token TTTTTTTTTT'.*-X PUT 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/fileupload/one.text' -F file=@.*$})
+      expect($stdout.string).to match(%r{^curl -s -H 'Authorization: token TTTTTTTTTT'.*-X PUT '#{@fileuploadURI}/one.text' -F file=@.*$})
       $stdout = saved
     end
   end
