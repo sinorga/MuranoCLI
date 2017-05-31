@@ -16,8 +16,6 @@ RSpec.describe MrMurano::Webservice::Endpoint do
     @srv = MrMurano::Webservice::Endpoint.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
 
-    # FIXME/2017-05-26/MRMUR-XXXX: Changed back to old endpoint.
-    #@baseURI = "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/endpoint"
     @baseURI = "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/endpoint"
   end
 
@@ -309,7 +307,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 404)
-      stub_request(:post, "#{@baseURI}").
+      stub_request(:post, "#{@baseURI}/").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
