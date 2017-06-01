@@ -40,8 +40,11 @@ RSpec.shared_context "CI_CMD" do
     #"#{name}-#{Random.new.rand.hash.abs.to_s(16)}"
     # MUR-2454: Product name may only contain letters and numbers.
     #"#{name}#{Random.new.rand.hash.abs.to_s(16)}"
-    # MUR-XXXX: Product name must be same as business ID??
-    $cfg['business.id']
+    # MUR-XXXX: Product name must be lowercase.
+    # 2017-06-01: From [cr]: "I'll be having bizapi convert to lower case
+    #  in the short term, and pegasus is updating to allow upper case."
+    #  LATER: Remove the downcase:
+    "#{name.downcase}#{Random.new.rand.hash.abs.to_s(16)}"
   end
 
   before(:example) do
