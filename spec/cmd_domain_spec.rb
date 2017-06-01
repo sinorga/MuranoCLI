@@ -14,7 +14,7 @@ RSpec.describe 'murano domain', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
@@ -22,7 +22,12 @@ RSpec.describe 'murano domain', :cmd, :needs_password do
 
   it "show domain" do
     out, err, status = Open3.capture3(capcmd('murano', 'domain'))
-    expect(out.chomp).to start_with("#{@project_name.downcase}.apps.exosite").and end_with(".io")
+    # 2017-05-31: Previously, the project could be named whatever and
+    #   the URI would start with the same.
+    #     expect(out.chomp).to start_with("#{@product_name.downcase}.apps.exosite").and end_with(".io")
+    #   Now, it's: <ID>.m2.exosite.io, where ID is of the form, "j41fj45hhk82so0os"
+    expect(out.split('.', 2)[0]).to match(/^[a-zA-Z0-9]{17}$/)
+    expect(out.chomp).to end_with("m2.exosite.io")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
