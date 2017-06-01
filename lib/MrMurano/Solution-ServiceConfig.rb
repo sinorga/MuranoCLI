@@ -14,6 +14,7 @@ module MrMurano
       return [] if ret.is_a?(Hash) and ret.has_key?(:error)
       ret[:items]
     end
+
     def fetch(id)
       get('/' + id.to_s)
     end

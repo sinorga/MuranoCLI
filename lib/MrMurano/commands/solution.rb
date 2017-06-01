@@ -106,7 +106,7 @@ command 'solution list' do |c|
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
-    options.default :type => 'all', :all=>true
+    options.default :type=>:all, :all=>true
     acc = MrMurano::Account.new
     data = acc.solutions(options.type)
 
