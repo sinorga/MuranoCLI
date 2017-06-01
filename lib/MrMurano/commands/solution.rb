@@ -17,6 +17,9 @@ command 'solution create' do |c|
   c.summary = %{Create a new solution}
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES, %{What type of solution to create. (default: product)}
   c.option '--save', %{Save new solution id to config}
+  # FIXME/2017-06-01: Rebase conflict: [lb] thinks options.type is
+  #   sufficient, and that we do not need options.section, since
+  #   we can always deduce the type of solution.
   c.option '--section SECTION', String, %{Which section in config to save id to}
 
   c.action do |args, options|
