@@ -205,7 +205,7 @@ module MrMurano
     #ALLOWED_TYPES = [:domain,:onepApi,:dataApi,:application,:product].freeze
     ALLOWED_TYPES = [:application,:product].freeze
 
-    def solutions(type=:product, invalidate=false)
+    def solutions(type=:all, invalidate=false)
       debug "Getting all solutions of type #{type}"
       raise "Missing Business ID" if $cfg['business.id'].nil?
       type = type.to_sym
