@@ -130,6 +130,7 @@ module MrMurano
   end
   # :nocov:
 
+<<<<<<< HEAD
 # FIXME: REBASE: This is removed from tadpol's branch.
 #  # Device config interface for the assign commands.
 #  class SC_Device < ServiceConfig
