@@ -12,7 +12,7 @@ RSpec.describe MrMurano::Webservice::Settings do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['product.id'] = 'XYZ'
+    $cfg['application.id'] = 'XYZ'
 
     @srv = MrMurano::Webservice::Settings.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
