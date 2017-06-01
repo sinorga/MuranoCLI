@@ -81,7 +81,7 @@ RSpec.describe 'murano init', :cmd do
 
       it "existing project" do
         # The test account will have one business.
-        # It will ask to create a solution and product.
+        # It will ask to create an application and product.
         # !!!! the 8 is hardcoded indention here !!!!
         data = <<-EOT.gsub(/^ {8}/, '')
         #{@product_name}
