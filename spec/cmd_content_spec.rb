@@ -21,7 +21,6 @@ RSpec.describe 'murano content', :cmd, :needs_password do
       expect(status.exitstatus).to eq(0)
   end
 
-
   it "life cycle" do
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'list'))
       expect(out.lines).to match([
