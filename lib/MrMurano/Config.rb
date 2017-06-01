@@ -284,6 +284,16 @@ module MrMurano
       tomod[ikey] = value unless value.nil?
       tomod.delete(ikey) if value.nil?
       data[section] = tomod
+      # Remove empty sections to make test results more predictable.
+      # Interesting: IniFile.each only returns sections with key-vals,
+      #              so call IniFile.each_section instead.
+      #                 data.each do |sectn, param, val|
+      #                   puts "#{param} = #{val} [in section: #{sectn}]"
+      data.each_section do |sectn|
+        if data[sectn].empty?
+          data.delete_section(sectn)
+        end
+      end
       cfg.write
     end
 
