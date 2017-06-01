@@ -132,8 +132,17 @@ RSpec.describe MrMurano::Account do
 
   context "lists business" do
     it "for user.name" do
-      bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
-                 {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
+      # http.rb::json_opts() sets :symbolize_names=>true, so use symbols, not strings.
+      bizlist = [
+        {:bizid=>"XXX",
+         :role=>"admin",
+         :name=>"MPS",
+        },
+        {:bizid=>"YYY",
+         :role=>"admin",
+         :name=>"MAE",
+        },
+      ]
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
         to_return(body: bizlist)
 
@@ -143,8 +152,14 @@ RSpec.describe MrMurano::Account do
     end
 
     it "askes for account when missing" do
-      bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
-                 {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
+      bizlist = [
+        {:bizid=>"XXX",
+         :role=>"admin",
+         :name=>"MPS"},
+        {:bizid=>"YYY",
+         :role=>"admin",
+         :name=>"MAE"},
+      ]
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
         to_return(body: bizlist)
 
@@ -161,13 +176,23 @@ RSpec.describe MrMurano::Account do
   # *** :product type solutions
 
   it "lists products" do
-    prdlist = [{"bizid"=>"XYZxyz","type"=>"onepModel","pid"=>"ABC","modelId"=>"cde","label"=>"fts"},
-               {"bizid"=>"XYZxyz","type"=>"onepModel","pid"=>"fgh","modelId"=>"ijk","label"=>"lua-test"}]
+    prodlist = [
+      {:bizid=>"XYZxyz",
+       :type=>"product",
+       :pid=>"ABC",
+       :modelId=>"cde",
+       :label=>"fts"},
+      {:bizid=>"XYZxyz",
+       :type=>"product",
+       :pid=>"fgh",
+       :modelId=>"ijk",
+       :label=>"lua-test"},
+    ]
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      to_return(body: prdlist)
+      to_return(body: prodlist)
 
     ret = @acc.products
-    expect(ret).to eq(prdlist)
+    expect(ret).to eq(prodlist)
   end
 
   it "lists products; without biz.id" do
@@ -206,22 +231,35 @@ RSpec.describe MrMurano::Account do
   # *** :applications type solutions
 
   it "lists applications" do
-    applist = [{"bizid"=>"XYZxyz","type"=>"product","pid"=>"ABC","modelId"=>"cde","label"=>"fts"},
-               {"bizid"=>"XYZxyz",
-                "type"=>"application",
-                "domain"=>"XYZxyz.apps.exosite.io",
-                "apiId"=>"ACBabc",
-                "sid"=>"ACBabc"},
-               {"bizid"=>"XYZxyz",
-                "type"=>"application",
-                "domain"=>"XYZxyz.apps.exosite.io",
-                "apiId"=>"DEFdef",
-                "sid"=>"DEFdef"}]
+    # NOTE: Need to use symbols, not strings, for keys, because
+    #       http.rb::json_opts() specifies :symbolize_names => true.
+    appllist = [
+      {:bizid=>"XYZxyz",
+       :type=>"application",
+       :domain=>"XYZxyz.apps.exosite.io",
+       :apiId=>"ACBabc",
+       :sid=>"ACBabc",
+      },
+      {:bizid=>"XYZxyz",
+       :type=>"application",
+       :domain=>"XYZxyz.apps.exosite.io",
+       :apiId=>"DEFdef",
+       :sid=>"DEFdef",
+      },
+    ]
+    solnlist = [
+      {:bizid=>"XYZxyz",
+       :type=>"product",
+       :pid=>"ABC",
+       :modelId=>"cde",
+       :label=>"fts",
+      },
+    ]
+    solnlist.concat appllist
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      to_return(body: applist)
-
+      to_return(body: solnlist)
     ret = @acc.applications
-    expect(ret).to eq(applist)
+    expect(ret).to eq(appllist)
   end
 
   it "lists applications; without biz.id" do
@@ -260,21 +298,28 @@ RSpec.describe MrMurano::Account do
   # *** :all type solutions
 
   it "lists solutions" do
-    sollist = [{"bizid"=>"XYZxyz",
-                "type"=>"product",
-                "domain"=>"ABCabc.m2.exosite.io",
-                "apiId"=>"ABCabc",
-                "sid"=>"ABCabc"},
-               {"bizid"=>"XYZxyz",
-                "type"=>"application",
-                "domain"=>"XYZxyz.apps.exosite.io",
-                "apiId"=>"DEFdef",
-                "sid"=>"DEFdef"}]
+    # http.rb::json_opts() sets :symbolize_names=>true, so use symbols, not strings.
+    prodlist = [
+      {:bizid=>"XYZxyz",
+       :type=>"product",
+       :domain=>"ABCabc.m2.exosite.io",
+       :apiId=>"ABCabc",
+       :sid=>"ABCabc",
+      },
+    ]
+    appllist = [
+      {:bizid=>"XYZxyz",
+       :type=>"application",
+       :domain=>"XYZxyz.apps.exosite.io",
+       :apiId=>"DEFdef",
+       :sid=>"DEFdef"},
+    ]
+    solnlist = prodlist + appllist
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      to_return(body: sollist)
+      to_return(body: solnlist)
 
     ret = @acc.solutions
-    expect(ret).to eq(sollist)
+    expect(ret).to eq(solnlist)
   end
 
   it "lists solutions; without biz.id" do
