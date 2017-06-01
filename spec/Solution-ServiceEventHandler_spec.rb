@@ -268,25 +268,25 @@ end
 
     it "raises on alias without service" do
       expect {
-        @srv.mkname( MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob') )
+        @srv.mkname(MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob'))
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on alias without event" do
       expect {
-        @srv.mkalias( MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob') )
+        @srv.mkalias(MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob'))
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
 
     it "raises on name without service" do
       expect {
-        @srv.mkalias( MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob') )
+        @srv.mkalias(MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob'))
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on name without event" do
       expect {
-        @srv.mkname( MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob') )
+        @srv.mkname(MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob'))
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
   end

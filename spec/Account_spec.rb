@@ -76,7 +76,7 @@ RSpec.describe MrMurano::Account, "token" do
     it "gets a token" do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/token/").
         with(:body => {:email=>'bob', :password=>'v'}.to_json).
-        to_return(body: {:token=>"ABCDEFGHIJKLMNOP"}.to_json )
+        to_return(body: {:token=>"ABCDEFGHIJKLMNOP"}.to_json)
 
       ret = @acc.token
       expect(ret).to eq("ABCDEFGHIJKLMNOP")
@@ -85,7 +85,7 @@ RSpec.describe MrMurano::Account, "token" do
     it "gets an error" do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/token/").
         with(:body => {:email=>'bob', :password=>'v'}.to_json).
-        to_return(status: 401, body: {}.to_json )
+        to_return(status: 401, body: {}.to_json)
 
       expect(@acc).to receive(:error).twice.and_return(nil)
       ret = @acc.token
@@ -135,7 +135,7 @@ RSpec.describe MrMurano::Account do
       bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
                  {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
-        to_return(body: bizlist )
+        to_return(body: bizlist)
 
       $cfg['user.name'] = 'BoB@place.net'
       ret = @acc.businesses
@@ -146,7 +146,7 @@ RSpec.describe MrMurano::Account do
       bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
                  {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
-        to_return(body: bizlist )
+        to_return(body: bizlist)
 
       $cfg['user.name'] = nil
       expect(@acc).to receive(:_loginInfo) do |arg|
@@ -158,11 +158,13 @@ RSpec.describe MrMurano::Account do
     end
   end
 
+  # *** :product type solutions
+
   it "lists products" do
     prdlist = [{"bizid"=>"XYZxyz","type"=>"onepModel","pid"=>"ABC","modelId"=>"cde","label"=>"fts"},
                {"bizid"=>"XYZxyz","type"=>"onepModel","pid"=>"fgh","modelId"=>"ijk","label"=>"lua-test"}]
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      to_return(body: prdlist )
+      to_return(body: prdlist)
 
     ret = @acc.products
     expect(ret).to eq(prdlist)
@@ -177,7 +179,7 @@ RSpec.describe MrMurano::Account do
   it "creates product" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
       with(:body => {:label=>'ONe', :type=>'product'}).
-      to_return(body: "" )
+      to_return(body: "")
 
     ret = @acc.new_product("ONe")
     expect(ret).to eq({})
@@ -190,7 +192,7 @@ RSpec.describe MrMurano::Account do
 
   it "deletes product" do
     stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/ONe").
-      to_return(body: "" )
+      to_return(body: "")
 
     ret = @acc.delete_product("ONe")
     expect(ret).to eq({})
@@ -214,7 +216,7 @@ RSpec.describe MrMurano::Account do
                 "apiId"=>"ghi",
                 "sid"=>"jkl"}]
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      to_return(body: sollist )
+      to_return(body: sollist)
 
     ret = @acc.solutions
     expect(ret).to eq(sollist)
@@ -229,7 +231,7 @@ RSpec.describe MrMurano::Account do
   it "creates solution" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
       with(:body => {:label=>'one', :type=>'product'}).
-      to_return(body: "" )
+      to_return(body: "")
 
     ret = @acc.new_solution("one")
     expect(ret).to eq({})
@@ -238,7 +240,7 @@ RSpec.describe MrMurano::Account do
   it "creates solution; with upper case" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
       with(:body => {:label=>'ONe', :type=>'product'}).
-      to_return(body: "" )
+      to_return(body: "")
 
     expect { @acc.new_solution("ONe") }.to_not raise_error
   end
@@ -246,7 +248,7 @@ RSpec.describe MrMurano::Account do
   it "creates solution; with numbers and dashes" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
       with(:body => {:label=>'ONe-8796-gkl', :type=>'product'}).
-      to_return(body: "" )
+      to_return(body: "")
 
     # 2017-05-26: Dashes forbidden! MUR-1994
     #expect { @acc.new_solution("ONe-8796-gkl") }.to_not raise_error
@@ -268,7 +270,7 @@ RSpec.describe MrMurano::Account do
 
   it "deletes solution" do
     stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/one").
-      to_return(body: "" )
+      to_return(body: "")
 
     ret = @acc.delete_solution("one")
     expect(ret).to eq({})
