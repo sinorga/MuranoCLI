@@ -203,18 +203,73 @@ RSpec.describe MrMurano::Account do
     expect { @acc.delete_product("ONe") }.to raise_error("Missing Business ID")
   end
 
+  # *** :applications type solutions
+
+  it "lists applications" do
+    applist = [{"bizid"=>"XYZxyz","type"=>"product","pid"=>"ABC","modelId"=>"cde","label"=>"fts"},
+               {"bizid"=>"XYZxyz",
+                "type"=>"application",
+                "domain"=>"XYZxyz.apps.exosite.io",
+                "apiId"=>"ACBabc",
+                "sid"=>"ACBabc"},
+               {"bizid"=>"XYZxyz",
+                "type"=>"application",
+                "domain"=>"XYZxyz.apps.exosite.io",
+                "apiId"=>"DEFdef",
+                "sid"=>"DEFdef"}]
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      to_return(body: applist)
+
+    ret = @acc.applications
+    expect(ret).to eq(applist)
+  end
+
+  it "lists applications; without biz.id" do
+    allow($cfg).to receive(:get).with('business.id').and_return(nil)
+    expect(@acc).to receive(:debug).with("Getting all solutions of type application")
+    expect { @acc.applications }.to raise_error("Missing Business ID")
+  end
+
+  it "creates application" do
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      with(:body => {:label=>'ONe', :type=>'application'}).
+      to_return(body: "")
+
+    ret = @acc.new_application("ONe")
+    expect(ret).to eq({})
+  end
+
+  it "creates application; without biz.id" do
+    allow($cfg).to receive(:get).with('business.id').and_return(nil)
+    expect { @acc.new_application("ONe") }.to raise_error("Missing Business ID")
+  end
+
+  it "deletes application" do
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/ONe").
+      to_return(body: "")
+
+    ret = @acc.delete_application("ONe")
+    expect(ret).to eq({})
+  end
+
+  it "deletes application; without biz.id" do
+    allow($cfg).to receive(:get).with('business.id').and_return(nil)
+    expect { @acc.delete_application("ONe") }.to raise_error("Missing Business ID")
+  end
+
+  # *** :all type solutions
 
   it "lists solutions" do
     sollist = [{"bizid"=>"XYZxyz",
                 "type"=>"product",
-                "domain"=>"two.apps.exosite.io",
-                "apiId"=>"abc",
-                "sid"=>"def"},
+                "domain"=>"ABCabc.m2.exosite.io",
+                "apiId"=>"ABCabc",
+                "sid"=>"ABCabc"},
                {"bizid"=>"XYZxyz",
-                "type"=>"product",
-                "domain"=>"one.apps.exosite.io",
-                "apiId"=>"ghi",
-                "sid"=>"jkl"}]
+                "type"=>"application",
+                "domain"=>"XYZxyz.apps.exosite.io",
+                "apiId"=>"DEFdef",
+                "sid"=>"DEFdef"}]
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
       to_return(body: sollist)
 
@@ -224,7 +279,7 @@ RSpec.describe MrMurano::Account do
 
   it "lists solutions; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect(@acc).to receive(:debug).with("Getting all solutions of type product")
+    expect(@acc).to receive(:debug).with("Getting all solutions of type all")
     expect { @acc.solutions }.to raise_error("Missing Business ID")
   end
 
