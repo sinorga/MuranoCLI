@@ -248,15 +248,17 @@ RSpec.describe MrMurano::Account do
       with(:body => {:label=>'ONe-8796-gkl', :type=>'product'}).
       to_return(body: "" )
 
-    expect { @acc.new_solution("ONe-8796-gkl") }.to_not raise_error
+    # 2017-05-26: Dashes forbidden! MUR-1994
+    #expect { @acc.new_solution("ONe-8796-gkl") }.to_not raise_error
+    expect { @acc.new_solution("ONe-8796-gkl") }.to raise_error("Solution name must contain only letters and/or numbers")
   end
 
   it "creates solution; that is too long" do
-    expect { @acc.new_solution("o"*70) }.to raise_error("Solution name must be a valid domain name component")
+    expect { @acc.new_solution("o"*70) }.to raise_error("Solution name must contain only letters and/or numbers")
   end
 
   it "creates solution; with underscore" do
-    expect { @acc.new_solution("one_two") }.to raise_error("Solution name must be a valid domain name component")
+    expect { @acc.new_solution("one_two") }.to raise_error("Solution name must contain only letters and/or numbers")
   end
 
   it "creates solution; without biz.id" do
