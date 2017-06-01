@@ -120,6 +120,7 @@ module MrMurano
   # Device config interface for the assign commands.
   class SC_Device < ServiceConfig
     def initialize
+      @solntype = 'product.id'
       super
       @serviceName = 'device'
     end
