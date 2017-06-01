@@ -121,7 +121,6 @@ module MrMurano
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
-
       set('tool.verbose', false, :defaults)
       set('tool.debug', false, :defaults)
       set('tool.dry', false, :defaults)
