@@ -21,13 +21,13 @@ command 'show' do |c|
       selectedProductId = $cfg['product.id']
       selectedProduct = nil
       acc.products.each do |row|
-        selectedProduct = row if row[:modelId] == selectedProductId
+        selectedProduct = row if row[:apiId] == selectedProductId
       end
 
-      selectedSolutionId = $cfg['solution.id']
-      selectedSolution = nil
-      acc.solutions.each do |row|
-        selectedSolution = row if row[:apiId] == selectedSolutionId
+      selectedApplicationId = $cfg['application.id']
+      selectedApplication = nil
+      acc.applications.each do |row|
+        selectedApplication = row if row[:apiId] == selectedApplicationId
       end
 
       if $cfg['user.name'] then
@@ -42,8 +42,11 @@ command 'show' do |c|
         puts 'no business selected'
       end
 
+      # E.g., {:bizid=>"AAAAAAAAAAAAAAAA", :type=>"product",
+      #   :apiId=>"BBBBBBBBBBBBBBBBB", :sid=>"BBBBBBBBBBBBBBBBB",
+      #   :domain=>"BBBBBBBBBBBBBBBBB.m2.exosite.io", :name=>"AAAAAAAAAAAAAAAA"}
       if selectedProduct then
-        puts %(product: #{selectedProduct[:label]})
+        puts %(product: #{selectedProduct[:name]})
       else
         if selectedProductId then
           puts 'selected product not in business'
@@ -52,13 +55,16 @@ command 'show' do |c|
         end
       end
 
-      if selectedSolution then
-        puts %(solution: https://#{selectedSolution[:domain]})
+      # E.g., {:bizid=>"AAAAAAAAAAAAAAAA", :type=>"application",
+      #   :apiId=>"CCCCCCCCCCCCCCCCC", :sid=>"CCCCCCCCCCCCCCCCC",
+      #   :domain=>"AAAAAAAAAAAAAAAA.apps.exosite.io", :name=>"AAAAAAAAAAAAAAAA"}
+      if selectedApplication then
+        puts %(application: https://#{selectedApplication[:domain]})
       else
-        if selectedSolutionId then
-          puts 'selected solution not in business'
+        if selectedApplicationId then
+          puts 'selected application not in business'
         else
-          puts 'no solution selected'
+          puts 'no application selected'
         end
       end
 
