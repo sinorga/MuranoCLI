@@ -10,7 +10,7 @@ RSpec.describe MrMurano::Gateway::Base do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['project.id'] = 'XYZ'
+    $cfg['product.id'] = 'XYZ'
 
     @gw = MrMurano::Gateway::Base.new
     allow(@gw).to receive(:token).and_return("TTTTTTTTTT")

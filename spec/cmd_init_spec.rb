@@ -253,7 +253,7 @@ RSpec.describe 'murano init', :cmd do
           :version => '0.3.0',
         }.to_json
       end
-      # The test account will have one business, one product, and one solution.
+      # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
       expect(out.lines).to match_array([

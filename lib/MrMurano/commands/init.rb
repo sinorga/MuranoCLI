@@ -2,13 +2,12 @@ require 'MrMurano/Account'
 require 'MrMurano/Config-Migrate'
 require 'erb'
 
-
 command :init do |c|
   c.syntax = %{murano init}
   c.summary = %{The easy way to start a project}
   c.description = %{}
 
-  c.option '--force', %{Override existing business, or project ids}
+  c.option '--force', %{Override existing business, product, or application ids}
   c.option '--[no-]mkdirs', %{Create default directories}
 
   c.action do |args, options|

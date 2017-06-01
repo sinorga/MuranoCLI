@@ -11,7 +11,7 @@ RSpec.describe MrMurano::Library do
     $project = MrMurano::ProjectFile.new
     $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['project.id'] = 'XYZ'
+    $cfg['application.id'] = 'XYZ'
 
     @srv = MrMurano::Library.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")

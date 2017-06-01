@@ -12,6 +12,8 @@ RSpec.describe MrMurano::ServiceConfig do
     $project = MrMurano::ProjectFile.new
     $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
+    # serviceconfig works on all solution types.
+    $cfg['product.id'] = 'XYZ'
     $cfg['application.id'] = 'XYZ'
 
     @srv = MrMurano::ServiceConfig.new

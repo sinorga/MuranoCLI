@@ -12,7 +12,7 @@ RSpec.describe MrMurano::Webservice::Cors do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['project.id'] = 'XYZ'
+    $cfg['application.id'] = 'XYZ'
 
     @srv = MrMurano::Webservice::Cors.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")

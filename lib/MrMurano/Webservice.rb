@@ -10,8 +10,8 @@ module MrMurano
   module Webservice
     class Base
       def initialize
-        @pid = $cfg['project.id']
-        raise MrMurano::ConfigError.new("No project id!") if @pid.nil?
+        @pid = $cfg['application.id']
+        raise MrMurano::ConfigError.new("No application id!") if @pid.nil?
         @uriparts = [:solution, @pid]
         @itemkey = :id
         @locationbase = $cfg['location.base']
