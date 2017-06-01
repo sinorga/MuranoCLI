@@ -10,6 +10,14 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
     @product_name = rname('syncdownTest')
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
     expect(err).to eq('')
+    # out is the Solution ID.
+    expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
+    expect(status.exitstatus).to eq(0)
+
+    # The solution/XYZ/endpoint calls work on an application, not product.
+    #@product_name = rname('syncdownTest')
+    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @product_name, '--save'))
+    expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
   end
