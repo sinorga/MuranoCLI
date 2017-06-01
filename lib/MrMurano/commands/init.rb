@@ -123,7 +123,7 @@ command :init do |c|
       elsif solz.count == 0 then
         say "You do not have any #{type}s; let's create one"
         solname = ask("#{type.capitalize} Name? ")
-        ret = acc.new_product(solname)
+        ret = acc.new_solution(solname, type)
         if ret.nil? then
           acc.error "Create #{type.capitalize} failed"
           exit 5
