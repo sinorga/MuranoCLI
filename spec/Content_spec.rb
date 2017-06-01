@@ -264,6 +264,10 @@ RSpec.describe MrMurano::Content::Base do
       stub_request(:get , "https://s3-us-west-1.amazonaws.com/murano-content-service-staging/XXX/ZZZ").
         to_return(:body => "FOOOOOOOOOOOO")
 
+      # This test does not work with curldebug enabled.
+      $cfg['tool.curldebug'] = false
+      $cfg['tool']['curlfile_f'] = nil
+
       saved = $stdout
       $stdout = StringIO.new
 
