@@ -205,14 +205,21 @@ module MrMurano
     #ALLOWED_TYPES = [:domain,:onepApi,:dataApi,:application,:product].freeze
     ALLOWED_TYPES = [:application,:product].freeze
 
-    def solutions(type=:product)
+    def solutions(type=:product, invalidate=false)
       debug "Getting all solutions of type #{type}"
       raise "Missing Business ID" if $cfg['business.id'].nil?
       type = type.to_sym
       raise "Unknown type(#{type})" unless type == :all or ALLOWED_TYPES.include? type
-      got = get('business/' + $cfg['business.id'] + '/solution/')
-      got.select!{|i| i[:type] == type.to_s} unless type == :all
-      got
+      # Cache the result since sometimes both products() and applications() are called.
+      if @bizSolns.nil? or invalidate
+        got = get('business/' + $cfg['business.id'] + '/solution/')
+        @bizSolns = got
+      end
+      solz = @bizSolns.dup
+      unless type == :all
+        solz.select!{|i| i[:type] == type.to_s}
+      end
+      solz
     end
 
     ## Create a new solution in the current business
