@@ -49,7 +49,7 @@ command 'solution create' do |c|
       exit 3
     end
     if options.save then
-      $cfg.set('project.id', pid)
+      $cfg.set("#{options.type.to_s}.id", pid)
     end
     acc.outf pid
 

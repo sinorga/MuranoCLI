@@ -26,7 +26,7 @@ RSpec.describe MrMurano::Setting do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['project.id'] = 'XYZ'
+    $cfg['product.id'] = 'XYZ'
 
     @srv = MrMurano::Setting.new
   end

@@ -51,7 +51,7 @@ module MrMurano
       script = local.read
 
       pst = remote.to_h.merge({
-        :solution_id => $cfg['project.id'],
+        :solution_id => $cfg['application.id'],
         :script => script,
         :alias => mkalias(remote),
         :name => mkname(remote),
@@ -157,7 +157,7 @@ module MrMurano
       attr_accessor :updated_at
       # @return [String] Timestamp when this was created.
       attr_accessor :created_at
-      # @return [String] The project.id that this is in
+      # @return [String] The application solution's ID.
       attr_accessor :solution_id
     end
 
@@ -175,7 +175,8 @@ module MrMurano
 
     def mkalias(remote)
       unless remote.name.nil? then
-        [$cfg['project.id'], remote[:name]].join('_')
+        # Modules apply to applications.
+        [$cfg['application.id'], remote[:name]].join('_')
       else
         raise "Missing parts! #{remote.to_h.to_json}"
       end
@@ -217,7 +218,7 @@ module MrMurano
       attr_accessor :updated_at
       # @return [String] Timestamp when this was created.
       attr_accessor :created_at
-      # @return [String] The project.id that this is in
+      # @return [String] The soln's product.id or application.id (Murano's apiId).
       attr_accessor :solution_id
       # @return [String] Which service triggers this script
       attr_accessor :service
@@ -239,7 +240,7 @@ module MrMurano
       if remote.service.nil? or remote.event.nil? then
         raise "Missing parts! #{remote.to_h.to_json}"
       else
-        [$cfg['project.id'], remote[:service], remote[:event]].join('_')
+        [$cfg['application.id'], remote[:service], remote[:event]].join('_')
       end
     end
 

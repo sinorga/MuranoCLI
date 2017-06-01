@@ -10,7 +10,7 @@ RSpec.describe MrMurano::Content::Base do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['project.id'] = 'XYZ'
+    $cfg['product.id'] = 'XYZ'
 
     @ct = MrMurano::Content::Base.new
     allow(@ct).to receive(:token).and_return("TTTTTTTTTT")

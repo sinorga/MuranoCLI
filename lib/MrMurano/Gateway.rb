@@ -13,8 +13,8 @@ module MrMurano
   module Gateway
     class Base
       def initialize
-        @pid = $cfg['project.id']
-        raise MrMurano::ConfigError.new("No project id!") if @pid.nil?
+        @pid = $cfg['product.id']
+        raise MrMurano::ConfigError.new("No product id!") if @pid.nil?
         @uriparts = [:service, @pid, :device2]
         @itemkey = :id
       end
