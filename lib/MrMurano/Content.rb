@@ -101,7 +101,12 @@ module MrMurano
             a << %{-F '#{key}=#{value}'}
           end
           a << %{-F #{ret[:field]}=@#{local_path.to_s}}
-          puts a.join(' ')
+          if $cfg['tool.curlfile_f'].nil?
+            puts a.join(' ')
+          else
+            $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
+            $cfg['tool.curlfile_f'].flush
+          end
         end
 
         unless $cfg['tool.dry'] then
@@ -143,7 +148,12 @@ module MrMurano
           a << %{-H 'User-Agent: #{request['User-Agent']}'}
           a << %{-X #{request.method}}
           a << %{'#{request.uri.to_s}'}
-          puts a.join(' ')
+          if $cfg['tool.curlfile_f'].nil?
+            puts a.join(' ')
+          else
+            $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
+            $cfg['tool.curlfile_f'].flush
+          end
         end
 
         unless $cfg['tool.dry'] then
