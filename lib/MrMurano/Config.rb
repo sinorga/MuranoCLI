@@ -16,6 +16,8 @@ module MrMurano
       def load()
         return if kind == :internal
         return if kind == :defaults
+        # DEVs: Uncomment if you're trying to figure where settings are coming from.
+        #puts "Loading config at: #{path}"
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
         self[:data].restore
