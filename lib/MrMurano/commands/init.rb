@@ -29,9 +29,59 @@ command :init do |c|
     # If they have never logged in, then asking for the business.id will also ask
     # for their username and password.
     say "Using account #{$cfg['user.name']}"
-    say ''
+    puts '' # `say ''` doesn't actually print anything
 
-    # 1. Get business id
+    # 1. Get Business ID
+    acquireBusinessId(options, acc)
+    # 2. Get Product ID
+    acquireSolutionId(options, acc, :product)
+    # 3. Get Application ID
+    acquireSolutionId(options, acc, :application)
+
+    msg = "Ok, in Business ID: #{$cfg['business.id']}"
+    unless $cfg['product.id'].nil?
+      msg += " using Product ID: #{$cfg['product.id']}"
+    end
+    unless $cfg['application.id'].nil?
+      msg += " using Application ID: #{$cfg['application.id']}"
+    end
+    say msg
+    puts ''
+
+    # If no ProjectFile, then write a ProjectFile
+    if not $project.usingProjectfile then
+      tmpl = File.read(File.join(File.dirname(__FILE__),'..','template','projectFile.murano.erb'))
+      tmpl = ERB.new(tmpl)
+      res = tmpl.result($project.data_binding)
+      prFile = $project['info.name'] + '.murano'
+      say "Writing an initial Project file: #{prFile}"
+      puts ''
+      File.open(prFile, 'w') {|io| io << res}
+    end
+
+    if options.mkdirs then
+      base = $cfg['location.base']
+      base = Pathname.new(base) unless base.kind_of? Pathname
+      %w{
+        location.files
+        location.endpoints
+        location.modules
+        location.eventhandlers
+        location.resources
+      }.each do |cfgi|
+        path = $cfg[cfgi]
+        path = Pathname.new(path) unless path.kind_of? Pathname
+        path = base + path
+        unless path.exist? then
+          path = path.dirname unless path.extname.empty?
+          path.mkpath
+        end
+      end
+      say "Default directories created"
+    end
+  end
+
+  def acquireBusinessId(options, acc)
     if not options.force and not $cfg['business.id'].nil? then
       say "Using Business ID already set to #{$cfg['business.id']}"
     else
@@ -57,90 +107,59 @@ command :init do |c|
       end
     end
     puts '' # blank line
+  end
 
-    # 2. Get Project id
-    if not options.force and not $cfg['project.id'].nil? then
-      say "Using Project ID already set to #{$cfg['project.id']}"
+  def acquireSolutionId(options, acc, type)
+    raise "Unknown type(#{type})" unless MrMurano::Account::ALLOWED_TYPES.include? type
+    if not options.force and not $cfg["#{type}.id"].nil? then
+      say "Using #{type.capitalize} ID already set to " + $cfg["#{type}.id"]
     else
-      solz = acc.products
+      solz = acc.solutions(type)
       if solz.count == 1 then
         sol = solz.first
-        say "You only have one project; using #{sol[:domain]}"
-        $cfg.set('project.id', sol[:apiId], :project)
+        say "You only have one #{type}; using #{sol[:domain]}"
+        $cfg.set("#{type}.id", sol[:apiId], :project)
 
       elsif solz.count == 0 then
-        say "You don't have any projects; lets create one"
-        solname = ask("Project Name? ")
+        say "You do not have any #{type}s; let's create one"
+        solname = ask("#{type.capitalize} Name? ")
         ret = acc.new_product(solname)
         if ret.nil? then
-          acc.error "Create Project failed"
+          acc.error "Create #{type.capitalize} failed"
           exit 5
         end
         if not ret.kind_of?(Hash) and not ret.empty? then
-          acc.error "Create Project failed: #{ret.to_s}"
+          acc.error "Create #{type.capitalize} failed: #{ret.to_s}"
           exit 2
         end
 
         # create doesn't return anything, so we need to go look for it.
-        ret = acc.solutions.select do |i|
-#          i[:type] == 'dataApi' and (i[:name] == solname or i[:domain] =~ /#{solname}\./i)
-          i[:type] == 'product' and (i[:name] == solname or i[:domain] =~ /#{solname}\./i)
+        ret = acc.solutions(type=type, invalidate=true).select do |i|
+          i[:name] == solname or i[:domain] =~ /#{solname}\./i
         end
         sid = (ret.first or {})[:apiId]
         if sid.nil? or sid.empty? then
           acc.error "Solution didn't find an apiId!!!! #{name} -> #{ret}"
           exit 3
         end
-        $cfg.set('project.id', sid, :project)
+        $cfg.set("#{type}.id", sid, :project)
 
       else
         choose do |menu|
-          menu.prompt = "Select which Project to use:"
+          menu.prompt = "Select which #{type.capitalize} to use:"
           menu.flow = :columns_across
+          # NOTE: There are 2 human friendly identifiers, :name and :domain.
           solz.sort{|a,b| a[:domain]<=>b[:domain]}.each do |s|
-            menu.choice(s[:domain].sub(/\..*$/,'')) do
-              $cfg.set('project.id', s[:apiId], :project)
+            menu.choice(s[:domain].sub(/\..*$/, '')) do
+              $cfg.set("#{type}.id", s[:apiId], :project)
             end
           end
         end
       end
     end
     puts '' # blank line
-
-    say "Ok, In business ID: #{$cfg['business.id']} using Project ID: #{$cfg['project.id']}"
-
-    # If no ProjectFile, then write a ProjectFile
-    if not $project.usingProjectfile then
-      tmpl = File.read(File.join(File.dirname(__FILE__),'..','template','projectFile.murano.erb'))
-      tmpl = ERB.new(tmpl)
-      res = tmpl.result($project.data_binding)
-      prFile = $project['info.name'] + '.murano'
-      say "Writing an initial Project file: #{prFile}"
-      File.open(prFile, 'w') {|io| io << res}
-    end
-
-    if options.mkdirs then
-      base = $cfg['location.base']
-      base = Pathname.new(base) unless base.kind_of? Pathname
-      %w{
-        location.files
-        location.endpoints
-        location.modules
-        location.eventhandlers
-        location.resources
-      }.each do |cfgi|
-        path = $cfg[cfgi]
-        path = Pathname.new(path) unless path.kind_of? Pathname
-        path = base + path
-        unless path.exist? then
-          path = path.dirname unless path.extname.empty?
-          path.mkpath
-        end
-      end
-      say "Default directories created"
-    end
-
   end
+
 end
 
 #  vim: set ai et sw=2 ts=2 :
