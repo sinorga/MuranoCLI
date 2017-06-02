@@ -15,13 +15,18 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     # The solution/XYZ/endpoint calls work on an application, not product.
-    #@product_name = rname('syncdownTest')
-    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @product_name, '--save'))
+    @applctn_name = rname('syncdownTest')
+    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @applctn_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+    expect(out).to eq('')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
     out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
     expect(out).to eq('')
     expect(err).to eq('')
