@@ -51,6 +51,13 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
+      # FIXME/2017-06-02 03:06: This is failing. `murano status` shows:
+      #   Adding:
+      #   Deleting:
+      #   Changing:
+      #    M M  modules/table_util.lua
+      #    M E  services/devdata.lua
+      #    M E  services/timers.lua
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       expect(out).to start_with(%{Adding:\nDeleting:\nChanging:\n})
       # Due to timestamp races, there might be modules or services in Changing.
