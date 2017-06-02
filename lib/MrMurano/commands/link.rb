@@ -117,6 +117,4 @@ command 'link unset' do |c|
 end
 alias_command 'assign unset', 'link unset'
 
-
-
 #  vim: set ai et sw=2 ts=2 :
