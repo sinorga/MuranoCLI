@@ -333,6 +333,13 @@ Run All Tests and Capture Colorful Output to HTML
         --tag '~not_in_okami' \
     | aha --black > MuranoCLI.rspec.html
 
+Rerun Failing Tests
+^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+    rspec --tag '~not_in_okami' --only-failures
+
 Uninstall MuranoCLI
 -------------------
 
