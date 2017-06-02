@@ -33,6 +33,7 @@ module MrMurano
 
     def create(pid, name=nil)  #? script_key?
       name = pid if name.nil?
+      # See pegasus_registry PostServiceConfig for the POST properties.
       post('', {
         :solution_id => @sid,
         :service => pid,
