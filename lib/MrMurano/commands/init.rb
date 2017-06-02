@@ -110,6 +110,7 @@ command :init do |c|
   end
 
   def acquireSolutionId(options, acc, type)
+    isNewSoln = false
     raise "Unknown type(#{type})" unless MrMurano::Account::ALLOWED_TYPES.include? type
     if not options.force and not $cfg["#{type}.id"].nil? then
       say "Using #{type.capitalize} ID already set to " + $cfg["#{type}.id"]
@@ -122,7 +123,18 @@ command :init do |c|
 
       elsif solz.count == 0 then
         say "You do not have any #{type}s; let's create one"
-        solname = ask("#{type.capitalize} Name? ")
+
+        asking = true
+        while asking do
+          solname = ask("#{type.capitalize} Name? ")
+          # LATER: Allow uppercase characters once pegasus_registry does.
+          unless solname.match(MrMurano::Account::SOLN_NAME_REGEX)
+            say MrMurano::Account::SOLN_NAME_HELP
+          else
+            break
+          end
+        end
+
         ret = acc.new_solution(solname, type)
         if ret.nil? then
           acc.error "Create #{type.capitalize} failed"
@@ -132,6 +144,7 @@ command :init do |c|
           acc.error "Create #{type.capitalize} failed: #{ret.to_s}"
           exit 2
         end
+        isNewSoln = true
 
         # create doesn't return anything, so we need to go look for it.
         ret = acc.solutions(type=type, invalidate=true).select do |i|
@@ -158,6 +171,8 @@ command :init do |c|
       end
     end
     puts '' # blank line
+
+    isNewSoln
   end
 
 end

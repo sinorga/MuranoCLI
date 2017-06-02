@@ -222,15 +222,32 @@ module MrMurano
       solz
     end
 
+    # SYNC_ME: See regex in bizapi: lib/api/route/business/solution.js
+    #
+    # NOTE: 2017-06-02: In bizapi, it's: /^?![0-9][a-zA-Z0-9]{1,63}$/
+    #           but this code has been checking /^[a-zA-Z0-9]{0,62}$/
+    #                      and [lb] is hesitant to change it to 63 now.
+    #
+    # FIXME: Allow uppercase once pegasus_registry fixed.
+    #SOLN_NAME_REGEX = /^(?![0-9])[a-zA-Z0-9]{1,62}$/
+    #SOLN_NAME_HELP = "Solution name must contain only letters and/or numbers"
+    #
+    # For now, lowercase only.
+    SOLN_NAME_REGEX = /^(?![0-9])[a-z0-9]{1,62}$/
+    SOLN_NAME_HELP = "Solution name must contain only lowercase letters and/or numbers, and may not start with a number"
+    #
+    # MUR-2454: Dashes no longer allowed in sol'n name
+    # Legacy check (good old days, before soln name was also a Lua variable name):
+    #SOLN_NAME_REGEX = /^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/
+    #SOLN_NAME_HELP = "Solution name must be a valid domain name component"
+
     ## Create a new solution in the current business
-    def new_solution(name, type=:product)
+    def new_solution(name, type)
       raise "Missing Business ID" if $cfg['business.id'].nil?
-      type = type.to_sym
+      type = type.to_s.to_sym
       raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
-      # MUR-2454: Dashes no longer allowed in sol'n name
-      #   (so more restrictive than domain name format).
-      #raise "Solution name must be a valid domain name component" unless name.match(/^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/)
-      raise MrMurano::ConfigError.new("Solution name must contain only letters and/or numbers") unless name.match(/^[a-zA-Z0-9]{0,62}$/)
+      # FIXME: Allow uppercase once pegasus_registry fixed.
+      raise MrMurano::ConfigError.new(SOLN_NAME_HELP) unless name.match(SOLN_NAME_REGEX)
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
     end
 
