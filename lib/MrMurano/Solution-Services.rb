@@ -57,7 +57,8 @@ module MrMurano
         :name => mkname(remote),
       })
       debug "f: #{local} >> #{pst.reject{|k,_| k==:script}.to_json}"
-      # try put, if 404, then post.
+      # Try PUT. If 404, then POST.
+      # I.e., PUT if not exists, else POST to create.
       put('/'+mkalias(remote), pst) do |request, http|
         response = http.request(request)
         case response
@@ -292,7 +293,7 @@ module MrMurano
     def toRemoteItem(from, path)
       # This allows multiple events to be in the same file. This is a lie.
       # This only finds the last event in a file.
-      # :legacy support doesn't allow for that. but that's ok.
+      # :legacy support doesn't allow for that. But that's ok.
       path = Pathname.new(path) unless path.kind_of? Pathname
       cur = nil
       lineno=0
