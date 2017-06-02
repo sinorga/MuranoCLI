@@ -8,13 +8,35 @@ RSpec.describe 'murano status', :cmd, :needs_password do
   include_context "CI_CMD"
 
   before(:example) do
+    # With an application only, the expected output is different, e.g.,
+    #   $ murano application create statusTest --save
+    #   $ murano status
+    #   Skipping missing location /tmp/d20170602-25639-1xb3al5/project/modules
+    #   No product!
     @product_name = rname('statusTest')
-    out, err, status = Open3.capture3(capcmd('murano', 'application', 'create', @product_name, '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
+
+    @applctn_name = rname('statusTest')
+    out, err, status = Open3.capture3(capcmd('murano', 'application', 'create', @applctn_name, '--save'))
+    expect(err).to eq('')
+    expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
+    expect(status.exitstatus).to eq(0)
+
+    #out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
+    #expect(out).to a_string_starting_with("Linked #{@product_name}")
+    #expect(err).to eq('')
+    #expect(status.exitstatus).to eq(0)
   end
+
   after(:example) do
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+    expect(out).to eq('')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
     out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
     expect(out).to eq('')
     expect(err).to eq('')
