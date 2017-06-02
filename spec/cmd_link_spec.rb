@@ -46,7 +46,17 @@ RSpec.describe 'murano link', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "unlinks"
+  it "unlinks" do
+    out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
+    expect(out).to a_string_starting_with("Linked #{@solz_name}")
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
+    out, err, status = Open3.capture3(capcmd('murano', 'link', 'unset'))
+    expect(out).to a_string_starting_with("Unlinked #{@solz_name}")
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+  end
 
 end
 
