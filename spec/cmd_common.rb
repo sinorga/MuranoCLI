@@ -43,7 +43,7 @@ RSpec.shared_context "CI_CMD" do
     # MUR-XXXX: Product name must be lowercase.
     # 2017-06-01: From [cr]: "I'll be having bizapi convert to lower case
     #  in the short term, and pegasus is updating to allow upper case."
-    #  LATER: Remove the downcase:
+    #  LATER: Remove .downcase once PAAS fixed.
     "#{name.downcase}#{Random.new.rand.hash.abs.to_s(16)}"
   end
 
