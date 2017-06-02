@@ -365,7 +365,48 @@ module MrMurano
       "#{item[:service]}_#{item[:event]}"
     end
   end
-  SyncRoot.add('eventhandlers', EventHandler, 'E', %{Event Handlers}, true)
+
+  class EventHandlerSolnPrd < EventHandler
+    def initialize
+      @solntype = 'product.id'
+      super
+    end
+
+    ##
+    # Get a list of local items filtered by solution type.
+    # @return [Array<Item>] Product solution events found
+    def locallist()
+      llist = super
+      # This feels like a hack to [lb], but I don't know of a better
+      # way to tell what files are associated with what solution
+      # without putting that in the Lua script, e.g., like changing
+      #     --#EVENT device2 data_in
+      # to this:
+      #     --#EVENT product device2 data_in
+      # Having this here means there's less stuff user can get wrong.
+      llist.select!{|i| i.service == "device2"}
+      llist
+    end
+  end
+
+  class EventHandlerSolnApp < EventHandler
+    def initialize
+      @solntype = 'application.id'
+      super
+    end
+
+    ##
+    # Get a list of local items filtered by solution type.
+    # @return [Array<Item>] Application solution events found
+    def locallist()
+      llist = super
+      llist.select!{|i| i.service != "device2"}
+      llist
+    end
+  end
+
+  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
+  SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
 
 end
 #  vim: set ai et sw=2 ts=2 :
