@@ -31,12 +31,19 @@ command :init do |c|
     say "Using account #{$cfg['user.name']}"
     puts '' # `say ''` doesn't actually print anything
 
+    newPrd = false
+    newApp = false
     # 1. Get Business ID
     acquireBusinessId(options, acc)
     # 2. Get Product ID
-    acquireSolutionId(options, acc, :product)
+    newPrd = acquireSolutionId(options, acc, :product)
     # 3. Get Application ID
-    acquireSolutionId(options, acc, :application)
+    newApp = acquireSolutionId(options, acc, :application)
+
+    # FIXME: Should we automatically link them?
+    #if newPrd and newApp do
+    #  # <insert link code here>
+    #end
 
     msg = "Ok, in Business ID: #{$cfg['business.id']}"
     unless $cfg['product.id'].nil?
