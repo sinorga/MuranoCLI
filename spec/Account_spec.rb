@@ -202,30 +202,34 @@ RSpec.describe MrMurano::Account do
   end
 
   it "creates product" do
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'ONe', :type=>'product'}).
+      with(:body => {:label=>'one', :type=>'product'}).
       to_return(body: "")
 
-    ret = @acc.new_product("ONe")
+    ret = @acc.new_product("one")
     expect(ret).to eq({})
   end
 
   it "creates product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.new_product("ONe") }.to raise_error("Missing Business ID")
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    expect { @acc.new_product("one") }.to raise_error("Missing Business ID")
   end
 
   it "deletes product" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/ONe").
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/one").
       to_return(body: "")
 
-    ret = @acc.delete_product("ONe")
+    ret = @acc.delete_product("one")
     expect(ret).to eq({})
   end
 
   it "deletes product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.delete_product("ONe") }.to raise_error("Missing Business ID")
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    expect { @acc.delete_product("one") }.to raise_error("Missing Business ID")
   end
 
   # *** :applications type solutions
@@ -269,17 +273,19 @@ RSpec.describe MrMurano::Account do
   end
 
   it "creates application" do
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'ONe', :type=>'application'}).
+      with(:body => {:label=>'one', :type=>'application'}).
       to_return(body: "")
 
-    ret = @acc.new_application("ONe")
+    ret = @acc.new_application("one")
     expect(ret).to eq({})
   end
 
   it "creates application; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.new_application("ONe") }.to raise_error("Missing Business ID")
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    expect { @acc.new_application("one") }.to raise_error("Missing Business ID")
   end
 
   it "deletes application" do
@@ -337,12 +343,19 @@ RSpec.describe MrMurano::Account do
     expect(ret).to eq({})
   end
 
-  it "creates solution; with upper case" do
-    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'ONe', :type=>'product'}).
-      to_return(body: "")
+  if false
+    # LATER: Re-enable after upcase fixed in pegasus_registry.
+    it "creates solution; with upper case" do
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+        with(:body => {:label=>'ONe', :type=>'product'}).
+        to_return(body: "")
 
-    expect { @acc.new_solution("ONe", :product) }.to_not raise_error
+      expect { @acc.new_solution("ONe", :product) }.to_not raise_error
+    end
+  else
+    it "creates solution; with uppercase" do
+      expect { @acc.new_solution("oNeTWO", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+    end
   end
 
   it "creates solution; with numbers and dashes" do
@@ -361,6 +374,10 @@ RSpec.describe MrMurano::Account do
 
   it "creates solution; with underscore" do
     expect { @acc.new_solution("one_two", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+  end
+
+  it "creates solution; with digit first" do
+    expect { @acc.new_solution("1two", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
   end
 
   it "creates solution; without biz.id" do
