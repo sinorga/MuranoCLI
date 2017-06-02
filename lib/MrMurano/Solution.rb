@@ -7,7 +7,7 @@ require 'MrMurano/SyncUpDown'
 module MrMurano
   class SolutionBase
     def initialize
-      if @solntype.nil?
+      if !defined?(@solntype) or @solntype.nil?
         @solntype = 'application.id'
       end
       # Get the application.id or product.id.
