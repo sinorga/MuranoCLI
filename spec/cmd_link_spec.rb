@@ -7,32 +7,32 @@ RSpec.describe 'murano link', :cmd, :needs_password do
   include_context "CI_CMD"
 
   before(:example) do
-    @project_name = rname('linktest')
-    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @project_name, '--save'))
+    @solz_name = rname('linktest')
+    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @solz_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @project_name, '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @solz_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'app', 'delete', @project_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'app', 'delete', @solz_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @project_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @solz_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
 
-  it "status" do
+  it "links and lists" do
     out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
-    expect(out).to a_string_starting_with('Linked linktest')
+    expect(out).to a_string_starting_with("Linked #{@solz_name}")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
