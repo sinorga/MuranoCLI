@@ -51,7 +51,7 @@ module MrMurano
       script = local.read
 
       pst = remote.to_h.merge({
-        :solution_id => $cfg['application.id'],
+        :solution_id => $cfg[@solntype],
         :script => script,
         :alias => mkalias(remote),
         :name => mkname(remote),
@@ -176,8 +176,7 @@ module MrMurano
 
     def mkalias(remote)
       unless remote.name.nil? then
-        # Modules apply to applications.
-        [$cfg['application.id'], remote[:name]].join('_')
+        [$cfg[@solntype], remote[:name]].join('_')
       else
         raise "Missing parts! #{remote.to_h.to_json}"
       end
@@ -241,7 +240,7 @@ module MrMurano
       if remote.service.nil? or remote.event.nil? then
         raise "Missing parts! #{remote.to_h.to_json}"
       else
-        [$cfg['application.id'], remote[:service], remote[:event]].join('_')
+        [$cfg[@solntype], remote[:service], remote[:event]].join('_')
       end
     end
 
