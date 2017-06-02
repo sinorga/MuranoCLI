@@ -115,7 +115,12 @@ module MrMurano
             a << %{-X #{request.method}}
             a << %{'#{request.uri.to_s}'}
             a << %{-F file=@#{local.to_s}}
-            puts a.join(' ')
+            if $cfg['tool.curlfile_f'].nil?
+              puts a.join(' ')
+            else
+              $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
+              $cfg['tool.curlfile_f'].flush
+            end
           end
 
           response = http.request(request)
