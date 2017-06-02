@@ -26,7 +26,8 @@ RSpec.describe 'murano domain', :cmd, :needs_password do
     #   the URI would start with the same.
     #     expect(out.chomp).to start_with("#{@product_name.downcase}.apps.exosite").and end_with(".io")
     #   Now, it's: <ID>.m2.exosite.io, where ID is of the form, "j41fj45hhk82so0os"
-    expect(out.split('.', 2)[0]).to match(/^[a-zA-Z0-9]{17}$/)
+    # Is there an expected length? [lb] has seen {16,17}
+    expect(out.split('.', 2)[0]).to match(/^[a-zA-Z0-9]{16,17}$/)
     expect(out.chomp).to end_with("m2.exosite.io")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
