@@ -333,7 +333,7 @@ RSpec.describe MrMurano::Account do
       with(:body => {:label=>'one', :type=>'product'}).
       to_return(body: "")
 
-    ret = @acc.new_solution("one")
+    ret = @acc.new_solution("one", :product)
     expect(ret).to eq({})
   end
 
@@ -342,7 +342,7 @@ RSpec.describe MrMurano::Account do
       with(:body => {:label=>'ONe', :type=>'product'}).
       to_return(body: "")
 
-    expect { @acc.new_solution("ONe") }.to_not raise_error
+    expect { @acc.new_solution("ONe", :product) }.to_not raise_error
   end
 
   it "creates solution; with numbers and dashes" do
@@ -351,21 +351,21 @@ RSpec.describe MrMurano::Account do
       to_return(body: "")
 
     # 2017-05-26: Dashes forbidden! MUR-1994
-    #expect { @acc.new_solution("ONe-8796-gkl") }.to_not raise_error
-    expect { @acc.new_solution("ONe-8796-gkl") }.to raise_error("Solution name must contain only letters and/or numbers")
+    #expect { @acc.new_solution("ONe-8796-gkl", :product) }.to_not raise_error
+    expect { @acc.new_solution("ONe-8796-gkl", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
   end
 
   it "creates solution; that is too long" do
-    expect { @acc.new_solution("o"*70) }.to raise_error("Solution name must contain only letters and/or numbers")
+    expect { @acc.new_solution("o"*70, :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
   end
 
   it "creates solution; with underscore" do
-    expect { @acc.new_solution("one_two") }.to raise_error("Solution name must contain only letters and/or numbers")
+    expect { @acc.new_solution("one_two", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
   end
 
   it "creates solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.new_solution("one") }.to raise_error("Missing Business ID")
+    expect { @acc.new_solution("one", :product) }.to raise_error("Missing Business ID")
   end
 
   it "deletes solution" do
