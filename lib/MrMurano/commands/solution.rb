@@ -17,6 +17,9 @@ command 'solution create' do |c|
   c.summary = %{Create a new solution}
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES, %{What type of solution to create. (default: product)}
   c.option '--save', %{Save new solution id to config}
+  # FIXME/2017-06-01: Rebase conflict: [lb] thinks options.type is
+  #   sufficient, and that we do not need options.section, since
+  #   we can always deduce the type of solution.
   c.option '--section SECTION', String, %{Which section in config to save id to}
 
   c.action do |args, options|
@@ -43,9 +46,9 @@ command 'solution create' do |c|
     ret = acc.solutions(options.type).select do |i|
       i[:name] == name or i[:domain] =~ /#{name}\./i
     end
-    pid = ret.first[:apiId]
+    pid = (ret.first or {})[:apiId]
     if pid.nil? or pid.empty? then
-      acc.error "Didn't find an apiId!!!!  #{ret}"
+      acc.error "Didn't find an apiId!!!! #{name} -> #{ret} "
       exit 3
     end
     if options.save then
@@ -106,7 +109,7 @@ command 'solution list' do |c|
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
-    options.default :type => 'all', :all=>true
+    options.default :type=>:all, :all=>true
     acc = MrMurano::Account.new
     data = acc.solutions(options.type)
 

@@ -30,7 +30,9 @@ module MrMurano
       # Get a list of all of the static content
       # @return [Array<FileItem>] List of items on server
       def list
-        get().map{|i| FileItem.new(i)}
+        ret = get()
+        return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+        ret.map{|i| FileItem.new(i)}
       end
 
       ##
@@ -113,7 +115,12 @@ module MrMurano
             a << %{-X #{request.method}}
             a << %{'#{request.uri.to_s}'}
             a << %{-F file=@#{local.to_s}}
-            puts a.join(' ')
+            if $cfg['tool.curlfile_f'].nil?
+              puts a.join(' ')
+            else
+              $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
+              $cfg['tool.curlfile_f'].flush
+            end
           end
 
           response = http.request(request)

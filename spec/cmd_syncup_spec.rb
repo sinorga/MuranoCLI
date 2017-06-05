@@ -7,14 +7,31 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
   include_context "CI_CMD"
 
   before(:example) do
-    @project_name = rname('syncupTest')
-    out, err, status = Open3.capture3(capcmd('murano', 'project', 'create', @project_name, '--save'))
+    @product_name = rname('syncupTestPrd')
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
+
+    @applctn_name = rname('syncdownTestApp')
+    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @applctn_name, '--save'))
+    expect(err).to eq('')
+    soln_id = out
+    expect(soln_id.chomp).to match(/^[a-zA-Z0-9]+$/)
+    expect(status.exitstatus).to eq(0)
+
+    out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
+    expect(out).to a_string_starting_with("Linked #{@product_name}")
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+    expect(out).to eq('')
+    expect(err).to eq('')
+    expect(status.exitstatus).to eq(0)
+
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
@@ -34,8 +51,15 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
+      # FIXME/2017-06-02 03:06: This is failing. `murano status` shows:
+      #   Adding:
+      #   Deleting:
+      #   Changing:
+      #    M M  modules/table_util.lua
+      #    M E  services/devdata.lua
+      #    M E  services/timers.lua
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
-      expect(out).to start_with(%{Adding:\nDeleteing:\nChanging:\n})
+      expect(out).to start_with(%{Adding:\nDeleting:\nChanging:\n})
       # Due to timestamp races, there might be modules or services in Changing.
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)

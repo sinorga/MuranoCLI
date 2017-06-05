@@ -14,7 +14,7 @@ module MrMurano
     class Base
       def initialize
         @pid = $cfg['product.id']
-        raise "No product id!" if @pid.nil?
+        raise MrMurano::ConfigError.new("No product id!") if @pid.nil?
         @uriparts = [:service, @pid, :device2]
         @itemkey = :id
       end
@@ -140,7 +140,11 @@ module MrMurano
       end
 
       def syncup_after()
-        upload_all(@there)
+        unless @there.empty?
+          upload_all(@there)
+        else
+          error "Nothing to sync"
+        end
         @there = nil
       end
 
@@ -354,5 +358,4 @@ module MrMurano
 end
 
 #  vim: set ai et sw=2 ts=2 :
-
 

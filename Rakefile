@@ -31,7 +31,7 @@ gvim lib/MrMurano/version.rb
 git commit -a -m 'version bump'
 git flow release finish <newversion>
 # When editing message for tag, add release notes.
-rake git:all
+#rake git:all
 # Wait for all tests to complete.
 # if all passed: rake gemit
 EOR
@@ -55,33 +55,35 @@ desc "Clean out junk from prior hot tests"
 task :test_clean_up do
     if not ENV['MURANO_CONFIGFILE'].nil? then
         ids = `ruby -Ilib bin/murano solution list --idonly`.chomp
-        puts "Found solutions #{ids}; deleteing"
-        ids.split.each do |id|
-            sh %{ruby -Ilib bin/murano solution delete #{id}}
+        unless ids.empty?
+            puts "Found solutions #{ids}; deleting"
+            ids.split.each do |id|
+                sh %{ruby -Ilib bin/murano solution delete #{id}}
+            end
         end
     end
 end
 
 ###
 # When new tags are pushed to upstream, the CI will kick-in and build the release
-namespace :git do
-    desc "Push only develop, master, and tags to origin"
-    task :origin do
-        sh %{git push origin develop}
-        sh %{git push origin master}
-        sh %{git push origin --tags}
-    end
-
-    desc "Push only develop, master, and tags to upstream"
-    task :upstream do
-        sh %{git push upstream develop}
-        sh %{git push upstream master}
-        sh %{git push upstream --tags}
-    end
-
-    desc "Push to origin and upstream"
-    task :all => [:origin, :upstream]
-end
+#namespace :git do
+#    desc "Push only develop, master, and tags to origin"
+#    task :origin do
+#        sh %{git push origin develop}
+#        sh %{git push origin master}
+#        sh %{git push origin --tags}
+#    end
+#
+#    desc "Push only develop, master, and tags to upstream"
+#    task :upstream do
+#        sh %{git push upstream develop}
+#        sh %{git push upstream master}
+#        sh %{git push upstream --tags}
+#    end
+#
+#    desc "Push to origin and upstream"
+#    task :all => [:origin, :upstream]
+#end
 
 desc "Build, install locally, and push gem"
 task :gemit do

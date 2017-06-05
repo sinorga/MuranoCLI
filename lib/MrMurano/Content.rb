@@ -1,6 +1,7 @@
 require 'uri'
 require 'cgi'
 require 'net/http'
+require 'mime/types'
 require 'digest'
 require 'http/form_data'
 require 'MrMurano/Config'
@@ -14,7 +15,7 @@ module MrMurano
     class Base
       def initialize
         @pid = $cfg['product.id']
-        raise "No product id!" if @pid.nil?
+        raise MrMurano::ConfigError.new("No product id!") if @pid.nil?
         @uriparts = [:service, @pid, :content, :item]
         @itemkey = :id
         @locationbase = $cfg['location.base']
@@ -100,7 +101,12 @@ module MrMurano
             a << %{-F '#{key}=#{value}'}
           end
           a << %{-F #{ret[:field]}=@#{local_path.to_s}}
-          puts a.join(' ')
+          if $cfg['tool.curlfile_f'].nil?
+            puts a.join(' ')
+          else
+            $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
+            $cfg['tool.curlfile_f'].flush
+          end
         end
 
         unless $cfg['tool.dry'] then
@@ -142,7 +148,12 @@ module MrMurano
           a << %{-H 'User-Agent: #{request['User-Agent']}'}
           a << %{-X #{request.method}}
           a << %{'#{request.uri.to_s}'}
-          puts a.join(' ')
+          if $cfg['tool.curlfile_f'].nil?
+            puts a.join(' ')
+          else
+            $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
+            $cfg['tool.curlfile_f'].flush
+          end
         end
 
         unless $cfg['tool.dry'] then

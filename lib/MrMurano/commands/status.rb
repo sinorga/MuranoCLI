@@ -53,7 +53,7 @@ command :status do |c|
     def pretty(ret, options)
       say "Adding:" if options.grouped
       ret[:toadd].each{|item| say " + #{item[:pp_type]}  #{fmtr(item)}"}
-      say "Deleteing:" if options.grouped
+      say "Deleting:" if options.grouped
       ret[:todel].each{|item| say " - #{item[:pp_type]}  #{fmtr(item)}"}
       say "Changing:" if options.grouped
       ret[:tomod].each{|item|
@@ -69,15 +69,21 @@ command :status do |c|
     @grouped = {:toadd=>[],:todel=>[],:tomod=>[], :unchg=>[]}
     def gmerge(ret, type, options)
       if options.grouped then
-        [:toadd, :todel, :tomod, :unchg].each do |kind|
-          ret[kind].each do |item|
-            item = item.to_h
-            item[:pp_type] = type
-            @grouped[kind] << item
-          end
-        end
+        out = @grouped
       else
-        pretty(ret, options)
+        out = {:toadd=>[],:todel=>[],:tomod=>[], :unchg=>[]}
+      end
+
+      [:toadd, :todel, :tomod, :unchg].each do |kind|
+        ret[kind].each do |item|
+          item = item.to_h
+          item[:pp_type] = type
+          out[kind] << item
+        end
+      end
+
+      unless options.grouped then
+        pretty(out, options)
       end
     end
 
