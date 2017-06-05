@@ -51,13 +51,14 @@ module MrMurano
       script = local.read
 
       pst = remote.to_h.merge({
-        :solution_id => $cfg['project.id'],
+        :solution_id => $cfg[@solntype],
         :script => script,
         :alias => mkalias(remote),
         :name => mkname(remote),
       })
       debug "f: #{local} >> #{pst.reject{|k,_| k==:script}.to_json}"
-      # try put, if 404, then post.
+      # Try PUT. If 404, then POST.
+      # I.e., PUT if not exists, else POST to create.
       put('/'+mkalias(remote), pst) do |request, http|
         response = http.request(request)
         case response
@@ -157,7 +158,7 @@ module MrMurano
       attr_accessor :updated_at
       # @return [String] Timestamp when this was created.
       attr_accessor :created_at
-      # @return [String] The project.id that this is in
+      # @return [String] The application solution's ID.
       attr_accessor :solution_id
     end
 
@@ -175,7 +176,7 @@ module MrMurano
 
     def mkalias(remote)
       unless remote.name.nil? then
-        [$cfg['project.id'], remote[:name]].join('_')
+        [$cfg[@solntype], remote[:name]].join('_')
       else
         raise "Missing parts! #{remote.to_h.to_json}"
       end
@@ -191,7 +192,8 @@ module MrMurano
 
     def list
       ret = get()
-      return [] unless ret.has_key? :items
+      return [] unless ret.is_a?(Hash) and !ret.has_key?(:error)
+      return [] unless ret.has_key?(:items)
       ret[:items].map{|i| LibraryItem.new(i)}
     end
 
@@ -216,7 +218,7 @@ module MrMurano
       attr_accessor :updated_at
       # @return [String] Timestamp when this was created.
       attr_accessor :created_at
-      # @return [String] The project.id that this is in
+      # @return [String] The soln's product.id or application.id (Murano's apiId).
       attr_accessor :solution_id
       # @return [String] Which service triggers this script
       attr_accessor :service
@@ -238,7 +240,7 @@ module MrMurano
       if remote.service.nil? or remote.event.nil? then
         raise "Missing parts! #{remote.to_h.to_json}"
       else
-        [$cfg['project.id'], remote[:service], remote[:event]].join('_')
+        [$cfg[@solntype], remote[:service], remote[:event]].join('_')
       end
     end
 
@@ -252,6 +254,7 @@ module MrMurano
 
     def list
       ret = get()
+      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
       # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] or '').split
@@ -289,7 +292,7 @@ module MrMurano
     def toRemoteItem(from, path)
       # This allows multiple events to be in the same file. This is a lie.
       # This only finds the last event in a file.
-      # :legacy support doesn't allow for that. but that's ok.
+      # :legacy support doesn't allow for that. But that's ok.
       path = Pathname.new(path) unless path.kind_of? Pathname
       cur = nil
       lineno=0
@@ -362,7 +365,48 @@ module MrMurano
       "#{item[:service]}_#{item[:event]}"
     end
   end
-  SyncRoot.add('eventhandlers', EventHandler, 'E', %{Event Handlers}, true)
+
+  class EventHandlerSolnPrd < EventHandler
+    def initialize
+      @solntype = 'product.id'
+      super
+    end
+
+    ##
+    # Get a list of local items filtered by solution type.
+    # @return [Array<Item>] Product solution events found
+    def locallist()
+      llist = super
+      # This feels like a hack to [lb], but I don't know of a better
+      # way to tell what files are associated with what solution
+      # without putting that in the Lua script, e.g., like changing
+      #     --#EVENT device2 data_in
+      # to this:
+      #     --#EVENT product device2 data_in
+      # Having this here means there's less stuff user can get wrong.
+      llist.select!{|i| i.service == "device2"}
+      llist
+    end
+  end
+
+  class EventHandlerSolnApp < EventHandler
+    def initialize
+      @solntype = 'application.id'
+      super
+    end
+
+    ##
+    # Get a list of local items filtered by solution type.
+    # @return [Array<Item>] Application solution events found
+    def locallist()
+      llist = super
+      llist.select!{|i| i.service != "device2"}
+      llist
+    end
+  end
+
+  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
+  SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
 
 end
 #  vim: set ai et sw=2 ts=2 :

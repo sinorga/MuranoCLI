@@ -10,9 +10,9 @@ module MrMurano
   module Webservice
     class Base
       def initialize
-        @pid = $cfg['project.id']
-        raise "No project id!" if @pid.nil?
-        @uriparts = [:service, @pid, :webservice]
+        @pid = $cfg['application.id']
+        raise MrMurano::ConfigError.new("No application id!") if @pid.nil?
+        @uriparts = [:solution, @pid]
         @itemkey = :id
         @locationbase = $cfg['location.base']
         @location = nil
@@ -24,7 +24,7 @@ module MrMurano
       ## Generate an endpoint in Murano
       # Uses the uriparts and path
       # @param path String: any additional parts for the URI
-      # @return URI: The full URI for this enpoint.
+      # @return URI: The full URI for this endpoint.
       def endPoint(path='')
         parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
         s = parts.map{|v| v.to_s}.join('/')

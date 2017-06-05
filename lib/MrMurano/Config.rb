@@ -16,9 +16,12 @@ module MrMurano
       def load()
         return if kind == :internal
         return if kind == :defaults
+        # DEVs: Uncomment if you're trying to figure where settings are coming from.
+        #puts "Loading config at: #{path}"
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
         self[:data].restore
+        self.initCurlfile()
       end
 
       def write()
@@ -29,6 +32,22 @@ module MrMurano
         self[:data].save
         path.chmod(0600)
       end
+
+      # To capture curl calls when running rspec, write to a file.
+      def initCurlfile()
+        if self[:data]['tool']['curldebug'] and !self[:data]['tool']['curlfile'].to_s.strip.empty? then
+          if self[:data]['tool']['curlfile_f'].nil?
+            self[:data]['tool']['curlfile_f'] = File.open(self[:data]['tool']['curlfile'], 'a')
+            # MEH: Call $cfg['tool.curlfile_f'].close() at some point? Or let Ruby do on exit.
+            self[:data]['tool']['curlfile_f'] << Time.now << "\n"
+            self[:data]['tool']['curlfile_f'] << "murano #{ARGV.join(' ')}\n"
+          end
+        elsif not self[:data]['tool']['curlfile_f'].nil?
+          self[:data]['tool']['curlfile_f'].close
+          self[:data]['tool']['curlfile_f'] = nil
+        end
+      end
+
     end
 
     attr :paths
@@ -103,7 +122,6 @@ module MrMurano
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
-
 
       set('tool.verbose', false, :defaults)
       set('tool.debug', false, :defaults)
@@ -266,6 +284,16 @@ module MrMurano
       tomod[ikey] = value unless value.nil?
       tomod.delete(ikey) if value.nil?
       data[section] = tomod
+      # Remove empty sections to make test results more predictable.
+      # Interesting: IniFile.each only returns sections with key-vals,
+      #              so call IniFile.each_section instead.
+      #                 data.each do |sectn, param, val|
+      #                   puts "#{param} = #{val} [in section: #{sectn}]"
+      data.each_section do |sectn|
+        if data[sectn].empty?
+          data.delete_section(sectn)
+        end
+      end
       cfg.write
     end
 
@@ -279,6 +307,9 @@ module MrMurano
       set(key, value, :internal)
     end
 
+  end
+
+  class ConfigError < StandardError
   end
 
 end

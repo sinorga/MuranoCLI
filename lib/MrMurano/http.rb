@@ -44,24 +44,11 @@ module MrMurano
             a << %{-d '#{request.body}'}
           end
         end
-        unless defined?(@@curlfile)
+        if $cfg['tool.curlfile_f'].nil?
           puts a.join(' ')
         else
-          @@curlfile << a.join(' ') + "\n\n"
-          @@curlfile.flush
-          # MEH: Call @@curlfile.close() at some point?
-        end
-      end
-    end
-
-    ## Open a file for capturing curl calls.
-    # Start with the current time and config.
-    def self.initCurlfile
-      if $cfg['tool.curldebug'] and $cfg['tool.curlfile'] then
-        unless defined?(@@curlfile)
-          @@curlfile = File.open($cfg['tool.curlfile'], 'a')
-          @@curlfile << Time.now << "\n"
-          @@curlfile << "murano #{ARGV.join(' ')}\n"
+          $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
+          $cfg['tool.curlfile_f'].flush
         end
       end
     end
@@ -110,9 +97,11 @@ module MrMurano
       if isj then
         if $cfg['tool.fullerror'] then
           resp << JSON.pretty_generate(jsn)
-        else
+        elsif jsn.kind_of? Hash then
           resp << "[#{jsn[:statusCode]}] " if jsn.has_key? :statusCode
           resp << jsn[:message] if jsn.has_key? :message
+        else
+          resp << jsn.to_s
         end
       else
         resp << (jsn or 'nil')

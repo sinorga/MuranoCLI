@@ -6,12 +6,15 @@ require '_workspace'
 RSpec.describe MrMurano::ServiceConfig do
   include_context "WORKSPACE"
   before(:example) do
+    MrMurano::SyncRoot.reset
     $cfg = MrMurano::Config.new
     $cfg.load
     $project = MrMurano::ProjectFile.new
     $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['project.id'] = 'XYZ'
+    # serviceconfig works on all solution types.
+    $cfg['product.id'] = 'XYZ'
+    $cfg['application.id'] = 'XYZ'
 
     @srv = MrMurano::ServiceConfig.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
@@ -58,6 +61,36 @@ RSpec.describe MrMurano::ServiceConfig do
       to_return(body: body.to_json)
 
     ret = @srv.fetch('9K0')
+    expect(ret).to eq(body)
+  end
+
+  it "creates" do
+    body = {:id=>"9K0",
+             :name=>"debug",
+             :alias=>"XYZ_debug",
+             :solution_id=>"XYZ",
+             :service=>"device",
+             :status=>"ready",
+             :created_at=>"2016-07-07T19:16:19.479Z",
+             :updated_at=>"2016-09-12T13:26:55.868Z"
+    }
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig").
+      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                      'Content-Type'=>'application/json'}).
+      to_return(body: body.to_json)
+
+    ret = @srv.create('p4q0m2ruyoxierh')
+    expect(ret).to eq(body)
+  end
+
+  it "removes" do
+    body = {}
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/serviceconfig/9K0").
+      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
+                      'Content-Type'=>'application/json'}).
+      to_return(body: body.to_json)
+
+    ret = @srv.remove('9K0')
     expect(ret).to eq(body)
   end
 

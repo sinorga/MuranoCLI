@@ -7,14 +7,14 @@ RSpec.describe 'murano device', :cmd, :needs_password do
   include_context "CI_CMD"
 
   before(:example) do
-    @project_name = rname('deviceTest')
-    out, err, status = Open3.capture3(capcmd('murano', 'project', 'create', @project_name, '--save'))
+    @product_name = rname('deviceTest')
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @project_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
@@ -70,7 +70,10 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'activate', '12345'))
-    expect(out.chomp).to match(/^\h{40}$/)
+    # 2017-06-01: This used to return hex, e.g., /^\h{40}$/, but now returns
+    #   a-zA-Z0-9 (but not \w, which also includes underscore).
+    #expect(out.chomp).to match(/^\h{40}$/)
+    expect(out.chomp).to match(/^[a-zA-Z0-9]{40}$/)
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
@@ -90,7 +93,9 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'activate', '12345'))
-    expect(out.chomp).to match(/^\h{40}$/)
+    # 2017-06-01: This used to return hex, e.g., /^\h{40}$/, but now returns
+    #   a-zA-Z0-9 (but not \w, which also includes underscore).
+    expect(out.chomp).to match(/^[a-zA-Z0-9]{40}$/)
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 

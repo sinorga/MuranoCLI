@@ -10,8 +10,11 @@ module MrMurano
     end
 
     def list
-      get()[:items]
+      ret = get()
+      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+      ret[:items]
     end
+
     def fetch(id)
       get('/' + id.to_s)
     end
@@ -26,6 +29,20 @@ module MrMurano
     def scid
       return @scid unless @scid.nil?
       @scid = scid_for_name(@serviceName)
+    end
+
+    def create(pid, name=nil)  #? script_key?
+      name = pid if name.nil?
+      # See pegasus_registry PostServiceConfig for the POST properties.
+      post('', {
+        :solution_id => @sid,
+        :service => pid,
+        :name => name,
+      })
+    end
+
+    def remove(id)
+      delete("/#{id}")
     end
 
     def info(id=scid)
@@ -85,6 +102,7 @@ module MrMurano
 
     def list
       ret = get()
+      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
       ret[:items]
     end
 
@@ -113,30 +131,6 @@ module MrMurano
   end
   # :nocov:
 
-  # Device config interface for the assign commands.
-  class SC_Device < ServiceConfig
-    def initialize
-      super
-      @serviceName = 'device'
-    end
-
-    def assignTriggers(products)
-      details = fetch(scid)
-      products = [products] unless products.kind_of? Array
-      details[:triggers] = {:pid=>products}
-      details[:parameters] = {:pid=>products}
-
-      put('/'+scid, details)
-    end
-
-    def showTriggers
-      details = fetch(scid)
-
-      return [] if details[:triggers].nil?
-      details[:triggers][:pid]
-    end
-
-  end
 end
 
 #  vim: set ai et sw=2 ts=2 :

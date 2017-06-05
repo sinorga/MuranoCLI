@@ -32,7 +32,8 @@ RSpec.describe MrMurano::SyncUpDown do
     $project['routes.location'] = 'tsud'
     $project['routes.include'] = ['*.lua', '*/*.lua']
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['project.id'] = 'XYZ'
+    $cfg['product.id'] = 'XYZ'
+    $cfg['application.id'] = 'XYZ'
   end
 
   context "status" do

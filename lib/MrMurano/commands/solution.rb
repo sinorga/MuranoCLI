@@ -17,6 +17,10 @@ command 'solution create' do |c|
   c.summary = %{Create a new solution}
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES, %{What type of solution to create. (default: product)}
   c.option '--save', %{Save new solution id to config}
+  # FIXME/2017-06-01: Rebase conflict: [lb] thinks options.type is
+  #   sufficient, and that we do not need options.section, since
+  #   we can always deduce the type of solution.
+  c.option '--section SECTION', String, %{Which section in config to save id to}
 
   c.action do |args, options|
     options.default :type => :product
@@ -39,22 +43,26 @@ command 'solution create' do |c|
     end
 
     # create doesn't return anything, so we need to go look for it.
-    ret = acc.solutions(options.type).select{|i| i[:domain] =~ /#{name}\./}
-    pid = ret.first[:apiId]
+    ret = acc.solutions(options.type).select do |i|
+      i[:name] == name or i[:domain] =~ /#{name}\./i
+    end
+    pid = (ret.first or {})[:apiId]
     if pid.nil? or pid.empty? then
-      acc.error "Didn't find an apiId!!!!  #{ret}"
+      acc.error "Didn't find an apiId!!!! #{name} -> #{ret} "
       exit 3
     end
     if options.save then
-      $cfg.set('project.id', pid)
+      section = options.type.to_s
+      section = options.section.to_s unless options.section.nil?
+      $cfg.set("#{section}.id", pid)
     end
     acc.outf pid
 
   end
 end
 alias_command 'product create', 'solution create','--type','product'
-alias_command 'project create', 'solution create','--type','product'
 alias_command 'app create', 'solution create','--type','application'
+alias_command 'application create', 'solution create','--type','application'
 
 command 'solution delete' do |c|
   c.syntax = %{murano solution delete <id>}
@@ -70,7 +78,7 @@ command 'solution delete' do |c|
     name = args[0]
 
     # Need to convert what we got into the internal PID.
-    ret = acc.solutions(:all).select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./ }
+    ret = acc.solutions(:all).select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./i }
 
     if $cfg['tool.debug'] then
       say "Matches found:"
@@ -87,9 +95,9 @@ command 'solution delete' do |c|
     end
   end
 end
-alias_command 'product delete', 'solution delete','--type','product'
-alias_command 'project delete', 'solution delete','--type','product'
-alias_command 'app delete', 'solution delete','--type','application'
+alias_command 'product delete', 'solution delete'
+alias_command 'app delete', 'solution delete'
+alias_command 'application delete', 'solution delete'
 
 command 'solution list' do |c|
   c.syntax = %{murano solution list [options]}
@@ -101,7 +109,7 @@ command 'solution list' do |c|
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
-    options.default :type => 'all', :all=>true
+    options.default :type=>:all, :all=>true
     acc = MrMurano::Account.new
     data = acc.solutions(options.type)
 
@@ -135,7 +143,7 @@ command 'solution list' do |c|
   end
 end
 alias_command 'product list', 'solution list', '--type', 'product', '--no-all'
-alias_command 'project list', 'solution list', '--type', 'product', '--no-all'
 alias_command 'app list', 'solution list', '--type', 'application', '--no-all'
+alias_command 'application list', 'solution list', '--type', 'application', '--no-all'
 
 #  vim: set ai et sw=2 ts=2 :

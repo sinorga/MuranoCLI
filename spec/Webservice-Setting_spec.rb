@@ -12,15 +12,17 @@ RSpec.describe MrMurano::Webservice::Settings do
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['project.id'] = 'XYZ'
+    $cfg['application.id'] = 'XYZ'
 
     @srv = MrMurano::Webservice::Settings.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
+
+    @baseURI = "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/cors"
   end
 
   it "initializes" do
     uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors/")
+    expect(uri.to_s).to eq("#{@baseURI}/")
   end
 
   context "when server gives string" do
@@ -31,7 +33,7 @@ RSpec.describe MrMurano::Webservice::Settings do
                 :headers=>["Content-Type","Cookie","Authorization"],
                 :credentials=>true}
         body = cors
-        stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors").
+        stub_request(:get, "#{@baseURI}").
           with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                           'Content-Type'=>'application/json'}).
                           to_return(body: body.to_json)
@@ -50,7 +52,7 @@ RSpec.describe MrMurano::Webservice::Settings do
                 :headers=>["Content-Type","Cookie","Authorization"],
                 :credentials=>true}
         body = cors
-        stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors").
+        stub_request(:get, "#{@baseURI}").
           with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                           'Content-Type'=>'application/json'}).
                           to_return(body: body.to_json)
@@ -71,7 +73,7 @@ RSpec.describe MrMurano::Webservice::Settings do
                :credentials=>true}
     end
     it "sets" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/webservice/cors").
+      stub_request(:put, "#{@baseURI}").
         with(:body=>@cors.to_json,
              :headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).

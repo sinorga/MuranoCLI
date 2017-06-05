@@ -76,7 +76,7 @@ RSpec.describe MrMurano::Account, "token" do
     it "gets a token" do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/token/").
         with(:body => {:email=>'bob', :password=>'v'}.to_json).
-        to_return(body: {:token=>"ABCDEFGHIJKLMNOP"}.to_json )
+        to_return(body: {:token=>"ABCDEFGHIJKLMNOP"}.to_json)
 
       ret = @acc.token
       expect(ret).to eq("ABCDEFGHIJKLMNOP")
@@ -85,7 +85,7 @@ RSpec.describe MrMurano::Account, "token" do
     it "gets an error" do
       stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/token/").
         with(:body => {:email=>'bob', :password=>'v'}.to_json).
-        to_return(status: 401, body: {}.to_json )
+        to_return(status: 401, body: {}.to_json)
 
       expect(@acc).to receive(:error).twice.and_return(nil)
       ret = @acc.token
@@ -132,10 +132,19 @@ RSpec.describe MrMurano::Account do
 
   context "lists business" do
     it "for user.name" do
-      bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
-                 {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
+      # http.rb::json_opts() sets :symbolize_names=>true, so use symbols, not strings.
+      bizlist = [
+        {:bizid=>"XXX",
+         :role=>"admin",
+         :name=>"MPS",
+        },
+        {:bizid=>"YYY",
+         :role=>"admin",
+         :name=>"MAE",
+        },
+      ]
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
-        to_return(body: bizlist )
+        to_return(body: bizlist)
 
       $cfg['user.name'] = 'BoB@place.net'
       ret = @acc.businesses
@@ -143,10 +152,16 @@ RSpec.describe MrMurano::Account do
     end
 
     it "askes for account when missing" do
-      bizlist = [{"bizid"=>"XXX","role"=>"admin","name"=>"MPS"},
-                 {"bizid"=>"YYY","role"=>"admin","name"=>"MAE"}]
+      bizlist = [
+        {:bizid=>"XXX",
+         :role=>"admin",
+         :name=>"MPS"},
+        {:bizid=>"YYY",
+         :role=>"admin",
+         :name=>"MAE"},
+      ]
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
-        to_return(body: bizlist )
+        to_return(body: bizlist)
 
       $cfg['user.name'] = nil
       expect(@acc).to receive(:_loginInfo) do |arg|
@@ -158,14 +173,26 @@ RSpec.describe MrMurano::Account do
     end
   end
 
+  # *** :product type solutions
+
   it "lists products" do
-    prdlist = [{"bizid"=>"XYZxyz","type"=>"onepModel","pid"=>"ABC","modelId"=>"cde","label"=>"fts"},
-               {"bizid"=>"XYZxyz","type"=>"onepModel","pid"=>"fgh","modelId"=>"ijk","label"=>"lua-test"}]
+    prodlist = [
+      {:bizid=>"XYZxyz",
+       :type=>"product",
+       :pid=>"ABC",
+       :modelId=>"cde",
+       :label=>"fts"},
+      {:bizid=>"XYZxyz",
+       :type=>"product",
+       :pid=>"fgh",
+       :modelId=>"ijk",
+       :label=>"lua-test"},
+    ]
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      to_return(body: prdlist )
+      to_return(body: prodlist)
 
     ret = @acc.products
-    expect(ret).to eq(prdlist)
+    expect(ret).to eq(prodlist)
   end
 
   it "lists products; without biz.id" do
@@ -175,98 +202,192 @@ RSpec.describe MrMurano::Account do
   end
 
   it "creates product" do
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'ONe', :type=>'product'}).
-      to_return(body: "" )
+      with(:body => {:label=>'one', :type=>'product'}).
+      to_return(body: "")
 
-    ret = @acc.new_product("ONe")
+    ret = @acc.new_product("one")
     expect(ret).to eq({})
   end
 
   it "creates product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.new_product("ONe") }.to raise_error("Missing Business ID")
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    expect { @acc.new_product("one") }.to raise_error("Missing Business ID")
   end
 
   it "deletes product" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/ONe").
-      to_return(body: "" )
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/one").
+      to_return(body: "")
 
-    ret = @acc.delete_product("ONe")
+    ret = @acc.delete_product("one")
     expect(ret).to eq({})
   end
 
   it "deletes product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.delete_product("ONe") }.to raise_error("Missing Business ID")
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    expect { @acc.delete_product("one") }.to raise_error("Missing Business ID")
   end
 
+  # *** :applications type solutions
+
+  it "lists applications" do
+    # NOTE: Need to use symbols, not strings, for keys, because
+    #       http.rb::json_opts() specifies :symbolize_names => true.
+    appllist = [
+      {:bizid=>"XYZxyz",
+       :type=>"application",
+       :domain=>"XYZxyz.apps.exosite.io",
+       :apiId=>"ACBabc",
+       :sid=>"ACBabc",
+      },
+      {:bizid=>"XYZxyz",
+       :type=>"application",
+       :domain=>"XYZxyz.apps.exosite.io",
+       :apiId=>"DEFdef",
+       :sid=>"DEFdef",
+      },
+    ]
+    solnlist = [
+      {:bizid=>"XYZxyz",
+       :type=>"product",
+       :pid=>"ABC",
+       :modelId=>"cde",
+       :label=>"fts",
+      },
+    ]
+    solnlist.concat appllist
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      to_return(body: solnlist)
+    ret = @acc.applications
+    expect(ret).to eq(appllist)
+  end
+
+  it "lists applications; without biz.id" do
+    allow($cfg).to receive(:get).with('business.id').and_return(nil)
+    expect(@acc).to receive(:debug).with("Getting all solutions of type application")
+    expect { @acc.applications }.to raise_error("Missing Business ID")
+  end
+
+  it "creates application" do
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+      with(:body => {:label=>'one', :type=>'application'}).
+      to_return(body: "")
+
+    ret = @acc.new_application("one")
+    expect(ret).to eq({})
+  end
+
+  it "creates application; without biz.id" do
+    allow($cfg).to receive(:get).with('business.id').and_return(nil)
+    # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
+    expect { @acc.new_application("one") }.to raise_error("Missing Business ID")
+  end
+
+  it "deletes application" do
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/ONe").
+      to_return(body: "")
+
+    ret = @acc.delete_application("ONe")
+    expect(ret).to eq({})
+  end
+
+  it "deletes application; without biz.id" do
+    allow($cfg).to receive(:get).with('business.id').and_return(nil)
+    expect { @acc.delete_application("ONe") }.to raise_error("Missing Business ID")
+  end
+
+  # *** :all type solutions
 
   it "lists solutions" do
-    sollist = [{"bizid"=>"XYZxyz",
-                "type"=>"dataApi",
-                "domain"=>"two.apps.exosite.io",
-                "apiId"=>"abc",
-                "sid"=>"def"},
-               {"bizid"=>"XYZxyz",
-                "type"=>"dataApi",
-                "domain"=>"one.apps.exosite.io",
-                "apiId"=>"ghi",
-                "sid"=>"jkl"}]
+    # http.rb::json_opts() sets :symbolize_names=>true, so use symbols, not strings.
+    prodlist = [
+      {:bizid=>"XYZxyz",
+       :type=>"product",
+       :domain=>"ABCabc.m2.exosite.io",
+       :apiId=>"ABCabc",
+       :sid=>"ABCabc",
+      },
+    ]
+    appllist = [
+      {:bizid=>"XYZxyz",
+       :type=>"application",
+       :domain=>"XYZxyz.apps.exosite.io",
+       :apiId=>"DEFdef",
+       :sid=>"DEFdef"},
+    ]
+    solnlist = prodlist + appllist
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      to_return(body: sollist )
+      to_return(body: solnlist)
 
     ret = @acc.solutions
-    expect(ret).to eq(sollist)
+    expect(ret).to eq(solnlist)
   end
 
   it "lists solutions; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect(@acc).to receive(:debug).with("Getting all solutions of type dataApi")
+    expect(@acc).to receive(:debug).with("Getting all solutions of type all")
     expect { @acc.solutions }.to raise_error("Missing Business ID")
   end
 
   it "creates solution" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'one', :type=>'dataApi'}).
-      to_return(body: "" )
+      with(:body => {:label=>'one', :type=>'product'}).
+      to_return(body: "")
 
-    ret = @acc.new_solution("one")
+    ret = @acc.new_solution("one", :product)
     expect(ret).to eq({})
   end
 
-  it "creates solution; with upper case" do
-    stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'ONe', :type=>'dataApi'}).
-      to_return(body: "" )
+  if false
+    # LATER: Re-enable after upcase fixed in pegasus_registry.
+    it "creates solution; with upper case" do
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
+        with(:body => {:label=>'ONe', :type=>'product'}).
+        to_return(body: "")
 
-    expect { @acc.new_solution("ONe") }.to_not raise_error
+      expect { @acc.new_solution("ONe", :product) }.to_not raise_error
+    end
+  else
+    it "creates solution; with uppercase" do
+      expect { @acc.new_solution("oNeTWO", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+    end
   end
 
   it "creates solution; with numbers and dashes" do
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/").
-      with(:body => {:label=>'ONe-8796-gkl', :type=>'dataApi'}).
-      to_return(body: "" )
+      with(:body => {:label=>'ONe-8796-gkl', :type=>'product'}).
+      to_return(body: "")
 
-    expect { @acc.new_solution("ONe-8796-gkl") }.to_not raise_error
+    # 2017-05-26: Dashes forbidden! MUR-1994
+    #expect { @acc.new_solution("ONe-8796-gkl", :product) }.to_not raise_error
+    expect { @acc.new_solution("ONe-8796-gkl", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
   end
 
   it "creates solution; that is too long" do
-    expect { @acc.new_solution("o"*70) }.to raise_error("Solution name must be a valid domain name component")
+    expect { @acc.new_solution("o"*70, :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
   end
 
   it "creates solution; with underscore" do
-    expect { @acc.new_solution("one_two") }.to raise_error("Solution name must be a valid domain name component")
+    expect { @acc.new_solution("one_two", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+  end
+
+  it "creates solution; with digit first" do
+    expect { @acc.new_solution("1two", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
   end
 
   it "creates solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.new_solution("one") }.to raise_error("Missing Business ID")
+    expect { @acc.new_solution("one", :product) }.to raise_error("Missing Business ID")
   end
 
   it "deletes solution" do
     stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/business/XYZxyz/solution/one").
-      to_return(body: "" )
+      to_return(body: "")
 
     ret = @acc.delete_solution("one")
     expect(ret).to eq({})
