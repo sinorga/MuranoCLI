@@ -43,9 +43,12 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       FileUtils.move('assets','files')
       FileUtils.mkpath('specs')
       FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
-      dev_symlink = File.join(Dir.tmpdir(), "murcli-test")
-      FileUtils.rm(dev_symlink)
-      FileUtils.ln_s(Dir.pwd, dev_symlink)
+      @dev_symlink = File.join(Dir.tmpdir(), "murcli-test")
+      FileUtils.rm(@dev_symlink, :force => true)
+      FileUtils.ln_s(Dir.pwd, @dev_symlink)
+    end
+    after(:example) do
+      FileUtils.rm(@dev_symlink, :force => true)
     end
 
     it "syncup" do
