@@ -104,6 +104,13 @@ namespace :push do
     end
 
     namespace :github do
+
+        desc 'Verify that the computed tag exists'
+        task :verifyTag do
+            r = `git tag -l #{tagName}`
+            raise "Tag doesn't exist (#{tagName})" if r.empty?
+        end
+
         desc "Make a release in Github"
         task :makeRelease do
             # ENV['GITHUB_TOKEN'] set by CI.
