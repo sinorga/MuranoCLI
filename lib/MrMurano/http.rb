@@ -3,6 +3,9 @@ require 'uri'
 require 'net/http'
 require 'json'
 require('certified') if Gem.win_platform?
+# 2017-06-07: [lb] getting "execution expired (Net::OpenTimeout)" on http.start.
+# Suggestions online say to load the pure-Ruby DNS implementation, resolv.rb.
+require 'resolv-replace'
 
 module MrMurano
   module Http
