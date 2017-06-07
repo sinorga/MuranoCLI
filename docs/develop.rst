@@ -148,7 +148,8 @@ run into problems with different ruby projects using different
 versions of different libraries. So you'll probably want to
 use a ruby version manager, such as
 `Ruby Version Manager <https://rvm.io/>`__,
-or `chruby <https://github.com/postmodern/chruby>`__.
+or `chruby <https://github.com/postmodern/chruby>`__
+or `rbenv <https://github.com/rbenv/rbenv>`__.
 
 - If you're having problems building or running MuranoCLI,
   ``gem env`` is a good way to see how the ruby environment
