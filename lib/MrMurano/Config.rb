@@ -119,6 +119,10 @@ module MrMurano
       migrateOldConfig(Pathname.new(Dir.home))
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       (Pathname.new(Dir.home) + CFG_DIR_NAME).mkpath
+# 2017-06-07 16:23: [lb] troubleshooting Jenkins rake test_clean_up failure...
+newpath = Pathname.new(Dir.home) + CFG_DIR_NAME
+$stderr.puts "Pathname.new(Dir.home) + CFG_DIR_NAME: #{newpath}"
+$stderr.puts `/bin/ls -lhFa #{newpath}`
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
