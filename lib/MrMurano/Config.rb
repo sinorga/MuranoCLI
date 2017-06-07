@@ -123,6 +123,7 @@ module MrMurano
 newpath = Pathname.new(Dir.home) + CFG_DIR_NAME
 $stderr.puts "Pathname.new(Dir.home) + CFG_DIR_NAME: #{newpath}"
 $stderr.puts `/bin/ls -lhFa #{newpath}`
+$stderr.puts `/bin/ls -lhFa #{Dir.home}`
       fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
