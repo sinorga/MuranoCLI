@@ -87,10 +87,12 @@ command 'solution delete' do |c|
 
     if ret.empty? then
       acc.error "No solution matching '#{name}' found. Nothing to delete."
+      exit 1
     else
       ret = acc.delete_solution(ret.first[:sid])
       if not ret.kind_of?(Hash) and not ret.empty? then
         acc.error "Delete failed: #{ret.to_s}"
+        exit 1
       end
     end
   end
@@ -129,15 +131,19 @@ command 'solution list' do |c|
       data = data.map{|r| headers.map{|h| r[h]}}
     end
 
-    acc.outf(data, io) do |dd, ios|
-      if options.idonly then
-        ios.puts dd.join(' ')
-      else
-        acc.tabularize({
-          :headers=>headers.map{|h| h.to_s},
-          :rows=>dd
-        }, ios)
+    if !data.empty? or options.idonly
+      acc.outf(data, io) do |dd, ios|
+        if options.idonly then
+          ios.puts dd.join(' ')
+        else
+          acc.tabularize({
+            :headers=>headers.map{|h| h.to_s},
+            :rows=>dd
+          }, ios)
+        end
       end
+    else
+      acc.warning "Did not find any solutions"
     end
     io.close unless io.nil?
   end
