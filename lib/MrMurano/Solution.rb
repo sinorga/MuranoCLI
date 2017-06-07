@@ -34,12 +34,56 @@ module MrMurano
     # …
 
     def get(*args)
-      ret = super
-      if ret.nil?
-        warning "No solution with ID: #{@sid}"
-        exit 1
+      aggregate = nil
+      total = nil
+      remaining = -1
+      while remaining != 0 do
+        ret = super
+        if ret.nil?
+          warning "No solution with ID: #{@sid}"
+          exit 1
+        end
+        if ret.is_a?(Hash) and ret.has_key?(:total) and ret.has_key?(:items)
+          if total.nil?
+            total = ret[:total]
+            remaining = total - ret[:items].length
+            # The response also includes a hint of how to get the next page.
+            #   ret[:next] == "/api/v1/eventhandler?query={\
+            #     \"solution_id\":\"XXXXXXXXXXXXXXXX\"}&limit=20&offset=20"
+            # But note that the URL we use is a little different
+            #   https://bizapi.hosted.exosite.io/api:1/solution/XXXXXXXXXXXXXXXXX/eventhandler
+            if args[1].nil?
+              args[1] = []
+            end
+            query = args[1].dup
+          else
+            if total != ret[:total]
+              warning "Unexpected: subsequence :total not total: #{ret[:total]} != #{total}"
+            end
+            remaining -= ret[:items].length
+            if remaining <= 0
+              if remaining != 0
+                warning "Unexpected: remaining count not zero but ‘#{total}’"
+                remaining = 0
+              end
+            end
+          end
+          if remaining > 0
+            args[1] = query.dup
+            #args[1].push ["limit", 20]
+            args[1].push ["offset", total-remaining]
+          end
+          if aggregate.nil?
+            aggregate = ret
+          else
+            aggregate[:items].concat ret[:items]
+          end
+        else
+          aggregate = ret
+          remaining = 0
+        end
       end
-      ret
+      aggregate
     end
 
     include SyncUpDown
