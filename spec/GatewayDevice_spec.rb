@@ -245,7 +245,7 @@ RSpec.describe MrMurano::Gateway::Device do
       File.open('ids.csv', 'w') {|io| io << "ID\n1\n2\n3\n4\n5"}
       stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identities').
         with(:headers=>{'Content-Type'=>%r{^multipart/form-data.*}}) do |request|
-          request.body.to_s =~ %r{Content-Type: text/csv\r\n\r\nID\n1\n2\n3\n4\n5}
+          request.body.to_s =~ %r{Content-Type: text/csv\r\n\r\nID\r?\n1\r?\n2\r?\n3\r?\n4\r?\n5}
       end
       @gw.enable_batch('ids.csv')
     end
@@ -269,7 +269,7 @@ RSpec.describe MrMurano::Gateway::Device do
       File.open('ids.csv', 'w') {|io| io << "1\n2\n3\n4\n5"}
       stub_request(:post, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/identities').
         with(:headers=>{'Content-Type'=>%r{^multipart/form-data.*}}) do |request|
-          request.body.to_s =~ %r{Content-Type: text/csv\r\n\r\n1\n2\n3\n4\n5}
+          request.body.to_s =~ %r{Content-Type: text/csv\r\n\r\n1\r?\n2\r?\n3\r?\n4\r?\n5}
       end.to_return(:status=>400, :body => "CSV file format invalid")
       saved = $stderr
       $stderr = StringIO.new

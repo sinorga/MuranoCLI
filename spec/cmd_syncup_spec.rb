@@ -43,12 +43,6 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       FileUtils.move('assets','files')
       FileUtils.mkpath('specs')
       FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
-      @dev_symlink = File.join(Dir.tmpdir(), "murcli-test")
-      FileUtils.rm(@dev_symlink, :force => true)
-      FileUtils.ln_s(Dir.pwd, @dev_symlink)
-    end
-    after(:example) do
-      FileUtils.rm(@dev_symlink, :force => true)
     end
 
     it "syncup" do
@@ -57,13 +51,6 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
-      # FIXME/2017-06-02 03:06: This is failing. `murano status` shows:
-      #   Adding:
-      #   Deleting:
-      #   Changing:
-      #    M M  modules/table_util.lua
-      #    M E  services/devdata.lua
-      #    M E  services/timers.lua
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       expect(out).to start_with(%{Adding:\nDeleting:\nChanging:\n})
       # Due to timestamp races, there might be modules or services in Changing.
