@@ -211,7 +211,7 @@ module MrMurano
       type = type.to_sym
       raise "Unknown type(#{type})" unless type == :all or ALLOWED_TYPES.include? type
       # Cache the result since sometimes both products() and applications() are called.
-      if @bizSolns.nil? or invalidate
+      if !instance_variable_defined?("@bizSolns") or invalidate
         got = get('business/' + $cfg['business.id'] + '/solution/')
         @bizSolns = got
       end

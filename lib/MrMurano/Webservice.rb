@@ -12,6 +12,8 @@ module MrMurano
       def initialize
         @pid = $cfg['application.id']
         raise MrMurano::ConfigError.new("No application id!") if @pid.nil?
+        # FIXME/2017-06-05/MRMUR-XXXX: Update to new endpoint.
+        #@uriparts = [:service, @pid, :webservice]
         @uriparts = [:solution, @pid]
         @itemkey = :id
         @locationbase = $cfg['location.base']
