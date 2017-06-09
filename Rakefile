@@ -152,6 +152,7 @@ file "ReadMe.txt" => ['README.markdown'] do |t|
 end
 
 if Gem.win_platform? then
+    desc "Build as a single windows exe"
     file 'murano.exe' => Dir['lib/**/*.{rb,erb,yaml}'] do
         # Need to find all dlls, because ocra isn't finding them for some reason.
         shadlls = Dir[*$:.map{|i| File.join(i, 'digest/sha2.{so,dll}')}]
@@ -167,8 +168,9 @@ if Gem.win_platform? then
     desc 'Run rspec on cmd tests using murano.exe'
     task :murano_exe_test => ['murano.exe'] do
         Dir.mkdir("report") unless File.directory?("report")
+        rv=RUBY_VERSION.gsub(/\./,'_')
         ENV['CI_MR_EXE'] = '1'
-        sh %{rspec --format html --out report/murano_exe.html --format documentation --tag cmd --tag '~not_in_okami'}
+        sh %{rspec --format html --out report/murano_exe-#{rv}.html --format documentation --tag cmd --tag '~not_in_okami'}
     end
     task :test => [:murano_exe_test]
 
