@@ -152,6 +152,7 @@ file "ReadMe.txt" => ['README.markdown'] do |t|
 end
 
 if Gem.win_platform? then
+    desc "Build as a single windows exe"
     file 'murano.exe' => Dir['lib/**/*.{rb,erb,yaml}'] do
         # Need to find all dlls, because ocra isn't finding them for some reason.
         shadlls = Dir[*$:.map{|i| File.join(i, 'digest/sha2.{so,dll}')}]
