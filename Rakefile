@@ -119,7 +119,12 @@ namespace :push do
       # Create Release
       sh %{github-release info --tag #{tagName}} do |ok, res|
         if not ok then
-          sh %{github-release release --tag #{tagName}}
+          # if version contains more than #.#.#, mark it as pre-release
+          if %r{v\d+\.\d+\.\d+(.*)}.match(tagname)[1].nil? then
+            sh %{github-release release --tag #{tagName}}
+          else
+            sh %{github-release release --tag #{tagName} -p}
+          end
         end
       end
     end
