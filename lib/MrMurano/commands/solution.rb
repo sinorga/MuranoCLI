@@ -68,38 +68,76 @@ command 'solution delete' do |c|
   c.syntax = %{murano solution delete <id>}
   c.summary = %{Delete a solution}
   c.description = %{Delete a solution}
-
   c.action do |args, options|
-    acc = MrMurano::Account.new
-    if args.count < 1 then
-      acc.error "solution id or name missing"
-      return
-    end
-    name = args[0]
-
-    # Need to convert what we got into the internal PID.
-    ret = acc.solutions(:all).select{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./i }
-
-    if $cfg['tool.debug'] then
-      say "Matches found:"
-      acc.outf ret
-    end
-
-    if ret.empty? then
-      acc.error "No solution matching '#{name}' found. Nothing to delete."
-      exit 1
-    else
-      ret = acc.delete_solution(ret.first[:sid])
-      if not ret.kind_of?(Hash) and not ret.empty? then
-        acc.error "Delete failed: #{ret.to_s}"
-        exit 1
-      end
-    end
+    solution_delete(args, options)
   end
 end
 alias_command 'product delete', 'solution delete'
 alias_command 'app delete', 'solution delete'
 alias_command 'application delete', 'solution delete'
+alias_command 'solution rm', 'solution delete'
+
+command 'solutions expunge' do |c|
+  c.syntax = %{murano solution expunge}
+  c.summary = %{Delete all solutions}
+  c.description = %{Delete all solutions}
+  c.action do |args, options|
+    if args.count > 0 then
+      acc.error "not expecting any arguments"
+      return
+    end
+    args = ['*']
+    solution_delete(args, options)
+  end
+end
+alias_command 'solutions delete', 'solutions expunge'
+alias_command 'solutions rm', 'solutions expunge'
+
+def solution_delete(args, options)
+  acc = MrMurano::Account.new
+  if args.count < 1 then
+    acc.error "solution id or name missing"
+    return
+  end
+  if args.count == 1 and args[0] == '*'
+    confirmed = MrMurano::Verbose::ask_yes_no("Really delete all solutions? [Y/n] ", true)
+    unless confirmed
+      acc.warning "abort!"
+      return
+    end
+    name = ""
+  else
+    name = args[0]
+  end
+
+  MrMurano::Verbose::whirly_start
+  # Need to convert what we got into the internal PID.
+  ret = acc.solutions(:all)
+  unless name.empty?
+    ret.select!{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./i }
+  end
+  MrMurano::Verbose::whirly_stop
+
+  if $cfg['tool.debug'] then
+    say "Matches found:"
+    acc.outf ret
+  end
+
+  if ret.empty? then
+    unless name.empty?
+      acc.error "No solution matching '#{name}' found. Nothing to delete."
+    else
+      acc.error "No solutions found. Nothing to delete."
+    end
+    exit 1
+  else
+    ret = acc.delete_solution(ret.first[:sid])
+    if not ret.kind_of?(Hash) and not ret.empty? then
+      acc.error "Delete failed: #{ret.to_s}"
+      exit 1
+    end
+  end
+end
 
 command 'solution list' do |c|
   c.syntax = %{murano solution list [options]}
