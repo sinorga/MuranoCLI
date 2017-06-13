@@ -40,10 +40,14 @@ command :init do |c|
     # 3. Get Application ID
     newApp = acquireSolutionId(options, acc, :application)
 
-    # FIXME: Should we automatically link them?
-    #if newPrd and newApp do
-    #  # <insert link code here>
-    #end
+    # Automatically link solutions.
+    if newPrd and newApp then
+      sercfg = MrMurano::ServiceConfig.new
+      ret = sercfg.create(newPrd)
+      unless ret.nil? then
+        say "Linked #{ret[:script_key]}"
+      end
+    end
 
     msg = "Ok, in Business ID: #{$cfg['business.id']}"
     unless $cfg['product.id'].nil?
