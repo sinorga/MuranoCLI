@@ -13,6 +13,8 @@ gem 'mime-types', '~> 3.1'
 gem 'mime-types-data', '~> 3.2016.0521'
 gem 'terminal-table', '~> 1.7.3'
 gem 'vine', '~> 0.4'
+gem 'whirly', '~> 0.2.4'
+gem 'paint', '~> 2.0.0'
 
 group :test do
   gem 'coderay', :require => false
