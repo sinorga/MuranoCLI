@@ -130,4 +130,13 @@ module MrMurano
 
   end
 end
+
+module MrMurano
+  class Blather
+    include Verbose
+    #def initialize()
+    #end
+  end
+end
+
 #  vim: set ai et sw=2 ts=2 :
