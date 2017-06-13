@@ -118,6 +118,16 @@ module MrMurano
       Whirly.stop
     end
 
+    def self.ask_yes_no(question, default)
+      confirm = ask("Really delete all solutions? [Y/n] ")
+      if default
+        answer = ["", "y", "ye", "yes"].include?(confirm.downcase)
+      else
+        answer = !["", "n", "no"].include?(confirm.downcase)
+      end
+      answer
+    end
+
   end
 end
 #  vim: set ai et sw=2 ts=2 :
