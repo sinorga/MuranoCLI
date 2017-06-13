@@ -60,9 +60,23 @@ command :postgresql do |c|
 
     pg.outf(ret, io) do |dd, ios|
       dd = dd[:result]
+      # Look for date cells and pretty them. (a Hash with specific fields)
+      # All others, call to_s
+      rows = dd[:rows].map do |row|
+        row.map do |cell|
+          if cell.kind_of?(Hash) and
+              cell.keys.sort == [:day, :hour, :min, :month, :sec, :usec, :year] then
+            t = Time.gm(cell[:year], cell[:month], cell[:day], cell[:hour],
+                        cell[:min], cell[:sec], cell[:usec])
+            t.getlocal.strftime("%F %T.%6N %z")
+          else
+            cell.to_s
+          end
+        end
+      end
       pg.tabularize({
         :headers=>dd[:columns],
-        :rows=>dd[:rows]
+        :rows=>rows
       }, ios)
     end
     io.close unless io.nil?
