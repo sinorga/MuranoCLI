@@ -4,6 +4,8 @@ require 'json'
 require 'pp'
 require 'csv'
 require 'terminal-table'
+require 'whirly'
+require 'paint'
 
 module MrMurano
   module Verbose
@@ -92,6 +94,28 @@ module MrMurano
           end
         end
       end
+    end
+
+    EXO_QUADRANTS = [
+      "▚",
+      "▘",
+      "▝",
+      "▞",
+      "▖",
+      "▗",
+    ]
+    def self.whirly_start
+      Whirly.start spinner: MrMurano::Verbose::EXO_QUADRANTS,
+        status: "Looking for solutions...", append_newline: false
+      @@whirly_time = Time.now
+    end
+
+    def self.whirly_stop
+      not_so_fast = 1.0 - (Time.now - @@whirly_time)
+      if not_so_fast > 0
+        sleep not_so_fast
+      end
+      Whirly.stop
     end
 
   end

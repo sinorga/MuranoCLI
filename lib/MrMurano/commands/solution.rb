@@ -113,7 +113,9 @@ command 'solution list' do |c|
   c.action do |args, options|
     options.default :type=>:all, :all=>true
     acc = MrMurano::Account.new
+    MrMurano::Verbose::whirly_start
     data = acc.solutions(options.type)
+    MrMurano::Verbose::whirly_stop
 
     io = nil
     if options.output then

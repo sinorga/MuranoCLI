@@ -49,10 +49,12 @@ command :syncup do |c|
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
 
+    MrMurano::Verbose::whirly_start
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
       sol = klass.new
       sol.syncup(options, args)
     end
+    MrMurano::Verbose::whirly_stop
   end
 end
 alias_command :push, :syncup, '--no-delete'
