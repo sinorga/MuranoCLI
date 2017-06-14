@@ -121,15 +121,19 @@ module MrMurano
         response = http().request(request)
         case response
         when Net::HTTPSuccess
-          return {} if response.body.nil?
-          begin
-            return JSON.parse(response.body, json_opts)
-          rescue
-            return response.body
-          end
+          return workit_response(response)
         else
           showHttpError(request, response)
         end
+      end
+    end
+
+    def workit_response(response)
+      return {} if response.body.nil?
+      begin
+        return JSON.parse(response.body, json_opts)
+      rescue
+        return response.body
       end
     end
 
