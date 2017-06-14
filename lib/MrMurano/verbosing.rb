@@ -105,10 +105,12 @@ module MrMurano
       "▗",
     ]
     def self.whirly_start(msg)
-      Whirly.start spinner: MrMurano::Verbose::EXO_QUADRANTS,
-        status: msg, append_newline: false
-      @@whirly_time = Time.now
-      @@whirly_cols, lines = HighLine::SystemExtensions.terminal_size
+      if $WHIRLY_ON
+        Whirly.start spinner: MrMurano::Verbose::EXO_QUADRANTS,
+          status: msg, append_newline: false
+        @@whirly_time = Time.now
+        @@whirly_cols, lines = HighLine::SystemExtensions.terminal_size
+      end
     end
 
     def whirly_start(msg)
@@ -116,15 +118,17 @@ module MrMurano
     end
 
     def self.whirly_stop
-      not_so_fast = 1.0 - (Time.now - @@whirly_time)
-      if not_so_fast > 0
-        sleep not_so_fast
-      end
-      Whirly.stop
-      # The progress indicator is always overwritten.
-      if @@whirly_cols
-        $stdout.print (" " * @@whirly_cols) + "\r"
-        $stdout.flush
+      if $WHIRLY_ON and defined?(@@whirly_time)
+        not_so_fast = 1.0 - (Time.now - @@whirly_time)
+        if not_so_fast > 0
+          sleep not_so_fast
+        end
+        Whirly.stop
+        # The progress indicator is always overwritten.
+        if @@whirly_cols
+          $stdout.print (" " * @@whirly_cols) + "\r"
+          $stdout.flush
+        end
       end
     end
 
