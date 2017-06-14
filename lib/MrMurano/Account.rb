@@ -249,8 +249,9 @@ module MrMurano
       # FIXME: Allow uppercase once pegasus_registry fixed.
       raise MrMurano::ConfigError.new(SOLN_NAME_HELP) unless name.match(SOLN_NAME_REGEX)
       self.whirly_start "Creating solution..."
-      post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
-      self.whirly_end
+      resp = post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
+      self.whirly_stop
+      resp
     end
 
     def delete_solution(apiId)
