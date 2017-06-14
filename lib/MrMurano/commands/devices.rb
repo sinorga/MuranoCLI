@@ -5,7 +5,7 @@ command 'device' do |c|
   c.summary = %{Interact with a device}
   c.description = %{}
 
-  c.action do |a,o|
+  c.action do |a, o|
     ::Commander::UI.enable_paging
     say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
@@ -24,7 +24,7 @@ command 'device list' do |c|
   c.option '-l', '--long', %{show everything}
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
-  c.action do |args,options|
+  c.action do |args, options|
     #options.default :limit=>1000
 
     prd = MrMurano::Gateway::Device.new
@@ -70,7 +70,7 @@ command 'device read' do |c|
   }
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
-  c.action do |args,options|
+  c.action do |args, options|
     prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
       prd.error "Identifier missing"
@@ -81,13 +81,14 @@ command 'device read' do |c|
     io=nil
     data = prd.read(snid)
     exit 1 if data.nil?
+
     io = File.open(options.output, 'w') if options.output
     unless args.empty? then
       data.select!{|k,v| args.include? k.to_s}
     end
-    prd.outf(data, io) do |dd,ios|
+    prd.outf(data, io) do |dd, ios|
       rows = []
-      dd.each_pair do |k,v|
+      dd.each_pair do |k, v|
         rows << [k, v[:reported], v[:set], v[:timestamp]]
       end
       prd.tabularize({
@@ -107,7 +108,7 @@ command 'device write' do |c|
   If an alias is not settable, this will fail.
   }
 
-  c.action do |args,options|
+  c.action do |args, options|
     resources = (MrMurano::Gateway::Base.new.info or {})[:resources]
     prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
@@ -117,7 +118,7 @@ command 'device write' do |c|
     snid = args.shift
 
     set = Hash[ args.map{|i| i.split('=')} ]
-    set.each_pair do |k,v|
+    set.each_pair do |k, v|
       fmt = ((resources[k.to_sym] or {})[:format] or 'string')
       case fmt
       when 'number'
@@ -147,7 +148,7 @@ command 'device enable' do |c|
   c.option '-f', '--file FILE', %{A file of serial numbers, one per line}
   c.option '--key FILE', %{Public TLS key for this device}
 
-  c.action do |args,options|
+  c.action do |args, options|
     prd = MrMurano::Gateway::Device.new
     if not options.file.nil? and not options.key.nil? then
       prd.error %{Cannot use both --file and --key}
@@ -193,7 +194,7 @@ Note that you can only activate a device once.  After that you cannot retrive th
 CIK again.
 }
 
-  c.action do |args,options|
+  c.action do |args, options|
     prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
       prd.error "Identifier missing"
@@ -209,7 +210,7 @@ command 'device delete' do |c|
   c.syntax = %{murano device delete <identifier>}
   c.summary = %{Delete a device}
 
-  c.action do |args,options|
+  c.action do |args, options|
     prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
       prd.error "Identifier missing"
@@ -226,7 +227,7 @@ command 'device httpurl' do |c|
   c.syntax = %{murano device httpurl}
   c.summary = %{Get the URL for the HTTP-Data-API for this Project}
 
-  c.action do |args,options|
+  c.action do |args, options|
     prd = MrMurano::Gateway::Base.new
     ret = prd.info()
     say "https://#{ret[:fqdn]}/onep:v1/stack/alias"
