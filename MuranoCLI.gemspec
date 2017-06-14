@@ -52,6 +52,7 @@ explicitly specifying the version. For instance,
   s.add_runtime_dependency('vine', '~> 0.4')
   s.add_runtime_dependency('whirly', '~> 0.2.4')
   s.add_runtime_dependency('paint', '~> 2.0.0')
+  s.add_runtime_dependency('inflecto')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
   s.add_development_dependency('ocra', '~> 1.3.8')
