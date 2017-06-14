@@ -8,7 +8,6 @@ command :password do |c|
     say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end
-
 alias_command 'password current', :config, 'user.name'
 
 command 'password list' do |c|
@@ -31,6 +30,7 @@ command 'password list' do |c|
     end
   end
 end
+alias_command 'passwords list', 'password list'
 
 command 'password set' do |c|
   c.syntax = %{murano password set <username> [<host>]}

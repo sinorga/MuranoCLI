@@ -52,6 +52,7 @@ command 'link list' do |c|
   end
 end
 alias_command 'assign list', 'link list'
+alias_command 'links list', 'link list'
 
 command 'link set' do |c|
   c.syntax = 'murano link set [product]'
