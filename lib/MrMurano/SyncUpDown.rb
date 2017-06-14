@@ -87,6 +87,13 @@ module MrMurano
 
       nil
     end
+
+    ##
+    # Return the @@syncset
+    # @return [Array<String>] array of Syncables
+    def self.syncset
+      @@syncset
+    end
   end
 
   ## The functionality of a Syncable thing.
