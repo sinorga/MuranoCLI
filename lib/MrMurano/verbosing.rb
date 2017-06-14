@@ -111,8 +111,8 @@ module MrMurano
       @@whirly_cols, lines = HighLine::SystemExtensions.terminal_size
     end
 
-    def whirly_start
-      MrMurano::Verbose::whirly_start
+    def whirly_start(msg)
+      MrMurano::Verbose::whirly_start(msg)
     end
 
     def self.whirly_stop
