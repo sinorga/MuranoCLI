@@ -220,4 +220,10 @@ alias_command 'app list', 'solution list', '--type', 'application', '--no-all'
 alias_command 'application list', 'solution list', '--type', 'application', '--no-all'
 alias_command 'solutions list', 'solution list'
 
+def command_add_solution_pickers(c)
+  c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES, %{Find solution(s) by type}
+  c.option '--ids IDS', Array, %{Find solution(s) by ID (IDS can be 1 ID or comma-separated list)}
+  c.option '--names NAME', %{Find solution(s) by name (NAMES can be 1 name or comma-separated list)}
+end
+
 #  vim: set ai et sw=2 ts=2 :
