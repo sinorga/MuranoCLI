@@ -8,7 +8,16 @@ RSpec.describe 'murano usage', :cmd, :needs_password do
 
   before(:example) do
     @product_name = rname('usageTest')
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
+
+raise "FIXME: Support for Product(s) and/or Application(s)"
+#
+# FIXME: Could be either?
+# FIXME: Need to run against *all* solutions.
+# FIXME: Check other commands to see for cross-solution support...
+
+#    out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'application', 'create', @product_name, '--save'))
+#require 'byebug' ; byebug if true
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
