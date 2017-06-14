@@ -20,7 +20,7 @@ command :syncdown do |c|
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
 
-    MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
+    MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
       sol = klass.new
       sol.syncdown(options, args)
     end
@@ -50,7 +50,7 @@ command :syncup do |c|
     options.default :delete=>true, :create=>true, :update=>true
 
     MrMurano::Verbose::whirly_start "Syncing solutions..."
-    MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
+    MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
       sol = klass.new
       sol.syncup(options, args)
     end

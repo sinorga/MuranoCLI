@@ -87,11 +87,21 @@ command :status do |c|
       end
     end
 
-    MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass|
-      sol = klass.new
-      ret = sol.status(options, args)
-      gmerge(ret, type, options)
+    MrMurano::Verbose::whirly_start "Fetching status..."
+    MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
+      Whirly.configure status: "Fetching #{desc}..."
+      begin
+        sol = klass.new
+      rescue MrMurano::ConfigError => err
+        say "Could not fetch status for #{desc}: #{err}"
+      rescue StandardError => err
+        raise
+      else
+        ret = sol.status(options, args)
+        gmerge(ret, type, options)
+      end
     end
+    MrMurano::Verbose::whirly_stop
 
     pretty(@grouped, options) if options.grouped
   end

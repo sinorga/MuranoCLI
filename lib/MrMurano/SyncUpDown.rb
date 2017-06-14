@@ -63,7 +63,7 @@ module MrMurano
       self.checkSAME(opt)
       @@syncset.each do |a|
         if opt[a.name.to_sym] or opt[a.type.to_sym] then
-          yield a.name, a.type, a.class
+          yield a.name, a.type, a.class, a.desc
         end
       end
     end
