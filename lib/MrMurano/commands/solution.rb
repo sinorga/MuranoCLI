@@ -92,28 +92,30 @@ command 'solutions expunge' do |c|
       acc.error "not expecting any arguments"
       return
     end
-    args = ['*']
-    solution_delete(args, options)
+    name = '*'
+    n_deleted, n_faulted = solution_delete(name, options)
+    unless n_deleted.zero?
+      # FIXME: Should this use "say" or "outf"?
+      say "Deleted #{n_deleted} solutions"
+    end
+    unless n_faulted.zero?
+      acc.error "Failed to delete #{n_faulted} solutions"
+    end
   end
 end
 alias_command 'solutions delete', 'solutions expunge'
 alias_command 'solutions rm', 'solutions expunge'
 
-def solution_delete(args, options)
+def solution_delete(name, options)
   acc = MrMurano::Account.new
-  if args.count < 1 then
-    acc.error "solution id or name missing"
-    return
-  end
-  if args.count == 1 and args[0] == '*'
+
+  if name == '*'
     confirmed = MrMurano::Verbose::ask_yes_no("Really delete all solutions? [Y/n] ", true)
     unless confirmed
       acc.warning "abort!"
       return
     end
     name = ""
-  else
-    name = args[0]
   end
 
   MrMurano::Verbose::whirly_start
@@ -129,6 +131,8 @@ def solution_delete(args, options)
     acc.outf ret
   end
 
+  n_deleted = 0
+  n_faulted = 0
   if ret.empty? then
     unless name.empty?
       acc.error "No solution matching '#{name}' found. Nothing to delete."
@@ -137,12 +141,27 @@ def solution_delete(args, options)
     end
     exit 1
   else
-    ret = acc.delete_solution(ret.first[:sid])
-    if not ret.kind_of?(Hash) and not ret.empty? then
-      acc.error "Delete failed: #{ret.to_s}"
-      exit 1
+    unless name.empty? or ret.length == 1
+      acc.warning "Unexpected number of solutions: found #{ret.length} but expected 1"
+    end
+    ret.each do |soln|
+      delret = acc.delete_solution(soln[:sid])
+      if not delret.kind_of?(Hash) and not delret.empty? then
+        acc.error "Delete failed: #{delret.to_s}"
+        n_faulted += 1
+      else
+        n_deleted += 1
+        # Clear the ID from the config.
+        MrMurano::Config::CFG_SOLUTION_ID_KEYS.each do |keyn|
+          if $cfg[keyn] == soln[:sid]
+            $cfg.set(keyn, nil)
+          end
+        end
+      end
     end
   end
+
+  return n_deleted, n_faulted
 end
 
 command 'solution list' do |c|

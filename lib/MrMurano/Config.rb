@@ -63,6 +63,8 @@ module MrMurano
     CFG_OLD_DIR_NAME=%[.mrmurano].freeze
     CFG_OLD_FILE_NAME=%[.mrmuranorc].freeze
 
+    CFG_SOLUTION_ID_KEYS=%w{application.id product.id}.freeze
+
     def warning(msg)
       $stderr.puts HighLine.color(msg, :yellow)
     end
