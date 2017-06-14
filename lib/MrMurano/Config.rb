@@ -53,17 +53,17 @@ module MrMurano
     attr :paths
     attr_reader :projectDir
 
-    CFG_SCOPES=%w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
+    CFG_SCOPES = %w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
 
-    CFG_ENV_NAME=%{MURANO_CONFIGFILE}.freeze
-    CFG_FILE_NAME=%[.murano/config].freeze
-    CFG_DIR_NAME=%[.murano].freeze
+    CFG_ENV_NAME = %{MURANO_CONFIGFILE}.freeze
+    CFG_FILE_NAME = %[.murano/config].freeze
+    CFG_DIR_NAME = %[.murano].freeze
 
-    CFG_OLD_ENV_NAME=%[MR_CONFIGFILE].freeze
-    CFG_OLD_DIR_NAME=%[.mrmurano].freeze
-    CFG_OLD_FILE_NAME=%[.mrmuranorc].freeze
+    CFG_OLD_ENV_NAME = %[MR_CONFIGFILE].freeze
+    CFG_OLD_DIR_NAME = %[.mrmurano].freeze
+    CFG_OLD_FILE_NAME = %[.mrmuranorc].freeze
 
-    CFG_SOLUTION_ID_KEYS=%w{application.id product.id}.freeze
+    CFG_SOLUTION_ID_KEYS = %w{application.id product.id}.freeze
 
     def warning(msg)
       $stderr.puts HighLine.color(msg, :yellow)
