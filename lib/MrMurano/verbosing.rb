@@ -111,6 +111,10 @@ module MrMurano
       @@whirly_cols, lines = HighLine::SystemExtensions.terminal_size
     end
 
+    def whirly_start
+      MrMurano::Verbose::whirly_start
+    end
+
     def self.whirly_stop
       not_so_fast = 1.0 - (Time.now - @@whirly_time)
       if not_so_fast > 0
@@ -122,6 +126,10 @@ module MrMurano
         $stdout.print (" " * @@whirly_cols) + "\r"
         $stdout.flush
       end
+    end
+
+    def whirly_stop
+      MrMurano::Verbose::whirly_stop
     end
 
     def self.ask_yes_no(question, default)
