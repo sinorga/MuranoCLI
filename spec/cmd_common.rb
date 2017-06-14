@@ -17,6 +17,8 @@ RSpec.shared_context "CI_CMD" do
     end
     args.push '--trace'
     args.push '-c', 'fullerror'
+    # The spinner output would make it hard to write expects().
+    args.push '--no-progress'
 
     if Gem.win_platform? then
       cmd = args.map do |i|
