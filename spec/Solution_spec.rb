@@ -16,7 +16,13 @@ RSpec.describe MrMurano::Solution do
     $cfg['product.id'] = 'XYZ'
     $cfg['application.id'] = 'XYZ'
 
-    @srv = MrMurano::Solution.new
+raise "FIXME: Support for Product(s) and/or Application(s)"
+#
+# FIXME: Could be either?
+#    @srv = MrMurano::Solution.new
+    @srv = MrMurano::Product.new
+    @srv = MrMurano::Application.new
+
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
