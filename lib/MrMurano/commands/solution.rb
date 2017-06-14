@@ -216,5 +216,6 @@ end
 alias_command 'product list', 'solution list', '--type', 'product', '--no-all'
 alias_command 'app list', 'solution list', '--type', 'application', '--no-all'
 alias_command 'application list', 'solution list', '--type', 'application', '--no-all'
+alias_command 'solutions list', 'solution list'
 
 #  vim: set ai et sw=2 ts=2 :

@@ -16,6 +16,7 @@ command 'setting list' do |c|
     setting.outf dd
   end
 end
+alias_command 'settings list', 'setting list'
 
 command 'setting read' do |c|
   c.syntax = %{murano setting read <service>.<setting> [<sub-key>]}

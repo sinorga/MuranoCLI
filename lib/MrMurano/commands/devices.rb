@@ -59,6 +59,7 @@ command 'device list' do |c|
     io.close unless io.nil?
   end
 end
+alias_command 'devices list', 'device list'
 
 command 'device read' do |c|
   c.syntax = %{murano device read <identifier> (<alias>...)}
