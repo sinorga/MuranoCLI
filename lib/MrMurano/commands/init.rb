@@ -1,6 +1,7 @@
 require 'MrMurano/Account'
 require 'MrMurano/Config-Migrate'
 require 'erb'
+require 'inflecto'
 
 command :init do |c|
   c.syntax = %{murano init}
@@ -137,6 +138,7 @@ command :init do |c|
 
       elsif solz.count == 0 then
         say "You do not have any #{type}s; let's create one"
+        say "This business does not have any #{Inflecto.pluralize(type)}. Let's create one"
 
         asking = true
         while asking do
