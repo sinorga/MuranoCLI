@@ -118,7 +118,7 @@ def solution_delete(name, options)
     name = ""
   end
 
-  MrMurano::Verbose::whirly_start
+  MrMurano::Verbose::whirly_start "Looking for solutions..."
   # Need to convert what we got into the internal PID.
   ret = acc.solutions(:all)
   unless name.empty?
@@ -176,7 +176,7 @@ command 'solution list' do |c|
   c.action do |args, options|
     options.default :type=>:all, :all=>true
     acc = MrMurano::Account.new
-    MrMurano::Verbose::whirly_start
+    MrMurano::Verbose::whirly_start "Looking for solutions..."
     data = acc.solutions(options.type)
     MrMurano::Verbose::whirly_stop
 

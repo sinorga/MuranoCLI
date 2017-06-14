@@ -104,9 +104,9 @@ module MrMurano
       "▖",
       "▗",
     ]
-    def self.whirly_start
+    def self.whirly_start(msg)
       Whirly.start spinner: MrMurano::Verbose::EXO_QUADRANTS,
-        status: "Looking for solutions...", append_newline: false
+        status: msg, append_newline: false
       @@whirly_time = Time.now
       @@whirly_cols, lines = HighLine::SystemExtensions.terminal_size
     end
