@@ -17,7 +17,12 @@ command :logs do |c|
   c.action do |args,options|
     options.default :pretty=>true, :localtime=>true, :raw => false
 
+raise "FIXME: Support for Product(s) and/or Application(s)"
+#
+# FIXME: Could be either?
     sol = MrMurano::Solution.new
+#    sol = MrMurano::Product.new
+#    sol = MrMurano::Application.new
 
     if options.follow then
       # open a lasting connection and continually feed makePretty()
