@@ -96,10 +96,12 @@ command 'solutions expunge' do |c|
     n_deleted, n_faulted = solution_delete(name, options)
     unless n_deleted.zero?
       # FIXME: Should this use "say" or "outf"?
-      say "Deleted #{n_deleted} solutions"
+      inflection = MrMurano::Verbose::pluarlize_maybe("solution", n_deleted)
+      say "Deleted #{n_deleted} #{inflection}"
     end
     unless n_faulted.zero?
-      acc.error "Failed to delete #{n_faulted} solutions"
+      inflection = MrMurano::Verbose::pluarlize_maybe("solution", n_faulted)
+      acc.error "Failed to delete #{n_faulted} #{inflection}"
     end
   end
 end
