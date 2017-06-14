@@ -92,6 +92,9 @@ module MrMurano
 
   class Solution < SolutionBase
     def initialize
+      if !defined?(@solntype) or @solntype.nil?
+        raise MrMurano::ConfigError.new("Solution subclass must set @solntype")
+      end
       super
     end
 
