@@ -5,7 +5,7 @@ command :domain do |c|
   c.option '--[no-]raw', %{Don't add scheme}
   c.action do |args,options|
     options.default :raw=>true
-    sol = MrMurano::Solution.new
+    sol = MrMurano::Product.new
     ret = sol.info()
     if options.raw then
       say ret[:domain]
