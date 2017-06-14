@@ -60,9 +60,9 @@ command 'solution create' do |c|
 
   end
 end
-alias_command 'product create', 'solution create','--type','product'
-alias_command 'app create', 'solution create','--type','application'
-alias_command 'application create', 'solution create','--type','application'
+alias_command 'product create', 'solution create' ,'--type', 'product'
+alias_command 'app create', 'solution create', '--type', 'application'
+alias_command 'application create', 'solution create','--type', 'application'
 
 command 'solution delete' do |c|
   c.syntax = %{murano solution delete <id>}
