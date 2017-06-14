@@ -27,17 +27,24 @@ the HTTP Device API.
 
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
+
+    MrMurano::Verbose::whirly_start "Looking for content..."
     items = prd.list
     exit 2 if items.nil?
-    prd.outf(items) do |dd, ios|
-      if options.long then
-        headers = [:Name, :Size, 'Last Modified', :MIME]
-        rows = dd.map{|d| [d[:id], d[:length], d[:last_modified], d[:type]]}
-      else
-        headers = [:Name, :Size]
-        rows = dd.map{|d| [d[:id], d[:length]]}
+    MrMurano::Verbose::whirly_stop
+    unless items.empty?
+      prd.outf(items) do |dd, ios|
+        if options.long then
+          headers = [:Name, :Size, 'Last Modified', :MIME]
+          rows = dd.map{|d| [d[:id], d[:length], d[:last_modified], d[:type]]}
+        else
+          headers = [:Name, :Size]
+          rows = dd.map{|d| [d[:id], d[:length]]}
+        end
+        prd.tabularize({:headers=>headers, :rows=>rows}, ios)
       end
-      prd.tabularize({:headers=>headers, :rows=>rows}, ios)
+    else
+      prd.warning "Did not find any content"
     end
   end
 end
