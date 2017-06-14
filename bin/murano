@@ -6,6 +6,8 @@ require 'pathname'
 require 'MrMurano'
 require 'pp'
 require 'dotenv'
+require 'highline'
+require 'rainbow'
 Dotenv.load
 
 Signal.trap('INT', 'EXIT') # Don't drop traces on ^C
@@ -40,6 +42,10 @@ global_option('-c', '--config KEY=VALUE', %{Set a single config key}) {|param|
   else
     $cfg[key] = value
   end
+}
+global_option('--no-color', %{Disable fancy output}) {
+  HighLine.use_color = false
+  Rainbow.enabled = false
 }
 
 default_command :help
