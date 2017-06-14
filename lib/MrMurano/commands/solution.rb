@@ -48,7 +48,7 @@ command 'solution create' do |c|
     end
     pid = (ret.first or {})[:apiId]
     if pid.nil? or pid.empty? then
-      acc.error "Didn't find an apiId!!!! #{name} -> #{ret} "
+      acc.error "Did not find an apiId!!!! #{name} -> #{ret} "
       exit 3
     end
     if options.save then
