@@ -69,7 +69,13 @@ command 'solution delete' do |c|
   c.summary = %{Delete a solution}
   c.description = %{Delete a solution}
   c.action do |args, options|
-    solution_delete(args, options)
+    if args.count < 1 then
+      acc.error "solution id or name missing"
+      return
+    end
+    args.each do |name|
+      solution_delete(name, options)
+    end
   end
 end
 alias_command 'product delete', 'solution delete'
