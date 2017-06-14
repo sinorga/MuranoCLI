@@ -75,6 +75,8 @@ command 'keystore list' do |c|
   c.description = %{List all of the keys in the Keystore}
   c.action do |args,options|
     sol = MrMurano::Keystore.new
+    # FIXME/2017-06-14: This outputs nothing if not list, unlike other
+    #   list commands that say, e.g., "No solutions found"
     sol.outf sol.listkeys
   end
 end
