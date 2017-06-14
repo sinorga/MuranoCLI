@@ -20,10 +20,13 @@ command :syncdown do |c|
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
 
+    MrMurano::Verbose::whirly_start "Syncing solutions..."
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
+      Whirly.configure status: "Syncing #{desc}..."
       sol = klass.new
       sol.syncdown(options, args)
     end
+    MrMurano::Verbose::whirly_stop
   end
 end
 alias_command :pull, :syncdown, '--no-delete'
@@ -51,6 +54,7 @@ command :syncup do |c|
 
     MrMurano::Verbose::whirly_start "Syncing solutions..."
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
+      Whirly.configure status: "Syncing #{desc}..."
       sol = klass.new
       sol.syncup(options, args)
     end
