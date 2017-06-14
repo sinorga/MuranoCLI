@@ -186,9 +186,9 @@ module MrMurano
       delete("business/#{id}")
     end
 
-    def overview(id=nil)
+    def overview(id=nil, &block)
       id = $cfg['business.id'] if id.nil?
-      get("business/#{id}/overview")
+      get("business/#{id}/overview", &block)
     end
 
     def has_projects?(id)
