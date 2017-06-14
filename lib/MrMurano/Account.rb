@@ -143,6 +143,9 @@ module MrMurano
     end
 
     def new_account(email, name, company="")
+      # this is a kludge.  If we're gonna support this, do it better.
+      @@token = ''
+      @token = ''
       post('key/', {
         :email=>email,
         :name=>name,
@@ -156,6 +159,9 @@ module MrMurano
     end
 
     def accept_account(token, password)
+      # this is a kludge.  If we're gonna support this, do it better.
+      @@token = ''
+      @token = ''
       post("key/#{token}", {:password=>password})
     end
 
