@@ -38,6 +38,8 @@ module Commander
       begin
         old_run_active_command
       rescue MrMurano::ConfigError => err
+        # Clear whirly if it was running.
+        MrMurano::Verbose::whirly_stop
         puts err.message
         exit 1
       rescue StandardError => err
