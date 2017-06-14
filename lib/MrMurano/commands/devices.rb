@@ -28,35 +28,51 @@ command 'device list' do |c|
     #options.default :limit=>1000
 
     prd = MrMurano::Gateway::Device.new
-    io=nil
+    MrMurano::Verbose::whirly_start "Looking for devices..."
     data = prd.list(options.limit, options.before)
+    MrMurano::Verbose::whirly_stop
     exit 1 if data.nil?
-    io = File.open(options.output, 'w') if options.output
-    prd.outf(data, io) do |dd,ios|
-      dt={}
-      if options.long then
-        dt[:headers] = [:Identifier,
-                        :AuthType,
-                        :Locked,
-                        :Reprovision, 'Dev Mode', 'Last IP',
-                        'Last Seen',
-                        :Status, :Online]
-        dt[:rows] = data[:devices].map{|row| [row[:identity],
-                                    (row[:auth] or {})[:type],
-                                    row[:locked],
-                                    row[:reprovision],
-                                    row[:devmode],
-                                    row[:lastip],
-                                    row[:lastseen],
-                                    row[:status],
-                                    row[:online]]}
-      else
-        dt[:headers] = [:Identifier, :Status, :Online]
-        dt[:rows] = data[:devices].map{|row| [row[:identity], row[:status], row[:online]]}
+
+    unless data[:devices].empty?
+      io = File.open(options.output, 'w') if options.output
+      prd.outf(data, io) do |dd, ios|
+        dt={}
+        if options.long then
+          dt[:headers] = [
+            :Identifier,
+            :AuthType,
+            :Locked,
+            :Reprovision,
+            'Dev Mode',
+            'Last IP',
+            'Last Seen',
+            :Status,
+            :Online
+          ]
+          dt[:rows] = data[:devices].map{ |row|
+            [row[:identity],
+             (row[:auth] or {})[:type],
+             row[:locked],
+             row[:reprovision],
+             row[:devmode],
+             row[:lastip],
+             row[:lastseen],
+             row[:status],
+             row[:online]
+            ]
+          }
+        else
+          dt[:headers] = [:Identifier, :Status, :Online]
+          dt[:rows] = data[:devices].map{ |row|
+            [row[:identity], row[:status], row[:online]]
+          }
+        end
+        prd.tabularize(dt, ios)
       end
-      prd.tabularize(dt, ios)
+      io.close unless io.nil?
+    else
+      prd.warning "Did not find any devices"
     end
-    io.close unless io.nil?
   end
 end
 alias_command 'devices list', 'device list'
@@ -78,8 +94,10 @@ command 'device read' do |c|
     end
     snid = args.shift
 
-    io=nil
+    # FIXME/2017-06-14: Confirm that whirly is helpful here.
+    MrMurano::Verbose::whirly_start "Fetching device data..."
     data = prd.read(snid)
+    MrMurano::Verbose::whirly_stop
     exit 1 if data.nil?
 
     io = File.open(options.output, 'w') if options.output
