@@ -108,6 +108,7 @@ module MrMurano
       Whirly.start spinner: MrMurano::Verbose::EXO_QUADRANTS,
         status: "Looking for solutions...", append_newline: false
       @@whirly_time = Time.now
+      @@whirly_cols, lines = HighLine::SystemExtensions.terminal_size
     end
 
     def self.whirly_stop
@@ -116,6 +117,11 @@ module MrMurano
         sleep not_so_fast
       end
       Whirly.stop
+      # The progress indicator is always overwritten.
+      if @@whirly_cols
+        $stdout.print (" " * @@whirly_cols) + "\r"
+        $stdout.flush
+      end
     end
 
     def self.ask_yes_no(question, default)
