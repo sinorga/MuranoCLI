@@ -12,12 +12,16 @@ command 'link list' do |c|
     # List service configs.
     # Display where serviceconfig.service == products.apiId
 
+    MrMurano::Verbose::whirly_start "Looking for links..."
+
     acc = MrMurano::Account.new
     products = acc.products
     pids = products.map{|p| p[:apiId]}
 
     sercfg = MrMurano::ServiceConfig.new
     scfgs = sercfg.list
+
+    MrMurano::Verbose::whirly_stop
 
     scfgs.select!{|s| pids.include? s[:service]}
 
