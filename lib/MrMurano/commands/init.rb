@@ -47,11 +47,15 @@ command :init do |c|
     # Automatically link solutions.
     if pid and aid then
       sercfg = MrMurano::ServiceConfig.new
-      ret = sercfg.create(pid, pname)
-      unless ret.nil? then
-        say "Linked #{pname} and #{aname}"
-      else
-        acc.error "Unable to link solutions!"
+      ret = sercfg.create(pid, pname) do |request, http|
+        response = http.request(request)
+        if response.is_a? Net::HTTPSuccess then
+          say "Linked #{pname} and #{aname}"
+        elsif response.is_a? Net::HTTPConflict
+          say "Verified #{pname} and #{aname} are linked"
+        else
+          acc.error "Unable to link solutions because #{Rainbow(response.message).underline}"
+        end
       end
       puts ''
     end
