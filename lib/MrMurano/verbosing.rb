@@ -147,15 +147,15 @@ module MrMurano
       answer
     end
 
-    def self.pluarlize_maybe(word, count)
+    def self.pluralize?(word, count)
       unless count == 1
         return Inflecto.pluralize(word)
       end
       word
     end
 
-    def pluarlize_maybe(word, count)
-      MrMurano::Verbose::pluarlize_maybe(word, count)
+    def pluralize?(word, count)
+      MrMurano::Verbose::pluralize?(word, count)
     end
 
   end
