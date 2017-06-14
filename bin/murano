@@ -43,7 +43,9 @@ global_option('-c', '--config KEY=VALUE', %{Set a single config key}) {|param|
     $cfg[key] = value
   end
 }
+$WHIRLY_ON = true
 global_option('--no-color', %{Disable fancy output}) {
+  $WHIRLY_ON = false
   HighLine.use_color = false
   Rainbow.enabled = false
 }
