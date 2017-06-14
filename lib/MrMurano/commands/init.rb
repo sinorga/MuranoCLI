@@ -37,17 +37,20 @@ command :init do |c|
     # 1. Get Business ID
     acquireBusinessId(options, acc)
     # 2. Get Product ID
-    newPrd = acquireSolutionId(options, acc, :product)
+    pid, pname, newPrd = acquireSolutionId(options, acc, :product)
     # 3. Get Application ID
-    newApp = acquireSolutionId(options, acc, :application)
+    aid, aname, newApp = acquireSolutionId(options, acc, :application)
 
     # Automatically link solutions.
-    if newPrd and newApp then
+    if pid and aid then
       sercfg = MrMurano::ServiceConfig.new
-      ret = sercfg.create(newPrd)
+      ret = sercfg.create(pid, pname)
       unless ret.nil? then
-        say "Linked #{ret[:script_key]}"
+        say "Linked #{pname} and #{aname}"
+      else
+        acc.error "Unable to link solutions!"
       end
+      puts ''
     end
 
     # If no ProjectFile, then write a ProjectFile
@@ -130,12 +133,15 @@ command :init do |c|
     if not options.force and not $cfg["#{type}.id"].nil? then
       say "Using #{type.capitalize} ID already set to " + $cfg["#{type}.id"]
     else
+      sid = nil
+      solname = nil
       solz = acc.solutions(type)
       if solz.count == 1 then
         sol = solz.first
         say "You only have one #{type}; using #{sol[:domain]}"
-        $cfg.set("#{type}.id", sol[:apiId], :project)
-
+        sid = sol[:apiId]
+        $cfg.set("#{type}.id", sid, :project)
+        solname = sol[:name]
       elsif solz.count == 0 then
         say "You do not have any #{type}s; let's create one"
         say "This business does not have any #{Inflecto.pluralize(type)}. Let's create one"
@@ -178,9 +184,11 @@ command :init do |c|
           menu.prompt = "Select which #{type.capitalize} to use:"
           menu.flow = :columns_across
           # NOTE: There are 2 human friendly identifiers, :name and :domain.
-          solz.sort{|a,b| a[:domain]<=>b[:domain]}.each do |s|
+          solz.sort{|a,b| a[:domain]<=>b[:domain]}.each do |sol|
             menu.choice(s[:domain].sub(/\..*$/, '')) do
-              $cfg.set("#{type}.id", s[:apiId], :project)
+              sid = sol[:apiId]
+              $cfg.set("#{type}.id", sid, :project)
+              solname = sol[:name]
             end
           end
         end
@@ -188,7 +196,7 @@ command :init do |c|
     end
     puts '' # blank line
 
-    isNewSoln
+    return sid, solname, isNewSoln
   end
 
 end
