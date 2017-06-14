@@ -1,11 +1,12 @@
-require 'highline'
-require 'yaml'
-require 'json'
-require 'pp'
 require 'csv'
+require 'highline'
+require 'inflecto'
+require 'json'
+require 'paint'
+require 'pp'
 require 'terminal-table'
 require 'whirly'
-require 'paint'
+require 'yaml'
 
 module MrMurano
   module Verbose
@@ -144,6 +145,17 @@ module MrMurano
         answer = !["", "n", "no"].include?(confirm.downcase)
       end
       answer
+    end
+
+    def self.pluarlize_maybe(word, count)
+      unless count == 1
+        return Inflecto.pluralize(word)
+      end
+      word
+    end
+
+    def pluarlize_maybe(word, count)
+      MrMurano::Verbose::pluarlize_maybe(word, count)
     end
 
   end
