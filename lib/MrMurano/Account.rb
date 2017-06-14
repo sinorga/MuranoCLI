@@ -248,7 +248,9 @@ module MrMurano
       raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
       # FIXME: Allow uppercase once pegasus_registry fixed.
       raise MrMurano::ConfigError.new(SOLN_NAME_HELP) unless name.match(SOLN_NAME_REGEX)
+      whirly_start
       post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
+      whirly_end
     end
 
     def delete_solution(apiId)
