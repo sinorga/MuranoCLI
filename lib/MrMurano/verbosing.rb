@@ -105,7 +105,7 @@ module MrMurano
       "▗",
     ]
     def self.whirly_start(msg)
-      if $WHIRLY_ON
+      unless $cfg['tool.no-color']
         Whirly.start spinner: MrMurano::Verbose::EXO_QUADRANTS,
           status: msg, append_newline: false
         @@whirly_time = Time.now
@@ -118,7 +118,7 @@ module MrMurano
     end
 
     def self.whirly_stop
-      if $WHIRLY_ON and defined?(@@whirly_time)
+      unless $cfg['tool.no-color'] or !defined?(@@whirly_time)
         not_so_fast = 1.0 - (Time.now - @@whirly_time)
         if not_so_fast > 0
           sleep not_so_fast
