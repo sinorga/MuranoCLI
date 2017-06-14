@@ -6,6 +6,8 @@ command :logs do |c|
   c.description = %{Get the logs for a solution}
   c.option '-f','--follow', %{Follow logs from server}
   c.option('--[no-]color', %{Toggle colorizing of logs}) {
+    # EXPLAIN/2017-06-14: [lb] curious if this the same as rainbow gem I added.
+    #   I also do not think this --color/--no-color option is used
     Rainbow.enabled = false
   }
   c.option '--[no-]pretty', %{Reformat JSON blobs in logs.}
@@ -18,7 +20,7 @@ command :logs do |c|
     sol = MrMurano::Solution.new
 
     if options.follow then
-      # open a lasting connection and continueally feed makePretty()
+      # open a lasting connection and continually feed makePretty()
       begin
         sol.get('/logs?polling=true') do |request, http|
           request["Accept-Encoding"] = "None"
