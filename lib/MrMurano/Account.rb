@@ -234,7 +234,7 @@ module MrMurano
     #
     # For now, lowercase only.
     SOLN_NAME_REGEX = /^(?![0-9])[a-z0-9]{1,62}$/
-    SOLN_NAME_HELP = "Solution name must contain only lowercase letters and/or numbers, and may not start with a number"
+    SOLN_NAME_HELP = "Solution name must contain only lowercase letters and/or numbers,\nand the name may not start with a number"
     #
     # MUR-2454: Dashes no longer allowed in sol'n name
     # Legacy check (good old days, before soln name was also a Lua variable name):

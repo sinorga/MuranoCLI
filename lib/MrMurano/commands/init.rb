@@ -59,7 +59,7 @@ command :init do |c|
       tmpl = ERB.new(tmpl)
       res = tmpl.result($project.data_binding)
       prFile = $project['info.name'] + '.murano'
-      say "Writing an initial Project file: #{prFile}"
+      say "Writing Project file to #{prFile}"
       puts ''
       File.open(prFile, 'w') {|io| io << res}
     end
@@ -131,7 +131,9 @@ command :init do |c|
     isNewSoln = false
     raise "Unknown type(#{type})" unless MrMurano::Account::ALLOWED_TYPES.include? type
     if not options.force and not $cfg["#{type}.id"].nil? then
-      say "Using #{type.capitalize} ID already set to " + $cfg["#{type}.id"]
+      # If user deleted a solution via Web or even using MurCLI,
+      # the .murano/config is not updated, so check sol'n exists.
+      say "#{type.capitalize} ID already set to " + $cfg["#{type}.id"]
     else
       sid = nil
       solname = nil
@@ -143,12 +145,12 @@ command :init do |c|
         $cfg.set("#{type}.id", sid, :project)
         solname = sol[:name]
       elsif solz.count == 0 then
-        say "You do not have any #{type}s; let's create one"
+        #say "You do not have any #{type}s. Let's create one."
         say "This business does not have any #{Inflecto.pluralize(type)}. Let's create one"
 
         asking = true
         while asking do
-          solname = ask("#{type.capitalize} Name? ")
+          solname = ask("\nPlease enter the #{type.capitalize} name: ")
           # LATER: Allow uppercase characters once pegasus_registry does.
           unless solname.match(MrMurano::Account::SOLN_NAME_REGEX)
             say MrMurano::Account::SOLN_NAME_HELP
