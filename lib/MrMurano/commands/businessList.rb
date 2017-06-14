@@ -20,7 +20,10 @@ command 'business list' do |c|
 
   c.action do |args, options|
     acc = MrMurano::Account.new
+
+    MrMurano::Verbose::whirly_start "Looking for businesses..."
     data = acc.businesses
+    MrMurano::Verbose::whirly_stop
 
     io=nil
     if options.output then
