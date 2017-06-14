@@ -50,7 +50,7 @@ RSpec.describe MrMurano::SyncRoot do
   it "iterates only on selected" do
     @options.role = true
     ret=[]
-    MrMurano::SyncRoot.each_filtered(@options) {|a,b,c| ret << a}
+    MrMurano::SyncRoot.each_filtered(@options) {|a,b,c,d| ret << a}
     expect(ret).to eq(["role"])
   end
 
