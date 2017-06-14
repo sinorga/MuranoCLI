@@ -43,6 +43,7 @@ module MrMurano
           warning "No solution with ID: #{@sid}"
           exit 1
         end
+        # Pagination: Check if more data.
         if ret.is_a?(Hash) and ret.has_key?(:total) and ret.has_key?(:items)
           if total.nil?
             total = ret[:total]
@@ -91,8 +92,6 @@ module MrMurano
 
   class Solution < SolutionBase
     def initialize
-      # Code path for `murano domain`.
-      @solntype = 'product.id'
       super
     end
 
@@ -115,7 +114,21 @@ module MrMurano
     def log
       get('/logs')
     end
+  end
 
+  class Product < Solution
+    def initialize
+      # Code path for `murano domain`.
+      @solntype = 'product.id'
+      super
+    end
+  end
+
+  class Application < Solution
+    def initialize
+      @solntype = 'application.id'
+      super
+    end
   end
 
 end
