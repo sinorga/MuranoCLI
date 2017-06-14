@@ -50,20 +50,42 @@ command :status do |c|
         item[:synckey]
       end
     end
+
     def pretty(ret, options)
-      say "Adding:" if options.grouped
-      ret[:toadd].each{|item| say " + #{item[:pp_type]}  #{fmtr(item)}"}
-      say "Deleting:" if options.grouped
-      ret[:todel].each{|item| say " - #{item[:pp_type]}  #{fmtr(item)}"}
-      say "Changing:" if options.grouped
+      pretty_group_header(ret[:toadd], "To be added", "add", options.grouped)
+      ret[:toadd].each{|item| say " + #{item[:pp_type]}  #{highlight_chg(fmtr(item))}"}
+
+      pretty_group_header(ret[:todel], "To be deleted", "delete", options.grouped)
+      ret[:todel].each{|item| say " - #{item[:pp_type]}  #{highlight_del(fmtr(item))}"}
+
+      pretty_group_header(ret[:tomod], "To be changed", "change", options.grouped)
       ret[:tomod].each{|item|
-        say " M #{item[:pp_type]}  #{fmtr(item)}"
+        say " M #{item[:pp_type]}  #{highlight_chg(fmtr(item))}"
         say item[:diff] if options.diff
       }
+
       if options.showall then
         say "Unchanged:" if options.grouped
         ret[:unchg].each{|item| say "   #{item[:pp_type]}  #{fmtr(item)}"}
       end
+    end
+
+    def pretty_group_header(group, header_any, header_empty, grouped)
+      if grouped
+        unless group.empty?
+          say "#{header_any}:"
+        else
+          say "Nothing to #{header_empty}"
+        end
+      end
+    end
+
+    def highlight_chg(msg)
+      Rainbow(msg).green.bright
+    end
+
+    def highlight_del(msg)
+      Rainbow(msg).red.bright
     end
 
     @grouped = {:toadd=>[],:todel=>[],:tomod=>[], :unchg=>[]}
