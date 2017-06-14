@@ -29,6 +29,8 @@ end
 
 module Commander
   class Runner
+    # This is the command entry point; we override
+    # (money patch) Commander's run_active_command.
     alias :old_run_active_command :run_active_command
     def run_active_command
       section = active_command.name
@@ -55,6 +57,23 @@ module Commander
       @args.push( *defopts )
       old_parse_global_options
     end
+
+    # Weird. --help doesn't work if other flags also specified.
+    # E.g., this shows the help for usage:
+    #   $ murano --help usage
+    # but if a flag is added, the command gets run, e.g.,
+    #   $ murano usage --ids 1234 --help
+    # ignore the --help and runs the usage command.
+    # ([lb] walked the code and it looks like when Commander tries to
+    # validate the args, it doesn't like the --ids flag (maybe because
+    # the "help" command is being used to validate?). Then it removes
+    # the --ids flags (after --help was previously removed) and tries
+    # the command *again* (in gems/commander-4.4.3/lib/commander/runner.rb,
+    # look for the comment, "Remove the offending args and retry").
+    #
+    # 2017-06-14: [lb] tried override run! here to show help correctly
+    # in this use case, but I could not get it to work. Oh, well... a
+    # minor annoyance; just live with it, I guess.
   end
 end
 
