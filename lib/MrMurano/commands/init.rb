@@ -40,9 +40,9 @@ command :init do |c|
     # 1. Get Business ID
     acquireBusinessId(options, acc)
     # 2. Get Product ID
-    pid, pname, newPrd = acquireSolutionId(options, acc, :product)
+    pid, pname, newPrd = acquireSolutionId(options, acc, :product, MrMurano::Product)
     # 3. Get Application ID
-    aid, aname, newApp = acquireSolutionId(options, acc, :application)
+    aid, aname, newApp = acquireSolutionId(options, acc, :application, MrMurano::Application)
 
     # Automatically link solutions.
     if pid and aid then
@@ -172,23 +172,45 @@ command :init do |c|
     puts '' # blank line
   end
 
-  def acquireSolutionId(options, acc, type)
+  def acquireSolutionId(options, acc, type, klass)
+    sid = nil
+    solname = nil
     isNewSoln = false
+
     raise "Unknown type(#{type})" unless MrMurano::Account::ALLOWED_TYPES.include? type
+
+    # If user deleted solution via Web, .murano/config might be outdated.
+    # Check sol'n exists.
+    exists = false
     if not options.force and not $cfg["#{type}.id"].nil? then
-      # If user deleted a solution via Web or even using MurCLI,
-      # the .murano/config is not updated, so check sol'n exists.
-      say "#{type.capitalize} ID already set to " + $cfg["#{type}.id"]
-    else
-      sid = nil
-      solname = nil
+      sol = klass.new
+      ret = sol.get() do |request, http|
+        response = http.request(request)
+        if response.is_a? Net::HTTPSuccess then
+          response = acc.workit_response(response)
+          exists = true
+          # [lb] expected this to be: sid = sol[:apiId]
+          sid = response[:id]
+          solname = response[:name]
+        end
+        response
+      end
+      if exists
+        say "Found #{type.capitalize} #{Rainbow(solname).underline} <#{sid}> #{ret[:domain]}"
+      else
+        say "Could not find #{type.capitalize} " + $cfg["#{type}.id"] + " referenced in the config"
+        puts ''
+      end
+    end
+
+    unless exists
       solz = acc.solutions(type)
       if solz.count == 1 then
         sol = solz.first
         say "This business has one #{type.capitalize}. Using #{Rainbow(sol[:domain]).underline}"
         sid = sol[:apiId]
-        $cfg.set("#{type}.id", sid, :project)
         solname = sol[:name]
+        $cfg.set("#{type}.id", sid, :project)
       elsif solz.count == 0 then
         #say "You do not have any #{type}s. Let's create one."
         say "This business does not have any #{Inflecto.pluralize(type)}. Let's create one"
@@ -225,7 +247,6 @@ command :init do |c|
           exit 3
         end
         $cfg.set("#{type}.id", sid, :project)
-
       else
         choose do |menu|
           menu.prompt = "Select which #{type.capitalize} to use:"
