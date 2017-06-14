@@ -109,7 +109,7 @@ module MrMurano
         Whirly.start spinner: MrMurano::Verbose::EXO_QUADRANTS,
           status: msg, append_newline: false
         @@whirly_time = Time.now
-        @@whirly_cols, lines = HighLine::SystemExtensions.terminal_size
+        @@whirly_cols, _ = HighLine::SystemExtensions.terminal_size
       end
     end
 
