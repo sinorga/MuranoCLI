@@ -6,7 +6,11 @@ command :domain do |c|
   c.action do |args,options|
     options.default :raw=>true
     sol = MrMurano::Product.new
+
+    MrMurano::Verbose::whirly_start "Fetching domain..."
     ret = sol.info()
+    MrMurano::Verbose::whirly_stop
+
     if options.raw then
       say ret[:domain]
     else
