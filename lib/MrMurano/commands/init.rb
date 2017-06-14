@@ -3,6 +3,8 @@ require 'MrMurano/Config-Migrate'
 require 'erb'
 require 'inflecto'
 
+MURANO_SIGN_UP_URL = "https://exosite.com/signup/"
+
 command :init do |c|
   c.syntax = %{murano init}
   c.summary = %{The easy way to start a project}
@@ -110,7 +112,9 @@ command :init do |c|
         $cfg.set('businesses.id', bizid[:bizid], :project)
 
       elsif bizz.count == 0 then
-        acc.warning "You don't have any businesses; Log into the webUI and create one."
+        acc.warning "This user has not created any businesses."
+        say "Please log on to exosite.com to create a free account. Visit:"
+        say "  #{MURANO_SIGN_UP_URL}"
         exit 3
       else
         choose do |menu|
