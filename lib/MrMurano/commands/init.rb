@@ -2,6 +2,7 @@ require 'MrMurano/Account'
 require 'MrMurano/Config-Migrate'
 require 'erb'
 require 'inflecto'
+require 'rainbow'
 
 MURANO_SIGN_UP_URL = "https://exosite.com/signup/"
 
@@ -23,7 +24,7 @@ command :init do |c|
       exit 2
     end
 
-    say "Creating project at #{$cfg['location.base'].to_s}"
+    say "Creating project at #{Rainbow($cfg['location.base'].to_s).underline}"
     puts ''
 
     # Try to import a .Solutionfile.secret
@@ -31,7 +32,7 @@ command :init do |c|
 
     # If they have never logged in, then asking for the business.id will also ask
     # for their username and password.
-    say "Using account #{$cfg['user.name']}"
+    say "Found User #{Rainbow($cfg['user.name']).underline}"
     puts '' # `say ''` doesn't actually print anything
 
     newPrd = false
@@ -84,33 +85,69 @@ command :init do |c|
           path.mkpath
         end
       end
-      say "Default directories created"
+      say 'Created default directories'
+      puts ''
     end
 
-    say "Success!"
-    unless $cfg['business.id'].nil?
-      say "Business ID: #{$cfg['business.id']}"
-    end
-    unless $cfg['product.id'].nil?
-      say "Product ID: #{$cfg['product.id']}"
-    end
-    unless $cfg['application.id'].nil?
-      say "Application ID: #{$cfg['application.id']}"
+    say 'Success!'
+    puts ''
+    id_postfix = ' ID'
+    important_ids = %w{business product application}.freeze
+    importantest_width = important_ids.map do |id_name|
+      cfg_key = id_name + '.id'
+      $cfg[cfg_key].length + id_postfix.length
+    end.max # Ruby is so weird! Max the map. [lb]
+    important_ids.each do |id_name|
+      # cfg_key is, e.g., 'business.id', 'product.id', 'application.id'
+      cfg_key = id_name + '.id'
+      unless $cfg[cfg_key].nil?
+        #say "#{id_name.capitalize} ID: #{highlightID($cfg[cfg_key])}"
+        # Right-aligned:
+        tmpl = "%%%ds: %%s" % importantest_width
+        # Left-aligned:
+        #tmpl = "%%-%ds: %%s" % importantest_width
+        say tmpl % [id_name.capitalize + id_postfix, highlightID($cfg[cfg_key]),]
+      end
     end
     puts ''
 
   end
 
+  def highlightID(id)
+    Rainbow(id).aliceblue.bright.underline
+  end
+
   def acquireBusinessId(options, acc)
+    exists = false
     if not options.force and not $cfg['business.id'].nil? then
-      say "Business ID already set to #{$cfg['business.id']}"
-    else
+      # Verify that the business exists.
+      biz = acc.overview do |request, http|
+        response = http.request(request)
+        if response.is_a? Net::HTTPSuccess then
+          exists = true
+          response = acc.workit_response(response)
+        end
+        # Ruby is so weird. In the do block, we can return a value
+        # to the caller (which called yield). But don't use the
+        # return keyword, lest we also leave our enclosing function
+        # (acquireBusinessId); just leave the value as the last line.
+        #  [2017-06-14: [lb] still learning Ruby nuances.]
+        response
+      end
+      if exists
+        say "Found Business #{Rainbow(biz[:name]).underline} <#{$cfg['business.id']}>"
+      else
+        say "Could not find Business #{$cfg['business.id']} referenced in the config"
+        puts ''
+      end
+    end
+
+    unless exists
       bizz = acc.businesses
       if bizz.count == 1 then
         bizid = bizz.first
-        say "You are only part of one business; using #{bizid[:name]}"
+        say "This user has one business. Using #{Rainbow(bizid[:name]).underline}"
         $cfg.set('businesses.id', bizid[:bizid], :project)
-
       elsif bizz.count == 0 then
         acc.warning "This user has not created any businesses."
         say "Please log on to exosite.com to create a free account. Visit:"
@@ -118,7 +155,7 @@ command :init do |c|
         exit 3
       else
         choose do |menu|
-          menu.prompt = "Select which Business to use:"
+          menu.prompt = "Please select the Business to use:"
           menu.flow = :columns_across
           bizz.sort{|a,b| a[:name]<=>b[:name]}.each do |b|
             menu.choice(b[:name]) do
@@ -144,7 +181,7 @@ command :init do |c|
       solz = acc.solutions(type)
       if solz.count == 1 then
         sol = solz.first
-        say "You only have one #{type}; using #{sol[:domain]}"
+        say "This business has one #{type.capitalize}. Using #{Rainbow(sol[:domain]).underline}"
         sid = sol[:apiId]
         $cfg.set("#{type}.id", sid, :project)
         solname = sol[:name]
