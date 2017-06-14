@@ -20,7 +20,7 @@ command :init do |c|
       exit 2
     end
 
-    say "Found project base directory at #{$cfg['location.base'].to_s}"
+    say "Creating project at #{$cfg['location.base'].to_s}"
     puts ''
 
     # Try to import a .Solutionfile.secret
@@ -48,16 +48,6 @@ command :init do |c|
         say "Linked #{ret[:script_key]}"
       end
     end
-
-    msg = "Ok, in Business ID: #{$cfg['business.id']}"
-    unless $cfg['product.id'].nil?
-      msg += " using Product ID: #{$cfg['product.id']}"
-    end
-    unless $cfg['application.id'].nil?
-      msg += " using Application ID: #{$cfg['application.id']}"
-    end
-    say msg
-    puts ''
 
     # If no ProjectFile, then write a ProjectFile
     if not $project.usingProjectfile then
@@ -90,11 +80,24 @@ command :init do |c|
       end
       say "Default directories created"
     end
+
+    say "Success!"
+    unless $cfg['business.id'].nil?
+      say "Business ID: #{$cfg['business.id']}"
+    end
+    unless $cfg['product.id'].nil?
+      say "Product ID: #{$cfg['product.id']}"
+    end
+    unless $cfg['application.id'].nil?
+      say "Application ID: #{$cfg['application.id']}"
+    end
+    puts ''
+
   end
 
   def acquireBusinessId(options, acc)
     if not options.force and not $cfg['business.id'].nil? then
-      say "Using Business ID already set to #{$cfg['business.id']}"
+      say "Business ID already set to #{$cfg['business.id']}"
     else
       bizz = acc.businesses
       if bizz.count == 1 then

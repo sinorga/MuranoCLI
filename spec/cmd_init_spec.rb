@@ -9,42 +9,44 @@ RSpec.describe 'murano init', :cmd do
   def expectedResponseWhenIdsFoundInConfig(t)
     return [
       "\n",
-      t.a_string_starting_with('Found project base directory at '),
+      t.a_string_starting_with('Creating project at '),
       "\n",
       t.a_string_starting_with('Using account '),
       "\n",
-      t.a_string_starting_with('Using Business ID already set to '),
+      t.a_string_starting_with('Business ID already set to '),
       "\n",
-      t.a_string_starting_with('Using Product ID already set to '),
+      t.a_string_starting_with('Product ID already set to '),
       "\n",
-      t.a_string_starting_with('Using Application ID already set to '),
-      "\n",
-      t.a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
+      t.a_string_starting_with('Application ID already set to '),
       "\n",
       "Writing an initial Project file: project.murano\n",
       "\n",
       "Default directories created\n",
+      "\n",
+      #t.a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
+      t.a_string_matching(%r{Success!\nBusiness ID: \w+(\nProduct ID: \w+)?(\nApplication ID: \w+)?}),
     ]
   end
 
   def expectedResponseWhenIdsFetchedFromMurano(t)
     return [
       "\n",
-      a_string_starting_with('Found project base directory at '),
+      a_string_starting_with('Creating project at '),
       "\n",
       a_string_starting_with('Using account '),
       "\n",
-      a_string_starting_with('Using Business ID already set to '),
+      a_string_starting_with('Business ID already set to '),
       "\n",
       a_string_starting_with('You only have one product; using '),
       "\n",
       a_string_starting_with('You only have one application; using '),
       "\n",
-      a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
-      "\n",
       "Writing an initial Project file: project.murano\n",
       "\n",
       "Default directories created\n",
+      "\n",
+      #a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
+      a_string_matching(%r{Success!\nBusiness ID: \w+(\nProduct ID: \w+)?(\nApplication ID: \w+)?}),
     ]
   end
 
@@ -138,21 +140,22 @@ RSpec.describe 'murano init', :cmd do
         out, err, status = Open3.capture3(capcmd('murano', 'init'), :stdin_data=>data)
         expect(out.lines).to match_array([
           "\n",
-          a_string_starting_with('Found project base directory at '),
+          a_string_starting_with('Creating project at '),
           "\n",
           a_string_starting_with('Using account '),
-          a_string_starting_with('Using Business ID already set to '),
+          a_string_starting_with('Business ID already set to '),
           "\n",
           "You do not have any products; let's create one\n",
           "Product Name? \n",
           "\n",
           "You do not have any applications; let's create one\n",
           "Application Name? \n",
-          a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
           "\n",
           "Writing an initial Project file: project.murano\n",
           "\n",
           "Default directories created\n",
+          #a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
+          a_string_matching(%r{Success!\nBusiness ID: \w+(\nProduct ID: \w+)?(\nApplication ID: \w+)?}),
         ])
         expect(err).to eq("")
         expect(status.exitstatus).to eq(0)
@@ -223,21 +226,22 @@ RSpec.describe 'murano init', :cmd do
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
       expect(out.lines).to match_array([
         "\n",
-        a_string_starting_with('Found project base directory at '),
+        a_string_starting_with('Creating project at '),
         "\n",
         a_string_starting_with('Using account '),
         "\n",
-        a_string_starting_with('Using Business ID already set to '),
+        a_string_starting_with('Business ID already set to '),
         "\n",
-        a_string_starting_with('Using Product ID already set to '),
+        a_string_starting_with('Product ID already set to '),
         "\n",
-        a_string_starting_with('Using Application ID already set to '),
-        "\n",
-        a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
-        "\n",
-        #"Writing an initial Project file: project.murano\n",
+        a_string_starting_with('Application ID already set to '),
         #"\n",
+        #"Writing an initial Project file: project.murano\n",
+        "\n",
         "Default directories created\n",
+        "\n",
+        #a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
+        a_string_matching(%r{Success!\nBusiness ID: \w+(\nProduct ID: \w+)?(\nApplication ID: \w+)?}),
       ])
       expect(err).to eq("")
       expect(status.exitstatus).to eq(0)
