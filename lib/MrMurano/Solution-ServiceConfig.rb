@@ -31,14 +31,14 @@ module MrMurano
       @scid = scid_for_name(@serviceName)
     end
 
-    def create(pid, name=nil)  #? script_key?
+    def create(pid, name=nil, &block) #? script_key?
       name = pid if name.nil?
       # See pegasus_registry PostServiceConfig for the POST properties.
       post('', {
         :solution_id => @sid,
         :service => pid,
         :name => name,
-      })
+      }, &block)
     end
 
     def remove(id)
