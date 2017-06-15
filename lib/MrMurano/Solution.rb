@@ -39,7 +39,7 @@ module MrMurano
     end
     # …
 
-    def get(*args)
+    def get(path='', query=nil, &block)
       aggregate = nil
       total = nil
       remaining = -1
@@ -59,10 +59,11 @@ module MrMurano
             #     \"solution_id\":\"XXXXXXXXXXXXXXXX\"}&limit=20&offset=20"
             # But note that the URL we use is a little different
             #   https://bizapi.hosted.exosite.io/api:1/solution/XXXXXXXXXXXXXXXXX/eventhandler
-            if args[1].nil?
-              args[1] = []
+            if query.nil?
+              query = []
+            else
+              query = query.dup
             end
-            query = args[1].dup
           else
             if total != ret[:total]
               warning "Unexpected: subsequence :total not total: #{ret[:total]} != #{total}"
@@ -76,9 +77,9 @@ module MrMurano
             end
           end
           if remaining > 0
-            args[1] = query.dup
-            #args[1].push ["limit", 20]
-            args[1].push ["offset", total-remaining]
+            query = query.dup
+            #query.push ["limit", 20]
+            query.push ["offset", total-remaining]
           end
           if aggregate.nil?
             aggregate = ret
