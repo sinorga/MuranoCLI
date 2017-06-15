@@ -110,6 +110,7 @@ command :init do |c|
         tmpl = "%%%ds: %%s" % importantest_width
         # Left-aligned:
         #tmpl = "%%-%ds: %%s" % importantest_width
+
         say tmpl % [id_name.capitalize + id_postfix, highlightID($cfg[cfg_key]),]
       end
     end
@@ -184,7 +185,7 @@ command :init do |c|
     exists = false
     if not options.force and not $cfg["#{type}.id"].nil? then
       sol = klass.new
-      ret = sol.get() do |request, http|
+      ret = sol.info() do |request, http|
         response = http.request(request)
         if response.is_a? Net::HTTPSuccess then
           response = acc.workit_response(response)
@@ -196,7 +197,7 @@ command :init do |c|
         response
       end
       if exists
-        say "Found #{type.capitalize} #{Rainbow(solname).underline} <#{sid}> #{ret[:domain]}"
+        say "Found #{type.capitalize} #{sol.pretty_desc}"
       else
         say "Could not find #{type.capitalize} " + $cfg["#{type}.id"] + " referenced in the config"
         puts ''
@@ -210,6 +211,7 @@ command :init do |c|
         say "This business has one #{type.capitalize}. Using #{Rainbow(sol[:domain]).underline}"
         sid = sol[:apiId]
         solname = sol[:name]
+        # Update the config file, both in memory and on drive.
         $cfg.set("#{type}.id", sid, :project)
       elsif solz.count == 0 then
         #say "You do not have any #{type}s. Let's create one."
@@ -218,7 +220,7 @@ command :init do |c|
         asking = true
         while asking do
           solname = ask("\nPlease enter the #{type.capitalize} name: ")
-          # LATER: Allow uppercase characters once pegasus_registry does.
+          # LATER: Allow uppercase characters once services do.
           unless solname.match(MrMurano::Account::SOLN_NAME_REGEX)
             say MrMurano::Account::SOLN_NAME_HELP
           else
