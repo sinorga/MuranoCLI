@@ -1,3 +1,4 @@
+require 'rainbow'
 require 'uri'
 require 'MrMurano/Config'
 require 'MrMurano/http'
@@ -6,12 +7,17 @@ require 'MrMurano/SyncUpDown'
 
 module MrMurano
   class SolutionBase
-    def initialize
-      if !defined?(@solntype) or @solntype.nil?
-        @solntype = 'application.id'
+    def initialize(sid=nil)
+      unless sid
+        if !defined?(@solntype) or @solntype.nil?
+          @solntype = 'application.id'
+        end
+        # Get the application.id or product.id.
+        @sid = $cfg[@solntype]
+      else
+        @solntype = @solntype or 'solution.id'
+        @sid = sid
       end
-      # Get the application.id or product.id.
-      @sid = $cfg[@solntype]
       # Maybe raise "No application!" or "No product!".
       raise MrMurano::ConfigError.new("No #{/(.*).id/.match(@solntype)[1]}!") if @sid.nil?
       @uriparts = [:solution, @sid]
@@ -91,9 +97,11 @@ module MrMurano
   end
 
   class Solution < SolutionBase
-    def initialize
-      if !defined?(@solntype) or @solntype.nil?
-        raise "Solution subclass must set @solntype"
+    def initialize(sid=nil)
+      unless sid
+        if !defined?(@solntype) or @solntype.nil?
+          raise "Solution subclass must set @solntype"
+        end
       end
       super
     end
@@ -120,7 +128,7 @@ module MrMurano
   end
 
   class Product < Solution
-    def initialize
+    def initialize(sid=nil)
       # Code path for `murano domain`.
       @solntype = 'product.id'
       super
@@ -128,7 +136,7 @@ module MrMurano
   end
 
   class Application < Solution
-    def initialize
+    def initialize(sid=nil)
       @solntype = 'application.id'
       super
     end
