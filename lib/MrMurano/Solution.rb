@@ -111,8 +111,10 @@ module MrMurano
       get('/version')
     end
 
-    def info
-      get()
+    def info(&block)
+      path = ''
+      query = nil
+      @desc = get(path, query, &block)
     end
 
     def list
@@ -125,6 +127,30 @@ module MrMurano
 
     def log
       get('/logs')
+    end
+
+    # Desc is from list of solutions fetched from business/<bizid>/solution/,
+    # e.g., from a call to solutions(), applications(), or products().
+    def desc
+      @desc
+    end
+
+    def desc=(ret)
+      @desc = ret
+    end
+
+    def pretty_desc
+      # [lb] would normally put presentation code elsewhere (i.e., model classes
+      #   should probably not be using Rainbow), but this seems okay.
+      "#{Rainbow(@desc[:name]).underline} <#{self.sid}> #{@desc[:domain]}"
+    end
+
+    def sid
+      # NOTE: The Solution info fetched from business/<bizid>/solutions endpoint
+      #   includes the keys, :name, :sid, and :domain (see calls to solutions()).
+      #   The solution details fetched from a call to Solution.get() include the
+      #   keys, :name, :id, and :domain, among others.
+      @desc[:id] or @desc[:sid] or nil
     end
   end
 
