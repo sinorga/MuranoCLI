@@ -220,10 +220,110 @@ alias_command 'app list', 'solution list', '--type', 'application', '--no-all'
 alias_command 'application list', 'solution list', '--type', 'application', '--no-all'
 alias_command 'solutions list', 'solution list'
 
+# To use fetch_solutions!, call command_add_solution_pickers(c) in
+# the command block, and then call fetch_solutions! from the action.
+def must_fetch_solutions(options)
+  command_set_soln_picker_defaults(options)
+
+  acc = MrMurano::Account.new
+
+  MrMurano::Verbose::whirly_start "Fetching solutions..."
+  resp = acc.solutions(options.type)
+  MrMurano::Verbose::whirly_stop
+
+  # Cull solutions if user specifies name(s) or ID(s).
+  culled = select_solutions(resp, options)
+
+  unless culled.length > 0
+    acc.error "No solutions found."
+    exit 0
+  end
+
+  solz = []
+
+  culled.each do |desc|
+    case desc[:type]
+    when "product"
+      soln = MrMurano::Product.new
+    when "application"
+      soln = MrMurano::Application.new
+    else
+      acc.warning "Unexpected solution type: #{desc[:type]}"
+      soln = MrMurano::Solution.new(desc[:sid])
+    end
+    soln.desc = desc
+    solz += [soln,]
+  end
+
+  solz
+end
+
 def command_add_solution_pickers(c)
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES, %{Find solution(s) by type}
   c.option '--ids IDS', Array, %{Find solution(s) by ID (IDS can be 1 ID or comma-separated list)}
-  c.option '--names NAME', %{Find solution(s) by name (NAMES can be 1 name or comma-separated list)}
+  c.option '--names NAME', Array, %{Find solution(s) by name (NAMES can be 1 name or comma-separated list)}
+  c.option '--find WORD', Array, %{Find solution(s) by word(s) (fuzzy match)}
+end
+
+def command_set_soln_picker_defaults(options)
+  options.default :header=>true
+  unless options.type
+    options.type = :all
+  end
+  if options.ids.nil?
+    options.ids = []
+  end
+  if options.names.nil?
+    options.names = []
+  end
+  if options.find.nil?
+    options.find = []
+  end
+  options
+end
+
+# 2017-06-15: [lb] not sure the best place for this function. So here for now.
+def select_solutions(solz, options)
+  if options.names.any? or options.ids.any? or options.find.any?
+    solz = solz.select { |i|
+      keep = false
+      # Check exact name match of name or domain.
+      if options.names.include? i[:name]
+        keep = true
+      end
+      options.names.each do |name|
+        if i[:domain] =~ /\b#{name}\./i
+          keep = true
+        end
+      end
+      # Check exact ID match.
+      if options.ids.include? i[:sid]
+        keep = true
+      end
+      # Check fuzzy name or domain match (or sid, for that matter).
+      options.find.each do |name|
+        if i[:sid] =~ /#{name}/i
+          keep = true
+        end
+        if i[:name] =~ /#{name}/i
+          keep = true
+        end
+        if i[:domain] =~ /#{name}/i
+          keep = true
+        end
+      end
+
+      # The type filter is applied in solutions() function,
+      # but we should honor it here for completeness.
+      if options.type and options.type != :all and i[:type] != options.type.to_s
+        keep = false
+      end
+
+      # Keep the solution if at least one thing matched above.
+      keep
+    }
+  end
+  solz
 end
 
 #  vim: set ai et sw=2 ts=2 :
