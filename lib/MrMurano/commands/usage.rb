@@ -8,61 +8,44 @@ command :usage do |c|
   c.summary = %{Get usage info for solution(s)}
   c.description = %{Get usage info for solution(s)}
 
-#require 'byebug' ; byebug if true
+  # Add the flags: --types, --ids, --names.
   command_add_solution_pickers c
-
-# FIXME: opts:
-  # --type TYPE :product :application
-  # --all
-
+  c.option '--[no-]header', %{Output solution description before usage report.}
 
   c.action do |args, options|
-    soln_types = MrMurano::Account::ALLOWED_TYPES
-    if options.type
-      soln_types = options.type
-    end
+    solz = must_fetch_solutions(options)
 
-    soln_ids = []
-    if options.ids
-      soln_ids = options.ids
-    end
-
-    soln_names = []
-    if options.names
-      soln_ids = options.names
-    end
-
-    solz = []
-
-    MrMurano::Verbose::whirly_start "Fetching solutions..."
-    ret = acc.solutions(options.type).select do |i|
-      i[:name] == name or i[:domain] =~ /#{name}\./i
+    solsages = []
+    MrMurano::Verbose::whirly_start "Fetching usage..."
+    solz.each do |soln|
+      solsages += [[soln, soln.usage,],]
     end
     MrMurano::Verbose::whirly_stop
 
-
-
-require 'byebug' ; byebug if true
-#    options.default :type=>:all, :all=>true
-#    sol = MrMurano::Solution.new
-#    sol = MrMurano::Product.new
-    sol = MrMurano::Application.new
-    sol.outf(sol.usage) do |dd, ios|
-      headers = ['', :Quota, :Daily, :Monthly, :Total]
-      rows = []
-      dd.each_pair do |key, value|
-        quota = value[:quota] or {}
-        usage = value[:usage] or {}
-        rows << [
-          key,
-          quota[:daily],
-          usage[:calls_daily],
-          usage[:calls_monthly],
-          usage[:calls_total],
-        ]
+    solsages.each do |soln, usage|
+      soln.outf(usage) do |dd, ios|
+        if options.header
+          #ios.puts soln.pretty_desc
+          type = soln.desc[:type]
+          ios.puts "#{type.capitalize}: #{soln.pretty_desc}"
+        end
+        headers = ['', :Quota, :Daily, :Monthly, :Total]
+        rows = []
+        dd.each_pair do |key, value|
+          quota = value[:quota] or {}
+          usage = value[:usage] or {}
+          rows << [
+            key,
+            quota[:daily],
+            usage[:calls_daily],
+            usage[:calls_monthly],
+            usage[:calls_total],
+          ]
+        end
+        soln.tabularize({:headers=>headers, :rows=>rows}, ios)
       end
-      sol.tabularize({:headers=>headers, :rows=>rows}, ios)
     end
+
   end
 end
 alias_command 'usage product', 'usage', '--type', 'product'
