@@ -14,6 +14,9 @@ command :logs do |c|
   c.option '--[no-]localtime', %{Adjust Timestamps to be in local time}
   c.option '--raw', %{Don't do any formating of the log data}
 
+  # Add the flags: --types, --ids, --names, --[no]-header.
+  command_add_solution_pickers c
+
   c.action do |args,options|
     options.default :pretty=>true, :localtime=>true, :raw => false
 
