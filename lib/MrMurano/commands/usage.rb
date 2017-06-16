@@ -2,9 +2,6 @@ require 'MrMurano/Solution'
 
 command :usage do |c|
   c.syntax = %{murano usage}
-# FIXME: Find other places to reword from "project"
-#  c.summary = %{Get usage info for project}
-#  c.description = %{Get usage info for project}
   c.summary = %{Get usage info for solution(s)}
   c.description = %{Get usage info for solution(s)}
 
