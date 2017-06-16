@@ -263,6 +263,7 @@ def command_add_solution_pickers(c)
   c.option '--ids IDS', Array, %{Find solution(s) by ID (IDS can be 1 ID or comma-separated list)}
   c.option '--names NAME', Array, %{Find solution(s) by name (NAMES can be 1 name or comma-separated list)}
   c.option '--find WORD', Array, %{Find solution(s) by word(s) (fuzzy match)}
+  c.option '--[no-]header', %{Output solution descriptions.}
 end
 
 def command_set_soln_picker_defaults(options)
