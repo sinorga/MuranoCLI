@@ -5,9 +5,8 @@ command :usage do |c|
   c.summary = %{Get usage info for solution(s)}
   c.description = %{Get usage info for solution(s)}
 
-  # Add the flags: --types, --ids, --names.
+  # Add the flags: --types, --ids, --names, --[no]-header.
   command_add_solution_pickers c
-  c.option '--[no-]header', %{Output solution description before usage report.}
 
   c.action do |args, options|
     solz = must_fetch_solutions(options)
@@ -22,11 +21,9 @@ command :usage do |c|
     solsages.each do |soln, usage|
       soln.outf(usage) do |dd, ios|
         if options.header
-          #ios.puts soln.pretty_desc
-          type = soln.desc[:type]
-          ios.puts "#{type.capitalize}: #{soln.pretty_desc}"
+          ios.puts "#{soln.type}: #{soln.pretty_desc}"
         end
-        headers = ['', :Quota, :Daily, :Monthly, :Total]
+        headers = ['', :Quota, :Daily, :Monthly, :Total,]
         rows = []
         dd.each_pair do |key, value|
           quota = value[:quota] or {}
@@ -47,9 +44,12 @@ command :usage do |c|
 end
 alias_command 'usage product', 'usage', '--type', 'product'
 alias_command 'usage products', 'usage', '--type', 'product'
+alias_command 'usage prod', 'usage', '--type', 'product'
+alias_command 'usage prods', 'usage', '--type', 'product'
 alias_command 'usage application', 'usage', '--type', 'application'
 alias_command 'usage applications', 'usage', '--type', 'application'
 alias_command 'usage app', 'usage', '--type', 'application'
 alias_command 'usage apps', 'usage', '--type', 'application'
 
 #  vim: set ai et sw=2 ts=2 :
+
