@@ -18,7 +18,6 @@ command :config do |c|
   c.example %{Unset a value in a configfile. (lower scopes will become visible when unset)},
     'murano config diff.cmd --unset'
 
-
   c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
   c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
   c.option '--env', 'Use only the config file from $MR_CONFIGFILE'
