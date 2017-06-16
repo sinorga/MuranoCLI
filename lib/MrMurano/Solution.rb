@@ -149,8 +149,15 @@ module MrMurano
       # NOTE: The Solution info fetched from business/<bizid>/solutions endpoint
       #   includes the keys, :name, :sid, and :domain (see calls to solutions()).
       #   The solution details fetched from a call to Solution.get() include the
-      #   keys, :name, :id, and :domain, among others.
+      #   keys, :name, :id, and :domain, among others. Note that the info()
+      #   response does not include :type.
       @desc[:id] or @desc[:sid] or nil
+    end
+
+    def type
+      # info() doesn't return :type. So get from class name, e.g.,
+      # soln.class == "MrMurano::Product"
+      self.class.to_s.gsub(/^.*::/, '')
     end
   end
 
