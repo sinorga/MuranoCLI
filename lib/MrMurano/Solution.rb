@@ -139,10 +139,18 @@ module MrMurano
       @desc = ret
     end
 
-    def pretty_desc
-      # [lb] would normally put presentation code elsewhere (i.e., model classes
-      #   should probably not be using Rainbow), but this seems okay.
-      "#{Rainbow(@desc[:name]).underline} <#{self.sid}> #{@desc[:domain]}"
+    def pretty_desc(add_type=false, no_raw=false)
+      # [lb] would normally put presentation code elsewhere (i.e., model
+      #   classes should not be formatting output), but this seems okay.
+      desc = ""
+      if add_type
+        desc += "#{self.type}: "
+      end
+      desc += "#{Rainbow(@desc[:name]).underline} <#{self.sid}> "
+      if no_raw
+        desc += "https://"
+      end
+      desc += @desc[:domain]
     end
 
     def sid
