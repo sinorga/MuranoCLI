@@ -58,7 +58,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       # 1: Order of files is not set
       # 2: Path prefixes could be different.
       olines = out.lines
-      expect(olines[0]).to eq("Adding:\n")
+      expect(olines[0]).to eq("To be added:\n")
       expect(olines[1..8]).to contain_exactly(
         a_string_matching(/ \+ M  .*modules\/table_util\.lua/),
         a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua/),
@@ -69,13 +69,13 @@ RSpec.describe 'murano status', :cmd, :needs_password do
         a_string_matching(/ \+ S  .*files\/icon\.png/),
         a_string_matching(/ \+ S  .*files\/index\.html/),
       )
-      expect(olines[9]).to eq("Deleting:\n")
+      expect(olines[9]).to eq("To be deleted:\n")
       expect(olines[10..10]).to contain_exactly(
         " - E  user_account\n",
         #" - E  gateway_disconnect\n",
         #" - E  gateway_connect\n",
       )
-      expect(olines[11]).to eq("Changing:\n")
+      expect(olines[11]).to eq("Nothing to change\n")
       #expect(olines[14..15]).to contain_exactly(
       #  a_string_matching(/ M E  .*services\/devdata\.lua/),
       #  a_string_matching(/ M E  .*services\/timers\.lua/),
@@ -87,10 +87,10 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       out, err, status = Open3.capture3(capcmd('murano', 'status', '**/icon.png'))
       expect(err).to eq('')
       expect(out.lines).to match([
-        "Adding:\n",
+        "To be added:\n",
         a_string_matching(/ \+ S  .*files\/icon\.png/),
-        "Deleting:\n",
-        "Changing:\n",
+        "Nothing to delete\n",
+        "Nothing to change\n",
       ])
       expect(status.exitstatus).to eq(0)
     end
@@ -99,10 +99,10 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       out, err, status = Open3.capture3(capcmd('murano', 'status', '#put#'))
       expect(err).to eq('')
       expect(out.lines).to match([
-        "Adding:\n",
+        "To be added:\n",
         a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/),
-        "Deleting:\n",
-        "Changing:\n",
+        "Nothing to delete\n",
+        "Nothing to change\n",
       ])
       expect(status.exitstatus).to eq(0)
     end
@@ -121,7 +121,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       expect(err).to eq('')
       olines = out.lines
-      expect(olines[0]).to eq("Adding:\n")
+      expect(olines[0]).to eq("To be added:\n")
       expect(olines[1..8]).to include(
         a_string_matching(/ \+ M  .*modules\/table_util\.lua/),
         a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua/),
@@ -132,13 +132,13 @@ RSpec.describe 'murano status', :cmd, :needs_password do
         a_string_matching(/ \+ S  .*files\/icon\.png/),
         a_string_matching(/ \+ S  .*files\/index\.html/),
       )
-      expect(olines[9]).to eq("Deleting:\n")
+      expect(olines[9]).to eq("To be deleted:\n")
       expect(olines[10..10]).to include(
         " - E  user_account\n",
         #" - E  gateway_connect\n",
         #" - E  gateway_disconnect\n",
       )
-      expect(olines[11]).to eq("Changing:\n")
+      expect(olines[11]).to eq("Nothing to change\n")
       #expect(olines[14..15]).to include(
       #  a_string_matching(/ M E  .*services\/devdata\.lua/),
       #  a_string_matching(/ M E  .*services\/timers\.lua/),
@@ -176,7 +176,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(err).to eq('')
       # Not a single match, because the order of items within groups can shift
       olines = out.lines
-      expect(olines[0]).to eq("Adding:\n")
+      expect(olines[0]).to eq("To be added:\n")
       expect(olines[1..7]).to contain_exactly(
         a_string_matching(/ \+ M  .*modules\/table_util\.lua/),
         a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua/),
@@ -186,14 +186,14 @@ RSpec.describe 'murano status', :cmd, :needs_password do
         a_string_matching(/ \+ S  .*files\/index\.html/),
         a_string_matching(/ \+ S  .*files\/js\/script\.js/),
       )
-      expect(olines[8]).to eq("Deleting:\n")
+      expect(olines[8]).to eq("To be deleted:\n")
       expect(olines[9..10]).to contain_exactly(
         " - E  user_account\n",
         " - E  timer_timer\n",
         #" - E  gateway_connect\n",
         #" - E  gateway_disconnect\n",
       )
-      expect(olines[11]).to eq("Changing:\n")
+      expect(olines[11]).to eq("To be changed:\n")
       expect(olines[12..12]).to contain_exactly(
         a_string_matching(/ M E  .*services\/devdata\.lua/),
       )
@@ -230,7 +230,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       expect(err).to eq('')
       olines = out.lines
-      expect(olines[0]).to eq("Adding:\n")
+      expect(olines[0]).to eq("To be added:\n")
       expect(olines[1..7]).to contain_exactly(
         a_string_matching(/ \+ M  .*modules\/table_util\.lua/),
         a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua/),
@@ -240,14 +240,14 @@ RSpec.describe 'murano status', :cmd, :needs_password do
         a_string_matching(/ \+ S  .*files\/icon\.png/),
         a_string_matching(/ \+ S  .*files\/index\.html/),
       )
-      expect(olines[8]).to eq("Deleting:\n")
+      expect(olines[8]).to eq("To be deleted:\n")
       expect(olines[9..10]).to contain_exactly(
         " - E  timer_timer\n",
         " - E  user_account\n",
         #" - E  gateway_connect\n",
         #" - E  gateway_disconnect\n",
       )
-      expect(olines[11]).to eq("Changing:\n")
+      expect(olines[11]).to eq("Nothing to change\n")
       #expect(olines[14..15]).to contain_exactly(
       #  a_string_matching(/ M E  .*services\/devdata\.lua/),
       #)
