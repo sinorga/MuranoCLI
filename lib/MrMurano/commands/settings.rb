@@ -56,13 +56,13 @@ command 'setting write' do |c|
 
   c.option '--bool', %{Set Value type to boolean}
   c.option '--num', %{Set Value type to number}
-  c.option '--string', %{Set Value type to string. (this is default)}
+  c.option '--string', %{Set Value type to string (this is default)}
   c.option '--json', %{Value is parsed as JSON}
   c.option '--array', %{Set Value type to array of strings}
   c.option '--dict', %{Set Value type to a dictionary of strings}
 
   c.option '--append', %{When sub-key is an array, append values instead of replacing}
-  c.option '--merge', %{When sub-key is a dict, merge values instead of replacing. (child dicts are also merged)}
+  c.option '--merge', %{When sub-key is a dict, merge values instead of replacing (child dicts are also merged)}
 
   c.example %{murano setting write Gateway.protocol devmode --bool yes}, %{}
   c.example %{murano setting write Gateway.identity_format options.length --int 24}, %{}

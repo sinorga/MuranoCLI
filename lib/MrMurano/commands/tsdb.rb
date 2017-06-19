@@ -49,7 +49,7 @@ Units are u (microseconds), ms (milliseconds), s (seconds)
 
 Also, many date-time formats can be parsed and will be converted to microseconds
   }
-  c.option '--when TIMESTAMP', %{When this data happened. (defaults to now)}
+  c.option '--when TIMESTAMP', %{When this data happened (default: now)}
   # TODO: add option to take data from STDIN.
   c.example 'murano tsdb write hum=45 lux=12765 @sn=44', %{Write two metrics (hum and lux) with a tag (sn)}
 
@@ -259,7 +259,7 @@ command :tsdb do |c|
   c.syntax = %{murano tsdb}
   c.summary = %{About TSDB}
   c.description = %{The tsdb sub-commands let you interact directly with the TSDB instance in a
-solution.  This allows for easier debugging, being able to quickly try out
+solution. This allows for easier debugging, being able to quickly try out
 different queries or write test data.}
 
   c.action do |args, options|
