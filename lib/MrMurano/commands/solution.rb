@@ -170,7 +170,7 @@ command 'solution list' do |c|
   c.syntax = %{murano solution list [options]}
   c.summary = %{List solution}
   c.description = %{List solution in the current business}
-  c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES+[:all], %{What type of solutions to list. (default: all)}
+  c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES+[:all], %{What type of solutions to list (default: all)}
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
@@ -263,7 +263,7 @@ def command_add_solution_pickers(c)
   c.option '--ids IDS', Array, %{Find solution(s) by ID (IDS can be 1 ID or comma-separated list)}
   c.option '--names NAME', Array, %{Find solution(s) by name (NAMES can be 1 name or comma-separated list)}
   c.option '--find WORD', Array, %{Find solution(s) by word(s) (fuzzy match)}
-  c.option '--[no-]header', %{Output solution descriptions.}
+  c.option '--[no-]header', %{Output solution descriptions}
 end
 
 def command_set_soln_picker_defaults(options)

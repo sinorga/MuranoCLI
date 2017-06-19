@@ -15,7 +15,7 @@ command :config do |c|
   c.example %{Query a value}, 'murano config solution.id'
   c.example %{Set a new value; writing to the project config file}, 'murano config solution.id XXXXXXXX'
   c.example %{Set a new value; writing to the user config file}, 'murano config --user user.name my@email.address'
-  c.example %{Unset a value in a configfile. (lower scopes will become visible when unset)},
+  c.example %{Unset a value in a configfile (lower scopes will become visible when unset)},
     'murano config diff.cmd --unset'
 
   c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
