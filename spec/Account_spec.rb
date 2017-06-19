@@ -354,7 +354,7 @@ RSpec.describe MrMurano::Account do
     end
   else
     it "creates solution; with uppercase" do
-      expect { @acc.new_solution("oNeTWO", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+      expect { @acc.new_solution("oNeTWO", :product) }.to raise_error(MrMurano::Account::SOLN_NAME_HELP)
     end
   end
 
@@ -365,19 +365,19 @@ RSpec.describe MrMurano::Account do
 
     # 2017-05-26: Dashes forbidden! MUR-1994
     #expect { @acc.new_solution("ONe-8796-gkl", :product) }.to_not raise_error
-    expect { @acc.new_solution("ONe-8796-gkl", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+    expect { @acc.new_solution("ONe-8796-gkl", :product) }.to raise_error(MrMurano::Account::SOLN_NAME_HELP)
   end
 
   it "creates solution; that is too long" do
-    expect { @acc.new_solution("o"*70, :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+    expect { @acc.new_solution("o"*70, :product) }.to raise_error(MrMurano::Account::SOLN_NAME_HELP)
   end
 
   it "creates solution; with underscore" do
-    expect { @acc.new_solution("one_two", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+    expect { @acc.new_solution("one_two", :product) }.to raise_error(MrMurano::Account::SOLN_NAME_HELP)
   end
 
   it "creates solution; with digit first" do
-    expect { @acc.new_solution("1two", :product) }.to raise_error("Solution name must contain only lowercase letters and/or numbers, and may not start with a number")
+    expect { @acc.new_solution("1two", :product) }.to raise_error(MrMurano::Account::SOLN_NAME_HELP)
   end
 
   it "creates solution; without biz.id" do
