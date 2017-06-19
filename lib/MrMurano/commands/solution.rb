@@ -68,6 +68,7 @@ command 'solution delete' do |c|
   c.syntax = %{murano solution delete <id>}
   c.summary = %{Delete a solution}
   c.description = %{Delete a solution}
+  c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES+[:all], %{Only delete solution(s) of the specified type (default: all)}
   c.action do |args, options|
     if args.count < 1 then
       acc.error "solution id or name missing"
@@ -78,15 +79,20 @@ command 'solution delete' do |c|
     end
   end
 end
-alias_command 'product delete', 'solution delete'
-alias_command 'app delete', 'solution delete'
-alias_command 'application delete', 'solution delete'
+alias_command 'product delete', 'solution delete', '--type', 'product'
+alias_command 'app delete', 'solution delete', '--type', 'application'
+alias_command 'application delete', 'solution delete', '--type', 'application'
+# 2017-06-19: [lb] wondering if 'rm' aliases would be useful...
 alias_command 'solution rm', 'solution delete'
+alias_command 'product rm', 'solution delete', '--type', 'product'
+alias_command 'app rm', 'solution delete', '--type', 'application'
+alias_command 'application rm', 'solution delete', '--type', 'application'
 
 command 'solutions expunge' do |c|
   c.syntax = %{murano solution expunge}
   c.summary = %{Delete all solutions}
   c.description = %{Delete all solutions}
+  c.option '--yes', %{Answer "yes" to all prompts and run non-interactively.}
   c.action do |args, options|
     if args.count > 0 then
       acc.error "not expecting any arguments"
@@ -94,12 +100,12 @@ command 'solutions expunge' do |c|
     end
     name = '*'
     n_deleted, n_faulted = solution_delete(name, options)
-    unless n_deleted.zero?
+    unless n_deleted.nil? or n_deleted.zero?
       # FIXME: Should this use "say" or "outf"?
       inflection = MrMurano::Verbose::pluralize?("solution", n_deleted)
       say "Deleted #{n_deleted} #{inflection}"
     end
-    unless n_faulted.zero?
+    unless n_faulted.nil? or n_faulted.zero?
       inflection = MrMurano::Verbose::pluralize?("solution", n_faulted)
       acc.error "Failed to delete #{n_faulted} #{inflection}"
     end
@@ -109,20 +115,24 @@ alias_command 'solutions delete', 'solutions expunge'
 alias_command 'solutions rm', 'solutions expunge'
 
 def solution_delete(name, options)
+  options.default :type=>:all
+
   acc = MrMurano::Account.new
 
   if name == '*'
-    confirmed = MrMurano::Verbose::ask_yes_no("Really delete all solutions? [Y/n] ", true)
-    unless confirmed
-      acc.warning "abort!"
-      return
+    unless options.yes
+      confirmed = MrMurano::Verbose::ask_yes_no("Really delete all solutions? [Y/n] ", true)
+      unless confirmed
+        acc.warning "abort!"
+        return
+      end
     end
     name = ""
   end
 
   MrMurano::Verbose::whirly_start "Looking for solutions..."
   # Need to convert what we got into the internal PID.
-  ret = acc.solutions(:all)
+  ret = acc.solutions(options.type)
   unless name.empty?
     ret.select!{|i| i.has_value?(name) or i[:domain] =~ /#{name}\./i }
   end
@@ -143,9 +153,12 @@ def solution_delete(name, options)
     end
     exit 1
   else
-    unless name.empty? or ret.length == 1
-      acc.warning "Unexpected number of solutions: found #{ret.length} but expected 1"
-    end
+    # Solutions of different types can have the same name, so warning that
+    # more than one solution was found when searching by name is not valid.
+    #unless name.empty? or ret.length == 1
+    #  acc.warning "Unexpected number of solutions: found #{ret.length} for #{name} but expected 1"
+    #end
+    MrMurano::Verbose::whirly_start "Deleting solutions..."
     ret.each do |soln|
       delret = acc.delete_solution(soln[:sid])
       if not delret.kind_of?(Hash) and not delret.empty? then
@@ -161,6 +174,7 @@ def solution_delete(name, options)
         end
       end
     end
+    MrMurano::Verbose::whirly_stop
   end
 
   return n_deleted, n_faulted
