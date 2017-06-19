@@ -6,8 +6,11 @@ require 'cmd_common'
 RSpec.describe 'murano init', :cmd do
   include_context "CI_CMD"
 
-  def expectedResponseWhenIdsFoundInConfig(t)
-    return [
+  def expectedResponseWhenIdsFoundInConfig(t, opts={})
+    opts[:has_one_each_soln] = false if opts[:has_one_each_soln].nil?
+    opts[:expect_proj_file_write] = true if opts[:expect_proj_file_write].nil?
+    expecting = []
+    expecting += [
       "\n",
       t.a_string_starting_with('Creating project at '),
       "\n",
@@ -15,39 +18,43 @@ RSpec.describe 'murano init', :cmd do
       "\n",
       t.a_string_starting_with('Found Business '),
       "\n",
-      t.a_string_starting_with('Found Product '),
+    ]
+    unless opts[:has_one_each_soln]
+      expecting += [
+        t.a_string_starting_with('Found Product '),
+        "\n",
+        t.a_string_starting_with('Found Application '),
+        "\n",
+      ]
+    else
+      expecting += [
+        a_string_starting_with('This business has one Product. Using '),
+        "\n",
+        a_string_starting_with('This business has one Application. Using '),
+        "\n",
+      ]
+    end
+    expecting += [
+      t.a_string_matching(%r{Linked \w+ and \w+\n}),
       "\n",
-      t.a_string_starting_with('Found Application '),
-      "\n",
-      "Writing Project file to project.murano\n",
-      "\n",
+    ]
+    if opts[:expect_proj_file_write]
+      expecting += [
+        "Writing Project file to project.murano\n",
+        "\n",
+      ]
+    end
+    expecting += [
       "Created default directories\n",
       "\n",
-      #t.a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
-      t.a_string_matching(%r{Success!\nBusiness ID: \w+(\nProduct ID: \w+)?(\nApplication ID: \w+)?}),
+      "Success!\n",
+      "\n",
+      t.a_string_matching(%r{\s+Business ID: \w+\n}),
+      t.a_string_matching(%r{(\s+Product ID: \w+\n)?}),
+      t.a_string_matching(%r{(\s+Application ID: \w+\n)?}),
+      "\n",
     ]
-  end
-
-  def expectedResponseWhenIdsFetchedFromMurano(t)
-    return [
-      "\n",
-      a_string_starting_with('Creating project at '),
-      "\n",
-      a_string_starting_with('Found User '),
-      "\n",
-      a_string_starting_with('Found Business '),
-      "\n",
-      a_string_starting_with('This business has one product. Using '),
-      "\n",
-      a_string_starting_with('This business has one application. Using '),
-      "\n",
-      "Writing Project file to project.murano\n",
-      "\n",
-      "Created default directories\n",
-      "\n",
-      #a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
-      a_string_matching(%r{Success!\nBusiness ID: \w+(\nProduct ID: \w+)?(\nApplication ID: \w+)?}),
-    ]
+    expecting
   end
 
   it "Won't init in HOME (gracefully)" do
@@ -97,7 +104,9 @@ RSpec.describe 'murano init', :cmd do
         # The test account will have one business, one product, and one application.
         # So it won't ask any questions.
         out, err, status = Open3.capture3(capcmd('murano', 'init'))
-        expect(out.lines).to match_array(expectedResponseWhenIdsFetchedFromMurano(self))
+        expect(out.lines).to match_array(
+          expectedResponseWhenIdsFoundInConfig(self, {:has_one_each_soln => true,})
+        )
         expect(err).to eq("")
         expect(status.exitstatus).to eq(0)
 
@@ -152,16 +161,16 @@ RSpec.describe 'murano init', :cmd do
           "This business does not have any applications. Let's create one\n",
           "Please enter the Application name: \n",
           "\n",
+          a_string_starting_with('Linked '),
+          "\n",
           "Writing Project file to project.murano\n",
           "\n",
           "Created default directories\n",
-          #a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
+          "\n",
           "Success!\n",
           "\n",
           a_string_starting_with('         Business ID: '),
-          "\n",
           a_string_starting_with('          Product ID: '),
-          "\n",
           a_string_starting_with('      Application ID: '),
           "\n",
         ])
@@ -182,7 +191,7 @@ RSpec.describe 'murano init', :cmd do
   context "in existing project directory", :needs_password do
     before(:example) do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
-      FileUtils.move('assets','files')
+      FileUtils.move('assets', 'files')
 
       @product_name = rname('initEmptyPrd')
       out, err, status = Open3.capture3(capcmd('murano', 'product', 'create', @product_name, '--save'))
@@ -232,23 +241,9 @@ RSpec.describe 'murano init', :cmd do
       # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expect(out.lines).to match_array([
-        "\n",
-        a_string_starting_with('Creating project at '),
-        "\n",
-        a_string_starting_with('Found User '),
-        "\n",
-        a_string_starting_with('Found Business '),
-        "\n",
-        a_string_starting_with('Found Product '),
-        "\n",
-        a_string_starting_with('Found Application '),
-        "\n",
-        "Created default directories\n",
-        "\n",
-        #a_string_matching(%r{Ok, in Business ID: \w+( using Product ID: \w+)?( using Application ID: \w+)?}),
-        a_string_matching(%r{Success!\nBusiness ID: \w+(\nProduct ID: \w+)?(\nApplication ID: \w+)?}),
-      ])
+      expect(out.lines).to match_array(
+        expectedResponseWhenIdsFoundInConfig(self, {:expect_proj_file_write => false,})
+      )
       expect(err).to eq("")
       expect(status.exitstatus).to eq(0)
 
