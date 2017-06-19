@@ -16,12 +16,10 @@ RSpec.describe MrMurano::Solution do
     $cfg['product.id'] = 'XYZ'
     $cfg['application.id'] = 'XYZ'
 
-raise "FIXME: Support for Product(s) and/or Application(s)"
-#
-# FIXME: Could be either?
-#    @srv = MrMurano::Solution.new
+    # NOTE: This test works on either Product or Application.
+    # MAYBE: Add Application to this test.
     @srv = MrMurano::Product.new
-    @srv = MrMurano::Application.new
+    #@srv = MrMurano::Application.new
 
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
@@ -98,3 +96,4 @@ raise "FIXME: Support for Product(s) and/or Application(s)"
 end
 
 #  vim: set ai et sw=2 ts=2 :
+
