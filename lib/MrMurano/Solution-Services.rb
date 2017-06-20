@@ -232,7 +232,10 @@ module MrMurano
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
-      @project_section = :services
+      #@project_section = :services
+      unless @project_section
+        raise "Subclass missing @project_section"
+      end
       @match_header = /--#EVENT (?<service>\S+) (?<event>\S+)/
     end
 
@@ -369,6 +372,10 @@ module MrMurano
   class EventHandlerSolnPrd < EventHandler
     def initialize
       @solntype = 'product.id'
+      # FIXME/2017-06-20: Should we use separate directories for prod vs app?
+      #   See also :services in PrfFile and elsewhere;
+      #   we could use @@class_var to DRY.
+      @project_section = :services
       super
     end
 
@@ -392,6 +399,8 @@ module MrMurano
   class EventHandlerSolnApp < EventHandler
     def initialize
       @solntype = 'application.id'
+      # FIXME/2017-06-20: Should we use separate directories for prod vs app?
+      @project_section = :services
       super
     end
 
@@ -407,6 +416,9 @@ module MrMurano
 
   SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
   SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
+  # FIXME/2017-06-20: Should we use separate directories for prod vs app?
+  #SyncRoot.add('prodhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
+  #SyncRoot.add('apphandlers', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
 
 end
 #  vim: set ai et sw=2 ts=2 :

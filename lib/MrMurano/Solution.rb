@@ -22,7 +22,9 @@ module MrMurano
       raise MrMurano::ConfigError.new("No #{/(.*).id/.match(@solntype)[1]}!") if @sid.nil?
       @uriparts = [:solution, @sid]
       @itemkey = :id
-      @project_section = nil
+      unless defined?(@project_section)
+        @project_section = nil
+      end
     end
 
     include Http
