@@ -41,10 +41,10 @@ module MrMurano
       end
     end
 
-    # The contents of this is explictily not just a nest of hashes and arrays.
+    # The contents of this is explicitly not just a nest of hashes and arrays.
     # To keep expectations in check, there is a set number of known keys.
-    # This should also help by keeping the file format seperate from the internal
-    # lookups.  Hopefully, this will avoid (or at least minimize) changes to the
+    # This should also help by keeping the file format separate from the internal
+    # lookups. Hopefully, this will avoid (or at least minimize) changes to the
     # file format affecting all kinds of code.
     PrjMeta = Struct.new(:name, :summary, :description, :authors, :version, :source, :dependencies) do
       include PrjStructCommonMethods
