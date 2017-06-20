@@ -388,6 +388,9 @@ module MrMurano
           io.write chunk
         end
       end
+      # Give the local file the same timestamp as the remote, because diff.
+      # FIXME/MUR-XXXX: Ideally, server should has a hash or something we can compare.
+      FileUtils.touch [local.to_path,], :mtime => DateTime.parse(item[:updated_at]).to_time
     end
 
     ## Remove local reference of item
