@@ -46,11 +46,11 @@ command :init do |c|
 
     # Automatically link solutions.
     if pid and aid then
-      self.whirly_start "Linking solutions..."
+      MrMurano::Verbose::whirly_start "Linking solutions..."
       sercfg = MrMurano::ServiceConfig.new
       ret = sercfg.create(pid, pname) do |request, http|
         response = http.request(request)
-        self.whirly_stop
+        MrMurano::Verbose::whirly_stop
         if response.is_a? Net::HTTPSuccess then
           say "Linked #{pname} and #{aname}"
         elsif response.is_a? Net::HTTPConflict
@@ -143,6 +143,7 @@ command :init do |c|
     exists = false
     if not options.force and not $cfg['business.id'].nil? then
       # Verify that the business exists.
+      MrMurano::Verbose::whirly_start "Verifying Business..."
       biz = acc.overview do |request, http|
         response = http.request(request)
         if response.is_a? Net::HTTPSuccess then
@@ -156,6 +157,7 @@ command :init do |c|
         #  [2017-06-14: [lb] still learning Ruby nuances.]
         response
       end
+      MrMurano::Verbose::whirly_stop
       if exists
         say "Found Business #{Rainbow(biz[:name]).underline} <#{$cfg['business.id']}>"
       else
@@ -201,6 +203,7 @@ command :init do |c|
     # Check sol'n exists.
     exists = false
     if not options.force and not $cfg["#{type}.id"].nil? then
+      MrMurano::Verbose::whirly_start "Verifying #{type.capitalize}..."
       sol = klass.new
       ret = sol.info() do |request, http|
         response = http.request(request)
@@ -213,6 +216,7 @@ command :init do |c|
         end
         response
       end
+      MrMurano::Verbose::whirly_stop
       if exists
         say "Found #{type.capitalize} #{sol.pretty_desc}"
       else

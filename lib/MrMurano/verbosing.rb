@@ -145,9 +145,13 @@ module MrMurano
     end
 
     def self.whirly_msg(msg)
-      unless $cfg['tool.no-progress'] or !defined?(@@whirly_time)
-        self.whirly_linger
-        Whirly.configure status: msg
+      unless $cfg['tool.no-progress']
+        if defined?(@@whirly_time)
+          self.whirly_linger
+          Whirly.configure status: msg
+        else
+          self.whirly_start msg
+        end
       end
     end
 

@@ -541,7 +541,7 @@ module MrMurano
 
     def sync_update_progress(msg)
       unless $cfg['tool.no-progress']
-        MrMurano::Verbose::whirly_start "#{msg}..."
+        MrMurano::Verbose::whirly_msg "#{msg}..."
       else
         verbose msg
       end
@@ -623,7 +623,6 @@ module MrMurano
             dest = tolocalpath(into, item)
             removelocal(dest, item)
           end
-          sync_finish_progress
         end
       end
       if options[:create] then
@@ -633,7 +632,6 @@ module MrMurano
             dest = tolocalpath(into, item)
             download(dest, item)
           end
-          sync_finish_progress
         end
       end
       if options[:update] then
@@ -643,9 +641,9 @@ module MrMurano
             dest = tolocalpath(into, item)
             download(dest, item)
           end
-          sync_finish_progress
         end
       end
+      sync_finish_progress
       syncdown_after(into)
     end
 
