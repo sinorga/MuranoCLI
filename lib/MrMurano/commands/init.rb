@@ -62,9 +62,9 @@ command :init do |c|
       puts ''
     end
 
-    # If no ProjectFile, then write a ProjectFile
+    # If no ProjectFile, then write a ProjectFile.
     if not $project.usingProjectfile then
-      tmpl = File.read(File.join(File.dirname(__FILE__),'..','template','projectFile.murano.erb'))
+      tmpl = File.read(File.join(File.dirname(__FILE__), '..', 'template', 'projectFile.murano.erb'))
       tmpl = ERB.new(tmpl)
       res = tmpl.result($project.data_binding)
       prFile = $project['info.name'] + '.murano'
@@ -73,6 +73,7 @@ command :init do |c|
       File.open(prFile, 'w') {|io| io << res}
     end
 
+    # Make the directory structure.
     if options.mkdirs then
       base = $cfg['location.base']
       base = Pathname.new(base) unless base.kind_of? Pathname
@@ -94,6 +95,20 @@ command :init do |c|
       say 'Created default directories'
       puts ''
     end
+
+    # Murano creates a bunch of empty event handlers. Grab them now.
+    # E.g., for the application, you'll see around 20 interface_<operationId>
+    # event handlers, and one named device2_event.lua; for the product, you'll
+    # see about 4 event handlers, including one named device2_event.lua (also:
+    # timer_timer.lua, tsdb_exportJob.lua, and user_account.lua). The application
+    # interface handlers are basic stubs, like
+    #       --#EVENT interface <operationId>
+    #       operation.solution_id = nil
+    #       return Device2.<operationId>(operation)
+    # The product handlers are different, and serve as example boilerplate
+    # for user to fill in.
+    # See:
+    #   sphinx-api/src/views/interface/productService.swagger.json
 
     say 'Success!'
     puts ''
