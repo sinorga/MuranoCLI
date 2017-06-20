@@ -109,17 +109,16 @@ command :status do |c|
       end
     end
 
-    #MrMurano::Verbose::whirly_start "Fetching status..."
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
       MrMurano::Verbose::whirly_msg "Fetching #{desc}..."
       begin
-        sol = klass.new
+        syncable = klass.new
       rescue MrMurano::ConfigError => err
         say "Could not fetch status for #{desc}: #{err}"
       rescue StandardError => err
         raise
       else
-        ret = sol.status(options, args)
+        ret = syncable.status(options, args)
         gmerge(ret, type, options)
       end
     end
