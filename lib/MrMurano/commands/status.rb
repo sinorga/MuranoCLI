@@ -52,13 +52,13 @@ command :status do |c|
     end
 
     def pretty(ret, options)
-      pretty_group_header(ret[:toadd], "To be added", "add", options.grouped)
+      pretty_group_header(ret[:toadd], "Only on local machine", "new locally", options.grouped)
       ret[:toadd].each{|item| say " + #{item[:pp_type]}  #{highlight_chg(fmtr(item))}"}
 
-      pretty_group_header(ret[:todel], "To be deleted", "delete", options.grouped)
+      pretty_group_header(ret[:todel], "Only on remote server", "new remotely", options.grouped)
       ret[:todel].each{|item| say " - #{item[:pp_type]}  #{highlight_del(fmtr(item))}"}
 
-      pretty_group_header(ret[:tomod], "To be changed", "change", options.grouped)
+      pretty_group_header(ret[:tomod], "Items that differ", "that differs", options.grouped)
       ret[:tomod].each{|item|
         say " M #{item[:pp_type]}  #{highlight_chg(fmtr(item))}"
         say item[:diff] if options.diff
@@ -75,7 +75,7 @@ command :status do |c|
         unless group.empty?
           say "#{header_any}:"
         else
-          say "Nothing to #{header_empty}"
+          say "Nothing #{header_empty}"
         end
       end
     end
