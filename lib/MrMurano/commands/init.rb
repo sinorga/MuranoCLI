@@ -46,9 +46,11 @@ command :init do |c|
 
     # Automatically link solutions.
     if pid and aid then
+      self.whirly_start "Linking solutions..."
       sercfg = MrMurano::ServiceConfig.new
       ret = sercfg.create(pid, pname) do |request, http|
         response = http.request(request)
+        self.whirly_stop
         if response.is_a? Net::HTTPSuccess then
           say "Linked #{pname} and #{aname}"
         elsif response.is_a? Net::HTTPConflict

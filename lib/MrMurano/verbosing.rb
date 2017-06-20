@@ -107,6 +107,7 @@ module MrMurano
     ]
     def self.whirly_start(msg)
       unless $cfg['tool.no-progress']
+        self.whirly_stop
         Whirly.start spinner: MrMurano::Verbose::EXO_QUADRANTS,
           status: msg, append_newline: false
         @@whirly_time = Time.now
@@ -120,10 +121,7 @@ module MrMurano
 
     def self.whirly_stop
       unless $cfg['tool.no-progress'] or !defined?(@@whirly_time)
-        not_so_fast = 1.0 - (Time.now - @@whirly_time)
-        if not_so_fast > 0
-          sleep not_so_fast
-        end
+        self.whirly_linger
         Whirly.stop
         # The progress indicator is always overwritten.
         if @@whirly_cols
@@ -135,6 +133,26 @@ module MrMurano
 
     def whirly_stop
       MrMurano::Verbose::whirly_stop
+    end
+
+    def self.whirly_linger
+      unless $cfg['tool.no-progress'] or !defined?(@@whirly_time)
+        not_so_fast = 0.55 - (Time.now - @@whirly_time)
+        if not_so_fast > 0
+          sleep not_so_fast
+        end
+      end
+    end
+
+    def self.whirly_msg(msg)
+      unless $cfg['tool.no-progress'] or !defined?(@@whirly_time)
+        self.whirly_linger
+        Whirly.configure status: msg
+      end
+    end
+
+    def whirly_msg(msg)
+      MrMurano::Verbose::whirly_msg msg
     end
 
     def self.ask_yes_no(question, default)

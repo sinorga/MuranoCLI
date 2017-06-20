@@ -1,7 +1,8 @@
-require 'pathname'
-require 'tempfile'
-require 'shellwords'
 require 'open3'
+require 'pathname'
+require 'shellwords'
+require 'tempfile'
+require 'whirly'
 require 'MrMurano/Config'
 require 'MrMurano/ProjectFile'
 require 'MrMurano/hash'
@@ -24,6 +25,13 @@ module MrMurano
     # @return [nil]
     def self.add(name, klass, type, desc, bydefault=false)
       @@syncset = [] unless defined?(@@syncset)
+      # 2017-06-20: Maybe possibly enforce unique name policy for --syncset options.
+      #@@syncset.each do |a|
+      #  if a.name == name.to_s
+      #    msg = %{WARNING: SyncRoot.add called more than once for name "#{a.name}"}
+      #    $stderr.puts HighLine.color(msg, :yellow)
+      #  end
+      #end
       @@syncset << Syncable.new(name.to_s, klass, type, desc, bydefault)
       nil
     end
@@ -528,6 +536,20 @@ module MrMurano
     end
     private :elevate_hash
 
+    def sync_update_progress(msg)
+      unless $cfg['tool.no-progress']
+        MrMurano::Verbose::whirly_start "#{msg}..."
+      else
+        verbose msg
+      end
+    end
+
+    def sync_finish_progress
+      unless $cfg['tool.no-progress']
+        MrMurano::Verbose::whirly_stop
+      end
+    end
+
     ## Make things in Murano look like local project
     #
     # This creates, uploads, and deletes things as needed up in Murano to match
@@ -593,29 +615,32 @@ module MrMurano
 
       if options[:delete] then
         todel.each do |item|
-          verbose "Removing item #{item[:synckey]}"
+          sync_update_progress("Removing item #{item[:synckey]}")
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
             removelocal(dest, item)
           end
+          sync_finish_progress
         end
       end
       if options[:create] then
         toadd.each do |item|
-          verbose "Adding item #{item[:synckey]}"
+          sync_update_progress("Adding item #{item[:synckey]}")
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
             download(dest, item)
           end
+          sync_finish_progress
         end
       end
       if options[:update] then
         tomod.each do |item|
-          verbose "Updating item #{item[:synckey]}"
+          sync_update_progress("Updating item #{item[:synckey]}")
           unless $cfg['tool.dry'] then
             dest = tolocalpath(into, item)
             download(dest, item)
           end
+          sync_finish_progress
         end
       end
       syncdown_after(into)
