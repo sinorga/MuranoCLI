@@ -1,4 +1,10 @@
 
+def sync_add_options(c)
+  c.option '--[no-]delete', %{Don't delete things from server}
+  c.option '--[no-]create', %{Don't create things on server}
+  c.option '--[no-]update', %{Don't update things on server}
+end
+
 command :syncdown do |c|
   c.syntax = %{murano syncdown [options] [filters]}
   c.description = %{Sync project down from Murano}
@@ -9,9 +15,7 @@ command :syncdown do |c|
     c.option s, l, d
   end
 
-  c.option '--[no-]delete', %{Don't delete things from server}
-  c.option '--[no-]create', %{Don't create things on server}
-  c.option '--[no-]update', %{Don't update things on server}
+  sync_add_options(c)
 
   c.example %{Make local be like what is on the server}, %{murano syncdown --all}
   c.example %{Pull down new things, but don't delete or modify anything}, %{murano syncdown --all --no-delete --no-update}
@@ -41,9 +45,7 @@ command :syncup do |c|
     c.option s, l, d
   end
 
-  c.option '--[no-]delete', %{Don't delete things from server}
-  c.option '--[no-]create', %{Don't create things on server}
-  c.option '--[no-]update', %{Don't update things on server}
+  sync_add_options(c)
 
   c.example %{Deploy project to server}, %{murano syncup --all}
   c.example %{Update static files}, %{murano syncup --files}
