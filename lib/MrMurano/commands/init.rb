@@ -42,14 +42,14 @@ command :init do |c|
     say "Found User #{Rainbow($cfg['user.name']).underline}"
     puts '' # `say ''` doesn't actually print anything
 
-    newPrd = false
     newApp = false
+    newPrd = false
     # 1. Get Business ID
     acquireBusinessId(options, acc)
-    # 2. Get Product ID
-    pid, pname, newPrd = acquireSolutionId(options, acc, :product, MrMurano::Product)
-    # 3. Get Application ID
+    # 2. Get Application ID
     aid, aname, newApp = acquireSolutionId(options, acc, :application, MrMurano::Application)
+    # 3. Get Product ID
+    pid, pname, newPrd = acquireSolutionId(options, acc, :product, MrMurano::Product)
 
     # Automatically link solutions.
     if pid and aid then
