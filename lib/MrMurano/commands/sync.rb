@@ -16,7 +16,7 @@ command :syncdown do |c|
     c.option s, l, d
   end
 
-  sync_add_options(c)
+  sync_add_options(c, "local machine")
 
   c.example %{Make local be like what is on the server}, %{murano syncdown --all}
   c.example %{Pull down new things, but don't delete or modify anything}, %{murano syncdown --all --no-delete --no-update}
@@ -46,7 +46,7 @@ command :syncup do |c|
     c.option s, l, d
   end
 
-  sync_add_options(c)
+  sync_add_options(c, "server")
 
   c.example %{Deploy project to server}, %{murano syncup --all}
   c.example %{Update static files}, %{murano syncup --files}
