@@ -369,6 +369,8 @@ module MrMurano
     end
   end
 
+  PRODUCT_SERVICES = ["device2", "interface",]
+
   class EventHandlerSolnPrd < EventHandler
     def initialize
       @solntype = 'product.id'
@@ -384,14 +386,19 @@ module MrMurano
     # @return [Array<Item>] Product solution events found
     def locallist()
       llist = super
-      # This feels like a hack to [lb], but I don't know of a better
-      # way to tell what files are associated with what solution
-      # without putting that in the Lua script, e.g., like changing
-      #     --#EVENT device2 data_in
-      # to this:
-      #     --#EVENT product device2 data_in
-      # Having this here means there's less stuff user can get wrong.
-      llist.select!{|i| i.service == "device2"}
+      # This is a kludge to distinguish between Product services
+      # and Application services: assume that Murano only ever
+      # identifies Product services as "device2" or "interface".
+      # If this weren't always the case, we'd have two obvious options:
+      #   1) Store Product and Application eventhandlers in separate
+      #      directories (and update the SyncRoot.add()s, below); or,
+      #   2) Put the solution type in the Lua script,
+      #      e.g., change this:
+      #        --#EVENT device2 data_in
+      #      to this:
+      #        --#EVENT product device2 data_in
+      # For now, the @service indicator is sufficient.
+      llist.select!{|i| PRODUCT_SERVICES.include? i.service }
       llist
     end
   end
@@ -409,7 +416,7 @@ module MrMurano
     # @return [Array<Item>] Application solution events found
     def locallist()
       llist = super
-      llist.select!{|i| i.service != "device2"}
+      llist.select!{|i| not PRODUCT_SERVICES.include? i.service }
       llist
     end
   end
@@ -417,8 +424,9 @@ module MrMurano
   SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
   SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
   # FIXME/2017-06-20: Should we use separate directories for prod vs app?
-  #SyncRoot.add('prodhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
-  #SyncRoot.add('apphandlers', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
+  #   [lb] thinks so if the locallist()/PRODUCT_SERVICES kludge fails in the future.
+  #SyncRoot.add('interfaces', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
+  #SyncRoot.add('services', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
 
 end
 #  vim: set ai et sw=2 ts=2 :
