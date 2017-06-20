@@ -1,5 +1,7 @@
 require 'MrMurano/Account'
 require 'MrMurano/Config-Migrate'
+require 'MrMurano/Solution-Services'
+require 'MrMurano/verbosing'
 require 'erb'
 require 'inflecto'
 require 'rainbow'
@@ -114,6 +116,39 @@ command :init do |c|
     # for user to fill in.
     # See:
     #   sphinx-api/src/views/interface/productService.swagger.json
+
+    # Automatically pull down eventhandler stubs that Murano creates for new solutions.
+    # Iterate over: MrMurano::EventHandlerSolnPrd, MrMurano::EventHandlerSolnApp.
+    MrMurano::SyncRoot.each_filtered :eventhandlers => true do |name, type, klass, desc|
+      MrMurano::Verbose::whirly_start "Populating #{desc}..."
+      begin
+        syncable = klass.new
+      rescue MrMurano::ConfigError => err
+        acc.error "Could not fetch status for #{desc}: #{err}"
+        # MAYBE: exit?
+      rescue StandardError => err
+        raise
+      else
+        # Get list of changes. Leave :delete => true and :update => true so we
+        # can tell if there are existing files, in which case skip the pull.
+        stat = syncable.status({
+          :asdown => true,
+          :eventhandlers => true,
+        })
+        if stat[:todel].any? or stat[:tomod].any?
+          MrMurano::Verbose::whirly_stop
+          say "Skipping #{desc}: local files found"
+          puts ''
+        else
+          stat[:toadd].each do |item|
+            MrMurano::Verbose::whirly_msg "Pulling item #{item[:synckey]}"
+            dest = syncable.tolocalpath(syncable.location, item)
+            syncable.download(dest, item)
+          end
+        end
+      end
+      MrMurano::Verbose::whirly_stop
+    end
 
     say 'Success!'
     puts ''
