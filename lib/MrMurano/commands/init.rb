@@ -19,6 +19,11 @@ command :init do |c|
     acc = MrMurano::Account.new
     puts ''
 
+    if $cfg['tool.dry']
+      acc.error "Cannot run a --dry init."
+      exit 2
+    end
+
     if Pathname.new(Dir.pwd).realpath == Pathname.new(Dir.home).realpath then
       acc.error "Cannot init a project in your HOME directory."
       exit 2
