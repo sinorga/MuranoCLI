@@ -1,8 +1,9 @@
+require 'MrMurano/verbosing'
 
-def sync_add_options(c)
-  c.option '--[no-]delete', %{Don't delete things from server}
-  c.option '--[no-]create', %{Don't create things on server}
-  c.option '--[no-]update', %{Don't update things on server}
+def sync_add_options(c, locale)
+  c.option '--[no-]delete', %{Don't delete things from #{locale}}
+  c.option '--[no-]create', %{Don't create things on #{locale}}
+  c.option '--[no-]update', %{Don't update things on #{locale}}
 end
 
 command :syncdown do |c|
