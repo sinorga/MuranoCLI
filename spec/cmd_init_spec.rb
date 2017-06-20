@@ -21,16 +21,16 @@ RSpec.describe 'murano init', :cmd do
     ]
     unless opts[:has_one_each_soln]
       expecting += [
-        t.a_string_starting_with('Found Product '),
-        "\n",
         t.a_string_starting_with('Found Application '),
+        "\n",
+        t.a_string_starting_with('Found Product '),
         "\n",
       ]
     else
       expecting += [
-        a_string_starting_with('This business has one Product. Using '),
-        "\n",
         a_string_starting_with('This business has one Application. Using '),
+        "\n",
+        a_string_starting_with('This business has one Product. Using '),
         "\n",
       ]
     end
@@ -50,8 +50,8 @@ RSpec.describe 'murano init', :cmd do
       "Success!\n",
       "\n",
       t.a_string_matching(%r{\s+Business ID: \w+\n}),
-      t.a_string_matching(%r{(\s+Product ID: \w+\n)?}),
       t.a_string_matching(%r{(\s+Application ID: \w+\n)?}),
+      t.a_string_matching(%r{(\s+Product ID: \w+\n)?}),
       "\n",
     ]
     expecting
@@ -155,11 +155,11 @@ RSpec.describe 'murano init', :cmd do
           "\n",
           a_string_starting_with('Found Business '),
           "\n",
-          "This business does not have any products. Let's create one\n",
+          "This business does not have an Application. Let's create one\n",
+          "Please enter the Application name: \n",
+          "This business does not have a Product. Let's create one\n",
           "\n",
           "Please enter the Product name: \n",
-          "This business does not have any applications. Let's create one\n",
-          "Please enter the Application name: \n",
           "\n",
           a_string_starting_with('Linked '),
           "\n",
@@ -170,8 +170,8 @@ RSpec.describe 'murano init', :cmd do
           "Success!\n",
           "\n",
           a_string_starting_with('         Business ID: '),
-          a_string_starting_with('          Product ID: '),
           a_string_starting_with('      Application ID: '),
+          a_string_starting_with('          Product ID: '),
           "\n",
         ])
         expect(err).to eq("")
