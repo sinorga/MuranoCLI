@@ -109,9 +109,9 @@ command :status do |c|
       end
     end
 
-    MrMurano::Verbose::whirly_start "Fetching status..."
+    #MrMurano::Verbose::whirly_start "Fetching status..."
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
-      Whirly.configure status: "Fetching #{desc}..."
+      MrMurano::Verbose::whirly_msg "Fetching #{desc}..."
       begin
         sol = klass.new
       rescue MrMurano::ConfigError => err
