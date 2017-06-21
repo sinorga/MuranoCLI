@@ -166,8 +166,8 @@ module MrMurano
 
     ## Find the root of this project Directory.
     #
-    # The Project dir is the directory between PWD and HOME that has one of (in
-    # order of preference):
+    # The Project dir is the directory between PWD and HOME
+    # that has one of (in order of preference):
     # - .murano/config
     # - .mrmuranorc
     # - .murano/
