@@ -10,10 +10,93 @@ MURANO_SIGN_UP_URL = "https://exosite.com/signup/"
 
 command :init do |c|
   c.syntax = %{murano init}
-  c.summary = %{The easy way to start a project}
-  c.description = %{}
 
-  c.option '--force', %{Override existing business, product, or application ids}
+  c.summary = %{The easy way to start a project}
+
+  c.description = %{
+
+The init command helps you create a new Murano project.
+=======================================================
+
+Example
+-------
+
+  Create a new project in a new directory:
+
+    #{File.basename $PROGRAM_NAME} init my-new-app
+
+Example
+-------
+
+  Create a project in the current directory, or rewrite an existing project:
+
+    cd project/path
+    #{File.basename $PROGRAM_NAME} init
+
+Solutions
+---------
+
+The init command configures two new Solutions for your new Murano project:
+
+  1. An Application
+
+     The Application is what users see.
+
+     Use the Application to control, monitor, and consume values from products.
+
+  2. A Product
+
+     A Product is something that captures data and reports it to the Application.
+
+     A Product can be a physical device connected to the Internet. It can be
+     a simulator running on your local network. It can be anything that
+     triggers events or supplies input data to the Application.
+
+How it Works
+------------
+
+You will be asked to log on to your Business account.
+
+  - To create a new Murano business account, visit:
+
+    #{MURANO_SIGN_UP_URL}
+
+  - Once logged on, you can choose to store your logon token so you
+    can skip this step when using Murano CLI.
+
+After logon, name your Application, and then name your Product.
+
+  - Please choose names that contain only lowercase letters and numbers.
+
+    The names are used as variable names in scripts, and as domain names,
+    so they cannot contain underscores, dashes, or other punctuation.
+
+After creating the two Solutions, they will be linked.
+
+  - Linking Solutions allows data and events to flow between the two.
+
+    For example, a Product device generates data that will be consumed
+    or processed by the Application.
+
+The init command will pull down Product and Application services
+that you can edit.
+
+  - The services, or event handlers, let you control how data is
+    processed and how your application behaves.
+
+    Take a look at the new directories and files created in your
+    Project after running init to see what services are available.
+
+    There are many other resources that are not downloaded that
+    you can also create and edit. Visit our docs site for more!
+
+    http://docs.exosite.com/
+
+}.strip
+#  - You can link many Products and Applications.
+#    You can also access and edit the same services using the web interface.
+#    In fact, everything you can do in Murano CLI, you can also do via the web.
+
   c.option '--[no-]mkdirs', %{Create default directories}
 
   c.action do |args, options|
@@ -46,9 +129,9 @@ command :init do |c|
     newPrd = false
     # 1. Get Business ID
     acquireBusinessId(options, acc)
-    # 2. Get Application ID
+    # 2. Get/Create Application ID
     aid, aname, newApp = acquireSolutionId(options, acc, :application, MrMurano::Application)
-    # 3. Get Product ID
+    # 3. Get/Create Product ID
     pid, pname, newPrd = acquireSolutionId(options, acc, :product, MrMurano::Product)
 
     # Automatically link solutions.
@@ -333,3 +416,4 @@ command :init do |c|
 end
 
 #  vim: set ai et sw=2 ts=2 :
+
