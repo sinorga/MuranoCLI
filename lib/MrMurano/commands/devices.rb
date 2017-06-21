@@ -161,7 +161,7 @@ end
 command 'device enable' do |c|
   c.syntax = %{murano device enable [<identifier>|--file <identifiers>]}
   c.summary = %{Enable an Identifier; Creates device in Murano}
-  c.description = %{Enables identifiers, creating the digial shadow in Murano.
+  c.description = %{Enables Identifiers, creating the digial shadow in Murano.
   }
   c.option '-f', '--file FILE', %{A file of serial numbers, one per line}
   c.option '--key FILE', %{Public TLS key for this device}
@@ -194,7 +194,7 @@ command 'device enable' do |c|
         prd.enable(args[0])
       end
     else
-      prd.error "Missing an identifier to enable"
+      prd.error "Missing an Identifier to enable"
     end
   end
 end
