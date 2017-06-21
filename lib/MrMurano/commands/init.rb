@@ -28,8 +28,8 @@ command :init do |c|
 
   c.description = %{
 
-The init command helps you create a new Murano project.
-=======================================================
+The init command helps you create a new Murano project
+======================================================
 
 Example
 -------
