@@ -8,6 +8,19 @@ require 'rainbow'
 
 MURANO_SIGN_UP_URL = "https://exosite.com/signup/"
 
+def validate_init!(acc, args, options)
+  require 'byebug' ; byebug if true
+  if args.count > 1 then
+    acc.error "Please only specify 1 path"
+    exit 2
+  end
+
+  if $cfg['tool.dry']
+    acc.error "Cannot run a --dry init."
+    exit 2
+  end
+end
+
 command :init do |c|
   c.syntax = %{murano init}
 
@@ -93,27 +106,17 @@ that you can edit.
     http://docs.exosite.com/
 
 }.strip
-#  - You can link many Products and Applications.
-#    You can also access and edit the same services using the web interface.
-#    In fact, everything you can do in Murano CLI, you can also do via the web.
 
   c.option '--[no-]mkdirs', %{Create default directories}
 
   c.action do |args, options|
     options.default :force=>false, :mkdirs=>true
+
     acc = MrMurano::Account.new
+
+    validate_init! acc, args, options
+
     puts ''
-
-    if $cfg['tool.dry']
-      acc.error "Cannot run a --dry init."
-      exit 2
-    end
-
-    if Pathname.new(Dir.pwd).realpath == Pathname.new(Dir.home).realpath then
-      acc.error "Cannot init a project in your HOME directory."
-      exit 2
-    end
-
     say "Creating project at #{Rainbow($cfg['location.base'].to_s).underline}"
     puts ''
 
