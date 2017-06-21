@@ -182,7 +182,11 @@ that you can edit.
         path = base + path
         unless path.exist? then
           path = path.dirname unless path.extname.empty?
-          path.mkpath
+          unless $cfg['tool.dry']
+            path.mkpath
+          else
+            say "--dry: Not creating project directory: #{path.to_s}"
+          end
         end
       end
       say 'Created default directories'
@@ -227,9 +231,13 @@ that you can edit.
           puts ''
         else
           stat[:toadd].each do |item|
-            MrMurano::Verbose::whirly_msg "Pulling item #{item[:synckey]}"
-            dest = syncable.tolocalpath(syncable.location, item)
-            syncable.download(dest, item)
+            unless $cfg['tool.dry']
+              MrMurano::Verbose::whirly_msg "Pulling item #{item[:synckey]}"
+              dest = syncable.tolocalpath(syncable.location, item)
+              syncable.download(dest, item)
+            else
+              say "--dry: Not pulling item #{item[:synckey]}"
+            end
           end
         end
       end
