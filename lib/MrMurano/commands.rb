@@ -2,6 +2,8 @@
 require 'MrMurano/commands/solution'
 
 # DEVs: If you want to generate a completion file, uncomment this.
+#   Then run, e.g.,
+#     murano completion > docs/completions/murano_completion-bash
 #require 'MrMurano/commands/completion'
 
 require 'MrMurano/commands/businessList'
