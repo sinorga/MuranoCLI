@@ -26,6 +26,10 @@ module MrMurano
       end
     end
     def save()
+      if $cfg['tool.dry']
+        say "--dry: Not saving config"
+        return
+      end
       @path.dirname.mkpath unless @path.dirname.exist?
       @path.open('wb') do |io|
         io << @data.to_yaml
@@ -248,6 +252,10 @@ module MrMurano
       raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
       # FIXME: Allow uppercase once pegasus_registry fixed.
       raise MrMurano::ConfigError.new(SOLN_NAME_HELP) unless name.match(SOLN_NAME_REGEX)
+      if $cfg['tool.dry']
+        say "--tag: Not creating solution #{name}"
+        return nil
+      end
       self.whirly_start "Creating solution..."
       resp = post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
       self.whirly_stop
