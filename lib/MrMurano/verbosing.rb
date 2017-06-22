@@ -23,10 +23,16 @@ module MrMurano
     end
 
     def warning(msg)
+      MrMurano::Verbose::warning(msg)
+    end
+    def self.warning(msg)
       $stderr.puts HighLine.color(msg, :yellow)
     end
 
     def error(msg)
+      MrMurano::Verbose::error(msg)
+    end
+    def self.error(msg)
       $stderr.puts HighLine.color(msg, :red)
     end
 
@@ -167,6 +173,10 @@ module MrMurano
         answer = !["", "n", "no"].include?(confirm.downcase)
       end
       answer
+    end
+
+    def ask_yes_no(question, default)
+      MrMurano::Verbose::ask_yes_no(question, default)
     end
 
     def self.pluralize?(word, count)
