@@ -166,7 +166,7 @@ module MrMurano
     end
 
     def self.ask_yes_no(question, default)
-      confirm = ask("Really delete all solutions? [Y/n] ")
+      confirm = ask(question)
       if default
         answer = ["", "y", "ye", "yes"].include?(confirm.downcase)
       else
