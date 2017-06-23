@@ -51,13 +51,6 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
-      # FIXME/2017-06-02 03:06: This is failing. `murano status` shows:
-      #   Adding:
-      #   Deleting:
-      #   Changing:
-      #    M M  modules/table_util.lua
-      #    M E  services/devdata.lua
-      #    M E  services/timers.lua
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       #expect(out).to start_with(%{Adding:\nDeleting:\nChanging:\n})
       expect(out).to start_with(%{Nothing to add\nNothing to delete\nNothing to change\n})
@@ -73,3 +66,4 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
 end
 
 #  vim: set ai et sw=2 ts=2 :
+

@@ -117,7 +117,7 @@ module MrMurano
       attr_accessor :name
       # @return [Pathname] Where this item lives
       attr_accessor :local_path
-      # ??? what is this?
+      # FIXME/EXPLAIN: ??? what is this?
       attr_accessor :id
       # @return [String] The lua code for this item. (not all items use this.)
       attr_accessor :script
@@ -129,7 +129,7 @@ module MrMurano
       attr_accessor :diff
       # @return [Boolean] When filtering, did this item pass.
       attr_accessor :selected
-      # FIXME/EXPLAIN: ???? what is this?
+      # FIXME/EXPLAIN: ??? what is this?
       attr_accessor :synckey
       # @return [String] For device2, the event type
       attr_accessor :type

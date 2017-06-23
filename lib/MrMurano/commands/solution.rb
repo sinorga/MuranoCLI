@@ -21,11 +21,13 @@ command 'solution create' do |c|
   c.description = %{
 Create a new solution.
   }.strip
-  c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES, %{What type of solution to create. (default: product)}
+  c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES,
+    %{What type of solution to create. (default: product)}
   c.option '--save', %{Save new solution id to config}
-  # FIXME/2017-06-01: Rebase conflict: [lb] thinks options.type is
-  #   sufficient, and that we do not need options.section, since
-  #   we can always deduce the type of solution.
+  # FIXME/2017-06-01: Rebase conflict introduced --section:
+  #   [lb] thinks options.type is sufficient,
+  #   and that we do not need options.section,
+  #   since we can always deduce the type of solution.
   c.option '--section SECTION', String, %{Which section in config to save id to}
   c.project_not_required = true
 
@@ -77,7 +79,8 @@ command 'solution delete' do |c|
   c.description = %{
 Delete a solution.
   }.strip
-  c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES+[:all], %{Only delete solution(s) of the specified type (default: all)}
+  c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES+[:all],
+    %{Only delete solution(s) of the specified type (default: all)}
   c.project_not_required = true
 
   c.action do |args, options|
