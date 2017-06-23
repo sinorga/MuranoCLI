@@ -566,7 +566,7 @@ module MrMurano
 
       if options[:delete] then
         todel.each do |item|
-          verbose "Removing item #{item[:synckey]}"
+          sync_update_progress("Removing item #{item[:synckey]}")
           unless $cfg['tool.dry'] then
             remove(item[itemkey])
           end
@@ -574,7 +574,7 @@ module MrMurano
       end
       if options[:create] then
         toadd.each do |item|
-          verbose "Adding item #{item[:synckey]}"
+          sync_update_progress("Adding item #{item[:synckey]}")
           unless $cfg['tool.dry'] then
             upload(item[:local_path], item.reject{|k,v| k==:local_path}, false)
           end
@@ -582,7 +582,7 @@ module MrMurano
       end
       if options[:update] then
         tomod.each do |item|
-          verbose "Updating item #{item[:synckey]}"
+          sync_update_progress("Updating item #{item[:synckey]}")
           unless $cfg['tool.dry'] then
             upload(item[:local_path], item.reject{|k,v| k==:local_path}, true)
           end
