@@ -35,6 +35,8 @@ Create a new solution.
     options.default :type => :product
 
     acc = MrMurano::Account.new
+    acc.must_business_id!
+
     if args.count < 1 then
       acc.error "Name of solution missing"
       return
@@ -138,6 +140,7 @@ def solution_delete(name, options)
   options.default :type=>:all
 
   acc = MrMurano::Account.new
+  acc.must_business_id!
 
   if name == '*'
     unless options.yes
@@ -214,7 +217,10 @@ List solution in the current business.
 
   c.action do |args, options|
     options.default :type=>:all, :all=>true
+
     acc = MrMurano::Account.new
+    acc.must_business_id!
+
     MrMurano::Verbose::whirly_start "Looking for solutions..."
     data = acc.solutions(options.type)
     MrMurano::Verbose::whirly_stop
@@ -263,6 +269,7 @@ def must_fetch_solutions(options)
   command_set_soln_picker_defaults(options)
 
   acc = MrMurano::Account.new
+  acc.must_business_id!
 
   MrMurano::Verbose::whirly_start "Fetching solutions..."
   resp = acc.solutions(options.type)

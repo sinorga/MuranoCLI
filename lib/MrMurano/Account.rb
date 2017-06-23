@@ -82,6 +82,8 @@ module MrMurano
     end
   end
 
+  #------------------------------------------------------------------------
+
   class Account
     include Http
     include Verbose
@@ -159,6 +161,7 @@ module MrMurano
     end
 
     #------------------------------------------------------------------------
+
     def new_account(email, name, company="")
       post('key/', {
         :email=>email,
@@ -177,6 +180,7 @@ module MrMurano
     end
 
     #------------------------------------------------------------------------
+
     def businesses
       _loginInfo if $cfg['user.name'].nil?
       get('user/' + $cfg['user.name'] + '/membership/')
@@ -205,13 +209,20 @@ module MrMurano
       return tier[:enableProjects]
     end
 
+    # FIXME/2017-06-23/MAYBE: Find more commands that should call must_business_id!.
+    def must_business_id!
+      raise MrMurano::ConfigError.new("Missing Business ID") if $cfg['business.id'].nil?
+    end
+
     #------------------------------------------------------------------------
+
     #ALLOWED_TYPES = [:domain,:onepApi,:dataApi,:application,:product].freeze
     ALLOWED_TYPES = [:application,:product].freeze
 
     def solutions(type=:all, invalidate=false)
       debug "Getting all solutions of type #{type}"
-      raise "Missing Business ID" if $cfg['business.id'].nil?
+      must_business_id!
+
       type = type.to_sym
       raise "Unknown type(#{type})" unless type == :all or ALLOWED_TYPES.include? type
       # Cache the result since sometimes both products() and applications() are called.
@@ -247,7 +258,7 @@ module MrMurano
 
     ## Create a new solution in the current business
     def new_solution(name, type)
-      raise "Missing Business ID" if $cfg['business.id'].nil?
+      must_business_id!
       type = type.to_s.to_sym
       raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
       # FIXME: Allow uppercase once pegasus_registry fixed.
@@ -263,11 +274,12 @@ module MrMurano
     end
 
     def delete_solution(apiId)
-      raise "Missing Business ID" if $cfg['business.id'].nil?
+      must_business_id!
       delete('business/' + $cfg['business.id'] + '/solution/' + apiId)
     end
 
     #------------------------------------------------------------------------
+
     def products
       solutions(:product)
     end
@@ -282,6 +294,7 @@ module MrMurano
     end
 
     #------------------------------------------------------------------------
+
     def applications
       solutions(:application)
     end
