@@ -59,6 +59,7 @@ module MrMurano
 
     attr :paths
     attr_reader :projectDir
+    attr_reader :projectExists
 
     CFG_SCOPES = %w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
 
@@ -119,7 +120,7 @@ module MrMurano
         end
       end
 
-      @projectDir = findProjectDir()
+      @projectDir, @projectExists = findProjectDir()
       migrateOldConfig(@projectDir)
       @paths << ConfigFile.new(:project,  @projectDir + CFG_FILE_NAME)
       # We'll create the CFG_DIR_NAME on write().
@@ -178,30 +179,31 @@ module MrMurano
     # - .murano/
     # - .mrmurano/
     def findProjectDir()
-      result=nil
-      fileNames=[CFG_FILE_NAME, CFG_OLD_FILE_NAME]
-      dirNames=[CFG_DIR_NAME, CFG_OLD_DIR_NAME]
+      result = nil
+      fileNames = [CFG_FILE_NAME, CFG_OLD_FILE_NAME]
+      dirNames = [CFG_DIR_NAME, CFG_OLD_DIR_NAME]
       home = Pathname.new(Dir.home).realpath
       pwd = Pathname.new(Dir.pwd).realpath
-      return home if home == pwd
-      pwd.ascend do |i|
-        break unless result.nil?
-        break if i == home
-        fileNames.each do |f|
-          if (i + f).exist? then
-            result = i
+      # The home directory contains the user ~/.murano/config,
+      # so we cannot also have a project .murano/ directory.
+      return home, false if home == pwd
+      pwd.ascend do |path|
+        # Don't bother with home or looking above it.
+        break if path == home
+        fileNames.each do |fname|
+          if (path + fname).exist? then
+            return path, true
           end
         end
-        dirNames.each do |f|
-          if (i + f).directory? then
-            result = i
+        dirNames.each do |dname|
+          if (path + dname).directory? then
+            return path, true
           end
         end
       end
-
       # Now if nothing found, assume it will live in pwd.
-      result = Pathname.new(Dir.pwd) if result.nil?
-      return result
+      result = Pathname.new(Dir.pwd)
+      return result, false
     end
     private :findProjectDir
 
