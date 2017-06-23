@@ -102,7 +102,9 @@ alias_command 'application rm', 'solution delete', '--type', 'application'
 command 'solutions expunge' do |c|
   c.syntax = %{murano solution expunge}
   c.summary = %{Delete all solutions}
-  c.description = %{Delete all solutions}
+  c.description = %{
+Delete all solutions.
+  }.strip
   c.option '--yes', %{Answer "yes" to all prompts and run non-interactively.}
   c.project_not_required = true
 
