@@ -28,11 +28,20 @@ module MrMurano
 end
 
 module Commander
+  class Command
+    attr_accessor :project_not_required
+  end
+
   class Runner
-    # This is the command entry point; we override
-    # (money patch) Commander's run_active_command.
+    attr_accessor :command_exit
+
+    # run_active_command is called by commander-rb's at_exit hook.
+    # We override -- monkey patch -- it to do other stuff.
     alias :old_run_active_command :run_active_command
     def run_active_command
+      if @command_exit
+        exit @command_exit
+      end
       section = active_command.name
       hooked = MrMurano::Hooked.new(section)
       hooked.check_run_pre_hook
