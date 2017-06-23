@@ -158,8 +158,8 @@ source _murano
       puts tmpl.result(pc.get_binding)
     end
 
-
   end
 end
 
 #  vim: set ai et sw=2 ts=2 :
+

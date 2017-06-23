@@ -61,3 +61,6 @@ command 'mock show' do |c|
     end
   end
 end
+
+#  vim: set ai et sw=2 ts=2 :
+

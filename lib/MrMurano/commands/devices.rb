@@ -262,3 +262,4 @@ alias_command 'product device write', 'device write'
 alias_command 'product device delete', 'device delete'
 
 #  vim: set ai et sw=2 ts=2 :
+

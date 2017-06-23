@@ -131,3 +131,4 @@ end
 alias_command :diff, :status, '--diff', '--no-grouped'
 
 #  vim: set ai et sw=2 ts=2 :
+
