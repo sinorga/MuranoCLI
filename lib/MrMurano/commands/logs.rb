@@ -85,4 +85,6 @@ raise "FIXME: Support for Product(s) and/or Application(s)"
     end
   end
 end
+
 #  vim: set ai et sw=2 ts=2 :
+

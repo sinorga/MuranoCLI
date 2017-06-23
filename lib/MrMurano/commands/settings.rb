@@ -179,5 +179,5 @@ command 'setting write' do |c|
   end
 end
 
-
 #  vim: set ai et sw=2 ts=2 :
+

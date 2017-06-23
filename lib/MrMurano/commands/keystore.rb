@@ -157,3 +157,4 @@ alias_command 'keystore smembers', 'keystore command', 'smembers'
 alias_command 'keystore spop', 'keystore command', 'spop'
 
 #  vim: set ai et sw=2 ts=2 :
+

@@ -89,3 +89,4 @@ command 'password delete' do |c|
 end
 
 #  vim: set ai et sw=2 ts=2 :
+
