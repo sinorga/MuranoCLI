@@ -99,10 +99,15 @@ Link a solution to an event handler.
       exit 2
     end
 
-    say "Linking #{prid} to solution" if $cfg['tool.verbose']
+    msg = "Linking #{prid} to solution"
+    say msg if $cfg['tool.verbose']
+    MrMurano::Verbose::whirly_start msg
 
     sercfg = MrMurano::ServiceConfig.new
     ret = sercfg.create(prid)
+
+    MrMurano::Verbose::whirly_stop
+
     unless ret.nil? then
       say "Linked #{ret[:script_key]}"
     end
