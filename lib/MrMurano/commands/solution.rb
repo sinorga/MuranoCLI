@@ -68,6 +68,7 @@ Create a new solution.
       section = options.type.to_s
       section = options.section.to_s unless options.section.nil?
       $cfg.set("#{section}.id", pid)
+      $cfg.set("#{section}.name", name)
     end
     acc.outf pid
 

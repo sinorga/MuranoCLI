@@ -99,17 +99,36 @@ Link a solution to an event handler.
       exit 2
     end
 
-    msg = "Linking #{prid} to solution"
+    if $cfg['product.name']
+      prod_name = "#{$cfg['product.name']} <#{prid}>"
+    else
+      prod_name = prid
+    end
+
+    if $cfg['application.name']
+      appl_name = "#{$cfg['application.name']} <#{$cfg['application.id']}>"
+    else
+      appl_name = $cfg['application.id']
+    end
+
+    msg = "Linking product #{prod_name} to application #{appl_name}"
     say msg if $cfg['tool.verbose']
     MrMurano::Verbose::whirly_start msg
 
     sercfg = MrMurano::ServiceConfig.new
-    ret = sercfg.create(prid)
-
-    MrMurano::Verbose::whirly_stop
-
-    unless ret.nil? then
-      say "Linked #{ret[:script_key]}"
+    ret = sercfg.create(prid) do |request, http|
+      response = http.request(request)
+      MrMurano::Verbose::whirly_stop
+      if response.is_a? Net::HTTPSuccess then
+        say "Linked #{response[:script_key]}product #{prod_name} to application #{appl_name}"
+      elsif response.is_a? Net::HTTPConflict then
+        #sercfg.warning "Solutions already linked"
+        sercfg.warning "Already linked: product #{prod_name} and application #{appl_name}"
+      else
+        # FIXME/2017-06-23: Are there any other non-success response to expect?
+        #sercfg.error "Unexpected HTTP response"
+        sercfg.showHttpError(request, response)
+      end
     end
   end
 end
