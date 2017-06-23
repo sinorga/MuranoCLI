@@ -21,6 +21,9 @@ command 'device list' do |c|
 List identifiers for a product.
   }.strip
 
+# FIXME/2017-06-23: This comment was in the description:
+#   The API for pagination of devices seems broken.
+# FIXME: Is it still broken? Create lots of devices are find out.
 
   c.option '--limit NUMBER', Integer, %{How many devices to return}
   c.option '--before TIMESTAMP', Integer, %{Show devices before timestamp}
