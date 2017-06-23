@@ -357,7 +357,7 @@ module MrMurano
       end
 
       paths = @paths.select{|p| scope == p.kind}
-      raise "Unknown scope" if paths.empty?
+      raise "Unknown scope ‘#{scope}’" if paths.empty?
       cfg = paths.first
       data = cfg.data
       tomod = data[section]
