@@ -44,12 +44,11 @@ global_option('-c', '--config KEY=VALUE', %{Set a single config key}) {|param|
   end
 }
 global_option('--[no-]color', %{Disable fancy output}) { |value|
-  $cfg['tool.no-progress'] = value
-  HighLine.use_color = !value
-  Rainbow.enabled = !value
+  HighLine.use_color = value
+  Rainbow.enabled = value
 }
-global_option('--no-progress', %{Disable spinner and progress message}) {
-  $cfg['tool.no-progress'] = true
+global_option('--[no-]progress', %{Disable spinner and progress message}) { |value|
+  $cfg['tool.no-progress'] = !value
 }
 
 default_command :help
