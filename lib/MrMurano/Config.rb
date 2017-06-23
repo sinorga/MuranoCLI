@@ -156,7 +156,9 @@ module MrMurano
       set('endpoints.searchFor', '{,../endpoints}/*.lua {,../endpoints}s/*/*.lua', :defaults)
       set('endpoints.ignoring', '*_test.lua *_spec.lua .*', :defaults)
 
-      set('eventhandler.searchFor', '*.lua */*.lua {../eventhandlers,../event_handler}/*.lua {../eventhandlers,../event_handler}/*/*.lua', :defaults)
+      set('eventhandler.searchFor',
+        '*.lua */*.lua {../eventhandlers,../event_handler}/*.lua {../eventhandlers,../event_handler}/*/*.lua',
+        :defaults)
       set('eventhandler.ignoring', '*_test.lua *_spec.lua .*', :defaults)
       set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
 
