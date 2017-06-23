@@ -210,8 +210,14 @@ module MrMurano
     end
 
     # FIXME/2017-06-23/MAYBE: Find more commands that should call must_business_id!.
+    MISSING_BUSINESS_ID_MSG = %{
+Missing Business ID.
+Call \`#{File.basename $PROGRAM_NAME} business list\` to get a list of BIZ_IDs.
+Set the ID temporarily using --config business.id=<BIZ_ID>,
+or permantently using \`#{File.basename $PROGRAM_NAME} config business.id <BIZ_ID>.
+    }.strip
     def must_business_id!
-      raise MrMurano::ConfigError.new("Missing Business ID") if $cfg['business.id'].nil?
+      raise MrMurano::ConfigError.new(MISSING_BUSINESS_ID_MSG) if $cfg['business.id'].nil?
     end
 
     #------------------------------------------------------------------------

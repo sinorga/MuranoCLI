@@ -195,10 +195,12 @@ RSpec.describe MrMurano::Account do
     expect(ret).to eq(prodlist)
   end
 
+  @@missing_biz_id_msg = MrMurano::Account::MISSING_BUSINESS_ID_MSG
+
   it "lists products; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     expect(@acc).to receive(:debug).with("Getting all solutions of type product")
-    expect { @acc.products }.to raise_error("Missing Business ID")
+    expect { @acc.products }.to raise_error(@@missing_biz_id_msg)
   end
 
   it "creates product" do
@@ -214,7 +216,7 @@ RSpec.describe MrMurano::Account do
   it "creates product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
-    expect { @acc.new_product("one") }.to raise_error("Missing Business ID")
+    expect { @acc.new_product("one") }.to raise_error(@@missing_biz_id_msg)
   end
 
   it "deletes product" do
@@ -229,7 +231,7 @@ RSpec.describe MrMurano::Account do
   it "deletes product; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
-    expect { @acc.delete_product("one") }.to raise_error("Missing Business ID")
+    expect { @acc.delete_product("one") }.to raise_error(@@missing_biz_id_msg)
   end
 
   # *** :applications type solutions
@@ -269,7 +271,7 @@ RSpec.describe MrMurano::Account do
   it "lists applications; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     expect(@acc).to receive(:debug).with("Getting all solutions of type application")
-    expect { @acc.applications }.to raise_error("Missing Business ID")
+    expect { @acc.applications }.to raise_error(@@missing_biz_id_msg)
   end
 
   it "creates application" do
@@ -285,7 +287,7 @@ RSpec.describe MrMurano::Account do
   it "creates application; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     # LATER: Re-enable using "ONe" instead of "one" after upcase fixed in pegasus_registry.
-    expect { @acc.new_application("one") }.to raise_error("Missing Business ID")
+    expect { @acc.new_application("one") }.to raise_error(@@missing_biz_id_msg)
   end
 
   it "deletes application" do
@@ -298,7 +300,7 @@ RSpec.describe MrMurano::Account do
 
   it "deletes application; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.delete_application("ONe") }.to raise_error("Missing Business ID")
+    expect { @acc.delete_application("ONe") }.to raise_error(@@missing_biz_id_msg)
   end
 
   # *** :all type solutions
@@ -331,7 +333,7 @@ RSpec.describe MrMurano::Account do
   it "lists solutions; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
     expect(@acc).to receive(:debug).with("Getting all solutions of type all")
-    expect { @acc.solutions }.to raise_error("Missing Business ID")
+    expect { @acc.solutions }.to raise_error(@@missing_biz_id_msg)
   end
 
   it "creates solution" do
@@ -382,7 +384,7 @@ RSpec.describe MrMurano::Account do
 
   it "creates solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.new_solution("one", :product) }.to raise_error("Missing Business ID")
+    expect { @acc.new_solution("one", :product) }.to raise_error(@@missing_biz_id_msg)
   end
 
   it "deletes solution" do
@@ -395,9 +397,10 @@ RSpec.describe MrMurano::Account do
 
   it "deletes solution; without biz.id" do
     allow($cfg).to receive(:get).with('business.id').and_return(nil)
-    expect { @acc.delete_solution("one") }.to raise_error("Missing Business ID")
+    expect { @acc.delete_solution("one") }.to raise_error(@@missing_biz_id_msg)
   end
 
 end
 
 #  vim: set ai et sw=2 ts=2 :
+
