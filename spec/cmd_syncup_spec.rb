@@ -66,3 +66,4 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
 end
 
 #  vim: set ai et sw=2 ts=2 :
+
