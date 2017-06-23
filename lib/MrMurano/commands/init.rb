@@ -243,7 +243,7 @@ command :init do |c|
       if bizz.count == 1 then
         bizid = bizz.first
         say "This user has one business. Using #{Rainbow(bizid[:name]).underline}"
-        $cfg.set('businesses.id', bizid[:bizid], :project)
+        $cfg.set('business.id', bizid[:bizid], :project)
       elsif bizz.count == 0 then
         acc.warning "This user has not created any businesses."
         say "Please log on to exosite.com to create a free account. Visit:"
