@@ -111,7 +111,7 @@ Delete all solutions.
   c.action do |args, options|
     if args.count > 0 then
       acc.error "not expecting any arguments"
-      return
+      exit 1
     end
     name = '*'
     n_deleted, n_faulted = solution_delete(name, options)
