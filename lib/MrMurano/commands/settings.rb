@@ -151,7 +151,6 @@ command 'setting write' do |c|
       value = value.to_s
     end
 
-
     ret = setting.read(service, pref)
     setting.verbose %{Read value: #{ret}}
 
@@ -176,8 +175,7 @@ command 'setting write' do |c|
     end
     setting.verbose %{Going to write composed value: #{ret}}
 
-    setting.write(service, pref, ret) unless $cfg['tool.dry']
-
+    setting.write(service, pref, ret)
   end
 end
 
