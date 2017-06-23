@@ -27,6 +27,13 @@ module MrMurano
       def write()
         return if kind == :internal
         return if kind == :defaults
+        if $cfg['tool.dry']
+          $cfg.warning "--dry: Not writing config file"
+          return
+        end
+        # Ensure path to the file exists.
+        path.dirname.mkpath
+        $cfg.fixModes(path.dirname)
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
         self[:data].save
@@ -115,13 +122,11 @@ module MrMurano
       @projectDir = findProjectDir()
       migrateOldConfig(@projectDir)
       @paths << ConfigFile.new(:project,  @projectDir + CFG_FILE_NAME)
-      (@projectDir + CFG_DIR_NAME).mkpath
-      fixModes(@projectDir + CFG_DIR_NAME)
+      # We'll create the CFG_DIR_NAME on write().
 
       migrateOldConfig(Pathname.new(Dir.home))
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
-      (Pathname.new(Dir.home) + CFG_DIR_NAME).mkpath
-      fixModes(Pathname.new(Dir.home) + CFG_DIR_NAME)
+      # We'll create the CFG_DIR_NAME on write().
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new())
 
