@@ -3,7 +3,9 @@ require 'MrMurano/Gateway'
 command 'device' do |c|
   c.syntax = %{murano device}
   c.summary = %{Interact with a device}
-  c.description = %{}
+  c.description = %{
+Interact with a device.
+  }.strip
 
   c.action do |a, o|
     ::Commander::UI.enable_paging
@@ -14,10 +16,10 @@ end
 command 'device list' do |c|
   c.syntax = %{murano device list [options]}
   c.summary = %{List identifiers for a product}
-  c.description = %{List identifiers for a product
+  c.description = %{
+List identifiers for a product.
+  }.strip
 
-  The API for pagination of devices seems broken.
-  }
 
   c.option '--limit NUMBER', Integer, %{How many devices to return}
   c.option '--before TIMESTAMP', Integer, %{Show devices before timestamp}
@@ -80,10 +82,11 @@ alias_command 'devices list', 'device list'
 command 'device read' do |c|
   c.syntax = %{murano device read <identifier> (<alias>...)}
   c.summary = %{Read state of a device}
-  c.description = %{Read state of a device
+  c.description = %{
+Read state of a device.
 
-  This reads the latest state values for the resources in a device.
-  }
+This reads the latest state values for the resources in a device.
+  }.strip
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 
   c.action do |args, options|
@@ -121,10 +124,11 @@ end
 command 'device write' do |c|
   c.syntax = %{murano device write <identifier> <Alias=Value> [<Alias=Value>...]}
   c.summary = %{Write to 'set' of aliases on devices}
-  c.description = %{Write to 'set' of aliases on devices
+  c.description = %{
+Write to 'set' of aliases on devices.
 
-  If an alias is not settable, this will fail.
-  }
+If an alias is not settable, this will fail.
+  }.strip
 
   c.action do |args, options|
     resources = (MrMurano::Gateway::Base.new.info or {})[:resources]
@@ -161,8 +165,9 @@ end
 command 'device enable' do |c|
   c.syntax = %{murano device enable [<identifier>|--file <identifiers>]}
   c.summary = %{Enable an Identifier; Creates device in Murano}
-  c.description = %{Enables Identifiers, creating the digial shadow in Murano.
-  }
+  c.description = %{
+Enables Identifiers, creating the digial shadow in Murano.
+  }.strip
   c.option '-f', '--file FILE', %{A file of serial numbers, one per line}
   c.option '--key FILE', %{Public TLS key for this device}
 
@@ -202,15 +207,20 @@ end
 command 'device activate' do |c|
   c.syntax = %{murano device activate <identifier>}
   c.summary = %{Activate a serial number, retriving its CIK}
-  c.description = %{Activates an Identifier.
+  c.description = %{
+Activate an Identifier.
 
-Generally you should not use this.  Instead the device should make the activation
-call itself and save the CIK token.  Its just that sometimes when building a
-proof-of-concept it is just easier to hardcode the CIK.
+Generally you should not use this.
 
-Note that you can only activate a device once.  After that you cannot retrive the
-CIK again.
-}
+Instead, the device should make the activation call itself
+and save the CIK token.
+
+But sometimes when building a proof-of-concept it is just
+easier to hardcode the CIK.
+
+Note that you can only activate a device once. After that
+you cannot retrive the CIK again.
+  }.strip
 
   c.action do |args, options|
     prd = MrMurano::Gateway::Device.new
@@ -227,6 +237,9 @@ end
 command 'device delete' do |c|
   c.syntax = %{murano device delete <identifier>}
   c.summary = %{Delete a device}
+  c.description = %{
+Delete a device.
+  }.strip
 
   c.action do |args, options|
     prd = MrMurano::Gateway::Device.new
@@ -244,6 +257,9 @@ end
 command 'device httpurl' do |c|
   c.syntax = %{murano device httpurl}
   c.summary = %{Get the URL for the HTTP-Data-API for this Project}
+  c.description = %{
+Get the URL for the HTTP-Data-API for this Project.
+  }.strip
 
   c.action do |args, options|
     prd = MrMurano::Gateway::Base.new

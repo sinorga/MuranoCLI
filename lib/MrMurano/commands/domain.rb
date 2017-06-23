@@ -3,6 +3,9 @@ require 'MrMurano/Solution'
 command :domain do |c|
   c.syntax = %{murano domain}
   c.summary = %{Print the domain for this solution}
+  c.description = %{
+Print the domain for this solution.
+  }.strip
   c.option '--[no-]raw', %{Don't add scheme}
   c.option '--[no-]brief', %{Show the URL but not the solution ID}
 

@@ -4,7 +4,9 @@ require 'MrMurano/SubCmdGroupContext'
 command :solution do |c|
   c.syntax = %{murano solution}
   c.summary = %{About solution}
-  c.description = %{Sub-commands for working with solution}
+  c.description = %{
+Sub-commands for working with solution.
+  }.strip
 
   c.action do |args, options|
     ::Commander::UI.enable_paging
@@ -15,6 +17,9 @@ end
 command 'solution create' do |c|
   c.syntax = %{murano solution create <name>}
   c.summary = %{Create a new solution}
+  c.description = %{
+Create a new solution.
+  }.strip
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES, %{What type of solution to create. (default: product)}
   c.option '--save', %{Save new solution id to config}
   # FIXME/2017-06-01: Rebase conflict: [lb] thinks options.type is
@@ -67,7 +72,9 @@ alias_command 'application create', 'solution create','--type', 'application'
 command 'solution delete' do |c|
   c.syntax = %{murano solution delete <id>}
   c.summary = %{Delete a solution}
-  c.description = %{Delete a solution}
+  c.description = %{
+Delete a solution.
+  }.strip
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES+[:all], %{Only delete solution(s) of the specified type (default: all)}
   c.action do |args, options|
     if args.count < 1 then
@@ -183,7 +190,9 @@ end
 command 'solution list' do |c|
   c.syntax = %{murano solution list [options]}
   c.summary = %{List solution}
-  c.description = %{List solution in the current business}
+  c.description = %{
+List solution in the current business.
+  }.strip
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES+[:all], %{What type of solutions to list (default: all)}
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'

@@ -6,7 +6,9 @@ require 'MrMurano/Setting'
 command 'setting list' do |c|
   c.syntax = %{murano setting list}
   c.summary = %{List which services and settings are avalible.}
-  c.description = %{List which services and settings are avalible.}
+  c.description = %{
+List which services and settings are avalible.
+  }.strip
 
   c.action do |args, options|
     setting = MrMurano::Setting.new
@@ -21,7 +23,9 @@ alias_command 'settings list', 'setting list'
 command 'setting read' do |c|
   c.syntax = %{murano setting read <service>.<setting> [<sub-key>]}
   c.summary = %{Read a setting on a Service}
-  c.description = %{Read a setting on a Service}
+  c.description = %{
+Read a setting on a Service.
+  }.strip
   c.option '-o', '--output FILE', String, %{File to save output to}
 
   c.action do |args, options|
@@ -45,14 +49,15 @@ end
 command 'setting write' do |c|
   c.syntax = %{murano setting write <service>.<setting> <sub-key> [<value>...]}
   c.summary = %{Write a setting on a Service}
-  c.description = %{Write a setting on a Service, or just part of a setting.
+  c.description = %{
+Write a setting on a Service, or just part of a setting.
 
-  if <value> is omitted on command line, then it is read from STDIN.
+if <value> is omitted on command line, then it is read from STDIN.
 
-  This always does a read-modify-write.
+This always does a read-modify-write.
 
-  If a sub-key doesn't exist, that entire path will be created as dicts.
-  }
+If a sub-key doesn't exist, that entire path will be created as dicts.
+  }.strip
 
   c.option '--bool', %{Set Value type to boolean}
   c.option '--num', %{Set Value type to number}

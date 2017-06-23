@@ -41,14 +41,15 @@ end
 
 command 'tsdb write' do |c|
   c.syntax = %{murano tsdb write [options] <metric=value>|@<tag=value> … }
-  c.summary = %{write data}
-  c.description = %{Write data
+  c.summary = %{Write data to the TSDB}
+  c.description = %{
+Write data to the time series database (TSDB).
 
 TIMESTAMP is microseconds since unix epoch, or can be suffixed with units.
 Units are u (microseconds), ms (milliseconds), s (seconds)
 
 Also, many date-time formats can be parsed and will be converted to microseconds
-  }
+  }.strip
   c.option '--when TIMESTAMP', %{When this data happened (default: now)}
   # TODO: add option to take data from STDIN.
   c.example 'murano tsdb write hum=45 lux=12765 @sn=44', %{Write two metrics (hum and lux) with a tag (sn)}
@@ -83,8 +84,9 @@ end
 
 command 'tsdb query' do |c|
   c.syntax = %{murano tsdb query [options] <metric>|@<tag=value> …}
-  c.summary = %{query data}
-  c.description =%{Query data from the TSDB.
+  c.summary = %{Query data from the TSDB}
+  c.description = %{
+Query data from the time series database (TSDB).
 
 FUNCS is a comma separated list of the aggregate functions.
 Currently: avg, min, max, count, sum.  For string metrics, only count.
@@ -99,7 +101,7 @@ TIMESTAMP is microseconds since unix epoch, or can be suffixed with units.
 Units are u (microseconds), ms (milliseconds), s (seconds)
 
 Also, many date-time formats can be parsed and will be converted to microseconds
-  }
+  }.strip
   c.option '--start_time TIMESTAMP', %{Start time range}
   c.option '--end_time TIMESTAMP', %{End time range; defaults to now}
   c.option '--relative_start DURATION', %{Start time relative from now}
@@ -122,7 +124,6 @@ Also, many date-time formats can be parsed and will be converted to microseconds
   c.example 'murano tsdb query hum --relative_start 2h --relative_end 1h', 'Get hum entries of two hours ago, but not the last hours'
   c.example 'murano tsdb query hum --sampling_size 30m', 'Get one hum entry from each 30 minute chunk of time'
   c.example 'murano tsdb query hum --sampling_size 30m --aggregate avg', 'Get average hum entry from each 30 minute chunk of time'
-
 
   c.action do |args, options|
     sol = MrMurano::ServiceConfigs::Tsdb.new
@@ -216,6 +217,9 @@ end
 command 'tsdb list tags' do |c|
   c.syntax = %{murano tsdb list tags [options]}
   c.summary = %{List tags}
+  c.description = %{
+List tags.
+  }.strip
   c.option '--values', %{Also return the known tag values}
 
   c.action do |args, options|
@@ -246,6 +250,9 @@ end
 command 'tsdb list metrics' do |c|
   c.syntax = %{murano tsdb list metrics}
   c.summary = %{List metrics}
+  c.description = %{
+List metrics.
+  }.strip
 
   c.action do |args, options|
     sol = MrMurano::ServiceConfigs::Tsdb.new
@@ -257,10 +264,12 @@ end
 
 command :tsdb do |c|
   c.syntax = %{murano tsdb}
-  c.summary = %{About TSDB}
-  c.description = %{The tsdb sub-commands let you interact directly with the TSDB instance in a
+  c.summary = %{Show list of TSDB commands}
+  c.description = %{
+The tsdb sub-commands let you interact directly with the TSDB instance in a
 solution. This allows for easier debugging, being able to quickly try out
-different queries or write test data.}
+different queries or write test data.
+  }.strip
 
   c.action do |args, options|
     ::Commander::UI.enable_paging

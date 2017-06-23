@@ -95,13 +95,18 @@ end
 command :completion do |c|
   c.syntax = %{murano completion}
   c.summary = %{Generate a completion file}
-  c.description = %{Creates a Tab completion file for either the Bash or Z shell.
+  c.description = %{
+Create a Tab completion file for either the Bash or Z shell.
 
-eval "$(murano completion)"
+E.g.,
+
+  eval "$(murano completion)"
+
 or
-murano completion > _murano
-source _murano
-}
+
+  murano completion > _murano
+  source _murano
+  }.strip
   c.option '--subs', 'List sub commands'
   #c.option '--opts CMD', 'List options for subcommand'
   #c.option '--gopts', 'List global options'

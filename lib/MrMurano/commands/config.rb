@@ -3,13 +3,14 @@ command :config do |c|
   c.syntax = %{murano config [options] <key> [<new value>]}
   c.summary = %{Get and set options}
   c.description = %{
-  You can get, set, or query config options with this command.  All config
-  options are in a 'section.key' format.  There is also a layer of scopes
-  that the keys can be saved in.
+Get, set, or query config options.
 
-  If section is left out, then key is assumed to be in the 'tool' section.
+All config options are in a 'section.key' format.
 
-  }
+There is also a layer of scopes that the keys can be saved in.
+
+If section is left out, then key is assumed to be in the 'tool' section.
+  }.strip
 
   c.example %{See what the current combined config is}, 'murano config --dump'
   c.example %{Query a value}, 'murano config solution.id'

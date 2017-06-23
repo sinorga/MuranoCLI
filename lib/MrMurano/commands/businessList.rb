@@ -3,7 +3,9 @@ require 'MrMurano/Account'
 command :business do |c|
   c.syntax = %{murano business}
   c.summary = %{About business}
-  c.description = %{Sub-commands for working with businesses}
+  c.description = %{
+Sub-commands for working with businesses.
+  }.strip
 
   c.action do |args, options|
     ::Commander::UI.enable_paging
@@ -13,7 +15,10 @@ end
 
 command 'business list' do |c|
   c.syntax = %{murano business list [options]}
-  c.description = %{List businesses}
+  c.summary = %{List businesses}
+  c.description = %{
+List businesses.
+  }.strip
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}

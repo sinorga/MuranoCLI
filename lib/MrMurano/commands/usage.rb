@@ -3,8 +3,9 @@ require 'MrMurano/Solution'
 command :usage do |c|
   c.syntax = %{murano usage}
   c.summary = %{Get usage info for solution(s)}
-  c.description = %{Get usage info for solution(s)}
-
+  c.description = %{
+Get usage info for solution(s).
+  }.strip
   # Add the flags: --types, --ids, --names, --[no]-header.
   command_add_solution_pickers c
 

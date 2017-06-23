@@ -3,7 +3,11 @@ require 'MrMurano/Solution-ServiceConfig'
 
 command 'link list' do |c|
   c.syntax = 'murano link list [options]'
-  c.description = 'List the solutions that are linked'
+  c.summary = %{List the solutions that are linked}
+  c.description = %{
+List the solutions that are linked.
+  }.strip
+
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all columns'
 
@@ -60,7 +64,10 @@ alias_command 'links list', 'link list'
 
 command 'link set' do |c|
   c.syntax = 'murano link set [product]'
-  c.description = 'Link a solution to a eventhandler'
+  c.summary = %{Link a solution to an event handler}
+  c.description = %{
+Link a solution to an event handler.
+  }.strip
 
   c.action do |args, options|
     prname = args.shift
@@ -91,7 +98,10 @@ alias_command 'assign set', 'link set'
 
 command 'link unset' do |c|
   c.syntax = 'murano link unset [product]'
-  c.description = 'Unlink a solution'
+  c.summary = %{Unlink a solution}
+  c.description = %{
+Unlink a solution.
+  }.strip
 
   c.action do |args, options|
     prname = args.shift

@@ -16,6 +16,9 @@ end
 command :postgresql do |c|
   c.syntax = %{murano postgresql <SQL Commands>}
   c.summary = %{Query the relational database}
+  c.description = %{
+Query the relational database.
+  }.strip
 
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
 

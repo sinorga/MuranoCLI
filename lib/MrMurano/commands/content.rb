@@ -3,10 +3,11 @@ require 'MrMurano/Content'
 command :content do |c|
   c.syntax = %{murano content}
   c.summary = %{About Content Area}
-  c.description = %{This set of commands let you interact with the content area for a product.
+  c.description = %{
+This set of commands let you interact with the content area for a product.
 
 This is where OTA data can be stored so that devices can easily download it.
-}
+  }.strip
 
   c.action do |args, options|
     ::Commander::UI.enable_paging
@@ -17,11 +18,12 @@ end
 command 'content list' do |c|
   c.syntax = %{murano content list}
   c.summary = %{List downloadable content for a product}
-  c.description = %{List downloadable content for a product
+  c.description = %{
+List downloadable content for a product.
 
 Data uploaded to a product's content area can be downloaded by devices using
 the HTTP Device API.
-  }
+  }.strip
 
   c.option '-l', '--long', %{Include more info for each file}
 
@@ -52,11 +54,12 @@ end
 command 'content info' do |c|
   c.syntax = %{murano content info <content name>}
   c.summary = %{Show more info for a content item}
-  c.description = %{Show more info for a content item
+  c.description = %{
+Show more info for a content item.
 
 Data uploaded to a product's content area can be downloaded by devices using
 the HTTP Device API.
-  }
+  }.strip
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
     if args[0].nil? then
@@ -72,11 +75,12 @@ end
 command 'content delete' do |c|
   c.syntax = %{murano content delete <content name>}
   c.summary = %{Delete a content item}
-  c.description = %{Delete a content item
+  c.description = %{
+Delete a content item.
 
 Data uploaded to a product's content area can be downloaded by devices using
 the HTTP Device API.
-  }
+  }.strip
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
     if args[0].nil? then
@@ -92,11 +96,12 @@ command 'content upload' do |c|
   tags = {}
   c.syntax = %{murano content upload <file>}
   c.summary = %{Upload content}
-  c.description = %{Upload a content item
+  c.description = %{
+Upload a content item.
 
 Data uploaded to a product's content area can be downloaded by devices using
 the HTTP Device API.
-  }
+  }.strip
   c.option('--tags KEY=VALUE', %{Add extra meta info to the content item}) do |ec|
     key, value = ec.split('=', 2)
     # a=b :> ["a","b"]
@@ -132,11 +137,12 @@ end
 command 'content download' do |c|
   c.syntax = %{murano content download <content name>}
   c.summary = %{Download a content item}
-  c.description = %{Download a content item
+  c.description = %{
+Download a content item.
 
 Data uploaded to a product's content area can be downloaded by devices using
 the HTTP Device API.
-  }
+  }.strip
   c.option '-o','--output FILE',%{save to this file}
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
