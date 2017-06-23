@@ -51,10 +51,12 @@ Create a new solution.
       return
     end
 
-    # create doesn't return anything, so we need to go look for it.
+    # Create doesn't return anything, so we need to go look for it.
+    MrMurano::Verbose::whirly_start "Verifying solution..."
     ret = acc.solutions(options.type).select do |i|
       i[:name] == name or i[:domain] =~ /#{name}\./i
     end
+    MrMurano::Verbose::whirly_stop
     pid = (ret.first or {})[:apiId]
     if pid.nil? or pid.empty? then
       acc.error "Did not find an apiId!!!! #{name} -> #{ret} "
