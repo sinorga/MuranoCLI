@@ -8,11 +8,6 @@ command :logs do |c|
 Get the logs for a solution.
   }.strip
   c.option '-f','--follow', %{Follow logs from server}
-  c.option('--[no-]color', %{Toggle colorizing of logs}) {
-    # EXPLAIN/2017-06-14: [lb] curious if this the same as rainbow gem I added.
-    #   I also do not think this --color/--no-color option is used
-    Rainbow.enabled = false
-  }
   c.option '--[no-]pretty', %{Reformat JSON blobs in logs.}
   c.option '--[no-]localtime', %{Adjust Timestamps to be in local time}
   c.option '--raw', %{Don't do any formating of the log data}
