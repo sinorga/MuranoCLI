@@ -2,27 +2,25 @@
 command :status do |c|
   c.syntax = %{murano status [options] [filters]}
   c.summary = %{Get the status of files}
-  c.description = %{Get the status of files
+  c.description = %{
+Get the status of files.
 
-  Compares the local project against what is up in Murano, returning a summary of
-  what things are new or changed.
+Compares the local project against what is up in Murano, showing a summary
+of what things are new or changed.
 
-  When --diff is passed, for items that have changes, the remote item and local
-  item are passed to a diff tool and that output is included.
+When --diff is passed, for items that have changes, the remote item and
+local item are passed to a diff tool and that output is included.
 
-  The diff tool and options to it can be set with the config key 'diff.cmd'.
+The diff tool and options to it can be set with the config key 'diff.cmd'.
 
+Filters allow for selecting a subset of items to check based on patterns.
 
-  Filters allow for selecting a subset of items to check based on patterns.
+File glob filters can be used to select local files. The glob is compared
+with the full file path.
 
-  File glob filters can be used to select local files.  The glob is compared with
-  the full file path.
-
-  Each item type also supports specific filters. These always start with #.
-  Endpoints can be selected with a "#<method>#<path glob>" pattern.
-
-
-  }.gsub(/^ +/,'')
+Each item type also supports specific filters. These always start with #.
+Endpoints can be selected with a "#<method>#<path glob>" pattern.
+  }.gsub(/^ +/,'').strip
   c.option '--all', 'Check everything'
 
   # Load options to control which things to status

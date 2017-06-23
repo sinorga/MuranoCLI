@@ -2,7 +2,9 @@
 command 'show' do |c|
   c.syntax = %(murano show)
   c.summary = %(Show readable information about the current configuration)
-  c.description = %(Show readable information about the current configuration)
+  c.description = %(
+Show readable information about the current configuration.
+  ).strip
 
   c.action do |args, options|
 
@@ -75,7 +77,9 @@ end
 command 'show location' do |c|
   c.syntax = %(murano show location)
   c.summary = %(Show readable location information)
-  c.description = %(Show readable information about the current configuration)
+  c.description = %(
+Show readable information about the current configuration.
+  ).strip
 
   c.action do |args, options|
     puts %(base: #{$cfg['location.base']})

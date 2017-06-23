@@ -7,8 +7,10 @@ require 'pp'
 
 command :_gb do |c|
   c.syntax = %{murano _gb <class> <method> (<args>)}
-  c.summary = %{Call internal class methods directly.}
-  c.description = %{Call internal class methods directly.}
+  c.summary = %{Call internal class methods directly}
+  c.description = %{
+Call internal class methods directly.
+  }.strip
 
   c.action do |args, options|
     cls = args[0]

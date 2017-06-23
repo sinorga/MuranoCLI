@@ -26,11 +26,13 @@ end
 command :timeseries do |c|
   c.syntax = %{murano timeseries}
   c.summary = %{About Timeseries}
-  c.description = %{These commands are deprecated.
+  c.description = %{
+These commands are deprecated.
 
 The timeseries sub-commands let you interact directly with the Timeseries
-instance in a solution.  This allows for easier debugging, being able to
-quickly try out different queries or write test data.}
+instance in a solution. This allows for easier debugging, being able to
+quickly try out different queries or write test data.
+  }.strip
 
   c.action do |args, options|
     ::Commander::UI.enable_paging
@@ -41,9 +43,11 @@ end
 command 'timeseries query' do |c|
   c.syntax = %{murano timeseries query <query string>}
   c.summary = %{Query the timeseries database}
-  c.description = %{This command is deprecated.
+  c.description = %{
+This command is deprecated.
 
-Query the timeseries database}
+Query the timeseries database.
+  }.strip
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
   c.option '--[no-]json', %{Display results as raw json}
   c.option '--[no-]csv', %{Display results as CSV}
@@ -81,9 +85,11 @@ alias_command :tsq, 'timeseries query'
 command 'timeseries write' do |c|
   c.syntax = %{murano timeseries <write string>}
   c.summary = %{Write data into the timeseries database}
-  c.description = %{This command is deprecated.
+  c.description = %{
+This command is deprecated.
 
-Write data into the timeseries database}
+Write data into the timeseries database.
+  }.strip
   c.option '--[no-]json', %{Display results as raw json}
   c.action do |args,options|
     options.defalts :json=>false
@@ -98,9 +104,11 @@ alias_command :tsw, 'timeseries write'
 command 'timeseries command' do |c|
   c.syntax = %{murano timeseries command <db command>}
   c.summary = %{Execute a non-query command in the database}
-  c.description = %{This command is deprecated.
+  c.description = %{
+This command is deprecated.
 
-Execute a non-query command in the database}
+Execute a non-query command in the database.
+  }.strip
   c.option '--[no-]json', %{Display results as raw json}
   c.action do |args,options|
     options.defalts :json=>false

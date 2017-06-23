@@ -3,7 +3,10 @@ require 'MrMurano/makePretty'
 
 command :logs do |c|
   c.syntax = %{murano logs [options]}
-  c.description = %{Get the logs for a solution}
+  c.summary = %{Get the logs for a solution}
+  c.description = %{
+Get the logs for a solution.
+  }.strip
   c.option '-f','--follow', %{Follow logs from server}
   c.option('--[no-]color', %{Toggle colorizing of logs}) {
     # EXPLAIN/2017-06-14: [lb] curious if this the same as rainbow gem I added.

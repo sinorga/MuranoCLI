@@ -19,7 +19,10 @@ end
 
 command :syncdown do |c|
   c.syntax = %{murano syncdown [options] [filters]}
-  c.description = %{Sync project down from Murano}
+  c.summary = %{Sync project down from Murano}
+  c.description = %{
+Sync project down from Murano.
+  }.strip
   c.option '--all', 'Sync everything'
 
   # Load options to control which things to sync
@@ -43,7 +46,10 @@ alias_command :pull, :syncdown, '--no-delete'
 
 command :syncup do |c|
   c.syntax = %{murano syncup [options] [filters]}
-  c.description = %{Sync project up into Murano}
+  c.summary = %{Sync project up into Murano}
+  c.description = %{
+Sync project up into Murano.
+  }.strip
   c.option '--all', 'Sync everything'
 
   # Load options to control which things to sync

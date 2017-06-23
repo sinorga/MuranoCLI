@@ -2,8 +2,10 @@ require 'MrMurano/Mock'
 
 command 'mock' do |c|
   c.syntax = %{murano mock}
-  c.summary = %{Enable or disable testpoint. Show current UUID.}
-  c.description = %{mock lets you enable testpoints to do local lua development}
+  c.summary = %{Enable or disable testpoint, or show current UUID}
+  c.description = %{
+The mock command lets you enable testpoints to do local Lua development.
+  }.strip
 
   c.action do |args, options|
     ::Commander::UI.enable_paging
@@ -13,11 +15,16 @@ end
 
 command 'mock enable' do |c|
   c.syntax = %{murano mock enable}
-  c.summary = %{Create a testpoint file.}
-  c.description = %{Run syncup after running this to carry the change through to Murano.
-   Returns the UUID to be used for authenticating.
-  }
+  c.summary = %{Create a testpoint file}
+  c.description = %{
+Create a testpoint file.
+
+Run syncup after running this to carry the change through to Murano.
+
+Returns the UUID to be used for authenticating.
+  }.strip
   c.option '--raw', %{print raw uuid}
+
   c.action do |args, options|
     mock = MrMurano::Mock.new
     uuid = mock.create_testpoint()
@@ -32,8 +39,12 @@ end
 
 command 'mock disable' do |c|
   c.syntax = %{murano mock disable}
-  c.summary = %{Remove the testpoint file.}
-  c.description = %{Run syncup after running this to carry the change through to Murano.}
+  c.summary = %{Remove the testpoint file}
+  c.description = %{
+Remove the testpoint file.
+
+Run syncup after running this to carry the change through to Murano.
+  }.strip
 
   c.action do |args, options|
     mock = MrMurano::Mock.new
@@ -48,8 +59,12 @@ end
 
 command 'mock show' do |c|
   c.syntax = %{murano mock disable}
-  c.summary = %{Remove the testpoint file.}
-  c.description = %{Run syncup after running this to carry the change through to Murano.}
+  c.summary = %{Remove the testpoint file}
+  c.description = %{
+Remove the testpoint file.
+
+Run syncup after running this to carry the change through to Murano.
+  }.strip
 
   c.action do |args, options|
     mock = MrMurano::Mock.new
