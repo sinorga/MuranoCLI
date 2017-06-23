@@ -46,6 +46,10 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     end
 
     it "syncup" do
+# FIXME/2017-06-23: This test failing horribly, because of files copied over.
+#  devdata.lua specifies: --#EVENT device2 data_in
+#  but Murano doesn't have this event, I don't think [lb].
+#  It does have --#EVENT device2 event
       out, err, status = Open3.capture3(capcmd('murano', 'syncup'))
       expect(out).to eq('')
       expect(err).to eq('')
