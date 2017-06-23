@@ -101,7 +101,7 @@ Get the logs for a solution.
   end
 end
 alias_command 'product logs', 'logs', '--type', 'product'
-alias_command 'application logs', 'logs', '--type', 'product'
+alias_command 'application logs', 'logs', '--type', 'application'
 
 #  vim: set ai et sw=2 ts=2 :
 
