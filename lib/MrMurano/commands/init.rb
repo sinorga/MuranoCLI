@@ -96,14 +96,10 @@ command :init do |c|
   c.syntax = %{murano init}
   c.summary = %{The easy way to start a project}
   c.description = get_description
-
-
-# FIXME: Disable project_not_required and run every command outside project folder.
-  c.project_not_required = true
-
   c.option '--force', %{Overwrite existing Business and Solution IDs found in the config}
   c.option '--purge', %{Remove Project directories and files, and recreate anew}
   c.option '--[no-]mkdirs', %{Create default directories}
+  c.project_not_required = true
 
   c.action do |args, options|
     options.default :force=>false, :mkdirs=>true

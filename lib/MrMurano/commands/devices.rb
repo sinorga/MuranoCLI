@@ -6,6 +6,7 @@ command 'device' do |c|
   c.description = %{
 Interact with a device.
   }.strip
+  c.project_not_required = true
 
   c.action do |a, o|
     ::Commander::UI.enable_paging

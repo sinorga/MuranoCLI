@@ -48,6 +48,7 @@ The Keystore sub-commands let you interact directly with the Keystore instance
 in a solution. This allows for easier debugging, being able to quickly get and
 set data. As well as calling any of the other supported REDIS commands.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     ::Commander::UI.enable_paging

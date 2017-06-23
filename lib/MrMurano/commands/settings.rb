@@ -9,6 +9,7 @@ command 'setting list' do |c|
   c.description = %{
 List which services and settings are avalible.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     setting = MrMurano::Setting.new

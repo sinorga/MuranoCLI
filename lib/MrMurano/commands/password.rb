@@ -5,6 +5,7 @@ command :password do |c|
   c.description = %{
 Sub-commands for working with usernames and passwords.
   }.strip
+  c.project_not_required = true
   c.action do |args, options|
     ::Commander::UI.enable_paging
     say MrMurano::SubCmdGroupHelp.new(c).get_help
@@ -18,6 +19,7 @@ command 'password list' do |c|
   c.description = %{
 List the usernames and hosts that have been saved.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     psd = MrMurano::Passwords.new
@@ -45,6 +47,7 @@ Set password for username.
   }.strip
   c.option '--password PASSWORD', String, %{The password to use}
   c.option '--from_env', %{Use password in MURANO_PASSWORD}
+  c.project_not_required = true
 
   c.action do |args, options|
     psd = MrMurano::Passwords.new
@@ -78,6 +81,7 @@ command 'password delete' do |c|
   c.description = %{
 Delete password for username.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     psd = MrMurano::Passwords.new

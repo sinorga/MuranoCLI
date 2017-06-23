@@ -7,6 +7,7 @@ command :solution do |c|
   c.description = %{
 Sub-commands for working with solution.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     ::Commander::UI.enable_paging
@@ -26,6 +27,7 @@ Create a new solution.
   #   sufficient, and that we do not need options.section, since
   #   we can always deduce the type of solution.
   c.option '--section SECTION', String, %{Which section in config to save id to}
+  c.project_not_required = true
 
   c.action do |args, options|
     options.default :type => :product
@@ -76,6 +78,8 @@ command 'solution delete' do |c|
 Delete a solution.
   }.strip
   c.option '--type TYPE', MrMurano::Account::ALLOWED_TYPES+[:all], %{Only delete solution(s) of the specified type (default: all)}
+  c.project_not_required = true
+
   c.action do |args, options|
     if args.count < 1 then
       acc.error "solution id or name missing"
@@ -100,6 +104,8 @@ command 'solutions expunge' do |c|
   c.summary = %{Delete all solutions}
   c.description = %{Delete all solutions}
   c.option '--yes', %{Answer "yes" to all prompts and run non-interactively.}
+  c.project_not_required = true
+
   c.action do |args, options|
     if args.count > 0 then
       acc.error "not expecting any arguments"
@@ -197,6 +203,7 @@ List solution in the current business.
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
+  c.project_not_required = true
 
   c.action do |args, options|
     options.default :type=>:all, :all=>true

@@ -27,6 +27,8 @@ If section is left out, then key is assumed to be in the 'tool' section.
   c.option '--unset', 'Remove key from config file.'
   c.option '--dump', 'Dump the current combined view of the config'
 
+  c.project_not_required = true
+
   c.action do |args, options|
 
     if options.dump then

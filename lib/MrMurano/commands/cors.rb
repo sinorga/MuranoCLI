@@ -9,6 +9,7 @@ Get the CORS for the project.
 
 Set the CORS with `murano cors set`.
   }.strip
+  c.project_not_required = true
 
   c.action do |args,options|
     sol = MrMurano::Webservice::Cors.new
@@ -23,6 +24,7 @@ command 'cors set' do |c|
   c.description = %{
 Set the CORS for the project.
   }.strip
+  c.project_not_required = true
 
   c.action do |args,options|
     crs = MrMurano::Webservice::Cors.new
