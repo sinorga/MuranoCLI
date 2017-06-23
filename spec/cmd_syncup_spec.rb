@@ -53,7 +53,8 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
 
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       #expect(out).to start_with(%{Adding:\nDeleting:\nChanging:\n})
-      expect(out).to start_with(%{Nothing to add\nNothing to delete\nNothing to change\n})
+      #expect(out).to start_with(%{Nothing to add\nNothing to delete\nNothing to change\n})
+      expect(out).to start_with(%{Nothing new locally\nNothing new remotely\nItems that differ\n})
       # Due to timestamp races, there might be modules or services in Changing.
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
