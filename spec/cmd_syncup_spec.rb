@@ -13,7 +13,7 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
 
-    @applctn_name = rname('syncdownTestApp')
+    @applctn_name = rname('syncupTestApp')
     out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @applctn_name, '--save'))
     expect(err).to eq('')
     soln_id = out
@@ -54,7 +54,7 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       out, err, status = Open3.capture3(capcmd('murano', 'status'))
       #expect(out).to start_with(%{Adding:\nDeleting:\nChanging:\n})
       #expect(out).to start_with(%{Nothing to add\nNothing to delete\nNothing to change\n})
-      expect(out).to start_with(%{Nothing new locally\nNothing new remotely\nItems that differ\n})
+      expect(out).to start_with(%{Nothing new locally\nNothing new remotely\nNothing that differs\n})
       # Due to timestamp races, there might be modules or services in Changing.
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
