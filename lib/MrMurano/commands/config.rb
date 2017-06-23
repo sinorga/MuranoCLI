@@ -26,6 +26,7 @@ If section is left out, then key is assumed to be in the 'tool' section.
 
   c.option '--unset', 'Remove key from config file.'
   c.option '--dump', 'Dump the current combined view of the config'
+  c.option '--locations', 'List the locations of all known configs'
 
   c.project_not_required = true
 
@@ -33,6 +34,8 @@ If section is left out, then key is assumed to be in the 'tool' section.
 
     if options.dump then
       puts $cfg.dump()
+    elsif options.locations then
+      puts $cfg.locations()
     elsif args.count == 0 then
       say_error "Need a config key"
     elsif args.count == 1 and not options.unset then
