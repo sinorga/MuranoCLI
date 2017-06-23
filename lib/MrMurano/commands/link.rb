@@ -1,6 +1,20 @@
 require 'MrMurano/Account'
 require 'MrMurano/Solution-ServiceConfig'
 
+command 'link' do |c|
+  c.syntax = %{murano link}
+  c.summary = %{Use the link commands to manage solution links}
+  c.description = %{
+Use the link commands to manage solution links.
+  }.strip
+  c.project_not_required = true
+
+  c.action do |args, options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
 command 'link list' do |c|
   c.syntax = 'murano link list [options]'
   c.summary = %{List the solutions that are linked}
