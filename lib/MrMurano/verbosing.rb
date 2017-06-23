@@ -144,6 +144,7 @@ module MrMurano
     def self.whirly_linger
       unless $cfg['tool.no-progress'] or !defined?(@@whirly_time)
         not_so_fast = 0.55 - (Time.now - @@whirly_time)
+        remove_class_variable(:@@whirly_time)
         if not_so_fast > 0
           sleep not_so_fast
         end
@@ -153,7 +154,7 @@ module MrMurano
     def self.whirly_msg(msg)
       unless $cfg['tool.no-progress']
         if defined?(@@whirly_time)
-          self.whirly_linger
+          #self.whirly_linger
           Whirly.configure status: msg
         else
           self.whirly_start msg
