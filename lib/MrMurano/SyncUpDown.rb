@@ -547,12 +547,6 @@ module MrMurano
       end
     end
 
-    def sync_finish_progress
-      unless $cfg['tool.no-progress']
-        MrMurano::Verbose::whirly_stop
-      end
-    end
-
     ## Make things in Murano look like local project
     #
     # This creates, uploads, and deletes things as needed up in Murano to match
@@ -643,7 +637,6 @@ module MrMurano
           end
         end
       end
-      sync_finish_progress
       syncdown_after(into)
     end
 
@@ -668,6 +661,8 @@ module MrMurano
       df = ""
       begin
         download(Pathname.new(trmt.path), item)
+
+        MrMurano::Verbose::whirly_stop
 
         cmd = $cfg['diff.cmd'].shellsplit
         cmd << trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
