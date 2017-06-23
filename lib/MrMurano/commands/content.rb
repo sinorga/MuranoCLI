@@ -8,6 +8,7 @@ This set of commands let you interact with the content area for a product.
 
 This is where OTA data can be stored so that devices can easily download it.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     ::Commander::UI.enable_paging

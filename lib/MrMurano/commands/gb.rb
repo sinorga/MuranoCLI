@@ -11,6 +11,7 @@ command :_gb do |c|
   c.description = %{
 Call internal class methods directly.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     cls = args[0]

@@ -11,6 +11,7 @@ If you are having trouble logging in, try deleting the saved password first.
   `murano password delete <username>`
   }.strip
   c.option '--show-token', %{Shows the API token}
+  c.project_not_required = true
 
   c.action do |args, options|
     acc = MrMurano::Account.new

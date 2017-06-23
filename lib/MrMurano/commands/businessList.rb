@@ -6,6 +6,7 @@ command :business do |c|
   c.description = %{
 Sub-commands for working with businesses.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     ::Commander::UI.enable_paging
@@ -22,6 +23,7 @@ List businesses.
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all fields'
   c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
+  c.project_not_required = true
 
   c.action do |args, options|
     acc = MrMurano::Account.new

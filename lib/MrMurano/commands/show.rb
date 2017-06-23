@@ -5,6 +5,7 @@ command 'show' do |c|
   c.description = %(
 Show readable information about the current configuration.
   ).strip
+  c.project_not_required = true
 
   c.action do |args, options|
 
@@ -80,6 +81,7 @@ command 'show location' do |c|
   c.description = %(
 Show readable information about the current configuration.
   ).strip
+  c.project_not_required = true
 
   c.action do |args, options|
     puts %(base: #{$cfg['location.base']})

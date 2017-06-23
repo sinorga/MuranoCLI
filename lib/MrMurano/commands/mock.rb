@@ -6,6 +6,7 @@ command 'mock' do |c|
   c.description = %{
 The mock command lets you enable testpoints to do local Lua development.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     ::Commander::UI.enable_paging

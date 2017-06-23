@@ -111,6 +111,7 @@ or
   #c.option '--opts CMD', 'List options for subcommand'
   #c.option '--gopts', 'List global options'
   c.option '--shell TYPE', Commander::Runner::SHELL_TYPES, %{Shell flavor of output (default: Bash)}
+  c.project_not_required = true
 
   # Changing direction.
   # Will poop out the file to be included as the completion script.

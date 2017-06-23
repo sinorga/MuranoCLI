@@ -270,6 +270,7 @@ The tsdb sub-commands let you interact directly with the TSDB instance in a
 solution. This allows for easier debugging, being able to quickly try out
 different queries or write test data.
   }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     ::Commander::UI.enable_paging
