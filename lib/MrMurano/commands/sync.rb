@@ -6,6 +6,17 @@ def sync_add_options(c, locale)
   c.option '--[no-]update', %{Don't update things on #{locale}}
 end
 
+def syncdownFiles(options, args=nil)
+  args = [] if args.nil?
+  MrMurano::SyncRoot.each_filtered(options) do |name, type, klass, desc|
+    MrMurano::Verbose::whirly_msg "Syncing #{desc}..."
+    sol = klass.new
+    sol.syncdown(options, args)
+    sleep 1
+  end
+  MrMurano::Verbose::whirly_stop
+end
+
 command :syncdown do |c|
   c.syntax = %{murano syncdown [options] [filters]}
   c.description = %{Sync project down from Murano}
@@ -25,13 +36,7 @@ command :syncdown do |c|
   c.action do |args,options|
     options.default :delete=>true, :create=>true, :update=>true
 
-    #MrMurano::Verbose::whirly_start "Syncing solutions..."
-    MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
-      MrMurano::Verbose::whirly_msg "Syncing #{desc}..."
-      sol = klass.new
-      sol.syncdown(options, args)
-    end
-    MrMurano::Verbose::whirly_stop
+    syncdownFiles(options.__hash__, args)
   end
 end
 alias_command :pull, :syncdown, '--no-delete'
