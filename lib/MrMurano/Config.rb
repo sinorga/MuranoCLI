@@ -6,7 +6,6 @@ require 'rainbow'
 module MrMurano
   class Config
     # Config scopes:
-    #
     #  :internal    transient this-run-only things (also -c options)
     #  :specified   from --configfile
     #  :env         from ENV['MURANO_CONFIGFILE']
