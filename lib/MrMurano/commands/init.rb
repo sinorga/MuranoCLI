@@ -244,6 +244,7 @@ command :init do |c|
         bizid = bizz.first
         say "This user has one business. Using #{Rainbow(bizid[:name]).underline}"
         $cfg.set('business.id', bizid[:bizid], :project)
+        $cfg.set('business.name', bizid[:name], :project)
       elsif bizz.count == 0 then
         acc.warning "This user has not created any businesses."
         say "Please log on to exosite.com to create a free account. Visit:"
@@ -256,6 +257,7 @@ command :init do |c|
           bizz.sort{|a,b| a[:name]<=>b[:name]}.each do |b|
             menu.choice(b[:name]) do
               $cfg.set('business.id', b[:bizid], :project)
+              $cfg.set('business.name', b[:name], :project)
             end
           end
         end
@@ -306,6 +308,7 @@ command :init do |c|
         solname = sol[:name]
         # Update the config file, both in memory and on drive.
         $cfg.set("#{type}.id", sid, :project)
+        $cfg.set("#{type}.name", solname, :project)
       elsif solz.count == 0 then
         #say "You do not have any #{type}s. Let's create one."
         say "This business does not have any #{Inflecto.pluralize(type)}. Let's create one"
@@ -342,6 +345,7 @@ command :init do |c|
           exit 3
         end
         $cfg.set("#{type}.id", sid, :project)
+        $cfg.set("#{type}.name", solname, :project)
       else
         choose do |menu|
           menu.prompt = "Select which #{type.capitalize} to use:"
@@ -350,8 +354,9 @@ command :init do |c|
           solz.sort{|a,b| a[:domain]<=>b[:domain]}.each do |sol|
             menu.choice(s[:domain].sub(/\..*$/, '')) do
               sid = sol[:apiId]
-              $cfg.set("#{type}.id", sid, :project)
               solname = sol[:name]
+              $cfg.set("#{type}.id", sid, :project)
+              $cfg.set("#{type}.name", solname, :project)
             end
           end
         end
@@ -371,9 +376,9 @@ command :init do |c|
         response = http.request(request)
         MrMurano::Verbose::whirly_stop
         if response.is_a? Net::HTTPSuccess then
-          say "Linked #{pname} and #{aname}"
+          say "Linked #{aname} and #{pname}"
         elsif response.is_a? Net::HTTPConflict
-          say "Verified #{pname} and #{aname} are linked"
+          say "Verified #{aname} and #{pname} are linked"
         else
           acc.error "Unable to link solutions because #{Rainbow(response.message).underline}"
         end
