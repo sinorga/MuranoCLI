@@ -30,15 +30,20 @@ Read a setting on a Service.
   c.option '-o', '--output FILE', String, %{File to save output to}
 
   c.action do |args, options|
+    setting = MrMurano::Setting.new
+
+    if args.count < 1
+      setting.error "Missing <service>.<setting>"
+      exit 1
+    end
     service, pref = args[0].split('.')
     subkey = args[1]
 
-    setting = MrMurano::Setting.new
     ret = setting.read(service, pref)
 
     ret = ret.access(subkey) unless subkey.nil?
 
-    io=nil
+    io = nil
     if options.output then
       io = File.open(options.output, 'w')
     end
