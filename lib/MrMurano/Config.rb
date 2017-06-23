@@ -1,22 +1,26 @@
-require 'pathname'
 require 'inifile'
 require 'highline'
+require 'pathname'
+require 'rainbow'
 
 module MrMurano
   class Config
+    # Config scopes:
     #
-    #  internal    transient this-run-only things (also -c options)
-    #  specified   from --configfile
-    #  env         from ENV['MURANO_CONFIGFILE']
-    #  project     .murano/config at project dir
-    #  user        .murano/config at $HOME
-    #  defaults    Internal hardcoded defaults
-    #
+    #  :internal    transient this-run-only things (also -c options)
+    #  :specified   from --configfile
+    #  :env         from ENV['MURANO_CONFIGFILE']
+    #  :project     .murano/config at project dir
+    #  :user        .murano/config at $HOME
+    #  :defaults    Internal hardcoded defaults
+    CFG_SCOPES = %w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
+
     ConfigFile = Struct.new(:kind, :path, :data) do
       def load()
         return if kind == :internal
         return if kind == :defaults
         # DEVs: Uncomment if you're trying to figure where settings are coming from.
+        #   See also: murano config --locations
         #puts "Loading config at: #{path}"
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
@@ -60,8 +64,6 @@ module MrMurano
     attr :paths
     attr_reader :projectDir
     attr_reader :projectExists
-
-    CFG_SCOPES = %w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
 
     CFG_ENV_NAME = %{MURANO_CONFIGFILE}.freeze
     CFG_FILE_NAME = %[.murano/config].freeze
@@ -276,6 +278,73 @@ module MrMurano
         base.merge! ini.data
       end
       base.to_s
+    end
+
+    ## Dump out locations of all known configs
+    def locations()
+      locats = ""
+      first = true
+      puts ''
+      #CFG_SCOPES.each do |scope|
+      ordered_scopes = [:project, :user, :env, :internal, :specified, :defaults,]
+      ordered_scopes.each do |scope|
+        locats += "\n" if !first
+        first = false
+
+        cfg_paths = @paths.select{|p| p.kind == scope}
+
+        msg = "Scope: ‘#{scope}’\n\n"
+        locats += Rainbow(msg).bright.underline
+
+        unless cfg_paths.empty?
+          cfg = cfg_paths.first
+
+          unless cfg.path.nil? or not cfg.path.exist?
+            path = "Path: #{cfg.path}\n"
+          else
+            if [:internal, :defaults,].include? cfg.kind
+              # cfg.path is nil.
+              path = "Path: ‘#{scope}’ config is not saved.\n"
+            else
+              path = "Path: ‘#{scope}’ config does not exist.\n"
+            end
+          end
+          #locats += Rainbow(path).bright
+          locats += path
+          locats += "\n"
+
+          skip_content = false
+          if scope == :env
+            locats += "Config: Use the environment variable, MURANO_CONFIGFILE, to specify this config file.\n"
+            skip_content = not(cfg.path.exist?)
+          end
+          next if skip_content
+
+          base = IniFile.new()
+          base.merge! cfg.data
+          content = base.to_s
+          if content.length > 0
+            locats += "Config:\n"
+            #locats += base.to_s
+            base.to_s.split("\n").each{ |line|
+              locats += "  " + line + "\n"
+            }
+          else
+            msg = "Config: Empty INI file.\n"
+            #locats += Rainbow(msg).aqua.bright
+            locats += msg
+          end
+        else
+          msg = "No config found for ‘#{scope}’.\n"
+          unless scope == :specified
+            locats += Rainbow(msg).red.bright
+          else
+            locats += "Path: ‘#{scope}’ config does not exist.\n\n"
+            locats += "Config: Use --configfile to specify this config file.\n"
+          end
+        end
+      end
+      locats
     end
 
     def set(key, value, scope=:project)
