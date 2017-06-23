@@ -1,3 +1,4 @@
+require 'MrMurano/verbosing'
 
 module MrMurano
   class Hooked
@@ -51,7 +52,7 @@ module Commander
       rescue MrMurano::ConfigError => err
         # Clear whirly if it was running.
         MrMurano::Verbose::whirly_stop
-        puts err.message
+        MrMurano::Verbose::error err.message
         exit 1
       rescue StandardError => err
         raise

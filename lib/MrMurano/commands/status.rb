@@ -1,3 +1,4 @@
+require 'MrMurano/verbosing'
 
 command :status do |c|
   c.syntax = %{murano status [options] [filters]}
@@ -112,7 +113,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       begin
         syncable = klass.new
       rescue MrMurano::ConfigError => err
-        say "Could not fetch status for #{desc}: #{err}"
+        MrMurano::Verbose::error "Could not fetch status for #{desc}: #{err}"
       rescue StandardError => err
         raise
       else
