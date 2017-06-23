@@ -315,10 +315,13 @@ module MrMurano
 
           skip_content = false
           if scope == :env
-            locats += "Config: Use the environment variable, MURANO_CONFIGFILE, to specify this config file.\n"
+            locats += "Use the environment variable, MURANO_CONFIGFILE, to specify this config file.\n"
             skip_content = not(cfg.path.exist?)
           end
           next if skip_content
+          if scope == :env
+            locats += "\n"
+          end
 
           base = IniFile.new()
           base.merge! cfg.data
@@ -340,7 +343,7 @@ module MrMurano
             locats += Rainbow(msg).red.bright
           else
             locats += "Path: ‘#{scope}’ config does not exist.\n\n"
-            locats += "Config: Use --configfile to specify this config file.\n"
+            locats += "Use --configfile to specify this config file.\n"
           end
         end
       end
