@@ -393,8 +393,31 @@ module MrMurano
       # Give the local file the same timestamp as the remote, because diff.
       # FIXME/MUR-XXXX: Ideally, server should has a hash or something we can compare.
       if item[:updated_at]
-# FIXME/2017-06-23: When is :updated_at not set? Seems to be from cmd_syncdown_spec test...
         FileUtils.touch [local.to_path,], :mtime => DateTime.parse(item[:updated_at]).to_time
+      else
+        # FIXME/EXPLAIN/2017-06-23: Why is :updated_at not set?
+        #     And why have I only triggered this from ./spec/cmd_syncdown_spec.rb ?
+        #       (Probably because nothing else makes routes or files?)
+        #     Here are the items in question:
+        #
+        # Happens to each of the MrMurano::Webservice::Endpoint::RouteItem's:
+        #
+        # <MrMurano::Webservice::Endpoint::RouteItem:0x007fe719cb6300
+        #   @id="QeRq21Cfij",
+        #   @method="delete",
+        #   @path="/api/fire/{code}",
+        #   @content_type="application/json",
+        #   @script="--#ENDPOINT delete /api/fire/{code}\nreturn 'ok'\n\n-- vim: set ai sw=2 ts=2 :\n",
+        #   @use_basic_auth=false,
+        #   @synckey="DELETE_/api/fire/{code}">
+        #
+        # Happens to each of the MrMurano::Webservice::File::FileItem's:
+        #
+        # <MrMurano::Webservice::File::FileItem:0x007fe71a44a8f0
+        #   @path="/",
+        #   @mime_type="text/html",
+        #   @checksum="da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        #   @synckey="/">
       end
     end
 
