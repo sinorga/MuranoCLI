@@ -30,14 +30,18 @@ module MrMurano
       def write()
         return if kind == :internal
         return if kind == :defaults
-        if $cfg['tool.dry']
+        if not $cfg.nil? and $cfg['tool.dry']
+          # $cfg.nil? when run from spec tests that don't load it with:
+          #   include_context "CI_CMD"
           $cfg.warning "--dry: Not writing config file"
           return
         end
-        # Ensure path to the file exists.
-        path.dirname.mkpath
-        $cfg.fixModes(path.dirname)
         self[:path] = Pathname.new(path) unless path.kind_of? Pathname
+        # Ensure path to the file exists.
+        unless path.dirname.exist?
+          path.dirname.mkpath
+          $cfg.fixModes(path.dirname)
+        end
         self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
         self[:data].save
         path.chmod(0600)
