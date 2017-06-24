@@ -111,28 +111,30 @@ module MrMurano
   #
   module SyncUpDown
 
-    # This is one item that can be synced
+    # This is one item that can be synced.
     class Item
-      # @return [String] The name of this item
+      # @return [String] The name of this item.
       attr_accessor :name
-      # @return [Pathname] Where this item lives
+      # @return [Pathname] Where this item lives.
       attr_accessor :local_path
       # FIXME/EXPLAIN: ??? what is this?
       attr_accessor :id
       # @return [String] The lua code for this item. (not all items use this.)
       attr_accessor :script
-      # @return [Integer] The line in #local_path where this #script starts
+      # @return [Integer] The line in #local_path where this #script starts.
       attr_accessor :line
-      # @return [Integer] The line in #local_path where this #script ends
+      # @return [Integer] The line in #local_path where this #script ends.
       attr_accessor :line_end
-      # @return [String] If requested, the diff output
+      # @return [String] If requested, the diff output.
       attr_accessor :diff
       # @return [Boolean] When filtering, did this item pass.
       attr_accessor :selected
       # FIXME/EXPLAIN: ??? what is this?
       attr_accessor :synckey
-      # @return [String] For device2, the event type
+      # @return [String] For device2, the event type.
       attr_accessor :type
+      # @return [String] For testing, the updated_at time the server would otherwise indicate.
+      attr_accessor :updated_at
 
       # Initialize a new Item with a few, or all, attributes.
       # @param hsh [Hash{Symbol=>Object}, Item] Initial values
