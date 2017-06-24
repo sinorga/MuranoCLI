@@ -13,7 +13,13 @@ RSpec.describe MrMurano::EventHandler do
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['application.id'] = 'XYZ'
 
-    @srv = MrMurano::EventHandler.new
+    # 2017-06-23: EventHandler is an intermediate class now, and we
+    # cannot use it because its @project_section is not defined.
+    #@srv = MrMurano::EventHandler.new
+    # It shouldn't matter which final event handler class we use:
+    # the only different is if it uses application.id or product.id.
+    @srv = MrMurano::EventHandlerSolnApp.new
+    #@srv = MrMurano::EventHandlerSolnPrd.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
