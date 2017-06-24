@@ -26,7 +26,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     #out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
-    #expect(out).to a_string_starting_with("Linked #{@product_name}")
+    #expect(out).to a_string_starting_with("Linked product #{@product_name}")
     #expect(err).to eq('')
     #expect(status.exitstatus).to eq(0)
   end
