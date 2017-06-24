@@ -45,7 +45,8 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
       FileUtils.move('assets','files')
       #FileUtils.mkpath('specs')
-      #FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
+      #FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'),
+      #  'specs/resources.yaml')
     end
 
     it "syncdown" do
@@ -59,6 +60,11 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
 
       out, err, status = Open3.capture3(capcmd('murano', 'syncdown'))
       expect(out).to eq('')
+
+# FIXME/2017-06-23: FAILING:
+
+      # Look for skipping missing location lines, e.g.,
+      #   "\e[33mSkipping missing location /tmp/d20170623-20035-17496y/project/modules\e[0m\n"
       expect(err.lines).to include(
         a_string_ending_with("routes\e[0m\n"),
         a_string_ending_with("files\e[0m\n"),

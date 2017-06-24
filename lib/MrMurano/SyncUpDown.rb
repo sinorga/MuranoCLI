@@ -392,7 +392,10 @@ module MrMurano
       end
       # Give the local file the same timestamp as the remote, because diff.
       # FIXME/MUR-XXXX: Ideally, server should has a hash or something we can compare.
-      FileUtils.touch [local.to_path,], :mtime => DateTime.parse(item[:updated_at]).to_time
+      if item[:updated_at]
+# FIXME/2017-06-23: When is :updated_at not set? Seems to be from cmd_syncdown_spec test...
+        FileUtils.touch [local.to_path,], :mtime => DateTime.parse(item[:updated_at]).to_time
+      end
     end
 
     ## Remove local reference of item
