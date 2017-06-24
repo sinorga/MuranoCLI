@@ -13,7 +13,7 @@ Dotenv.load
 Signal.trap('INT', 'EXIT') # Don't drop traces on ^C
 
 program :version, MrMurano::VERSION
-program :description, %{Manage a Solution and Product in Exosite's Murano}
+program :description, %{Manage an Application and Product in Exosite's Murano}
 
 global_option('-V', '--verbose', 'Be chatty') {
   $cfg['tool.verbose'] = true
@@ -55,11 +55,12 @@ default_command :help
 
 $cfg = MrMurano::Config.new
 $cfg.load
+
 # Most commands should be run from within a Murano project (sub-)directory.
 # Check that now.
 runner = ::Commander::Runner.instance
 the_cmd = runner.active_command
-unless the_cmd.project_not_required or $cfg.projectExists
+unless the_cmd.name == "help" or the_cmd.project_not_required or $cfg.projectExists
   MrMurano::Verbose::error %{The "#{the_cmd.name}" command only works in a Murano project.}
   say %{Please change to a project directory, or run "murano init" to create a new project.}
   # Note that commnander-rb uses an at_exit hook, which we hack around.
