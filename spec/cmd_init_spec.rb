@@ -47,6 +47,22 @@ RSpec.describe 'murano init', :cmd do
     expecting += [
       "Created default directories\n",
       "\n",
+    ]
+
+    if opts[:syncdown_will_find_local_files] or opts[:syncdown_will_find_local_files_application]
+      expecting += [
+        "Skipping Application Event Handlers: local files found\n",
+        "\n",
+      ]
+    end
+    if opts[:syncdown_will_find_local_files] or opts[:syncdown_will_find_local_files_product]
+      expecting += [
+        "Skipping Product Event Handlers: local files found\n",
+        "\n",
+      ]
+    end
+
+    expecting += [
       "Success!\n",
       "\n",
       t.a_string_matching(%r{\s+Business ID: \w+\n}),
@@ -61,7 +77,7 @@ RSpec.describe 'murano init', :cmd do
     # this is in the project dir. Want to be in HOME
     Dir.chdir(ENV['HOME']) do
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expect(out).to eq("\n")
+      expect(out).to eq("")
       expect(err).to eq("\e[31mCannot init a project in your HOME directory.\e[0m\n")
       expect(status.exitstatus).to eq(2)
     end
@@ -155,9 +171,9 @@ RSpec.describe 'murano init', :cmd do
           "\n",
           a_string_starting_with('Found Business '),
           "\n",
-          "This business does not have an Application. Let's create one\n",
+          "This business does not have any applications. Let's create one\n",
           "Please enter the Application name: \n",
-          "This business does not have a Product. Let's create one\n",
+          "This business does not have any products. Let's create one\n",
           "\n",
           "Please enter the Product name: \n",
           "\n",
@@ -223,7 +239,11 @@ RSpec.describe 'murano init', :cmd do
       # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expect(out.lines).to match_array(expectedResponseWhenIdsFoundInConfig(self))
+      expect(out.lines).to match_array(
+        expectedResponseWhenIdsFoundInConfig(self, {
+          :syncdown_will_find_local_files => true,
+          })
+      )
       expect(err).to eq("")
       expect(status.exitstatus).to eq(0)
 
@@ -242,7 +262,10 @@ RSpec.describe 'murano init', :cmd do
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
       expect(out.lines).to match_array(
-        expectedResponseWhenIdsFoundInConfig(self, {:expect_proj_file_write => false,})
+        expectedResponseWhenIdsFoundInConfig(self, {
+          :expect_proj_file_write => false,
+          :syncdown_will_find_local_files => true,
+          })
       )
       expect(err).to eq("")
       expect(status.exitstatus).to eq(0)
@@ -275,7 +298,12 @@ RSpec.describe 'murano init', :cmd do
       # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expect(out.lines).to match_array(expectedResponseWhenIdsFoundInConfig(self))
+      expect(out.lines).to match_array(
+        expectedResponseWhenIdsFoundInConfig(self, {
+          #:syncdown_will_find_local_files_application => true,
+          :syncdown_will_find_local_files_product => true,
+          })
+      )
       expect(err).to eq("")
       expect(status.exitstatus).to eq(0)
 
@@ -308,7 +336,12 @@ RSpec.describe 'murano init', :cmd do
       # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expect(out.lines).to match_array(expectedResponseWhenIdsFoundInConfig(self))
+      expect(out.lines).to match_array(
+        expectedResponseWhenIdsFoundInConfig(self, {
+          #:syncdown_will_find_local_files_application => true,
+          :syncdown_will_find_local_files_product => true,
+          })
+      )
       expect(err).to eq("")
       expect(status.exitstatus).to eq(0)
 
@@ -323,4 +356,6 @@ RSpec.describe 'murano init', :cmd do
   end
 
 end
+
 #  vim: set ai et sw=2 ts=2 :
+

@@ -421,12 +421,13 @@ module MrMurano
     end
   end
 
-  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
+  # Order here matters, because spec/cmd_init_spec.rb
   SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
+  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
   # FIXME/2017-06-20: Should we use separate directories for prod vs app?
   #   [lb] thinks so if the locallist()/PRODUCT_SERVICES kludge fails in the future.
-  #SyncRoot.add('interfaces', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
   #SyncRoot.add('services', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
+  #SyncRoot.add('interfaces', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
 
 end
 #  vim: set ai et sw=2 ts=2 :
