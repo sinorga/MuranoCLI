@@ -1,5 +1,6 @@
 require 'MrMurano/Account'
 require 'MrMurano/SubCmdGroupContext'
+require 'MrMurano/verbosing'
 
 command :solution do |c|
   c.syntax = %{murano solution}
@@ -90,7 +91,7 @@ Delete a solution.
 
   c.action do |args, options|
     if args.count < 1 then
-      acc.error "solution id or name missing"
+      MrMurano::Verbose::error "solution id or name missing"
       return
     end
     args.each do |name|
@@ -118,7 +119,7 @@ Delete all solutions.
 
   c.action do |args, options|
     if args.count > 0 then
-      acc.error "not expecting any arguments"
+      MrMurano::Verbose::error "not expecting any arguments"
       exit 1
     end
     name = '*'
@@ -130,7 +131,7 @@ Delete all solutions.
     end
     unless n_faulted.nil? or n_faulted.zero?
       inflection = MrMurano::Verbose::pluralize?("solution", n_faulted)
-      acc.error "Failed to delete #{n_faulted} #{inflection}"
+      MrMurano::Verbose::error "Failed to delete #{n_faulted} #{inflection}"
     end
   end
 end
