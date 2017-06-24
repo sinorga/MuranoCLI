@@ -21,6 +21,8 @@ RSpec::Matchers.define :pathname_globs do |glob|
   end
 end
 
+ITEM_UPDATED_AT="2017-06-24T00:45:15.564Z"
+
 RSpec.describe MrMurano::SyncUpDown do
   include_context "WORKSPACE"
   before(:example) do
@@ -183,31 +185,31 @@ RSpec.describe MrMurano::SyncUpDown do
         FileUtils.touch(@projectDir + '/tsud/ga/six.lua')  # toadd
         @t = TSUD.new
         expect(@t).to receive(:list).once.and_return([
-          MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),   # tomod
-          MrMurano::SyncUpDown::Item.new({:name=>'two.lua'}),   # tomod
-          MrMurano::SyncUpDown::Item.new({:name=>'three.lua'}), # unchg
-          MrMurano::SyncUpDown::Item.new({:name=>'four.lua'}),  # unchg
-          MrMurano::SyncUpDown::Item.new({:name=>'seven.lua'}), # todel
-          MrMurano::SyncUpDown::Item.new({:name=>'eight.lua'}), # todel
+          MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),   # tomod
+          MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT}),   # tomod
+          MrMurano::SyncUpDown::Item.new({:name=>'three.lua', :updated_at=>ITEM_UPDATED_AT}), # unchg
+          MrMurano::SyncUpDown::Item.new({:name=>'four.lua', :updated_at=>ITEM_UPDATED_AT}),  # unchg
+          MrMurano::SyncUpDown::Item.new({:name=>'seven.lua', :updated_at=>ITEM_UPDATED_AT}), # todel
+          MrMurano::SyncUpDown::Item.new({:name=>'eight.lua', :updated_at=>ITEM_UPDATED_AT}), # todel
         ])
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/one.lua')).
-          and_return(MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}))
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/two.lua')).
-          and_return(MrMurano::SyncUpDown::Item.new({:name=>'two.lua'}))
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/three.lua')).
-          and_return(MrMurano::SyncUpDown::Item.new({:name=>'three.lua'}))
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'three.lua', :updated_at=>ITEM_UPDATED_AT}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/four.lua')).
-          and_return(MrMurano::SyncUpDown::Item.new({:name=>'four.lua'}))
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'four.lua', :updated_at=>ITEM_UPDATED_AT}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/five.lua')).
-          and_return(MrMurano::SyncUpDown::Item.new({:name=>'five.lua'}))
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'five.lua', :updated_at=>ITEM_UPDATED_AT}))
         expect(@t).to receive(:toRemoteItem).
           with(anything(), pathname_globs('**/six.lua')).
-          and_return(MrMurano::SyncUpDown::Item.new({:name=>'six.lua'}))
+          and_return(MrMurano::SyncUpDown::Item.new({:name=>'six.lua', :updated_at=>ITEM_UPDATED_AT}))
 
         expect(@t).to receive(:docmp).with(have_attributes({:name=>'one.lua'}),anything()).and_return(true)
         expect(@t).to receive(:docmp).with(have_attributes({:name=>'two.lua'}),anything()).and_return(true)
@@ -341,7 +343,7 @@ RSpec.describe MrMurano::SyncUpDown do
       lp = Pathname.new(@projectDir + '/tsud/one.lua').realpath
       t = TSUD.new
       expect(t).to receive(:fetch).once.with(1).and_yield("foo")
-      t.download(lp, {:id=>1})
+      t.download(lp, {:id=>1, :updated_at=>ITEM_UPDATED_AT})
     end
   end
 
@@ -356,7 +358,7 @@ RSpec.describe MrMurano::SyncUpDown do
 
     it "nothing when same." do
       expect(@t).to receive(:fetch).and_yield(%{-- fake lua\nreturn 0\n})
-      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt})
+      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt, :updated_at=>ITEM_UPDATED_AT})
       if Gem.win_platform? then
         expect(ret).to match(/FC: no differences encountered/)
       else
@@ -366,14 +368,14 @@ RSpec.describe MrMurano::SyncUpDown do
 
     it "something when different." do
       expect(@t).to receive(:fetch).and_yield(%{-- fake lua\nreturn 2\n})
-      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt})
+      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt, :updated_at=>ITEM_UPDATED_AT})
       expect(ret).not_to eq('')
     end
 
     it "uses script in item" do
       script = %{-- fake lua\nreturn 2\n}
       expect(@t).to receive(:fetch).and_yield(script)
-      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt, :script=>script})
+      ret = @t.dodiff({:name=>'one.lua', :local_path=>@scpt, :script=>script, :updated_at=>ITEM_UPDATED_AT})
       if Gem.win_platform? then
         expect(ret).to match(/FC: no differences encountered/)
       else
@@ -408,8 +410,8 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
       expect(@t).to receive(:list).once.and_return([
-        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
-        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
       ])
 
       expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(MrMurano::SyncUpDown::Item), true)
@@ -437,8 +439,8 @@ RSpec.describe MrMurano::SyncUpDown do
 
     it "creates" do
       expect(@t).to receive(:list).once.and_return([
-        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
-        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
@@ -451,14 +453,14 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@projectDir + '/tsud/one.lua')
       FileUtils.touch(@projectDir + '/tsud/two.lua')
       expect(@t).to receive(:list).once.and_return([
-        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
-        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
       expect(@t).to receive(:toRemoteItem).and_return(
-        MrMurano::SyncUpDown::Item.new({:name=>'one.lua'}),
-        MrMurano::SyncUpDown::Item.new({:name=>'two.lua'})
+        MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),
+        MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
       )
       @t.syncdown({:update=>true})
       expect(FileTest.exist?(@projectDir + '/tsud/one.lua')).to be true
