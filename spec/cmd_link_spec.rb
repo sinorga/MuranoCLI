@@ -32,7 +32,7 @@ RSpec.describe 'murano link', :cmd, :needs_password do
 
   it "links and lists" do
     out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
-    expect(out).to a_string_starting_with("Linked #{@solz_name}")
+    expect(out).to a_string_starting_with("Linked product #{@solz_name}")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
@@ -48,7 +48,7 @@ RSpec.describe 'murano link', :cmd, :needs_password do
 
   it "unlinks" do
     out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
-    expect(out).to a_string_starting_with("Linked #{@solz_name}")
+    expect(out).to a_string_starting_with("Linked product #{@solz_name}")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
