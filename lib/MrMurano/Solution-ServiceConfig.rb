@@ -34,10 +34,16 @@ module MrMurano
     def create(pid, name=nil, &block) #? script_key?
       name = pid if name.nil?
       # See pegasus_registry PostServiceConfig for the POST properties.
+      #   pegasus_registry/api/swagger/paths/serviceconfig.yaml
+      #   pegasus_registry/api/swagger/definitions/serviceconfig.yaml
       post('', {
         :solution_id => @sid,
         :service => pid,
-        :name => name,
+        # 2017-06-26: "name" seems to work, but "script_key" is what web UI uses.
+        #   See yeti-ui/bridge/src/js/api/services.js::linkApplicationService
+# FIXME/2017-06-26: Needs to be alias or name or ID.
+        #:name => name,
+        :script_key => name,
       }, &block)
     end
 
