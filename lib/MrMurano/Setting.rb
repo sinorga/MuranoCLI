@@ -11,8 +11,8 @@ module MrMurano
 
     ## Map service names into actual class names.
     #
-    # Some of the service names have changed over time and nolonger match the class
-    # names that implement them.  This maps them back, as well as correcting casing.
+    # Some of the service names have changed over time and no longer match the class
+    # names that implement them. This maps them back, as well as correcting casing.
     #
     # @param service [String] User facing service name
     # @return [String] Internal class name for service
