@@ -74,25 +74,36 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
       expect(status.exitstatus).to eq(0)
 
       after = Dir['**/*'].sort
-      expect(after).to include("files",
-                           "files/icon.png",
-                           "files/index.html",
-                           "files/js",
-                           "files/js/script.js",
-                           "modules",
-                           "modules/table_util.lua",
-                           "routes",
-                           "routes/api-fire-{code}.delete.lua",
-                           "routes/api-fire-{code}.put.lua",
-                           "routes/api-fire.post.lua",
-                           "routes/api-onfire.get.lua",
-                           "services",
-                           "services/device2_event.lua",
-                           "services/timer_timer.lua")
+      expect(after).to include(
+        "files",
+        "files/icon.png",
+        "files/index.html",
+        "files/js",
+        "files/js/script.js",
+        "modules",
+        "modules/table_util.lua",
+        "routes",
+        "routes/api-fire-{code}.delete.lua",
+        "routes/api-fire-{code}.put.lua",
+        "routes/api-fire.post.lua",
+        "routes/api-onfire.get.lua",
+        "services",
+        "services/device2_event.lua",
+        "services/timer_timer.lua",
+      )
+
+      # A status should show no differences.
+      out, err, status = Open3.capture3(capcmd('murano', 'status'))
+      expect(err).to eq('')
+      expect(out.lines).to match([
+        "Nothing new locally\n",
+        "Nothing new remotely\n",
+        "Nothing that differs\n",
+      ])
+      expect(status.exitstatus).to eq(0)
+
     end
   end
-
-
 
   # TODO: With ProjectFile
   # TODO: With Solutionfile 0.2.0
@@ -100,3 +111,4 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
 end
 
 #  vim: set ai et sw=2 ts=2 :
+
