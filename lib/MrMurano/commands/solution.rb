@@ -40,7 +40,7 @@ Create a new solution.
 
     if args.count < 1 then
       acc.error "Name of solution missing"
-      return
+      exit 2
     end
     name = args[0]
 
