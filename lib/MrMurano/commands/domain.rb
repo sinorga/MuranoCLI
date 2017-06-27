@@ -15,7 +15,7 @@ Print the domain for this solution.
   c.action do |args,options|
     options.default :raw=>true
 
-    solz = must_fetch_solutions(options)
+    solz = must_fetch_solutions!(options)
 
     domain_s = MrMurano::Verbose::pluralize?("domain", solz.length)
     MrMurano::Verbose::whirly_start "Fetching #{domain_s}..."

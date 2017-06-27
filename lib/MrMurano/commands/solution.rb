@@ -265,9 +265,9 @@ alias_command 'app list', 'solution list', '--type', 'application', '--no-all'
 alias_command 'application list', 'solution list', '--type', 'application', '--no-all'
 alias_command 'solutions list', 'solution list'
 
-# To use fetch_solutions!, call command_add_solution_pickers(c) in
+# To use must_fetch_solutions!, call command_add_solution_pickers(c) in
 # the command block, and then call fetch_solutions! from the action.
-def must_fetch_solutions(options)
+def must_fetch_solutions!(options)
   command_set_soln_picker_defaults(options)
 
   acc = MrMurano::Account.new
@@ -329,7 +329,6 @@ def command_set_soln_picker_defaults(options)
   options
 end
 
-# 2017-06-15: [lb] not sure the best place for this function. So here for now.
 def select_solutions(solz, options)
   if options.names.any? or options.ids.any? or options.find.any?
     solz = solz.select { |i|
