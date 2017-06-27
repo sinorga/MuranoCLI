@@ -148,10 +148,10 @@ module MrMurano
     end
   end
 
-  # Libraries or better known as Modules.
-  class Library < ServiceBase
+  # What Murano calls "Modules". Snippets of Lua code.
+  class Module < ServiceBase
     # Module Specific details on an Item
-    class LibraryItem < Item
+    class ModuleItem < Item
       # @return [String] Internal Alias name
       attr_accessor :alias
       # @return [String] Timestamp when this was updated.
@@ -194,19 +194,19 @@ module MrMurano
       ret = get()
       return [] unless ret.is_a?(Hash) and !ret.has_key?(:error)
       return [] unless ret.has_key?(:items)
-      ret[:items].map{|i| LibraryItem.new(i)}
+      ret[:items].map{|i| ModuleItem.new(i)}
     end
 
     def toRemoteItem(from, path)
       name = path.basename.to_s.sub(/\..*/, '')
-      LibraryItem.new(:name => name)
+      ModuleItem.new(:name => name)
     end
 
     def synckey(item)
       item[:name]
     end
   end
-  SyncRoot.add('modules', Library, 'M', %{Modules}, true)
+  SyncRoot.add('modules', Module, 'M', %{Modules}, true)
 
   # Services aka EventHandlers
   class EventHandler < ServiceBase

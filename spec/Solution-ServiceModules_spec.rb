@@ -3,7 +3,7 @@ require 'MrMurano/Solution-Services'
 require 'tempfile'
 require '_workspace'
 
-RSpec.describe MrMurano::Library do
+RSpec.describe MrMurano::Module do
   include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
@@ -13,7 +13,7 @@ RSpec.describe MrMurano::Library do
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['application.id'] = 'XYZ'
 
-    @srv = MrMurano::Library.new
+    @srv = MrMurano::Module.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
@@ -143,7 +143,7 @@ RSpec.describe MrMurano::Library do
         tio.close
 
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -173,7 +173,7 @@ RSpec.describe MrMurano::Library do
 
         ret = @srv.upload(
           tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -199,7 +199,7 @@ RSpec.describe MrMurano::Library do
 
         expect(@srv).to receive(:error).and_return(nil)
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -226,7 +226,7 @@ RSpec.describe MrMurano::Library do
         cacheFile = $cfg.file_at(@srv.cacheFileName)
         FileUtils.touch(cacheFile.to_path)
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -257,7 +257,7 @@ RSpec.describe MrMurano::Library do
           }.to_yaml
         end
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -442,13 +442,13 @@ RSpec.describe MrMurano::Library do
 
     it "raises on alias without name" do
       expect {
-        @srv.mkname( MrMurano::Library::EventHandlerItem.new() )
+        @srv.mkname( MrMurano::Module::EventHandlerItem.new() )
       }.to raise_error(NameError)
     end
 
     it "raises on name without name" do
       expect {
-        @srv.mkalias( MrMurano::Library::EventHandlerItem.new() )
+        @srv.mkalias( MrMurano::Module::EventHandlerItem.new() )
       }.to raise_error(NameError)
     end
   end
