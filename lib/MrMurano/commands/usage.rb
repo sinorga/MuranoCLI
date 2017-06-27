@@ -10,7 +10,7 @@ Get usage info for solution(s).
   command_add_solution_pickers c
 
   c.action do |args, options|
-    solz = must_fetch_solutions(options)
+    solz = must_fetch_solutions!(options)
 
     solsages = []
     MrMurano::Verbose::whirly_start "Fetching usage..."
