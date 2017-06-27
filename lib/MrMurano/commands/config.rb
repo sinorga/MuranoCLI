@@ -12,12 +12,31 @@ There is also a layer of scopes that the keys can be saved in.
 If section is left out, then key is assumed to be in the 'tool' section.
   }.strip
 
-  c.example %{See what the current combined config is}, 'murano config --dump'
-  c.example %{Query a value}, 'murano config solution.id'
-  c.example %{Set a new value; writing to the project config file}, 'murano config solution.id XXXXXXXX'
-  c.example %{Set a new value; writing to the user config file}, 'murano config --user user.name my@email.address'
-  c.example %{Unset a value in a configfile (lower scopes will become visible when unset)},
-    'murano config diff.cmd --unset'
+  c.example %{
+    View the combined config
+  }.strip, 'murano config --dump'
+
+  c.example %{
+    View the config and path for each config file
+  }.strip, 'murano config --locations'
+
+  c.example %{
+    Query a value
+  }.strip, 'murano config solution.id'
+
+  c.example %{
+    Set a new value, which writes to the project config file
+  }.strip, 'murano config solution.id XXXXXXXX'
+
+  c.example %{
+    Set a new valuem, and write it to the user config file
+  }.strip, 'murano config --user user.name my@email.address'
+
+  c.example %{
+    Unset a value. If the value is set in multiple config files,
+    # this unsets it from the outermost config file and unmasks
+    # a value set in a lower scope
+  }.strip, 'murano config diff.cmd --unset'
 
   c.option '--user', 'Use only the config file in $HOME (.mrmuranorc)'
   c.option '--project', 'Use only the config file in the project (.mrmuranorc)'
@@ -35,6 +54,7 @@ If section is left out, then key is assumed to be in the 'tool' section.
     if options.dump then
       puts $cfg.dump()
     elsif options.locations then
+      puts "This list is ordered. The first value found for a key is the value used."
       puts $cfg.locations()
     elsif args.count == 0 then
       say_error "Need a config key"
