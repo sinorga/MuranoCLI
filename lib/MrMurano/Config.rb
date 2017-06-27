@@ -12,6 +12,8 @@ module MrMurano
     #  :project     .murano/config at project dir
     #  :user        .murano/config at $HOME
     #  :defaults    Internal hardcoded defaults
+    # NOTE: This list is ordered, such that values stored in upper scopes
+    #   mask values of the same keys in the lower scopes.
     CFG_SCOPES = %w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
 
     ConfigFile = Struct.new(:kind, :path, :data) do
@@ -288,9 +290,7 @@ module MrMurano
       locats = ""
       first = true
       puts ''
-      #CFG_SCOPES.each do |scope|
-      ordered_scopes = [:project, :user, :env, :internal, :specified, :defaults,]
-      ordered_scopes.each do |scope|
+      CFG_SCOPES.each do |scope|
         locats += "\n" if !first
         first = false
 
@@ -330,7 +330,7 @@ module MrMurano
           base.merge! cfg.data
           content = base.to_s
           if content.length > 0
-            locats += "Config:\n"
+            locats += "Config:\n\n"
             #locats += base.to_s
             base.to_s.split("\n").each{ |line|
               locats += "  " + line + "\n"
