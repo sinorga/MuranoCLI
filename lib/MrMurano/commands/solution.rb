@@ -372,5 +372,108 @@ def select_solutions(solz, options)
   solz
 end
 
+def solution_find_or_ask_ID(options, acc, type, klass)
+  sid = nil
+  solname = nil
+  isNewSoln = false
+
+  raise "Unknown type(#{type})" unless MrMurano::Account::ALLOWED_TYPES.include? type
+
+  # If the user used the web UI to delete the solution,
+  # .murano/config will be outdated. Check sol'n exists.
+  exists = false
+  if not options.force and not $cfg["#{type}.id"].nil? then
+    MrMurano::Verbose::whirly_start "Verifying #{type.capitalize}..."
+    sol = klass.new
+    ret = sol.info() do |request, http|
+      response = http.request(request)
+      if response.is_a? Net::HTTPSuccess then
+        response = acc.workit_response(response)
+        exists = true
+        # [lb] expected this to be: sid = sol[:apiId]
+        #  FIXME/2017-06-27/EXPLAIN: Why is sol[:apiId] not a thing?
+        sid = response[:id]
+        solname = response[:name]
+      end
+      response
+    end
+    MrMurano::Verbose::whirly_stop
+    if exists
+      say "Found #{type.capitalize} #{sol.pretty_desc}"
+    else
+      # The solution ID in the config was not found for this business.
+      say "The #{type.capitalize} ‘" + $cfg["#{type}.id"] + "’ found in the config does not exist"
+      puts ''
+    end
+  end
+
+  unless exists
+    solz = acc.solutions(type)
+    if solz.count == 1 then
+      sol = solz.first
+      say "This business has one #{type.capitalize}. Using #{Rainbow(sol[:domain]).underline}"
+      sid = sol[:apiId]
+      solname = sol[:name]
+      # Update the config file, both in memory and on drive.
+      $cfg.set("#{type}.id", sid, :project)
+      $cfg.set("#{type}.name", solname, :project)
+    elsif solz.count == 0 then
+      #say "You do not have any #{type}s. Let's create one."
+      say "This business does not have any #{Inflecto.pluralize(type)}. Let's create one"
+
+      asking = true
+      while asking do
+        solname = ask("\nPlease enter the #{type.capitalize} name: ")
+        # LATER: Allow uppercase characters once services do.
+        unless solname.match(MrMurano::Account::SOLN_NAME_REGEX)
+          say MrMurano::Account::SOLN_NAME_HELP
+        else
+          break
+        end
+      end
+
+      ret = acc.new_solution(solname, type)
+      if ret.nil? then
+        acc.error "Create #{type.capitalize} failed"
+        exit 5
+      end
+      if not ret.kind_of?(Hash) and not ret.empty? then
+        acc.error "Create #{type.capitalize} failed: #{ret.to_s}"
+        exit 2
+      end
+      isNewSoln = true
+
+      # create doesn't return anything, so we need to go look for it.
+      ret = acc.solutions(type=type, invalidate=true).select do |i|
+        i[:name] == solname or i[:domain] =~ /#{solname}\./i
+      end
+      sid = (ret.first or {})[:apiId]
+      if sid.nil? or sid.empty? then
+        acc.error "Solution didn't find an apiId!!!! #{name} -> #{ret}"
+        exit 3
+      end
+      $cfg.set("#{type}.id", sid, :project)
+      $cfg.set("#{type}.name", solname, :project)
+    else
+      choose do |menu|
+        menu.prompt = "Select which #{type.capitalize} to use:"
+        menu.flow = :columns_across
+        # NOTE: There are 2 human friendly identifiers, :name and :domain.
+        solz.sort{|a,b| a[:domain]<=>b[:domain]}.each do |sol|
+          menu.choice(s[:domain].sub(/\..*$/, '')) do
+            sid = sol[:apiId]
+            solname = sol[:name]
+            $cfg.set("#{type}.id", sid, :project)
+            $cfg.set("#{type}.name", solname, :project)
+          end
+        end
+      end
+    end
+  end
+  puts '' # blank line
+
+  return sid, solname, isNewSoln
+end
+
 #  vim: set ai et sw=2 ts=2 :
 
