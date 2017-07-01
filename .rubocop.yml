@@ -1,0 +1,120 @@
+# Last Modified: 2017.07.01 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
+# "Incorrect indentation detected (column X instead of Y)."
+Layout/CommentIndentation:
+  Enabled: false
+
+# "Missing space after #."
+Layout/LeadingCommentSpace:
+  Enabled: false
+
+# "Surrounding space missing in default value assignment."
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: no_space
+
+# "1 trailing blank lines detected."
+Layout/TrailingBlankLines:
+  Enabled: false
+
+# "Script file murano doesn't have execute permission."
+Lint/ScriptPermission:
+  Exclude:
+    - 'bin/murano'
+
+# "Assignment Branch Condition size for XXX is too high."
+# http://wiki.c2.com/?AbcMetric
+Metrics/AbcSize:
+  Enabled: false
+
+# Configuration parameters: CountComments, ExcludedMethods.
+Metrics/BlockLength:
+  Enabled: false
+  #Max: 500
+
+# "Avoid more than 3 levels of block nesting."
+Metrics/BlockNesting:
+  Enabled: false
+
+# "Class has too many lines."
+Metrics/ClassLength:
+  Enabled: false
+
+# "Cyclomatic complexity for XXX is too high."
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+# "Avoid parameter lists longer than 5 parameters."
+Metrics/ParameterLists:
+  Enabled: false
+
+# Perceived complexity for XXXX is too high."
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+# Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
+# URISchemes: http, https
+Metrics/LineLength:
+  Enabled: false
+
+# "Use only ascii symbols in comments."
+Style/AsciiComments:
+  Enabled: false
+
+# "Use the return of the conditional for variable assignment and comparison."
+#  http://www.rubydoc.info/github/bbatsov/RuboCop/RuboCop/Cop/Style/ConditionalAssignment
+Style/ConditionalAssignment:
+  EnforcedStyle: assign_inside_condition
+
+# "The name of this source file (Xxxxxxx.rb) should use snake_case."
+Style/FileName:
+  Exclude:
+    - 'lib/MrMurano/Account.rb'
+    - 'lib/MrMurano/Business.rb'
+    - 'lib/MrMurano/Config-Migrate.rb'
+    - 'lib/MrMurano/Config.rb'
+    - 'lib/MrMurano/Content.rb'
+    - 'lib/MrMurano/Gateway.rb'
+    - 'lib/MrMurano/Mock.rb'
+    - 'lib/MrMurano/Passwords.rb'
+    - 'lib/MrMurano/ProjectFile.rb'
+    - 'lib/MrMurano/ReCommander.rb'
+    - 'lib/MrMurano/Setting.rb'
+    - 'lib/MrMurano/Solution-ServiceConfig.rb'
+    - 'lib/MrMurano/Solution-Services.rb'
+    - 'lib/MrMurano/Solution-Users.rb'
+    - 'lib/MrMurano/Solution.rb'
+    - 'lib/MrMurano/SubCmdGroupContext.rb'
+    - 'lib/MrMurano/SyncUpDown.rb'
+    - 'lib/MrMurano/Webservice-Cors.rb'
+    - 'lib/MrMurano/Webservice-Endpoint.rb'
+    - 'lib/MrMurano/Webservice-File.rb'
+    - 'lib/MrMurano/Webservice.rb'
+
+# FIXME/2017-06-30: We should fix this one... put $cfg in MrMurano class.
+# "Do not introduce global variables."
+Style/GlobalVars:
+  Enabled: false
+
+# "Provide an exception class and message as arguments to raise."
+Style/RaiseArgs:
+  EnforcedStyle: compact
+
+# "Avoid comma after the last parameter of a method call."
+# FIXME/2017-06-30: Is this okay?
+Style/TrailingCommaInArguments:
+  Enabled: false
+
+# "Avoid comma after the last item of a hash."
+Style/TrailingCommaInLiteral:
+  # Rather than disable, tweak for multiline lists, so Rubocop will
+  # still tell you not to use trailing comma in single-line list.
+  EnforcedStyleForMultiline: "consistent_comma"
+
