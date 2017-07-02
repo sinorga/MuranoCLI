@@ -5,6 +5,9 @@
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+# 2017-07-01: This ordered list hacks around having
+# individual files include all the files they need.
+
 require 'MrMurano/version'
 require 'MrMurano/verbosing'
 require 'MrMurano/hash'
