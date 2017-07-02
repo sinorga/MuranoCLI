@@ -72,6 +72,10 @@ Metrics/LineLength:
 Style/AsciiComments:
   Enabled: false
 
+# "Missing top-level class documentation comment."
+Style/Documentation:
+  Enabled: false
+
 # "Use the return of the conditional for variable assignment and comparison."
 #  http://www.rubydoc.info/github/bbatsov/RuboCop/RuboCop/Cop/Style/ConditionalAssignment
 Style/ConditionalAssignment:
