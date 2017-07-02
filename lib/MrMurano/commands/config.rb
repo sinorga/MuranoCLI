@@ -22,11 +22,11 @@ If section is left out, then key is assumed to be in the 'tool' section.
 
   c.example %{
     Query a value
-  }.strip, 'murano config solution.id'
+  }.strip, 'murano config application.id'
 
   c.example %{
     Set a new value, which writes to the project config file
-  }.strip, 'murano config solution.id XXXXXXXX'
+  }.strip, 'murano config application.id XXXXXXXX'
 
   c.example %{
     Set a new valuem, and write it to the user config file
