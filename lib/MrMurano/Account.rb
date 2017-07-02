@@ -109,7 +109,8 @@ module MrMurano
 
     def businesses(match_bid=nil, match_name=nil, match_either=nil)
       # Ask user for name and password, if not saved to config and password files.
-      login_info if user.nil?
+      login_info if user.empty?
+      raise "Missing user?!" if user.empty?
 
       MrMurano::Verbose.whirly_start 'Fetching Businesses...'
       bizes = get('user/' + user + '/membership/')
