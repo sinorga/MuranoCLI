@@ -197,17 +197,16 @@ module MrMurano
       uri = endPoint(path)
       workit(set_def_headers(Net::HTTP::Delete.new(uri)), &block)
     end
-
   end
 end
 
-# There is a bug were not having TCP_NODELAY set causes connection issues with
-# Murano.  While ultimatily the bug is up there, we need to work around it down
-# here.  As for Ruby, setting TCP_NODELAY was added in 2.1.  But since the default
-# version installed on macos is 2.0.0 we hit it.
+# There is a bug where having TCP_NODELAY disabled causes connection issues
+# with Murano. While ultimately the bug is Murano's, we need to work around
+# here. As for Ruby, setting TCP_NODELAY was added in 2.1. But since the
+# default version installed on MacOS is 2.0.0, we oftentimes hit it.
 #
-# So, if the current version of Ruby is 2.0.0, then use this bit of code I copied
-# from Ruby 2.1.
+# So, if the current version of Ruby is 2.0.0, then use this bit of code
+# copied from Ruby 2.1 (lib/net/http.rb, at line 868).
 
 if RUBY_VERSION == '2.0.0'
   module Net
