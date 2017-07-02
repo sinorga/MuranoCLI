@@ -62,8 +62,9 @@ module MrMurano
           if self[:data]['tool']['curlfile_f'].nil?
             self[:data]['tool']['curlfile_f'] = File.open(self[:data]['tool']['curlfile'], 'a')
             # MEH: Call $cfg['tool.curlfile_f'].close() at some point? Or let Ruby do on exit.
-            self[:data]['tool']['curlfile_f'] << Time.now << "\n"
+            self[:data]['tool']['curlfile_f'] << Time.now.to_s + "\n"
             self[:data]['tool']['curlfile_f'] << "murano #{ARGV.join(' ')}\n"
+            self[:data]['tool']['curlfile_f'].flush
           end
         elsif !self[:data]['tool']['curlfile_f'].nil?
           self[:data]['tool']['curlfile_f'].close
