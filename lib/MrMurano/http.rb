@@ -37,19 +37,19 @@ module MrMurano
     end
 
     def curldebug(request)
-      if $cfg['tool.curldebug'] then
+      if $cfg['tool.curldebug']
         formp = (request.content_type =~ %r{multipart/form-data})
         a = []
         a << %{curl -s}
-        if request.key?('Authorization') then
+        if request.key?('Authorization')
           a << %{-H 'Authorization: #{request['Authorization']}'}
         end
         a << %{-H 'User-Agent: #{request['User-Agent']}'}
         a << %{-H 'Content-Type: #{request.content_type}'} unless formp
         a << %{-X #{request.method}}
         a << %{'#{request.uri.to_s}'}
-        unless request.body.nil? then
-          if formp then
+        unless request.body.nil?
+          if formp
             m = request.body.match(%r{form-data;\s+name="(?<name>[^"]+)";\s+filename="(?<filename>[^"]+)"})
             a << %{-F #{m[:name]}=@#{m[:filename]}} unless m.nil?
           else
@@ -72,7 +72,7 @@ module MrMurano
 
     def http
       uri = URI('https://' + $cfg['net.host'])
-      if not defined?(@http) or @http.nil? then
+      if not defined?(@http) or @http.nil?
         @http = Net::HTTP.new(uri.host, uri.port)
         @http.use_ssl = true
         @http.start
@@ -99,10 +99,10 @@ module MrMurano
     end
 
     def showHttpError(request, response)
-      if $cfg['tool.debug'] then
+      if $cfg['tool.debug']
         puts "Sent #{request.method} #{request.uri.to_s}"
         request.each_capitalized{|k,v| puts "> #{k}: #{v}"}
-        if request.body.nil? then
+        if request.body.nil?
         else
           puts ">> #{request.body[0..156]}"
         end
@@ -111,10 +111,10 @@ module MrMurano
       end
       isj, jsn = isJSON(response.body)
       resp = "Request Failed: #{response.code}: "
-      if isj then
-        if $cfg['tool.fullerror'] then
+      if isj
+        if $cfg['tool.fullerror']
           resp << JSON.pretty_generate(jsn)
-        elsif jsn.kind_of? Hash then
+        elsif jsn.kind_of? Hash
           resp << "[#{jsn[:statusCode]}] " if jsn.has_key? :statusCode
           resp << jsn[:message] if jsn.has_key? :message
         else
@@ -129,7 +129,7 @@ module MrMurano
 
     def workit(request, &block)
       curldebug(request)
-      if block_given? then
+      if block_given?
         return yield request, http()
       else
         response = http().request(request)
@@ -206,11 +206,11 @@ end
 # So, if the current version of Ruby is 2.0.0, then use this bit of code I copied
 # from Ruby 2.1.
 
-if RUBY_VERSION == '2.0.0' then
+if RUBY_VERSION == '2.0.0'
   module Net
     class HTTP
       def connect
-        if proxy? then
+        if proxy?
           conn_address = proxy_address
           conn_port    = proxy_port
         else
