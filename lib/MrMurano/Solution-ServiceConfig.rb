@@ -3,16 +3,25 @@ require 'MrMurano/Solution'
 module MrMurano
   # …/serviceconfig
   class ServiceConfig < SolutionBase
-    def initialize
+    def initialize(sid)
       super
       @uriparts << 'serviceconfig'
       @scid = nil
     end
 
-    def list
-      ret = get()
+    def list(call=nil, data=nil, &block)
+      ret = get(call, data, &block)
       return [] if ret.is_a?(Hash) and ret.has_key?(:error)
       ret[:items]
+    end
+
+    def search(svc_name)
+      #path = nil
+      #path = "?select=id,service,script_key"
+      # 2017-07-02: This is what yeti-ui adds.
+      # FIXME/EXPLAIN/2017-07-02: What's "UUID" that web UI uses?
+      path = "?select=service,id,solution_id,script_key,alias"
+      super(svc_name, path)
     end
 
     def fetch(id)
@@ -36,12 +45,11 @@ module MrMurano
       # See pegasus_registry PostServiceConfig for the POST properties.
       #   pegasus_registry/api/swagger/paths/serviceconfig.yaml
       #   pegasus_registry/api/swagger/definitions/serviceconfig.yaml
-      post('', {
+      post('/', {
         :solution_id => @sid,
         :service => pid,
         # 2017-06-26: "name" seems to work, but "script_key" is what web UI uses.
         #   See yeti-ui/bridge/src/js/api/services.js::linkApplicationService
-# FIXME/2017-06-26: Needs to be alias or name or ID.
         #:name => name,
         :script_key => name,
       }, &block)
@@ -78,7 +86,6 @@ module MrMurano
         raise "Unknown method: #{meth}"
       end
     end
-
   end
 
   ## This is only used for debugging and deciphering APIs.
@@ -107,7 +114,7 @@ module MrMurano
     end
 
     def list
-      ret = get()
+      ret = get
       return [] if ret.is_a?(Hash) and ret.has_key?(:error)
       ret[:items]
     end
@@ -136,7 +143,7 @@ module MrMurano
     end
   end
   # :nocov:
-
 end
 
 #  vim: set ai et sw=2 ts=2 :
+
