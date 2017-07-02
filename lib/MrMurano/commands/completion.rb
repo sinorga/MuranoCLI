@@ -155,7 +155,7 @@ or
       when :zsh
         cmpltnTmplt = "completion-zsh.erb"
       else
-        MrMurano::Blather.new().error "Impossible shell option specified: #{options.shell.to_s}"
+        MrMurano::Verbose.error "Impossible shell option specified: #{options.shell.to_s}"
         exit 2
       end
       tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), cmpltnTmplt)), nil, '-<>')
