@@ -65,6 +65,18 @@ module MrMurano
       @valid_sid
     end
 
+    def ==(them)
+      them.class == self.class && them.state == state
+    end
+
+    protected
+
+    def state
+      [@sid, @valid_sid, @uriparts, @solntype, @itemkey, @project_section]
+    end
+
+    public
+
     ## Generate an endpoint in Murano
     # Uses the uriparts and path
     # @param path String: any additional parts for the URI
@@ -174,6 +186,15 @@ module MrMurano
     attr_accessor :biz
 
     attr_reader :meta
+
+    protected
+
+    def state
+      parts = super
+      parts += [@name, @meta, @valid]
+    end
+
+    public
 
     # *** Network calls
 

@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -42,6 +42,18 @@ module MrMurano
     def valid?
       @valid
     end
+
+    def ==(them)
+      them.class == self.class && them.state == state
+    end
+
+    protected
+
+    def state
+      [@bid, @name, @valid, @user_bizes]
+    end
+
+    public
 
     # Consume data returned from Account::businesses.
     def meta=(data)
