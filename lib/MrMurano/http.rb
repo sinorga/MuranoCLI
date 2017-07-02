@@ -20,8 +20,10 @@ module MrMurano
       return @token unless @token.nil?
       acc = Account.new
       @token = acc.token
-      raise "Not logged in!" if @token.nil?
-      acc.adc_compat_check
+      raise 'Not logged in!' if @token.nil?
+      # MAYBE: Check that ADC is enabled on the business. If not, tell
+      #   user to run Murano 2.x. See adc_compat_check for comments.
+      #acc.adc_compat_check
       @token
     end
 
