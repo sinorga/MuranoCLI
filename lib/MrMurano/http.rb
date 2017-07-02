@@ -1,8 +1,15 @@
+# Last Modified: 2017.07.01 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
+require 'certified' if Gem.win_platform?
 require 'date'
-require 'uri'
-require 'net/http'
 require 'json'
-require('certified') if Gem.win_platform?
+require 'net/http'
+require 'uri'
 # 2017-06-07: [lb] getting "execution expired (Net::OpenTimeout)" on http.start.
 # Suggestions online say to load the pure-Ruby DNS implementation, resolv.rb.
 require 'resolv-replace'
@@ -267,4 +274,3 @@ if RUBY_VERSION == '2.0.0' then
   end
 end
 
-#  vim: set ai et sw=2 ts=2 :
