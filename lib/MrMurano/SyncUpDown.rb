@@ -675,8 +675,8 @@ module MrMurano
     # @param item [Item] The item to get a diff of
     # @return [String] The diff output
     def dodiff(item)
-      trmt = Tempfile.new([tolocalname(item, @itemkey)+'_remote_', '.lua'])
-      tlcl = Tempfile.new([tolocalname(item, @itemkey)+'_local_', '.lua'])
+      trmt = Tempfile.new([tolocalname(item, @itemkey) + '_remote_', '.lua'])
+      tlcl = Tempfile.new([tolocalname(item, @itemkey) + '_local_', '.lua'])
       if item.has_key? :script then
         Pathname.new(tlcl.path).open('wb') do |io|
           io << item[:script]
