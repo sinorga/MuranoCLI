@@ -143,7 +143,7 @@ RSpec.describe MrMurano::ProjectFile do
       context "load just meta" do
         before(:example) do
           src = File.join(@testdir, 'spec/fixtures/ProjectFiles/only_meta.yaml')
-          dst = File.join(@projectDir, 'meta.murano')
+          dst = File.join(@project_dir, 'meta.murano')
           FileUtils.copy(src, dst)
           @pjf.load
         end
@@ -163,7 +163,7 @@ RSpec.describe MrMurano::ProjectFile do
       context "load custom routes" do
         before(:example) do
           src = File.join(@testdir, 'spec/fixtures/ProjectFiles/with_routes.yaml')
-          dst = File.join(@projectDir, 'meta.murano')
+          dst = File.join(@project_dir, 'meta.murano')
           FileUtils.copy(src, dst)
           @pjf.load
         end
@@ -181,7 +181,7 @@ RSpec.describe MrMurano::ProjectFile do
 
       it "reports validation errors" do
         src = File.join(@testdir, 'spec/fixtures/ProjectFiles/invalid.yaml')
-        dst = File.join(@projectDir, 'meta.murano')
+        dst = File.join(@project_dir, 'meta.murano')
         FileUtils.copy(src, dst)
 
         saved = $stderr
@@ -206,7 +206,7 @@ RSpec.describe MrMurano::ProjectFile do
 
     it "Reports validation errors" do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0_invalid.json')
-        dst = File.join(@projectDir, 'Solutionfile.json')
+        dst = File.join(@project_dir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
         saved = $stderr
         $stderr = StringIO.new
@@ -217,7 +217,7 @@ RSpec.describe MrMurano::ProjectFile do
 
     it "loads with truncated version" do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.json')
-        dst = File.join(@projectDir, 'Solutionfile.json')
+        dst = File.join(@project_dir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
         saved = $stderr
         $stderr = StringIO.new
@@ -229,7 +229,7 @@ RSpec.describe MrMurano::ProjectFile do
     context "loads" do
       before(:example) do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0.json')
-        dst = File.join(@projectDir, 'Solutionfile.json')
+        dst = File.join(@project_dir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
         @pjf.load
       end
@@ -269,7 +269,7 @@ RSpec.describe MrMurano::ProjectFile do
 
     it "Reports validation errors" do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.0_invalid.json')
-        dst = File.join(@projectDir, 'Solutionfile.json')
+        dst = File.join(@project_dir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
         saved = $stderr
         $stderr = StringIO.new
@@ -280,7 +280,7 @@ RSpec.describe MrMurano::ProjectFile do
 
     it "loads with truncated version" do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.json')
-        dst = File.join(@projectDir, 'Solutionfile.json')
+        dst = File.join(@project_dir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
         saved = $stderr
         $stderr = StringIO.new
@@ -292,7 +292,7 @@ RSpec.describe MrMurano::ProjectFile do
     context "loads" do
       before(:example) do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.0.json')
-        dst = File.join(@projectDir, 'Solutionfile.json')
+        dst = File.join(@project_dir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
         @pjf.load
       end

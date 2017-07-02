@@ -96,8 +96,8 @@ RSpec.describe MrMurano::Webservice::File do
 
   context "uploads" do
     before(:example) do
-      FileUtils.mkpath(@projectDir + '/files')
-      @lp = Pathname.new(@projectDir + '/files/one.text')
+      FileUtils.mkpath(@project_dir + '/files')
+      @lp = Pathname.new(@project_dir + '/files/one.text')
       @lp.open('w') {|io| io << %{Just some text}}
       @lp = @lp.realpath
     end
@@ -198,13 +198,13 @@ RSpec.describe MrMurano::Webservice::File do
 
   context "toRemoteItem" do
     before(:example) do
-      FileUtils.mkpath(@projectDir + '/files')
-      @lp = Pathname.new(@projectDir + '/files/one.text')
+      FileUtils.mkpath(@project_dir + '/files')
+      @lp = Pathname.new(@project_dir + '/files/one.text')
       @lp.open('w') {|io| io << %{Just some text}}
       @lp = @lp.realpath
     end
     it "gets item" do
-      prj = Pathname.new(@projectDir).realpath
+      prj = Pathname.new(@project_dir).realpath
       ret = @srv.toRemoteItem(prj, @lp)
       expect(ret).to eq({
         :path=>"/files/one.text",

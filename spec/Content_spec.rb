@@ -66,7 +66,7 @@ RSpec.describe MrMurano::Content::Base do
 
   context "uploads" do
     before(:example) do
-      @tup = Pathname.new(@projectDir) + 'Solutionfile.json'
+      @tup = Pathname.new(@project_dir) + 'Solutionfile.json'
       FileUtils.copy(File.join(@testdir, 'spec/fixtures/SolutionFiles/basic.json'), @tup.to_path)
     end
 

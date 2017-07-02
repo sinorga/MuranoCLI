@@ -13,9 +13,9 @@ RSpec.shared_context "WORKSPACE" do
       ENV['HOME'] = File.join(hdir, 'home')
       FileUtils.mkpath(ENV['HOME'])
       Dir.chdir(hdir) do
-        @projectDir = File.join(ENV['HOME'], 'work', 'project')
-        FileUtils.mkpath(@projectDir)
-        Dir.chdir(@projectDir) do
+        @project_dir = File.join(ENV['HOME'], 'work', 'project')
+        FileUtils.mkpath(@project_dir)
+        Dir.chdir(@project_dir) do
             ex.run
         end
       end
