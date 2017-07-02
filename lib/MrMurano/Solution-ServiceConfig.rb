@@ -1,3 +1,10 @@
+# Last Modified: 2017.07.02 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'MrMurano/Solution'
 
 module MrMurano
@@ -11,16 +18,16 @@ module MrMurano
 
     def list(call=nil, data=nil, &block)
       ret = get(call, data, &block)
-      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+      return [] if ret.is_a?(Hash) && ret.key?(:error)
       ret[:items]
     end
 
     def search(svc_name)
       #path = nil
-      #path = "?select=id,service,script_key"
+      #path = '?select=id,service,script_key'
       # 2017-07-02: This is what yeti-ui adds.
       # FIXME/EXPLAIN/2017-07-02: What's "UUID" that web UI uses?
-      path = "?select=service,id,solution_id,script_key,alias"
+      path = '?select=service,id,solution_id,script_key,alias'
       super(svc_name, path)
     end
 
@@ -29,8 +36,8 @@ module MrMurano
     end
 
     def scid_for_name(name)
-      name = name.to_s unless name.kind_of? String
-      scr = list().select{|i| i[:service] == name}.first
+      name = name.to_s unless name.is_a? String
+      scr = list.select { |i| i[:service] == name }.first
       return nil if scr.nil?
       scr[:id]
     end
@@ -45,14 +52,18 @@ module MrMurano
       # See pegasus_registry PostServiceConfig for the POST properties.
       #   pegasus_registry/api/swagger/paths/serviceconfig.yaml
       #   pegasus_registry/api/swagger/definitions/serviceconfig.yaml
-      post('/', {
-        :solution_id => @sid,
-        :service => pid,
-        # 2017-06-26: "name" seems to work, but "script_key" is what web UI uses.
-        #   See yeti-ui/bridge/src/js/api/services.js::linkApplicationService
-        #:name => name,
-        :script_key => name,
-      }, &block)
+      post(
+        '/',
+        {
+          solution_id: @sid,
+          service: pid,
+          # 2017-06-26: "name" seems to work, but "script_key" is what web UI uses.
+          #   See yeti-ui/bridge/src/js/api/services.js::linkApplicationService
+          #name: name,
+          script_key: name,
+        },
+        &block
+      )
     end
 
     def remove(id)
@@ -69,7 +80,7 @@ module MrMurano
 
     def call(opid, meth=:get, data=nil, id=scid, &block)
       raise "Service '#{@serviceName}' not enabled for this Solution" if id.nil?
-      call = "/#{id.to_s}/call/#{opid.to_s}"
+      call = "/#{id}/call/#{opid}"
       debug "Will call: #{call}"
       case meth
       when :get
@@ -103,8 +114,8 @@ module MrMurano
     end
 
     def sid_for_name(name)
-      name = name.to_s unless name.kind_of? String
-      scr = list().select{|i| i[:alias] == name}.first
+      name = name.to_s unless name.is_a? String
+      scr = list.select { |i| i[:alias] == name }.first
       scr[:id]
     end
 
@@ -115,7 +126,7 @@ module MrMurano
 
     def list
       ret = get
-      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+      return [] if ret.is_a?(Hash) && ret.key?(:error)
       ret[:items]
     end
 
@@ -130,13 +141,12 @@ module MrMurano
       calls = []
       scm[:paths].each do |path, methods|
         methods.each do |method, params|
-          if params.kind_of?(Hash) then
-            call = [method]
-            call << path.to_s if all
-            call << params[:operationId]
-            call << (params['x-internal-use'.to_sym] or false) if all
-            calls << call
-          end
+          next unless params.is_a?(Hash)
+          call = [method]
+          call << path.to_s if all
+          call << params[:operationId]
+          call << (params['x-internal-use'.to_sym] || false) if all
+          calls << call
         end
       end
       calls
@@ -144,6 +154,4 @@ module MrMurano
   end
   # :nocov:
 end
-
-#  vim: set ai et sw=2 ts=2 :
 
