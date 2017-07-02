@@ -6,7 +6,7 @@
 - Clone project: `git clone https://github.com/tadpol/GWE-Multitool.git demo01`
 - `cd demo01`
 
-- Pick a bussiness: `murano business list`
+- Pick a business: `murano business list`
 - Set it: `murano config business.id ZZZZZZZZZ`
 
 - Create a product: `murano product create myawesomeproduct`
@@ -16,9 +16,9 @@
 - Set the directory to look for specs. `murano config location.specs spec`
 - Sync the product definition up: `murano syncup -V --specs`
 
-- Create a solution: `murano solution create myawesomesolution`
-- Save the result: `murano config solution.id XXXXXX`
-- Assign the product to the solution: `murano assign set`
+- Create an application: `murano application create myawesomesolution`
+- Save the result: `murano config application.id XXXXXX`
+- Assign the product to the application: `murano assign set`
 
 # What got configured?
 `murano config --dump`
