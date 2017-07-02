@@ -51,6 +51,10 @@ Metrics/CyclomaticComplexity:
 Metrics/MethodLength:
   Enabled: false
 
+# "Module has too many lines."
+Metrics/ModuleLength:
+  Enabled: false
+
 # "Avoid parameter lists longer than 5 parameters."
 Metrics/ParameterLists:
   Enabled: false
