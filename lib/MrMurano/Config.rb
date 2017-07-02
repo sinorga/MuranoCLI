@@ -1,5 +1,12 @@
-require 'inifile'
+# Last Modified: 2017.07.01 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'highline'
+require 'inifile'
 require 'pathname'
 require 'rainbow'
 
@@ -14,99 +21,99 @@ module MrMurano
     #  :defaults    Internal hardcoded defaults
     # NOTE: This list is ordered, such that values stored in upper scopes
     #   mask values of the same keys in the lower scopes.
-    CFG_SCOPES = %w{internal specified env project user defaults}.map{|i| i.to_sym}.freeze
+    CFG_SCOPES = %w[internal specified env project user defaults].map(&:to_sym).freeze
 
     ConfigFile = Struct.new(:kind, :path, :data) do
-      def load()
+      def load
         return if kind == :internal
         return if kind == :defaults
         # DEVs: Uncomment if you're trying to figure where settings are coming from.
         #   See also: murano config --locations
         #puts "Loading config at: #{path}"
-        self[:path] = Pathname.new(path) unless path.kind_of? Pathname
-        self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
+        self[:path] = Pathname.new(path) unless path.is_a? Pathname
+        self[:data] = IniFile.new(filename: path.to_s) if self[:data].nil?
         self[:data].restore
-        self.initCurlfile()
+        init_curl_file
       end
 
-      def write()
+      def write
         return if kind == :internal
         return if kind == :defaults
-        if not $cfg.nil? and $cfg['tool.dry']
+        if !$cfg.nil? && $cfg['tool.dry']
           # $cfg.nil? when run from spec tests that don't load it with:
           #   include_context "CI_CMD"
-          $cfg.warning "--dry: Not writing config file"
+          $cfg.warning('--dry: Not writing config file')
           return
         end
-        self[:path] = Pathname.new(path) unless path.kind_of? Pathname
+        self[:path] = Pathname.new(path) unless path.is_a?(Pathname)
         # Ensure path to the file exists.
         unless path.dirname.exist?
           path.dirname.mkpath
-          $cfg.fixModes(path.dirname)
+          $cfg.fix_modes(path.dirname)
         end
-        self[:data] = IniFile.new(:filename=>path.to_s) if self[:data].nil?
+        self[:data] = IniFile.new(filename: path.to_s) if self[:data].nil?
         self[:data].save
-        path.chmod(0600)
+        path.chmod(0o600)
       end
 
       # To capture curl calls when running rspec, write to a file.
-      def initCurlfile()
-        if self[:data]['tool']['curldebug'] and !self[:data]['tool']['curlfile'].to_s.strip.empty? then
+      def init_curl_file
+        if self[:data]['tool']['curldebug'] && !self[:data]['tool']['curlfile'].to_s.strip.empty?
           if self[:data]['tool']['curlfile_f'].nil?
             self[:data]['tool']['curlfile_f'] = File.open(self[:data]['tool']['curlfile'], 'a')
             # MEH: Call $cfg['tool.curlfile_f'].close() at some point? Or let Ruby do on exit.
             self[:data]['tool']['curlfile_f'] << Time.now << "\n"
             self[:data]['tool']['curlfile_f'] << "murano #{ARGV.join(' ')}\n"
           end
-        elsif not self[:data]['tool']['curlfile_f'].nil?
+        elsif !self[:data]['tool']['curlfile_f'].nil?
           self[:data]['tool']['curlfile_f'].close
           self[:data]['tool']['curlfile_f'] = nil
         end
       end
-
     end
 
-    attr :paths
+    attr_reader :paths
     attr_reader :projectDir
-    attr_reader :projectExists
+    attr_reader :project_exists
 
-    CFG_ENV_NAME = %{MURANO_CONFIGFILE}.freeze
-    CFG_FILE_NAME = %[.murano/config].freeze
-    CFG_DIR_NAME = %[.murano].freeze
+    CFG_ENV_NAME = %(MURANO_CONFIGFILE)
+    CFG_FILE_NAME = %(.murano/config)
+    CFG_DIR_NAME = %(.murano)
 
-    CFG_OLD_ENV_NAME = %[MR_CONFIGFILE].freeze
-    CFG_OLD_DIR_NAME = %[.mrmurano].freeze
-    CFG_OLD_FILE_NAME = %[.mrmuranorc].freeze
+    CFG_OLD_ENV_NAME = %(MR_CONFIGFILE)
+    CFG_OLD_DIR_NAME = %(.mrmurano)
+    CFG_OLD_FILE_NAME = %(.mrmuranorc)
 
-    CFG_SOLUTION_ID_KEYS = %w{application.id product.id}.freeze
+    CFG_SOLUTION_ID_KEYS = %w[application.id product.id].freeze
 
     def warning(msg)
       $stderr.puts HighLine.color(msg, :yellow)
     end
+
     def error(msg)
       $stderr.puts HighLine.color(msg, :red)
     end
 
-    def migrateOldEnv
-      unless ENV[CFG_OLD_ENV_NAME].nil? then
-        warning %{ENV "#{CFG_OLD_ENV_NAME}" is no longer supported. Rename it to "#{CFG_ENV_NAME}"}
-        unless ENV[CFG_ENV_NAME].nil? then
-          error %{Both "#{CFG_ENV_NAME}" and "#{CFG_OLD_ENV_NAME}" defined, please remove "#{CFG_OLD_ENV_NAME}".}
-        end
-        ENV[CFG_ENV_NAME] = ENV[CFG_OLD_ENV_NAME]
+    def migrate_old_env
+      return if ENV[CFG_OLD_ENV_NAME].nil?
+      warning %(ENV "#{CFG_OLD_ENV_NAME}" is no longer supported. Rename it to "#{CFG_ENV_NAME}")
+      unless ENV[CFG_ENV_NAME].nil?
+        error %(Both "#{CFG_ENV_NAME}" and "#{CFG_OLD_ENV_NAME}" defined, please remove "#{CFG_OLD_ENV_NAME}".)
       end
+      ENV[CFG_ENV_NAME] = ENV[CFG_OLD_ENV_NAME]
     end
 
-    def migrateOldConfig(where)
+    def migrate_old_config(where)
       # Check for dir.
-      if (where + CFG_OLD_DIR_NAME).exist? then
-        warning %{Moving old directory "#{CFG_OLD_DIR_NAME}" to "#{CFG_DIR_NAME}" in "#{where}"}
+      if (where + CFG_OLD_DIR_NAME).exist?
+        warning %(Moving old directory "#{CFG_OLD_DIR_NAME}" to "#{CFG_DIR_NAME}" in "#{where}")
         (where + CFG_OLD_DIR_NAME).rename(where + CFG_DIR_NAME)
       end
 
-      # check for cfg.
-      if (where + CFG_OLD_FILE_NAME).exist? then
-        warning %{Moving old config "#{CFG_OLD_FILE_NAME}" to "#{CFG_FILE_NAME}" in "#{where}"}
+      # Check for cfg.
+      # rubocop:disable Style/GuardClause
+      if (where + CFG_OLD_FILE_NAME).exist?
+        warning %(Moving old config "#{CFG_OLD_FILE_NAME}" to "#{CFG_FILE_NAME}" in "#{where}")
         (where + CFG_DIR_NAME).mkpath
         (where + CFG_OLD_FILE_NAME).rename(where + CFG_FILE_NAME)
       end
@@ -114,29 +121,31 @@ module MrMurano
 
     def initialize
       @paths = []
-      @paths << ConfigFile.new(:internal, nil, IniFile.new())
+      @paths << ConfigFile.new(:internal, nil, IniFile.new)
       # :specified --configfile FILE goes here. (see load_specific)
 
-      migrateOldEnv
-      unless ENV[CFG_ENV_NAME].nil? then
+      migrate_old_env
+      unless ENV[CFG_ENV_NAME].nil?
         # if it exists, must be a file
         # if it doesn't exist, that's ok
         ep = Pathname.new(ENV[CFG_ENV_NAME])
-        if ep.file? or not ep.exist? then
-          @paths << ConfigFile.new(:env, ep)
-        end
+        @paths << ConfigFile.new(:env, ep) if ep.file? || !ep.exist?
       end
 
-      @projectDir, @projectExists = findProjectDir()
-      migrateOldConfig(@projectDir)
-      @paths << ConfigFile.new(:project,  @projectDir + CFG_FILE_NAME)
+      @project_dir, @project_exists = find_project_dir
+      migrate_old_config(@project_dir)
+      @paths << ConfigFile.new(:project, @project_dir + CFG_FILE_NAME)
       # We'll create the CFG_DIR_NAME on write().
 
-      migrateOldConfig(Pathname.new(Dir.home))
+      migrate_old_config(Pathname.new(Dir.home))
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
       # We'll create the CFG_DIR_NAME on write().
 
-      @paths << ConfigFile.new(:defaults, nil, IniFile.new())
+      @paths << ConfigFile.new(:defaults, nil, IniFile.new)
+
+      # All these set()'s are against the :defaults config.
+      # So no disk writing ensues. And these serve as defaults
+      # unless, say, a SolutionFile says otherwise.
 
       set('tool.verbose', false, :defaults)
       set('tool.debug', false, :defaults)
@@ -146,7 +155,7 @@ module MrMurano
 
       set('net.host', 'bizapi.hosted.exosite.io', :defaults)
 
-      set('location.base', @projectDir, :defaults) unless @projectDir.nil?
+      set('location.base', @project_dir, :defaults) unless @project_dir.nil?
       set('location.files', 'files', :defaults)
       set('location.endpoints', 'routes', :defaults)
       set('location.modules', 'modules', :defaults)
@@ -163,16 +172,18 @@ module MrMurano
       set('endpoints.searchFor', '{,../endpoints}/*.lua {,../endpoints}s/*/*.lua', :defaults)
       set('endpoints.ignoring', '*_test.lua *_spec.lua .*', :defaults)
 
-      set('eventhandler.searchFor',
+      set(
+        'eventhandler.searchFor',
         '*.lua */*.lua {../eventhandlers,../event_handler}/*.lua {../eventhandlers,../event_handler}/*/*.lua',
-        :defaults)
+        :defaults,
+      )
       set('eventhandler.ignoring', '*_test.lua *_spec.lua .*', :defaults)
       set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
 
       set('modules.searchFor', '*.lua */*.lua', :defaults)
       set('modules.ignoring', '*_test.lua *_spec.lua .*', :defaults)
 
-      if Gem.win_platform? then
+      if Gem.win_platform?
         set('diff.cmd', 'fc', :defaults)
       else
         set('diff.cmd', 'diff -u', :defaults)
@@ -187,10 +198,9 @@ module MrMurano
     # - .mrmuranorc
     # - .murano/
     # - .mrmurano/
-    def findProjectDir()
-      result = nil
-      fileNames = [CFG_FILE_NAME, CFG_OLD_FILE_NAME]
-      dirNames = [CFG_DIR_NAME, CFG_OLD_DIR_NAME]
+    def find_project_dir
+      file_names = [CFG_FILE_NAME, CFG_OLD_FILE_NAME]
+      dir_names = [CFG_DIR_NAME, CFG_OLD_DIR_NAME]
       home = Pathname.new(Dir.home).realpath
       pwd = Pathname.new(Dir.pwd).realpath
       # The home directory contains the user ~/.murano/config,
@@ -199,28 +209,24 @@ module MrMurano
       pwd.ascend do |path|
         # Don't bother with home or looking above it.
         break if path == home
-        fileNames.each do |fname|
-          if (path + fname).exist? then
-            return path, true
-          end
+        file_names.each do |fname|
+          return path, true if (path + fname).exist?
         end
-        dirNames.each do |dname|
-          if (path + dname).directory? then
-            return path, true
-          end
+        dir_names.each do |dname|
+          return path, true if (path + dname).directory?
         end
       end
       # Now if nothing found, assume it will live in pwd.
       result = Pathname.new(Dir.pwd)
-      return result, false
+      [result, false]
     end
-    private :findProjectDir
+    private :find_project_dir
 
-    def fixModes(path)
-      if path.directory? then
-        path.chmod(0700)
-      elsif path.file? then
-        path.chmod(0600)
+    def fix_modes(path)
+      if path.directory?
+        path.chmod(0o700)
+      elsif path.file?
+        path.chmod(0o600)
       end
     end
 
@@ -231,7 +237,7 @@ module MrMurano
       when :specified
         root = nil
       when :project
-        root = @projectDir + CFG_DIR_NAME
+        root = @project_dir + CFG_DIR_NAME
       when :user
         root = Pathname.new(Dir.home) + CFG_DIR_NAME
       when :defaults
@@ -243,9 +249,9 @@ module MrMurano
     end
 
     ## Load all of the potential config files
-    def load()
+    def load
       # - read/write config file in [Project, User, System] (all are optional)
-      @paths.each { |cfg| cfg.load }
+      @paths.each(&:load)
     end
 
     ## Load specified file into the config stack
@@ -259,26 +265,23 @@ module MrMurano
     ## Get a value for key, looking at the specified scopes
     # key is <section>.<key>
     def get(key, scope=CFG_SCOPES)
-      scope = [scope] unless scope.kind_of? Array
-      paths = @paths.select{|p| scope.include? p.kind}
+      scope = [scope] unless scope.is_a? Array
+      paths = @paths.select { |p| scope.include? p.kind }
 
       section, ikey = key.split('.')
       paths.each do |path|
-        if path.data.has_section?(section) then
-          sec = path.data[section]
-          return sec if ikey.nil?
-          if sec.has_key?(ikey) then
-            return sec[ikey]
-          end
-        end
+        next unless path.data.has_section?(section)
+        sec = path.data[section]
+        return sec if ikey.nil?
+        return sec[ikey] if sec.key?(ikey)
       end
-      return nil
+      nil
     end
 
     ## Dump out a combined config
-    def dump()
+    def dump
       # have a fake, merge all into it, then dump it.
-      base = IniFile.new()
+      base = IniFile.new
       @paths.reverse.each do |ini|
         base.merge! ini.data
       end
@@ -286,31 +289,29 @@ module MrMurano
     end
 
     ## Dump out locations of all known configs
-    def locations()
-      locats = ""
+    def locations
+      locats = ''
       first = true
       puts ''
       CFG_SCOPES.each do |scope|
-        locats += "\n" if !first
+        locats += "\n" unless first
         first = false
 
-        cfg_paths = @paths.select{|p| p.kind == scope}
+        cfg_paths = @paths.select { |p| p.kind == scope }
 
         msg = "Scope: ‘#{scope}’\n\n"
         locats += Rainbow(msg).bright.underline
 
-        unless cfg_paths.empty?
+        if !cfg_paths.empty?
           cfg = cfg_paths.first
 
-          unless cfg.path.nil? or not cfg.path.exist?
+          if cfg.path&.exist?
             path = "Path: #{cfg.path}\n"
+          elsif %i[internal defaults].include? cfg.kind
+            # cfg.path is nil.
+            path = "Path: ‘#{scope}’ config is not saved.\n"
           else
-            if [:internal, :defaults,].include? cfg.kind
-              # cfg.path is nil.
-              path = "Path: ‘#{scope}’ config is not saved.\n"
-            else
-              path = "Path: ‘#{scope}’ config does not exist.\n"
-            end
+            path = "Path: ‘#{scope}’ config does not exist.\n"
           end
           #locats += Rainbow(path).bright
           locats += path
@@ -319,22 +320,20 @@ module MrMurano
           skip_content = false
           if scope == :env
             locats += "Use the environment variable, MURANO_CONFIGFILE, to specify this config file.\n"
-            skip_content = not(cfg.path.exist?)
+            skip_content = !cfg.path.exist?
           end
           next if skip_content
-          if scope == :env
-            locats += "\n"
-          end
+          locats += "\n" if scope == :env
 
-          base = IniFile.new()
+          base = IniFile.new
           base.merge! cfg.data
           content = base.to_s
-          if content.length > 0
+          if !content.empty?
             locats += "Config:\n\n"
             #locats += base.to_s
-            base.to_s.split("\n").each{ |line|
-              locats += "  " + line + "\n"
-            }
+            base.to_s.split("\n").each do |line|
+              locats += '  ' + line + "\n"
+            end
           else
             msg = "Config: Empty INI file.\n"
             #locats += Rainbow(msg).aqua.bright
@@ -342,7 +341,7 @@ module MrMurano
           end
         else
           msg = "No config found for ‘#{scope}’.\n"
-          unless scope == :specified
+          if scope != :specified
             locats += Rainbow(msg).red.bright
           else
             locats += "Path: ‘#{scope}’ config does not exist.\n\n"
@@ -355,15 +354,17 @@ module MrMurano
 
     def set(key, value, scope=:project)
       section, ikey = key.split('.', 2)
-      raise "Invalid key" if section.nil?
-      if ikey.nil? then
+      raise 'Invalid key' if section.nil?
+      if ikey.nil?
         # If key isn't dotted, then assume the tool section.
         ikey = section
         section = 'tool'
       end
 
-      paths = @paths.select{|p| scope == p.kind}
+      paths = @paths.select { |p| scope == p.kind }
       raise "Unknown scope ‘#{scope}’" if paths.empty?
+      raise "Too many scopes ‘#{scope}’" if paths.length > 1
+
       cfg = paths.first
       data = cfg.data
       tomod = data[section]
@@ -372,14 +373,14 @@ module MrMurano
       data[section] = tomod
       # Remove empty sections to make test results more predictable.
       # Interesting: IniFile.each only returns sections with key-vals,
-      #              so call IniFile.each_section instead.
+      #              so call IniFile.each_section instead, which includes
+      #              empty empty section. Here's what "each" looks like:
       #                 data.each do |sectn, param, val|
       #                   puts "#{param} = #{val} [in section: #{sectn}]"
       data.each_section do |sectn|
-        if data[sectn].empty?
-          data.delete_section(sectn)
-        end
+        data.delete_section(sectn) if data[sectn].empty?
       end
+
       cfg.write
     end
 
@@ -388,16 +389,13 @@ module MrMurano
       get(key)
     end
 
-    # For setting internal, this-run-only values
+    # For setting internal, this-run-only values.
     def []=(key, value)
       set(key, value, :internal)
     end
-
   end
 
   class ConfigError < StandardError
   end
-
 end
 
-#  vim: set ai et sw=2 ts=2 :
