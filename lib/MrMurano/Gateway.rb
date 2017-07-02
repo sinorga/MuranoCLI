@@ -14,7 +14,7 @@ module MrMurano
     class Base
       def initialize
         @pid = $cfg['product.id']
-        raise MrMurano::ConfigError.new("No product id!") if @pid.nil?
+        raise MrMurano::ConfigError.new("No Product ID specified in config") if @pid.to_s.empty?
         @uriparts = [:service, @pid, :device2]
         @itemkey = :id
       end
@@ -312,7 +312,8 @@ module MrMurano
       #
       # @param identifier [String] Who to activate.
       def activate(identifier)
-        fqdn = Base.new.info()[:fqdn]
+        info = Base.new.info()
+        fqdn = info[:fqdn]
         debug "Found FQDN: #{fqdn}"
         fqdn = "#{@pid}.m2.exosite.io" if fqdn.nil?
 
@@ -324,7 +325,7 @@ module MrMurano
         request.form_data = {
           :vendor => @pid,
           :model => @pid,
-          :sn => identifier
+          :sn => identifier,
         }
         request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
         request['Authorization'] = nil
