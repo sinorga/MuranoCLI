@@ -31,10 +31,10 @@ the HTTP Device API.
   c.action do |args, options|
     prd = MrMurano::Content::Base.new
 
-    MrMurano::Verbose::whirly_start "Looking for content..."
+    MrMurano::Verbose.whirly_start "Looking for content..."
     items = prd.list
     exit 2 if items.nil?
-    MrMurano::Verbose::whirly_stop
+    MrMurano::Verbose.whirly_stop
     unless items.empty?
       prd.outf(items) do |dd, ios|
         if options.long then

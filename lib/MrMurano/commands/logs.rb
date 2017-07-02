@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -33,7 +33,7 @@ Get the logs for a solution.
     options.default :pretty => true, :localtime => true, :raw => false
 
     unless options.type
-      MrMurano::Verbose::error "Please specify the --type of solution"
+      MrMurano::Verbose.error "Please specify the --type of solution"
       exit 1
     end
 
@@ -42,7 +42,7 @@ Get the logs for a solution.
     elsif options.type == :product
       sol = MrMurano::Product.new
     else
-      MrMurano::Verbose::error "Unknown --type specified: #{options.type}"
+      MrMurano::Verbose.error "Unknown --type specified: #{options.type}"
       exit 1
     end
 
