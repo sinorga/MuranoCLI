@@ -69,6 +69,11 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
         say item[:diff] if options.diff
       end
 
+      unless ret[:skipd].empty?
+        pretty_group_header(ret[:skipd], 'Items without a solution', 'without a solution', options.grouped)
+        ret[:skipd].each { |item| say " - #{item[:pp_type]}  #{highlight_del(fmtr(item))}" }
+      end
+
       return unless options.showall
       say 'Unchanged:' if options.grouped
       ret[:unchg].each { |item| say "   #{item[:pp_type]}  #{fmtr(item)}" }
@@ -91,15 +96,15 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       Rainbow(msg).red.bright
     end
 
-    @grouped = { toadd: [], todel: [], tomod: [], unchg: [] }
+    @grouped = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
     def gmerge(ret, type, options)
       if options.grouped
         out = @grouped
       else
-        out = { toadd: [], todel: [], tomod: [], unchg: [] }
+        out = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
       end
 
-      %i[toadd todel tomod unchg].each do |kind|
+      %i[toadd todel tomod unchg skipd].each do |kind|
         ret[kind].each do |item|
           item = item.to_h
           item[:pp_type] = type
@@ -119,7 +124,14 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       rescue StandardError => _err
         raise
       else
-        ret = syncable.status(options, args)
+        # Different syncables use different solution types, so if a
+        # certain solution doesn't exist, its syncables won't have an sid.
+        if syncable.sid?
+          ret = syncable.status(options, args)
+        else
+          ret = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
+          ret[:skipd] << { synckey: desc }
+        end
         gmerge(ret, type, options)
       end
     end

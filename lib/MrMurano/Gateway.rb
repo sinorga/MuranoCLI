@@ -11,11 +11,12 @@ module MrMurano
   ## The details of talking to the Gateway [Device2] service.
   # This is where interfacing to real hardware happens.
   module Gateway
-    class Base
+    class GweBase
       def initialize
-        @pid = $cfg['product.id']
-        raise MrMurano::ConfigError.new("No Product ID specified in config") if @pid.to_s.empty?
-        @uriparts = [:service, @pid, :device2]
+        @sid = $cfg['product.id']
+        raise MrMurano::ConfigError.new("No Product ID specified in config") if @sid.to_s.empty?
+        @uriparts = [:service, @sid, :device2]
+        @uriparts_sidex = 1
         @itemkey = :id
       end
 
@@ -36,14 +37,14 @@ module MrMurano
 
       # Get info for this gateway interface.
       def info
-        get()
+        get
       end
     end
 
-    class Settings < Base
+    class Settings < GweBase
       # Get the protocol settings
       def protocol
-        ret = get()
+        ret = get
         return {} if ret.nil?
         return {} unless ret.kind_of? Hash
         return {} unless ret.has_key? :protocol
@@ -59,7 +60,7 @@ module MrMurano
       end
 
       def identity_format
-        ret = get()
+        ret = get
         return {} if ret.nil?
         return {} unless ret.kind_of? Hash
         return {} unless ret.has_key? :identity_format
@@ -76,7 +77,7 @@ module MrMurano
       end
 
       def provisioning
-        ret = get()
+        ret = get
         return {} if ret.nil?
         return {} unless ret.kind_of? Hash
         return {} unless ret.has_key? :provisioning
@@ -94,7 +95,7 @@ module MrMurano
 
     ##############################################################################
     ## Working with the resources on a set of Devices. (Gateway)
-    class Resources < Base
+    class Resources < GweBase
       include SyncUpDown
       def initialize
         super
@@ -102,7 +103,7 @@ module MrMurano
         @project_section = :resources
       end
 
-      def list()
+      def list
         ret = get('')
         return [] unless ret.has_key? :resources
 
@@ -126,8 +127,8 @@ module MrMurano
       end
 
       ###################################################
-      def syncup_before()
-        @there = list()
+      def syncup_before
+        @there = list
       end
 
       def remove(itemkey)
@@ -139,7 +140,7 @@ module MrMurano
         @there << remote.reject{|k,v| k==:synckey}
       end
 
-      def syncup_after()
+      def syncup_after
         unless @there.empty?
           upload_all(@there)
         else
@@ -150,7 +151,7 @@ module MrMurano
 
       ###################################################
       def syncdown_before(local)
-        @here = locallist()
+        @here = locallist
       end
 
       def download(local, item)
@@ -223,7 +224,7 @@ module MrMurano
     ##############################################################################
     ##
     # Talking to the devices on a Gateway
-    class Device < Base
+    class Device < GweBase
       def initialize
         super
         @uriparts << :identity
@@ -286,7 +287,7 @@ module MrMurano
         # Need to modify @uriparts for just this endpoint call.
         uriparts = @uriparts
         @uriparts[-1] = :identities
-        uri = endpoint()
+        uri = endpoint
         @uriparts = uriparts
 
         file = HTTP::FormData::File.new(local.to_s, {:content_type=>'text/csv'})
@@ -312,10 +313,10 @@ module MrMurano
       #
       # @param identifier [String] Who to activate.
       def activate(identifier)
-        info = Base.new.info()
+        info = GweBase.new.info
         fqdn = info[:fqdn]
         debug "Found FQDN: #{fqdn}"
-        fqdn = "#{@pid}.m2.exosite.io" if fqdn.nil?
+        fqdn = "#{@sid}.m2.exosite.io" if fqdn.nil?
 
         uri = URI("https://#{fqdn}/provision/activate")
         http = Net::HTTP.new(uri.host, uri.port)
@@ -323,8 +324,8 @@ module MrMurano
         http.start
         request = Net::HTTP::Post.new(uri)
         request.form_data = {
-          :vendor => @pid,
-          :model => @pid,
+          :vendor => @sid,
+          :model => @sid,
           :sn => identifier,
         }
         request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"

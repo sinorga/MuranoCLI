@@ -750,6 +750,13 @@ module MrMurano
     # @param selected [Array<String>] Filters for _matcher
     # @return [Hash{Symbol=>Array<Item>}] Items grouped by the action that should be taken
     def status(options={}, selected=[])
+      # 2017-07-02: Now that there are multiple solution types, and because
+      # SyncRoot.add is called on different classes that go with either or
+      # both products and applications, if a user only created one solution,
+      # then some syncables will have their sid set to -1, because there's
+      # not a corresponding solution in Murano.
+      raise 'Syncable missing sid?!' unless self.sid?
+
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
 
@@ -789,13 +796,14 @@ module MrMurano
         end
       end
       if options[:unselected] then
-        { :toadd=>toadd, :todel=>todel, :tomod=>tomod, :unchg=>unchg }
+        { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
       else
         {
-          :toadd=>toadd.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
-          :todel=>todel.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
-          :tomod=>tomod.select{|i| i[:selected]}.map{|i| i.delete(:selected); i},
-          :unchg=>unchg.select{|i| i[:selected]}.map{|i| i.delete(:selected); i}
+          toadd: toadd.select { |i| i[:selected]}.map{|i| i.delete(:selected); i },
+          todel: todel.select { |i| i[:selected]}.map{|i| i.delete(:selected); i },
+          tomod: tomod.select { |i| i[:selected]}.map{|i| i.delete(:selected); i },
+          unchg: unchg.select { |i| i[:selected]}.map{|i| i.delete(:selected); i },
+          skipd: [],
         }
       end
     end

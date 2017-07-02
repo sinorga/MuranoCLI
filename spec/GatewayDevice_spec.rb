@@ -200,9 +200,9 @@ RSpec.describe MrMurano::Gateway::Device do
 
   context "activates" do
     before(:example) do
-      @bgw = MrMurano::Gateway::Base.new
+      @bgw = MrMurano::Gateway::GweBase.new
       allow(@bgw).to receive(:token).and_return("TTTTTTTTTT")
-      expect(MrMurano::Gateway::Base).to receive(:new).and_return(@bgw)
+      expect(MrMurano::Gateway::GweBase).to receive(:new).and_return(@bgw)
       allow(@gw).to receive(:token).and_return("TTTTTTTTTT")
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2").
         to_return(:body=>{:fqdn=>"xxxxx.m2.exosite-staging.io"}.to_json)
