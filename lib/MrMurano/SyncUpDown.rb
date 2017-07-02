@@ -1,3 +1,10 @@
+# Last Modified: 2017.07.02 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'open3'
 require 'pathname'
 require 'shellwords'
@@ -692,9 +699,11 @@ module MrMurano
 
         MrMurano::Verbose.whirly_stop
 
+        # 2017-07-02: Changing shovel operator << to +=
+        # to support Ruby 3.0 frozen string literals.
         cmd = $cfg['diff.cmd'].shellsplit
-        cmd << trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
-        cmd << tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        cmd += trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        cmd += tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
 
         df, _ = Open3.capture2e(*cmd)
       ensure
@@ -787,4 +796,4 @@ module MrMurano
     end
   end
 end
-#  vim: set ai et sw=2 ts=2 :
+

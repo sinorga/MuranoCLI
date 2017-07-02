@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -64,6 +64,7 @@ module MrMurano
         rows = data.to_a
       elsif data.respond_to?(:each)
         rows = []
+        # MAYBE/2017-07-02: Does shover operator work on frozen string literals?
         data.each { |i| rows << i }
       else
         error 'Unexpected data format: do not know how to tabularize.'
@@ -73,6 +74,7 @@ module MrMurano
         cols = [] if cols.nil?
         rows = [[]] if rows.nil?
         CSV(ios, headers: cols, write_headers: !cols.empty?) do |csv|
+          # MAYBE/2017-07-02: Does shover operator work on frozen string literals?
           rows.each { |v| csv << v }
         end
       else

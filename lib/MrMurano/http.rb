@@ -112,16 +112,18 @@ module MrMurano
       isj, jsn = isJSON(response.body)
       resp = "Request Failed: #{response.code}: "
       if isj
+        # 2017-07-02: Changing shovel operator << to +=
+        # to support Ruby 3.0 frozen string literals.
         if $cfg['tool.fullerror']
-          resp << JSON.pretty_generate(jsn)
+          resp += JSON.pretty_generate(jsn)
         elsif jsn.kind_of? Hash
-          resp << "[#{jsn[:statusCode]}] " if jsn.has_key? :statusCode
-          resp << jsn[:message] if jsn.has_key? :message
+          resp += "[#{jsn[:statusCode]}] " if jsn.has_key? :statusCode
+          resp += jsn[:message] if jsn.has_key? :message
         else
-          resp << jsn.to_s
+          resp += jsn.to_s
         end
       else
-        resp << (jsn or 'nil')
+        resp += (jsn or 'nil')
       end
       # assuming verbosing was included.
       error resp
@@ -249,14 +251,16 @@ if RUBY_VERSION == '2.0.0'
         if use_ssl?
           begin
             if proxy?
+              # 2017-07-02: Changing shovel operator << to +=
+              # to support Ruby 3.0 frozen string literals.
               buf = "CONNECT #{@address}:#{@port} HTTP/#{HTTPVersion}\r\n"
-              buf << "Host: #{@address}:#{@port}\r\n"
+              buf += "Host: #{@address}:#{@port}\r\n"
               if proxy_user
                 credential = ["#{proxy_user}:#{proxy_pass}"].pack('m')
                 credential.delete!("\r\n")
-                buf << "Proxy-Authorization: Basic #{credential}\r\n"
+                buf += "Proxy-Authorization: Basic #{credential}\r\n"
               end
-              buf << "\r\n"
+              buf += "\r\n"
               @socket.write(buf)
               HTTPResponse.read_new(@socket).value
             end

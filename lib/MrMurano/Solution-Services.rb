@@ -286,9 +286,11 @@ module MrMurano
         yield dheader + "\n" if aheader != dheader
         yield ret[:script]
       else
+        # 2017-07-02: Changing shovel operator << to +=
+        # to support Ruby 3.0 frozen string literals.
         res = ''
-        res << dheader + "\n" if aheader != dheader
-        res << ret[:script]
+        res += dheader + "\n" if aheader != dheader
+        res += ret[:script]
         res
       end
     end
@@ -338,6 +340,7 @@ module MrMurano
             script: line,
           )
         elsif !cur.nil? && !cur[:script].nil?
+          # MAYBE/2017-07-02: Frozen string literal: change << to += ??
           cur[:script] << line
         end
         lineno += 1
