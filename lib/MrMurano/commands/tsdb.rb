@@ -146,7 +146,7 @@ Also, many date-time formats can be parsed and will be converted to microseconds
 
     # A query without any metrics is invalid.  So if the user didn't provide any,
     # look up all of them (well, frist however many) and use that list.
-    if query[:metrics].nil? or query[:metrics].empty? then
+    if query[:metrics].to_s.empty? then
       ret = sol.listMetrics
       query[:metrics] = ret[:metrics]
     end
