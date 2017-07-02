@@ -53,21 +53,24 @@ module MrMurano
     # Get the list of default syncables.
     # @return [Array<String>] array of names
     def self.bydefault
-      @@syncset.select{|a| a.bydefault }.map{|a| a.name}
+      @@syncset = [] unless defined?(@@syncset)
+      @@syncset.select { |a| a.bydefault }.map { |a| a.name }
     end
 
     ##
     # Iterate over all syncables
     # @param block code to run on each
     def self.each(&block)
-      @@syncset.each{|a| yield a.name, a.type, a.class }
+      @@syncset = [] unless defined?(@@syncset)
+      @@syncset.each { |a| yield a.name, a.type, a.class }
     end
 
     ##
     # Iterate over all syncables with option arguments.
     # @param block code to run on each
     def self.each_option(&block)
-      @@syncset.each{|a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc}
+      @@syncset = [] unless defined?(@@syncset)
+      @@syncset.each { |a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc }
     end
 
     ##
@@ -75,6 +78,7 @@ module MrMurano
     # @param opt [Hash{Symbol=>Boolean}] Options hash of which to select from
     # @param block code to run on each
     def self.each_filtered(opt, &block)
+      @@syncset = [] unless defined?(@@syncset)
       self.checkSAME(opt)
       @@syncset.each do |a|
         if opt[a.name.to_sym] or opt[a.type.to_sym] then
@@ -90,13 +94,14 @@ module MrMurano
     #
     # @return [nil]
     def self.checkSAME(opt)
+      @@syncset = [] unless defined?(@@syncset)
       if opt[:all] then
-        @@syncset.each {|a| opt[a.name.to_sym] = true }
+        @@syncset.each { |a| opt[a.name.to_sym] = true }
       else
         any = @@syncset.select {|a| opt[a.name.to_sym] or opt[a.type.to_sym]}
         if any.empty? then
           bydef = $cfg['sync.bydefault'].split
-          @@syncset.select{|a| bydef.include? a.name }.each{|a| opt[a.name.to_sym] = true}
+          @@syncset.select{ |a| bydef.include? a.name }.each{ |a| opt[a.name.to_sym] = true }
         end
       end
 
