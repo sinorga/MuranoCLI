@@ -28,7 +28,7 @@ RSpec.describe 'murano usage', :cmd, :needs_password do
   end
 
   def confirm_usage_table(olines, ix)
-    expect(olines[ix+0]).to match(/^(Product|Application): [a-z0-9]+ <[a-z0-9]+> [.a-z0-9]+$/)
+    expect(olines[ix+0]).to match(/^(Product|Application): usage[tT]est[a-z0-9]+ <[a-z0-9]+> https:\/\/[.a-z0-9]+$/)
     expect(olines[ix+1]).to match(/^(\+-+){5}\+$/)
     expect(olines[ix+2]).to match(/^\|\s+\| Quota\s+\| Daily\s+\| Monthly\s+\| Total\s+\|$/)
     # Beneath the header row is a splitter line.
