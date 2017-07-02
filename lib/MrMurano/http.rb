@@ -92,9 +92,9 @@ module MrMurano
 
     def isJSON(data)
       begin
-        return true, JSON.parse(data, json_opts)
+        [true, JSON.parse(data, json_opts)]
       rescue
-        return false, data
+        [false, data]
       end
     end
 
@@ -130,12 +130,12 @@ module MrMurano
     def workit(request, &block)
       curldebug(request)
       if block_given?
-        return yield request, http()
+        yield request, http()
       else
         response = http().request(request)
         case response
         when Net::HTTPSuccess
-          return workit_response(response)
+          workit_response(response)
         else
           showHttpError(request, response)
         end
@@ -145,9 +145,9 @@ module MrMurano
     def workit_response(response)
       return {} if response.body.nil?
       begin
-        return JSON.parse(response.body, json_opts)
+        JSON.parse(response.body, json_opts)
       rescue
-        return response.body
+        response.body
       end
     end
 
