@@ -35,7 +35,7 @@ module MrMurano
         ret = get()
         return [] if ret.is_a?(Hash) and ret.has_key?(:error)
         ret.map do |item|
-          if item[:content_type]&.empty? then
+          if item[:content_type].to_s.empty? then
             item[:content_type] = 'application/json'
           end
           # XXX should this update the script header?
