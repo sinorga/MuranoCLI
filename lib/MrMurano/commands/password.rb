@@ -3,7 +3,7 @@ command :password do |c|
   c.syntax = %{murano password}
   c.summary = %{About password commands}
   c.description = %{
-Sub-commands for working with usernames and passwords.
+Commands for working with usernames and passwords.
   }.strip
   c.project_not_required = true
   c.action do |args, options|
