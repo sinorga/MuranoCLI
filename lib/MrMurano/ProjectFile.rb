@@ -29,7 +29,7 @@ module MrMurano
   class ProjectFile
     include Verbose
 
-    attr_reader :usingProjectfile, :usingSolutionfile
+    attr_reader :using_projectfile, :using_solutionfile
 
     # Methods that are common to various internal structs.
     module PrjStructCommonMethods
@@ -39,11 +39,11 @@ module MrMurano
       #
       # @param obj [Hash] Data to load in
       def load(obj)
-        self.members.reject{|key| [:legacy].include? key}.each do |key|
-          self[key] = obj[key] if obj.has_key? key
+        members.reject { |key| [:legacy].include? key }.each do |key|
+          self[key] = obj[key] if obj.key? key
         end
-        self.members.select{|k| [:include, :exclude].include? k}.each do |key|
-          self[key] = [self[key]] unless self[key].kind_of? Array
+        members.select { |k| %i[include exclude].include? k }.each do |key|
+          self[key] = [self[key]] unless self[key].is_a? Array
         end
       end
 
@@ -51,7 +51,7 @@ module MrMurano
       # @return [Hash] Just the non-nil members of this
       def save
         ret = {}
-        self.members.reject { |key| [:legacy].include? key }.each do |key|
+        members.reject { |key| [:legacy].include? key }.each do |key|
           ret[key] = self[key] unless self[key].nil?
         end
         ret
@@ -91,22 +91,24 @@ module MrMurano
       ## Returns a sparse hash of the data in self
       # @return [Hash] Just the non-empty members of this
       def save
-        ret={}
-        self.members.each do |key|
+        ret = {}
+        members.each do |key|
           value = self[key].save
           ret[key] = value unless value.empty?
         end
         ret
       end
+
+      # rubocop:disable Style/AccessorMethodName: "Do not prefix reader method names with get_."
       def get_binding
-        binding()
+        binding
       end
     end
 
-    def initialize()
-      @usingProjectfile = false
-      @usingSolutionfile = false
-      @prjFile = nil
+    def initialize
+      @using_projectfile = false
+      @using_solutionfile = false
+      @prj_file = nil
       tname = $cfg['location.base'].basename.to_s.gsub(/[^A-Za-z0-9]/, '')
       @data = PrfFile.new(
         PrjMeta.new(
@@ -114,7 +116,7 @@ module MrMurano
           "One line summary of #{tname}",
           "In depth description of #{tname}\n\nWith lots of details.",
           [$cfg['user.name']],
-          "1.0.0",
+          '1.0.0',
           nil,
           nil
         ),
@@ -129,7 +131,7 @@ module MrMurano
     # Get the current Project file
     # @return [Pathname] PAth to current project file.
     def project_file
-      @prjFile
+      @prj_file
     end
 
     # Get a binding to the data for building the example ProjectFile
@@ -140,13 +142,13 @@ module MrMurano
     # Get a value for a key.
     # Keys are 'section.key'
     def get(key)
-      raise "Empty key" if key.empty?
+      raise 'Empty key' if key.empty?
       section, ikey = key.split('.')
-      raise "Missing dot" if ikey.nil? and section == key
-      raise "Missing key" if ikey.nil? and section != key
+      raise 'Missing dot' if ikey.nil? && section == key
+      raise 'Missing key' if ikey.nil? && section != key
       ret = @data[section.to_sym][ikey.to_sym]
       return default_value_for(key) if ret.nil?
-      return ret
+      ret
     end
     alias [] get
 
@@ -184,17 +186,17 @@ module MrMurano
         'resources.include' => 'product.spec',
         'resources.exclude' => 'product.ignoring',
       }.freeze
-      needSplit = %r{.*\.(searchFor|ignoring)$}.freeze
-      return nil unless keymap.has_key? key
+      need_split = /.*\.(searchFor|ignoring)$/
+      return nil unless keymap.key? key
       # *.{include,exclude} want arrays returned.
       # But what they map to is strings.
       cfg_key = keymap[key]
-      ret = ($cfg[cfg_key] or '')
+      ret = ($cfg[cfg_key] || '')
       # split uses $; when no delimiter is specified.
       #   In Ruby, $; is $FS or $FIELD_SEPARATOR.
       #   It defaults to nil, which splits on whitespace.
       #   https://ruby-doc.org/stdlib-2.3.3/libdoc/English/rdoc/English.html
-      ret = ret.split() if cfg_key =~ needSplit
+      ret = ret.split if cfg_key =~ need_split
       ret
     end
 
@@ -235,41 +237,43 @@ module MrMurano
       return 0 if possible.empty? # this is ok.
 
       warning "Multiple possible Project files! #{possible}" if possible.count > 1
-      @prjFile = Pathname.new(possible.first)
+      @prj_file = Pathname.new(possible.first)
 
       data = nil
       begin
-        data = YAML.load_file(@prjFile.to_s)
-      rescue Exception => e
+        data = YAML.load_file(@prj_file.to_s)
+      #rescue Exception => e
+      rescue StandardError => e
         error "Load error; #{e}"
         pp e
         return -3
       end
-      if data.nil? then
-        error "Failed to load #{@prjFile}"
+      if data.nil?
+        error "Failed to load #{@prj_file}"
         return -2
       end
-      unless data.kind_of?(Hash) then
-        error "Bad format in #{@prjFile}"
+      unless data.is_a?(Hash)
+        error "Bad format in #{@prj_file}"
         return -4
       end
 
       data = Hash.transform_keys_to_symbols(data)
 
       # Get format version; little different for older format.
-      if @prjFile.basename.to_s == "Solutionfile.json" then
-        fmtvers = (data[:version] or '0.2.0')
+      if @prj_file.basename.to_s == 'Solutionfile.json'
+        fmtvers = (data[:version] || '0.2.0')
       else
-        fmtvers = (data[:formatversion] or '1.0.0')
+        fmtvers = (data[:formatversion] || '1.0.0')
       end
 
+      # FIXME/2017-07-02: "Performance/StringReplacement: Use tr instead of gsub."
       methodname = "load_#{fmtvers.gsub(/\./, '_')}".to_sym
       debug "Will try to #{methodname}"
-      if respond_to? methodname then
+      if respond_to? methodname
         errorlist = __send__(methodname, data)
-        unless errorlist.empty? then
-          error %{Project file #{@prjFile} not valid.}
-          errorlist.each{|er| error er}
+        unless errorlist.empty?
+          error %(Project file #{@prj_file} not valid.)
+          errorlist.each { |er| error er }
           return -5
         end
       else
@@ -283,21 +287,26 @@ module MrMurano
     # @param dest [Hash,Struct] Destination to save value in
     # @param dkey [String,Symbol] Key in destination to save to
     def ifset(src, skey, dest, dkey)
-      dest[dkey] = src[skey] if src.has_key? skey
+      dest[dkey] = src[skey] if src.key? skey
     end
+
+    # FIXME/2017-06-30: Is load_1_0_0 the normal code path for new projects?
+    #   I.e., after \`murano init\`, does running MurCLI go through here?
+    #   [lb] just leaving himself a note to understand this better, esp.
+    #   to help support help others migrate their projects...
 
     # Load data in the 1.0.0 format.
     # @param data [Hash] the data to load
     # @return [Array] An array of validation errors in the data
     def load_1_0_0(data)
-      schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/pf-v1.0.0.yaml'
-      schema = YAML.load_file(schemaPath.to_s)
+      schema_path = Pathname.new(::File.dirname(__FILE__)) + 'schema/pf-v1.0.0.yaml'
+      schema = YAML.load_file(schema_path.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
-      @usingProjectfile = true
+      @using_projectfile = true
 
       @data.each_pair do |key, str|
-        str.load(data[key]) if data.has_key? key
+        str.load(data[key]) if data.key? key
       end
 
       []
@@ -309,27 +318,27 @@ module MrMurano
     # @param data [Hash] the data to load
     # @return [Array] An array of validation errors in the data
     def load_0_2_0(data)
-      schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/sf-v0.2.0.yaml'
-      schema = YAML.load_file(schemaPath.to_s)
+      schema_path = Pathname.new(::File.dirname(__FILE__)) + 'schema/sf-v0.2.0.yaml'
+      schema = YAML.load_file(schema_path.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
-      @usingSolutionfile = true
+      @using_solutionfile = true
 
       ifset(data, :default_page, @data[:assets], :default_page)
       ifset(data, :file_dir, @data[:assets], :location)
 
       @data[:routes].location = '.'
-      @data[:routes][:include] = [data[:custom_api]] if data.has_key? :custom_api
+      @data[:routes][:include] = [data[:custom_api]] if data.key? :custom_api
       ifset(data, :cors, @data[:routes], :cors)
 
-      if data.has_key? :modules then
+      if data.key? :modules
         @data[:modules].location = '.'
         @data[:modules][:include] = data[:modules].values
       end
 
-      if data.has_key? :event_handler then
+      if data.key? :event_handler
         @data[:services].location = '.'
-        evd = data[:event_handler].values.map{|e| e.values}.flatten
+        evd = data[:event_handler].values.map(&:values).flatten
         @data[:services].include = evd
         @data.services.legacy = store_legacy_service_handlers(data[:event_handler])
       end
@@ -351,27 +360,27 @@ module MrMurano
     # @param data [Hash] the data to load
     # @return [Array] An array of validation errors in the data
     def load_0_3_0(data)
-      schemaPath = Pathname.new(::File.dirname(__FILE__)) + 'schema/sf-v0.3.0.yaml'
-      schema = YAML.load_file(schemaPath.to_s)
+      schema_path = Pathname.new(::File.dirname(__FILE__)) + 'schema/sf-v0.3.0.yaml'
+      schema = YAML.load_file(schema_path.to_s)
       v = JSON::Validator.fully_validate(schema, data)
       return v unless v.empty?
-      @usingSolutionfile = true
+      @using_solutionfile = true
 
       ifset(data, :default_page, @data[:assets], :default_page)
       ifset(data, :assets, @data[:assets], :location)
 
       @data[:routes].location = '.'
-      @data[:routes][:include] = [data[:routes]] if data.has_key? :routes
+      @data[:routes][:include] = [data[:routes]] if data.key? :routes
       ifset(data, :cors, @data[:routes], :cors)
 
-      if data.has_key? :modules then
+      if data.key? :modules
         @data[:modules].location = '.'
         @data[:modules][:include] = data[:modules].values
       end
 
-      if data.has_key? :services then
+      if data.key? :services
         @data[:services].location = '.'
-        evd = data[:services].values.map{|e| e.values}.flatten
+        evd = data[:services].values.map(&:values).flatten
         @data[:services].include = evd
         @data.services.legacy = store_legacy_service_handlers(data[:services])
       end
@@ -381,6 +390,5 @@ module MrMurano
     alias load_0_3 load_0_3_0
     alias load_0 load_0_3_0
   end
-
 end
 
