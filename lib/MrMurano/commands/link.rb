@@ -1,26 +1,33 @@
+# Last Modified: 2017.07.01 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'MrMurano/Account'
 require 'MrMurano/Solution-ServiceConfig'
 
 command 'link' do |c|
-  c.syntax = %{murano link}
-  c.summary = %{Use the link commands to manage solution links}
-  c.description = %{
+  c.syntax = %(murano link)
+  c.summary = %(Use the link commands to manage solution links)
+  c.description = %(
 Use the link commands to manage solution links.
-  }.strip
+  ).strip
   c.project_not_required = true
 
-  c.action do |args, options|
+  c.action do |_args, _options|
     ::Commander::UI.enable_paging
-    say MrMurano::SubCmdGroupHelp.new(c).get_help
+    say(MrMurano::SubCmdGroupHelp.new(c).get_help)
   end
 end
 
 command 'link list' do |c|
   c.syntax = 'murano link list [options]'
-  c.summary = %{List the solutions that are linked}
-  c.description = %{
+  c.summary = %(List the solutions that are linked)
+  c.description = %(
 List the solutions that are linked.
-  }.strip
+  ).strip
 
   c.option '--idonly', 'Only return the ids'
   c.option '--[no-]all', 'Show all columns'
@@ -30,145 +37,220 @@ List the solutions that are linked.
     # List service configs.
     # Display where serviceconfig.service == products.apiId
 
-    MrMurano::Verbose::whirly_start "Looking for links..."
+    c.verify_arg_count!(args)
 
-    acc = MrMurano::Account.new
-    products = acc.products
-    pids = products.map{|p| p[:apiId]}
+    MrMurano::Verbose.whirly_start('Looking for links...')
+
+    biz = MrMurano::Business.new
+    products = biz.products
+    pids = products.map { |p| p[:apiId] }
 
     sercfg = MrMurano::ServiceConfig.new
     scfgs = sercfg.list
 
-    MrMurano::Verbose::whirly_stop
+    MrMurano::Verbose.whirly_stop
 
-    scfgs.select!{|s| pids.include? s[:service]}
+    scfgs.select! { |s| pids.include? s[:service] }
 
-    io = nil
-    if options.output then
-      io = File.open(options.output, 'w')
-    end
+    io = File.open(options.output, 'w') if options.output
 
-    if options.idonly then
+    if options.idonly
       headers = [:service]
-      scfgs = scfgs.map{|row| [row[:service]]}
-    elsif not options.all then
-      headers = [:name, :script_key, :service]
-      scfgs = scfgs.map{|r| headers.map{|h| r[h]}}
+      scfgs = scfgs.map { |row| [row[:service]] }
+    elsif !options.all
+      headers = %i[name script_key service]
+      scfgs = scfgs.map { |r| headers.map { |h| r[h] } }
     else
-      headers = (scfgs.first or {}).keys
-      scfgs = scfgs.map{|r| headers.map{|h| r[h]}}
+      headers = (scfgs.first || {}).keys
+      scfgs = scfgs.map { |r| headers.map { |h| r[h] } }
     end
 
     sercfg.outf(scfgs, io) do |dd, ios|
-      if options.idonly then
+      if options.idonly
         ios.puts dd.join(' ')
       else
-        acc.tabularize({
-          :headers=>headers.map{|h| h.to_s},
-          :rows=>dd
-        }, ios)
+        biz.tabularize(
+          {
+            headers: headers.map(&:to_s),
+            rows: dd,
+          },
+          ios,
+        )
       end
     end
-    io.close unless io.nil?
-
+    io&.close
   end
 end
 alias_command 'assign list', 'link list'
 alias_command 'links list', 'link list'
 
 command 'link set' do |c|
-  c.syntax = 'murano link set [product]'
-  c.summary = %{Link a solution to an event handler}
-  c.description = %{
-Link a solution to an event handler.
-  }.strip
+  c.syntax = 'murano link set'
+  c.summary = %(Link a solution to an event handler)
+  c.description = %(
+Link a solution to an event handler of another solution.
+  ).strip
 
-  c.action do |args, options|
-    prname = args.shift
-    if prname.nil? then
-      prid = $cfg['product.id']
-    else
-      acc = MrMurano::Account.new
-      products = acc.products # For now just products. Future, solutions with Interface service
-      products.select!{|p| p[:name] == prname or p[:apiId]}
-      prid = products.map{|p| p[:apiId]}.first
-    end
-
-    if prid.nil? or prid.empty? then
-      say_error "No product id found!"
-      exit 2
-    end
-
-    if $cfg['product.name']
-      prod_name = "#{$cfg['product.name']} <#{prid}>"
-    else
-      prod_name = prid
-    end
-
-    if $cfg['application.name']
-      appl_name = "#{$cfg['application.name']} <#{$cfg['application.id']}>"
-    else
-      appl_name = $cfg['application.id']
-    end
-
-    msg = "Linking product #{prod_name} to application #{appl_name}"
-    say msg if $cfg['tool.verbose']
-    MrMurano::Verbose::whirly_start msg
-
-    sercfg = MrMurano::ServiceConfig.new
-    ret = sercfg.create(prid) do |request, http|
-      response = http.request(request)
-      MrMurano::Verbose::whirly_stop
-      if response.is_a? Net::HTTPSuccess then
-        say "Linked #{response[:script_key]}product #{prod_name} to application #{appl_name}"
-      elsif response.is_a? Net::HTTPConflict then
-        #sercfg.warning "Solutions already linked"
-        sercfg.warning "Already linked: product #{prod_name} and application #{appl_name}"
-      else
-        # FIXME/2017-06-23: Are there any other non-success response to expect?
-        #sercfg.error "Unexpected HTTP response"
-        sercfg.showHttpError(request, response)
-      end
-    end
+  c.action do |args, _options|
+    c.verify_arg_count!(args)
+    # For now, link links the one product to the one application.
+    # LATER: Users can link any solutions with Interface service.
+    # FIXME: Should probably make --product and --application options?
+    appl, prod = get_product_and_application!(skip_verify: true)
+    link_opts = { warn_on_conflict: true }
+    link_solutions(appl, prod, link_opts)
   end
 end
 alias_command 'assign set', 'link set'
 
 command 'link unset' do |c|
   c.syntax = 'murano link unset [product]'
-  c.summary = %{Unlink a solution}
-  c.description = %{
+  c.summary = %(Unlink a solution)
+  c.description = %(
 Unlink a solution.
-  }.strip
+  ).strip
 
-  c.action do |args, options|
-    prname = args.shift
-    if prname.nil? then
-      prid = $cfg['product.id']
-    else
-      acc = MrMurano::Account.new
-      products = acc.products # For now just products. Future, solutions with Interface service
-      products.select!{|p| p[:name] == prname or p[:apiId]}
-      prid = products.map{|p| p[:apiId]}.first
+  c.action do |args, _options|
+    c.verify_arg_count!(args)
+
+    appl, prod = get_product_and_application!(skip_verify: true)
+
+    sercfg = MrMurano::ServiceConfig.new(appl.sid)
+    MrMurano::Verbose.whirly_msg 'Fetching services...'
+    #scfgs = sercfg.list('?select=service,id,solution_id,script_key,alias')
+    scfgs = sercfg.search(prod.sid)
+    MrMurano::Verbose.whirly_stop
+
+    if scfgs.length > 1
+      sercfg.warning "More than one service configuration found: #{scfgs}"
+    elsif scfgs.empty?
+      sercfg.warning 'No matching service configurations found; nothing to unlink'
+      #exit 1
     end
 
-    if prid.nil? or prid.empty? then
-      say_error "No product id found!"
-      exit 2
+    sercfg.debug "Found #{scfgs.length} configurations to unlink from the Application"
+
+    scfgs.each do |svc|
+      sercfg.debug "Deleting #{svc[:service]} : #{svc[:script_key]} : #{svc[:id]}"
+      ret = sercfg.remove(svc[:id])
+      if !ret.nil?
+        say("Unlinked ‘#{svc[:script_key]}’ from #{appl.quoted_name}")
+      else
+        sercfg.warning "Failed to unlink ‘#{svc[:id]}’"
+      end
     end
 
-    sercfg = MrMurano::ServiceConfig.new
-    sercfg.verbose "Unlinking #{prid} to solution"
+    MrMurano::Verbose.whirly_msg 'Fetching handlers...'
+    evthlr = MrMurano::EventHandlerSolnApp.new(appl.sid)
+    hdlrs = evthlr.search(prod.sid)
+    #evt_hlr_exists = hdlrs.any?
+    MrMurano::Verbose.whirly_stop
 
-    scfgs = sercfg.list.select{|s| s[:service] == prid}
-    scfgs.each do |s|
-      sercfg.debug "Deleting #{s[:service]} : #{s[:script_key]} : #{s[:id]}"
-      ret = sercfg.remove(s[:id])
-      say "Unlinked #{s[:script_key]}" unless ret.nil?
+    if hdlrs.length > 1
+      sercfg.warning "More than one event handler found: #{hdlrs}"
+    elsif hdlrs.empty?
+      sercfg.warning 'No matching event handlers found; nothing to delete'
+      #exit 1
+    end
+
+    hdlrs.each do |evth|
+      evthlr.debug "Deleting #{evth[:service]} : #{evth[:alias]} : #{evth[:id]}"
+      ret = hdlrs.remove(evth[:id])
+      if !ret.nil?
+        say("Removed ‘#{evth[:alias]}’ from #{appl.quoted_name}")
+      else
+        hdlrs.warning "Failed to remove handler ‘#{svc[:id]}’"
+      end
     end
   end
 end
 alias_command 'assign unset', 'link unset'
 
-#  vim: set ai et sw=2 ts=2 :
+def link_solutions(appl, prod, options)
+  warn_on_conflict = options[:warn_on_conflict] || false
+  verbose = options[:verbose] || false
+
+  if appl.nil? || appl.sid.to_s.empty? || prod.nil? || prod.sid.to_s.empty?
+    msg = 'Missing Application and/or Product; nothing to link'
+    if warn_on_conflict
+      sercfg.warning msg
+    else
+      say(msg)
+    end
+    return
+  end
+
+  # Get services for application, and look for product service.
+  sercfg = MrMurano::ServiceConfig.new(appl.sid)
+  MrMurano::Verbose.whirly_msg 'Fetching services...'
+  scfgs = sercfg.search(prod.sid)
+  svc_cfg_exists = scfgs.any?
+  MrMurano::Verbose.whirly_stop
+
+  # Create the service configuration.
+  unless svc_cfg_exists
+    MrMurano::Verbose.whirly_msg 'Linking solutions...'
+    # Call Murano.
+    _ret = sercfg.create(prod.sid, prod.name) do |request, http|
+      response = http.request(request)
+      MrMurano::Verbose.whirly_stop
+      if response.is_a?(Net::HTTPSuccess)
+        say("Linked #{prod.quoted_name} to #{appl.quoted_name}")
+      elsif response.is_a?(Net::HTTPConflict)
+        svc_cfg_exists = true
+      else
+        MrMurano::Verbose.error(
+          "Unable to link solutions: ‘#{Rainbow(response.message).underline}’"
+        )
+        sercfg.showHttpError(request, response)
+      end
+    end
+  end
+  if svc_cfg_exists
+    msg = 'Solutions already linked'
+    if warn_on_conflict
+      sercfg.warning msg
+    else
+      say(msg)
+    end
+  end
+  puts '' if verbose
+
+  # Get event handlers for application, and look for product event handler.
+  MrMurano::Verbose.whirly_msg 'Fetching handlers...'
+  evthlr = MrMurano::EventHandlerSolnApp.new(appl.sid)
+  hdlrs = evthlr.search(prod.sid)
+  evt_hlr_exists = hdlrs.any?
+  MrMurano::Verbose.whirly_stop
+
+  # Create the event handler, using a simple script,
+  # like the web UI does (yeti yeti spaghetti).
+  unless evt_hlr_exists
+    MrMurano::Verbose.whirly_msg 'Setting default event handler...'
+    # Call Murano.
+    evthlr.default_event_script(prod.sid) do |request, http|
+      response = http.request(request)
+      MrMurano::Verbose.whirly_stop
+      if response.is_a?(Net::HTTPSuccess)
+        say('Created default event handler')
+      elsif response.is_a?(Net::HTTPConflict)
+        evt_hlr_exists = true
+      else
+        MrMurano::Verbose.error(
+          "Failed to create default event handler: ‘#{Rainbow(response.message).underline}’"
+        )
+        evthlr.showHttpError(request, response)
+      end
+    end
+  end
+  if evt_hlr_exists
+    msg = 'Event handler already created'
+    if warn_on_conflict
+      sercfg.warning msg
+    else
+      say(msg)
+    end
+  end
+  puts '' if verbose
+end
 
