@@ -67,8 +67,8 @@ pgds = [
 # Add plugin dirs from configs
 # This is run before the command line options are parsed, so need to check old way.
 unless ARGV.include? '--skip-plugins'
-  pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.is_a? 'MR_MURANO_PLUGIN_DIR'
-  pgds << Pathname.new(ENV['MURANO_PLUGIN_DIR']) if ENV.is_a? 'MURANO_PLUGIN_DIR'
+  pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.key? 'MR_MURANO_PLUGIN_DIR'
+  pgds << Pathname.new(ENV['MURANO_PLUGIN_DIR']) if ENV.key? 'MURANO_PLUGIN_DIR'
   pgds.each do |path|
     next unless path.exist?
     path.each_child do |plugin|
