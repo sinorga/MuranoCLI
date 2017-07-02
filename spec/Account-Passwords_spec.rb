@@ -7,14 +7,22 @@
 require 'tempfile'
 require 'MrMurano/version'
 require 'MrMurano/Account'
+require '_workspace'
 
 RSpec.describe MrMurano::Passwords, "#pwd" do
   before(:example) do
+    @saved_cfg = ENV['MURANO_CONFIGFILE']
+    ENV['MURANO_CONFIGFILE'] = nil
+    $cfg = MrMurano::Config.new
+    $cfg.load
+
     @saved_pwd = ENV['MURANO_PASSWORD']
     ENV['MURANO_PASSWORD'] = nil
   end
   after(:example) do
     ENV['MURANO_PASSWORD'] = @saved_pwd
+
+    ENV['MURANO_CONFIGFILE'] = @saved_cfg
   end
 
   it "Creates a file " do

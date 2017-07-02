@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -23,7 +23,7 @@ module MrMurano
 
     def initialize(path=nil)
       path = $cfg.file_at('passwords', :user) if path.nil?
-      path = Pathname.new(path) unless path.is_a? Pathname
+      path = Pathname.new(path) unless path.is_a?(Pathname)
       @path = path
       @data = nil
     end
@@ -53,7 +53,7 @@ module MrMurano
     end
 
     def set(host, user, pass)
-      unless @data.is_a? Hash
+      unless @data.is_a?(Hash)
         @data = { host => { user => pass } }
         return
       end
@@ -73,10 +73,10 @@ module MrMurano
         ).strip
         return ENV['MR_PASSWORD']
       end
-      return nil unless @data.is_a? Hash
-      return nil unless @data.is_a? host
-      return nil unless @data[host].is_a? Hash
-      return nil unless @data[host].is_a? user
+      return nil unless @data.is_a?(Hash)
+      return nil unless @data.key?(host)
+      return nil unless @data[host].is_a?(Hash)
+      return nil unless @data[host].key?(user)
       @data[host][user]
     end
 

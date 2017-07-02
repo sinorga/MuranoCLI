@@ -4,10 +4,10 @@
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
-require 'MrMurano/version'
-require 'MrMurano/Config'
-require 'MrMurano/Account'
 require 'highline/import'
+require 'MrMurano/version'
+require 'MrMurano/Account'
+require 'MrMurano/Config'
 require '_workspace'
 
 RSpec.describe MrMurano::Account, "token" do
