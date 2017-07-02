@@ -65,6 +65,11 @@ module MrMurano
       end
     end
 
+    # Default endpoint unless Class overrides it.
+    def endPoint(path)
+      URI('https://' + $cfg['net.host'] + '/api:1/' + path.to_s)
+    end
+
     def http
       uri = URI('https://' + $cfg['net.host'])
       if not defined?(@http) or @http.nil? then
