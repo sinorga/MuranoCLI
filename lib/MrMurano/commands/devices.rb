@@ -34,9 +34,9 @@ List identifiers for a product.
     #options.default :limit=>1000
 
     prd = MrMurano::Gateway::Device.new
-    MrMurano::Verbose::whirly_start "Looking for devices..."
+    MrMurano::Verbose.whirly_start "Looking for devices..."
     data = prd.list(options.limit, options.before)
-    MrMurano::Verbose::whirly_stop
+    MrMurano::Verbose.whirly_stop
     exit 1 if data.nil?
 
     unless data[:devices].empty?
@@ -102,9 +102,9 @@ This reads the latest state values for the resources in a device.
     snid = args.shift
 
     # FIXME/2017-06-14: Confirm that whirly is helpful here.
-    MrMurano::Verbose::whirly_start "Fetching device data..."
+    MrMurano::Verbose.whirly_start "Fetching device data..."
     data = prd.read(snid)
-    MrMurano::Verbose::whirly_stop
+    MrMurano::Verbose.whirly_stop
     exit 1 if data.nil?
 
     io = File.open(options.output, 'w') if options.output

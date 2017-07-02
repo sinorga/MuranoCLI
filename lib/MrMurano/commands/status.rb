@@ -109,11 +109,11 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
     end
 
     MrMurano::SyncRoot.each_filtered(options.__hash__) do |name, type, klass, desc|
-      MrMurano::Verbose::whirly_msg "Fetching #{desc}..."
+      MrMurano::Verbose.whirly_msg "Fetching #{desc}..."
       begin
         syncable = klass.new
       rescue MrMurano::ConfigError => err
-        MrMurano::Verbose::error "Could not fetch status for #{desc}: #{err}"
+        MrMurano::Verbose.error "Could not fetch status for #{desc}: #{err}"
       rescue StandardError => err
         raise
       else
@@ -121,7 +121,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
         gmerge(ret, type, options)
       end
     end
-    MrMurano::Verbose::whirly_stop
+    MrMurano::Verbose.whirly_stop
 
     pretty(@grouped, options) if options.grouped
   end

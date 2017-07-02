@@ -569,7 +569,7 @@ module MrMurano
 
     def sync_update_progress(msg)
       unless $cfg['tool.no-progress']
-        MrMurano::Verbose::whirly_msg "#{msg}..."
+        MrMurano::Verbose.whirly_msg "#{msg}..."
       else
         verbose msg
       end
@@ -690,7 +690,7 @@ module MrMurano
       begin
         download(Pathname.new(trmt.path), item)
 
-        MrMurano::Verbose::whirly_stop
+        MrMurano::Verbose.whirly_stop
 
         cmd = $cfg['diff.cmd'].shellsplit
         cmd << trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
