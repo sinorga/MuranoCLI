@@ -28,40 +28,40 @@ module MrMurano
     include Http
     include Verbose
 
-    attr_reader :host
-    attr_reader :user
+    def host
+      $cfg['net.host'].to_s
+    end
 
-    def initialize
-      @host = $cfg['net.host']
-      @user = $cfg['user.name']
+    def user
+      $cfg['user.name'].to_s
     end
 
     def endpoint(path)
-      URI('https://' + @host + '/api:1/' + path.to_s)
+      URI('https://' + host + '/api:1/' + path.to_s)
     end
 
     # ---------------------------------------------------------------------
 
     def login_info
       warned_once = false
-      if @user.to_s.empty?
+      if user.empty?
         error('No Murano user account found. Please login')
         warned_once = true
-        @user = ask('User name: ')
-        $cfg.set('user.name', @user, :user)
+        username = ask('User name: ')
+        $cfg.set('user.name', username, :user)
       end
       pwd_path = $cfg.file_at('passwords', :user)
       pwd_file = MrMurano::Passwords.new(pwd_path)
       pwd_file.load
-      user_pass = pwd_file.get(@host, @user)
+      user_pass = pwd_file.get(host, user)
       if user_pass.nil?
-        error("No Murano password found for #{@user}") unless warned_once
+        error("No Murano password found for #{user}") unless warned_once
         user_pass = ask('Password: ') { |q| q.echo = '*' }
-        pwd_file.set(@host, @user, user_pass)
+        pwd_file.set(host, user, user_pass)
         pwd_file.save
       end
       creds = {
-        email: @user,
+        email: user,
         password: user_pass,
       }
       creds
@@ -109,10 +109,10 @@ module MrMurano
 
     def businesses(match_bid=nil, match_name=nil, match_either=nil)
       # Ask user for name and password, if not saved to config and password files.
-      login_info if @user.nil?
+      login_info if user.nil?
 
       MrMurano::Verbose.whirly_start 'Fetching Businesses...'
-      bizes = get('user/' + @user + '/membership/')
+      bizes = get('user/' + user + '/membership/')
       MrMurano::Verbose.whirly_stop
 
       # 2017-06-30: The data for each message contains a :bizid, :role, and :name.
