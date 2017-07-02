@@ -35,7 +35,7 @@ RSpec.describe 'murano usage', :cmd, :needs_password do
     expect(olines[ix+3]).to match(/^(\+-+){5}\+$/)
     ix += 4
     # Beneath the splitter line are 1 or more rows, one for each service.
-    while true
+    loop do
       if olines[ix].start_with? '+-'
         # Closing table line.
         break
