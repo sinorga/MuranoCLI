@@ -62,15 +62,13 @@ RSpec.describe MrMurano::Account, "token" do
 
     it "Asks for password" do
       $cfg['user.name'] = "bob"
-      expect(@pswd).to receive(:get).with('bizapi.hosted.exosite.io','bob').once.and_return(nil)
+      expect(@pswd).to receive(:get).with('bizapi.hosted.exosite.io', 'bob').once.and_return(nil)
       expect(@acc).to receive(:error).once
       expect($terminal).to receive(:ask).once.and_return('dog')
       expect(@pswd).to receive(:set).once.with('bizapi.hosted.exosite.io','bob','dog')
 
       ret = @acc.login_info
-      expect(ret).to eq({
-        :email => "bob", :password=>"dog"
-      })
+      expect(ret).to eq(email: "bob", password: "dog")
     end
   end
 
@@ -152,9 +150,13 @@ RSpec.describe MrMurano::Account do
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
         to_return(body: bizlist)
 
+      buslist = []
+      buslist << MrMurano::Business.new(bizlist[0])
+      buslist << MrMurano::Business.new(bizlist[1])
+
       $cfg['user.name'] = 'BoB@place.net'
       ret = @acc.businesses
-      expect(ret).to eq(bizlist)
+      expect(ret).to eq(buslist)
     end
 
     it "asks for account when missing" do
@@ -169,13 +171,17 @@ RSpec.describe MrMurano::Account do
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
         to_return(body: bizlist)
 
+      buslist = []
+      buslist << MrMurano::Business.new(bizlist[0])
+      buslist << MrMurano::Business.new(bizlist[1])
+
       $cfg['user.name'] = nil
       expect(@acc).to receive(:login_info) do |arg|
         $cfg['user.name'] = 'BoB@place.net'
       end
 
       ret = @acc.businesses
-      expect(ret).to eq(bizlist)
+      expect(ret).to eq(buslist)
     end
   end
 end
