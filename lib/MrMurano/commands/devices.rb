@@ -161,7 +161,7 @@ If an alias is not settable, this will fail.
     end
 
     ret = prd.write(snid, set)
-    prd.outf ret unless ret.nil? or ret.empty?
+    prd.outf ret unless ret.to_s.empty?
   end
 end
 
