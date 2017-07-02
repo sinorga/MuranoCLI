@@ -51,7 +51,8 @@ module MrMurano
       script = local.read
 
       pst = remote.to_h.merge({
-        :solution_id => $cfg[@solntype],
+        #:solution_id => $cfg[@solntype],
+        :solution_id => @sid,
         :script => script,
         :alias => mkalias(remote),
         :name => mkname(remote),
@@ -59,7 +60,7 @@ module MrMurano
       debug "f: #{local} >> #{pst.reject{|k,_| k==:script}.to_json}"
       # Try PUT. If 404, then POST.
       # I.e., PUT if not exists, else POST to create.
-      put('/'+mkalias(remote), pst) do |request, http|
+      put('/' + mkalias(remote), pst) do |request, http|
         response = http.request(request)
         case response
         when Net::HTTPSuccess
@@ -176,7 +177,8 @@ module MrMurano
 
     def mkalias(remote)
       unless remote.name.nil? then
-        [$cfg[@solntype], remote[:name]].join('_')
+        #[$cfg[@solntype], remote[:name]].join('_')
+        [@sid, remote[:name]].join('_')
       else
         raise "Missing parts! #{remote.to_h.to_json}"
       end
@@ -228,7 +230,7 @@ module MrMurano
       attr_accessor :type
     end
 
-    def initialize
+    def initialize(sid)
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
@@ -243,7 +245,8 @@ module MrMurano
       if remote.service.nil? or remote.event.nil? then
         raise "Missing parts! #{remote.to_h.to_json}"
       else
-        [$cfg[@solntype], remote[:service], remote[:event]].join('_')
+        #[$cfg[@solntype], remote[:service], remote[:event]].join('_')
+        [@sid, remote[:service], remote[:event]].join('_')
       end
     end
 
@@ -255,8 +258,8 @@ module MrMurano
       end
     end
 
-    def list
-      ret = get()
+    def list(call=nil, data=nil, &block)
+      ret = get(call, data, &block)
       return [] if ret.is_a?(Hash) and ret.has_key?(:error)
       # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
@@ -270,7 +273,7 @@ module MrMurano
     end
 
     def fetch(name)
-      ret = get('/'+CGI.escape(name))
+      ret = get('/' + CGI.escape(name))
       if ret.nil? then
         error "Fetch for #{name} returned nil; skipping"
         return ''
@@ -286,6 +289,15 @@ module MrMurano
         res << ret[:script]
         res
       end
+    end
+
+    def default_event_script(service_or_sid, &block)
+      post('/', {
+        :solution_id => @sid,
+        :service => service_or_sid,
+        :event => "event",
+        :script => "print(event)",
+      }, &block)
     end
 
     def tolocalname(item, key)
@@ -311,12 +323,14 @@ module MrMurano
             event_type = nil
           end
           # header line.
-          cur = EventHandlerItem.new(:service=>md[:service],
-                                     :event=>event_event,
-                                     :type=>event_type,
-                                     :local_path=>path,
-                                     :line=>lineno,
-                                     :script=>line)
+          cur = EventHandlerItem.new(
+            :service => md[:service],
+            :event => event_event,
+            :type => event_type,
+            :local_path => path,
+            :line => lineno,
+            :script => line,
+          )
         elsif not cur.nil? and not cur[:script].nil? then
           cur[:script] << line
         end
@@ -333,14 +347,15 @@ module MrMurano
         unless service.nil? or event.nil? then
           warning "Event in #{spath} missing header, but has legacy support."
           warning "Please add the header \"--#EVENT #{service} #{event}\""
-          cur = EventHandlerItem.new(:service=>service,
-                                     :event=>event,
-                                     :type=>nil,
-                                     :local_path=>path,
-                                     :line=>0,
-                                     :line_end => lineno,
-                                     :script=>path.read() # FIXME: ick, fix this.
-                                    )
+          cur = EventHandlerItem.new(
+            :service => service,
+            :event => event,
+            :type => nil,
+            :local_path => path,
+            :line => 0,
+            :line_end => lineno,
+            :script => path.read(), # FIXME: ick, fix this.
+          )
         end
       end
       cur
@@ -372,7 +387,7 @@ module MrMurano
   PRODUCT_SERVICES = ["device2", "interface",]
 
   class EventHandlerSolnPrd < EventHandler
-    def initialize
+    def initialize(sid=nil)
       @solntype = 'product.id'
       # FIXME/2017-06-20: Should we use separate directories for prod vs app?
       #   See also :services in PrfFile and elsewhere;
@@ -404,7 +419,7 @@ module MrMurano
   end
 
   class EventHandlerSolnApp < EventHandler
-    def initialize
+    def initialize(sid=nil)
       @solntype = 'application.id'
       # FIXME/2017-06-20: Should we use separate directories for prod vs app?
       @project_section = :services
@@ -428,6 +443,7 @@ module MrMurano
   #   [lb] thinks so if the locallist()/PRODUCT_SERVICES kludge fails in the future.
   #SyncRoot.add('services', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
   #SyncRoot.add('interfaces', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
-
 end
+
 #  vim: set ai et sw=2 ts=2 :
+
