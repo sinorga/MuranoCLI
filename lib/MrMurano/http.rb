@@ -127,7 +127,7 @@ module MrMurano
       error resp
     end
 
-    def workit(request, &block)
+    def workit(request, no_error: false, &block)
       curldebug(request)
       if block_given?
         yield request, http()
@@ -137,7 +137,10 @@ module MrMurano
         when Net::HTTPSuccess
           workit_response(response)
         else
-          showHttpError(request, response)
+          unless @suppress_error || no_error
+            showHttpError(request, response)
+          end
+          nil
         end
       end
     end
@@ -151,10 +154,10 @@ module MrMurano
       end
     end
 
-    def get(path='', query=nil, &block)
+    def get(path='', query=nil, no_error: false, &block)
       uri = endPoint(path)
       uri.query = URI.encode_www_form(query) unless query.nil?
-      workit(set_def_headers(Net::HTTP::Get.new(uri)), &block)
+      workit(set_def_headers(Net::HTTP::Get.new(uri)), no_error: no_error, &block)
     end
 
     def post(path='', body={}, &block)
