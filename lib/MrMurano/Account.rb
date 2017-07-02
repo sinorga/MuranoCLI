@@ -36,7 +36,7 @@ module MrMurano
       @user = $cfg['user.name']
     end
 
-    def endPoint(path)
+    def endpoint(path)
       URI('https://' + @host + '/api:1/' + path.to_s)
     end
 
@@ -82,7 +82,7 @@ module MrMurano
 
     def token_fetch
       # Cannot have token call token, so cannot use Http::workit.
-      uri = endPoint('token/')
+      uri = endpoint('token/')
       request = Net::HTTP::Post.new(uri)
       request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
       request.content_type = 'application/json'

@@ -69,7 +69,7 @@ module MrMurano
     # Uses the uriparts and path
     # @param path String: any additional parts for the URI
     # @return URI: The full URI for this enpoint.
-    def endPoint(path='')
+    def endpoint(path='')
       parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
       s = parts.map(&:to_s).join('/')
       URI(s + path.to_s)

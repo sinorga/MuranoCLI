@@ -17,7 +17,7 @@ RSpec.describe MrMurano::Content::Base do
   end
 
   it "initializes" do
-    uri = @ct.endPoint('/')
+    uri = @ct.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/")
   end
 
