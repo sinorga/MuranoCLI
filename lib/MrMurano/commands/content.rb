@@ -66,7 +66,8 @@ the HTTP Device API.
     if args[0].nil? then
       prd.error "Missing <content name>"
     else
-      prd.outf(prd.info(args[0])) do |dd,ios|
+      info = prd.info(args[0])
+      prd.outf(info) do |dd, ios|
         ios.puts Hash.transform_keys_to_strings(dd).to_yaml
       end
     end
@@ -108,8 +109,8 @@ the HTTP Device API.
     # a=b :> ["a","b"]
     # a= :> ["a",""]
     # a :> ["a"]
-    raise "Bad tag key '#{param}'" if key.nil? or key.empty?
-    raise "Bad tag value '#{param}'" if value.nil? or value.empty?
+    raise "Bad tag key '#{param}'" if key.to_s.empty?
+    raise "Bad tag value '#{param}'" if value.to_s.empty?
     key = key.downcase if key.downcase == 'name'
     tags[key] = value
   end
@@ -123,7 +124,7 @@ the HTTP Device API.
     else
       name = ::File.basename(args[0])
       name = tags['name'] if tags.has_key? 'name'
-      if name.empty? or name.nil? then
+      if name.to_s.empty?
         prd.error "Bad file name."
         exit 2
       end
