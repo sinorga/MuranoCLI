@@ -14,9 +14,10 @@ module MrMurano
   module Content
     class Base
       def initialize
-        @pid = $cfg['product.id']
-        raise MrMurano::ConfigError.new("No product id!") if @pid.nil?
-        @uriparts = [:service, @pid, :content, :item]
+        @sid = $cfg['product.id']
+        raise MrMurano::ConfigError.new("No product id!") if @sid.nil?
+        @uriparts = [:service, @sid, :content, :item]
+        @uriparts_sidex = 1
         @itemkey = :id
         @locationbase = $cfg['location.base']
         @location = nil

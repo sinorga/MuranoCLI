@@ -135,7 +135,7 @@ If an alias is not settable, this will fail.
   }.strip
 
   c.action do |args, options|
-    resources = (MrMurano::Gateway::Base.new.info or {})[:resources]
+    resources = (MrMurano::Gateway::GweBase.new.info or {})[:resources]
     prd = MrMurano::Gateway::Device.new
     if args.count < 1 then
       prd.error "Identifier missing"
@@ -266,7 +266,7 @@ Get the URL for the HTTP-Data-API for this Project.
   }.strip
 
   c.action do |args, options|
-    prd = MrMurano::Gateway::Base.new
+    prd = MrMurano::Gateway::GweBase.new
     ret = prd.info()
     say "https://#{ret[:fqdn]}/onep:v1/stack/alias"
   end

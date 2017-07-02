@@ -8,7 +8,7 @@ require 'MrMurano/Webservice'
 module MrMurano
   module Webservice
     # Static File content
-    class File < Base
+    class File < WebserviceBase
       # File Specific details on an Item
       class FileItem < Item
         # @return [String] path for URL maps to this static file

@@ -10,60 +10,21 @@ require 'uri'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
 require 'MrMurano/Config'
+require 'MrMurano/SolutionId'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
   class SolutionBase
     include Http
     include Verbose
-
-    INVALID_SID = '-1'
-
-    attr_reader :sid
-    attr_reader :valid_sid
+    include SolutionId
 
     def initialize(sid=nil)
+      @uriparts_sidex = 1
+      init_sid!(sid)
       @uriparts = [:solution, @sid]
-      unless defined?(@solntype) && @solntype
-        # Note that 'solution.id' isn't an actual config setting;
-        # see instead 'application.id' and 'product.id'. We just
-        # use 'solution.id' to indicate that the caller specified
-        # a solution ID explicitly (i.e., it's not from the $cfg).
-        raise "Missing sid or class @solntype!?" if sid.to_s.empty?
-        @solntype = 'solution.id'
-      end
-      if sid
-        self.sid = sid
-      else
-        # Get the application.id or product.id.
-        self.sid = $cfg[@solntype]
-      end
-      # Maybe raise 'No application!' or 'No product!'.
-      raise MrMurano::ConfigError.new("No #{/(.*).id/.match(@solntype)[1]} ID!") if @sid.to_s.empty?
       @itemkey = :id
       @project_section = nil unless defined?(@project_section)
-    end
-
-    # rubocop:disable Style/MethodName
-    def apiId
-      @sid
-    end
-
-    def sid?
-      # The @sid should never be nil or empty, but let's at least check.
-      @sid != INVALID_SID && !@sid.to_s.empty?
-    end
-
-    def sid=(sid)
-      sid = INVALID_SID if sid.nil? || sid.empty?
-      @valid_sid = false if sid.to_s.empty? || sid == INVALID_SID || sid != @sid
-      @sid = sid
-      # MAGIC_NUMBER: The 2nd element is the solution ID, e.g., solution/<sid>/...
-      @uriparts[1] = @sid
-    end
-
-    def valid_sid?
-      @valid_sid
     end
 
     def ==(them)

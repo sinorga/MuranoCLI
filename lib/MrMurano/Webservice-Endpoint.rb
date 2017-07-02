@@ -1,3 +1,10 @@
+# Last Modified: 2017.07.02 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'uri'
 require 'net/http'
 require 'json'
@@ -7,7 +14,7 @@ require 'MrMurano/Webservice'
 module MrMurano
   # …/endpoint
   module Webservice
-    class Endpoint < Base
+    class Endpoint < WebserviceBase
 
       # Route Specific details on an Item
       class RouteItem < Item
@@ -142,12 +149,14 @@ module MrMurano
             # header line.
             cur[:line_end] = lineno unless cur.nil?
             items << cur unless cur.nil?
-            cur = RouteItem.new(:method=>md[:method],
-                                :path=>md[:path],
-                                :content_type=> (md[:ctype] or 'application/json'),
-                                :local_path=>path,
-                                :line=>lineno,
-                                :script=>line)
+            cur = RouteItem.new(
+              method: md[:method],
+              path: md[:path],
+              content_type: (md[:ctype] or 'application/json'),
+              local_path: path,
+              line: lineno,
+              script: line,
+            )
           elsif not cur.nil? and not cur[:script].nil? then
             # MAYBE/2017-07-02: Frozen string literal: change << to += ??
             cur[:script] << line
@@ -188,10 +197,9 @@ module MrMurano
         end
         return (itemA[:script] != itemB[:script] or itemA[:content_type] != itemB[:content_type])
       end
-
     end
 
     SyncRoot.add('endpoints', Endpoint, 'A', %{Endpoints}, true)
   end
 end
-#  vim: set ai et sw=2 ts=2 :
+

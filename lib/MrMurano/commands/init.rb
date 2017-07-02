@@ -310,6 +310,9 @@ command :init do |c|
       rescue StandardError => _err
         raise
       else
+        # If the user didn't make both an application and a product,
+        # then some syncables won't have their IDs set.
+        next unless syncable.sid?
         # Get list of changes. Leave :delete => true and :update => true so we
         # can tell if there are existing files, in which case skip the pull.
         stat = syncable.status(
