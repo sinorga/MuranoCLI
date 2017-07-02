@@ -250,7 +250,7 @@ module MrMurano
     # Children objects Must override this
     #
     # @return [Array<Item>] of item details
-    def list()
+    def list
       []
     end
 
