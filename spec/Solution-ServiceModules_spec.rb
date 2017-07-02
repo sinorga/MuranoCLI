@@ -455,7 +455,7 @@ RSpec.describe MrMurano::Module do
 
   context "toRemoteItem" do
     it "reads one" do
-      path = Pathname.new(@projectDir) + 'test.lua'
+      path = Pathname.new(@project_dir) + 'test.lua'
       ret = @srv.toRemoteItem(nil, path)
       expect(ret).to eq({:name=>'test'})
     end

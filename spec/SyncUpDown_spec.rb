@@ -47,14 +47,14 @@ RSpec.describe MrMurano::SyncUpDown do
     end
 
     it "finds nothing in empty directory" do
-      FileUtils.mkpath(@projectDir + '/tsud')
+      FileUtils.mkpath(@project_dir + '/tsud')
       t = TSUD.new
       ret = t.status
       expect(ret).to eq({:toadd=>[], :todel=>[], :tomod=>[], :unchg=>[]})
     end
 
     it "finds things there but not here" do
-      FileUtils.mkpath(@projectDir + '/tsud')
+      FileUtils.mkpath(@project_dir + '/tsud')
       t = TSUD.new
       expect(t).to receive(:list).once.and_return([
         {:name=>1},{:name=>2},{:name=>3}
@@ -68,7 +68,7 @@ RSpec.describe MrMurano::SyncUpDown do
     end
 
     it "finds things there but not here; asdown" do
-      FileUtils.mkpath(@projectDir + '/tsud')
+      FileUtils.mkpath(@project_dir + '/tsud')
       t = TSUD.new
       expect(t).to receive(:list).once.and_return([
         {:name=>1},{:name=>2},{:name=>3}
@@ -82,9 +82,9 @@ RSpec.describe MrMurano::SyncUpDown do
     end
 
     it "finds things here but not there" do
-      FileUtils.mkpath(@projectDir + '/tsud')
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      FileUtils.touch(@projectDir + '/tsud/two.lua')
+      FileUtils.mkpath(@project_dir + '/tsud')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
+      FileUtils.touch(@project_dir + '/tsud/two.lua')
       t = TSUD.new
       expect(t).to receive(:toRemoteItem).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
@@ -103,9 +103,9 @@ RSpec.describe MrMurano::SyncUpDown do
     end
 
     it "finds things here and there" do
-      FileUtils.mkpath(@projectDir + '/tsud')
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      FileUtils.touch(@projectDir + '/tsud/two.lua')
+      FileUtils.mkpath(@project_dir + '/tsud')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
+      FileUtils.touch(@project_dir + '/tsud/two.lua')
       t = TSUD.new
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'},{:name=>'two.lua'}
@@ -126,9 +126,9 @@ RSpec.describe MrMurano::SyncUpDown do
         :unchg=>[]})
     end
     it "finds things here and there; but they're the same" do
-      FileUtils.mkpath(@projectDir + '/tsud')
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      FileUtils.touch(@projectDir + '/tsud/two.lua')
+      FileUtils.mkpath(@project_dir + '/tsud')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
+      FileUtils.touch(@project_dir + '/tsud/two.lua')
       t = TSUD.new
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'},{:name=>'two.lua'}
@@ -151,8 +151,8 @@ RSpec.describe MrMurano::SyncUpDown do
     end
 
     it "calls diff" do
-      FileUtils.mkpath(@projectDir + '/tsud')
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
+      FileUtils.mkpath(@project_dir + '/tsud')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
       t = TSUD.new
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'}
@@ -175,14 +175,14 @@ RSpec.describe MrMurano::SyncUpDown do
 
     context "Filtering" do
       before(:example) do
-        FileUtils.mkpath(@projectDir + '/tsud/ga')
-        FileUtils.mkpath(@projectDir + '/tsud/gb')
-        FileUtils.touch(@projectDir + '/tsud/one.lua')     # tomod
-        FileUtils.touch(@projectDir + '/tsud/ga/two.lua')  # tomod
-        FileUtils.touch(@projectDir + '/tsud/three.lua')   # unchg
-        FileUtils.touch(@projectDir + '/tsud/gb/four.lua') # unchg
-        FileUtils.touch(@projectDir + '/tsud/five.lua')    # toadd
-        FileUtils.touch(@projectDir + '/tsud/ga/six.lua')  # toadd
+        FileUtils.mkpath(@project_dir + '/tsud/ga')
+        FileUtils.mkpath(@project_dir + '/tsud/gb')
+        FileUtils.touch(@project_dir + '/tsud/one.lua')     # tomod
+        FileUtils.touch(@project_dir + '/tsud/ga/two.lua')  # tomod
+        FileUtils.touch(@project_dir + '/tsud/three.lua')   # unchg
+        FileUtils.touch(@project_dir + '/tsud/gb/four.lua') # unchg
+        FileUtils.touch(@project_dir + '/tsud/five.lua')    # toadd
+        FileUtils.touch(@project_dir + '/tsud/ga/six.lua')  # toadd
         @t = TSUD.new
         expect(@t).to receive(:list).once.and_return([
           MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),   # tomod
@@ -308,7 +308,7 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(@t).to receive(:toRemoteItem).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
-      ret = @t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
+      ret = @t.localitems(Pathname.new(@project_dir + '/tsud').realpath)
       expect(ret).to match([
         {:name=>'one.lua',
          :local_path=>an_instance_of(Pathname)},
@@ -322,7 +322,7 @@ RSpec.describe MrMurano::SyncUpDown do
         [{:name=>'one:1'},{:name=>'one:2'}],
         [{:name=>'two:1'},{:name=>'two:2'}]
         )
-      ret = @t.localitems(Pathname.new(@projectDir + '/tsud').realpath)
+      ret = @t.localitems(Pathname.new(@project_dir + '/tsud').realpath)
       expect(ret).to match([
         {:name=>'one:1',
          :local_path=>an_instance_of(Pathname)},
@@ -338,9 +338,9 @@ RSpec.describe MrMurano::SyncUpDown do
 
   context "download" do
     it "defaults to :id if @itemkey missing" do
-      FileUtils.mkpath(@projectDir + '/tsud')
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      lp = Pathname.new(@projectDir + '/tsud/one.lua').realpath
+      FileUtils.mkpath(@project_dir + '/tsud')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
+      lp = Pathname.new(@project_dir + '/tsud/one.lua').realpath
       t = TSUD.new
       expect(t).to receive(:fetch).once.with(1).and_yield("foo")
       t.download(lp, {:id=>1, :updated_at=>ITEM_UPDATED_AT})
@@ -349,9 +349,9 @@ RSpec.describe MrMurano::SyncUpDown do
 
   context "doing diffs" do
     before(:example) do
-      FileUtils.mkpath(@projectDir + '/tsud')
+      FileUtils.mkpath(@project_dir + '/tsud')
       @t = TSUD.new
-      @scpt = Pathname.new(@projectDir + '/tsud/one.lua')
+      @scpt = Pathname.new(@project_dir + '/tsud/one.lua')
       @scpt.open('w'){|io| io << %{-- fake lua\nreturn 0\n}}
       @scpt = @scpt.realpath
     end
@@ -386,7 +386,7 @@ RSpec.describe MrMurano::SyncUpDown do
 
   context "syncup" do
     before(:example) do
-      FileUtils.mkpath(@projectDir + '/tsud')
+      FileUtils.mkpath(@project_dir + '/tsud')
       @t = TSUD.new
     end
 
@@ -399,16 +399,16 @@ RSpec.describe MrMurano::SyncUpDown do
     end
 
     it "creates" do
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      FileUtils.touch(@projectDir + '/tsud/two.lua')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
+      FileUtils.touch(@project_dir + '/tsud/two.lua')
 
       expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(MrMurano::SyncUpDown::Item), false)
       @t.syncup({:create=>true})
     end
 
     it "updates" do
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      FileUtils.touch(@projectDir + '/tsud/two.lua')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
+      FileUtils.touch(@project_dir + '/tsud/two.lua')
       expect(@t).to receive(:list).once.and_return([
         MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),
         MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
@@ -424,17 +424,17 @@ RSpec.describe MrMurano::SyncUpDown do
 
   context "syncdown" do
     before(:example) do
-      FileUtils.mkpath(@projectDir + '/tsud')
+      FileUtils.mkpath(@project_dir + '/tsud')
       @t = TSUD.new
     end
 
     it "removes" do
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      FileUtils.touch(@projectDir + '/tsud/two.lua')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
+      FileUtils.touch(@project_dir + '/tsud/two.lua')
 
       @t.syncdown({:delete=>true})
-      expect(FileTest.exist?(@projectDir + '/tsud/one.lua')).to be false
-      expect(FileTest.exist?(@projectDir + '/tsud/two.lua')).to be false
+      expect(FileTest.exist?(@project_dir + '/tsud/one.lua')).to be false
+      expect(FileTest.exist?(@project_dir + '/tsud/two.lua')).to be false
     end
 
     it "creates" do
@@ -445,13 +445,13 @@ RSpec.describe MrMurano::SyncUpDown do
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
       @t.syncdown({:create=>true})
-      expect(FileTest.exist?(@projectDir + '/tsud/one.lua')).to be true
-      expect(FileTest.exist?(@projectDir + '/tsud/two.lua')).to be true
+      expect(FileTest.exist?(@project_dir + '/tsud/one.lua')).to be true
+      expect(FileTest.exist?(@project_dir + '/tsud/two.lua')).to be true
     end
 
     it "updates" do
-      FileUtils.touch(@projectDir + '/tsud/one.lua')
-      FileUtils.touch(@projectDir + '/tsud/two.lua')
+      FileUtils.touch(@project_dir + '/tsud/one.lua')
+      FileUtils.touch(@project_dir + '/tsud/two.lua')
       expect(@t).to receive(:list).once.and_return([
         MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),
         MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
@@ -463,21 +463,21 @@ RSpec.describe MrMurano::SyncUpDown do
         MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
       )
       @t.syncdown({:update=>true})
-      expect(FileTest.exist?(@projectDir + '/tsud/one.lua')).to be true
-      expect(FileTest.exist?(@projectDir + '/tsud/two.lua')).to be true
+      expect(FileTest.exist?(@project_dir + '/tsud/one.lua')).to be true
+      expect(FileTest.exist?(@project_dir + '/tsud/two.lua')).to be true
     end
   end
 
 #  context "bundles" do
 #    before(:example) do
-#      FileUtils.mkpath(@projectDir + '/tsud')
-#      FileUtils.mkpath(@projectDir + '/bundles/mybun/tsud')
+#      FileUtils.mkpath(@project_dir + '/tsud')
+#      FileUtils.mkpath(@project_dir + '/bundles/mybun/tsud')
 #      @t = TSUD.new
 #    end
 #
 #    it "finds items in bundles." do
-#      FileUtils.touch(@projectDir + '/tsud/one.lua')
-#      FileUtils.touch(@projectDir + '/bundles/mybun/tsud/two.lua')
+#      FileUtils.touch(@project_dir + '/tsud/one.lua')
+#      FileUtils.touch(@project_dir + '/bundles/mybun/tsud/two.lua')
 #
 #      expect(@t).to receive(:toRemoteItem).and_return(
 #        {:name=>'two.lua'},{:name=>'one.lua'}
@@ -493,8 +493,8 @@ RSpec.describe MrMurano::SyncUpDown do
 #    end
 #
 #    it "Doesn't download a bundled item" do
-#      FileUtils.touch(@projectDir + '/tsud/one.lua')
-#      lp = Pathname.new(@projectDir + '/tsud/one.lua').realpath
+#      FileUtils.touch(@project_dir + '/tsud/one.lua')
+#      lp = Pathname.new(@project_dir + '/tsud/one.lua').realpath
 #
 #      expect(@t).to receive(:warning).once.with(/Not downloading into bundled item.*/)
 #

@@ -113,7 +113,7 @@ RSpec.describe MrMurano::Webservice::Cors do
                :credentials=>true}
     end
     it "specified file" do
-      File.open(File.join(@projectDir, 'bob.yaml'), 'w'){|io| io << @cors.to_yaml}
+      File.open(File.join(@project_dir, 'bob.yaml'), 'w'){|io| io << @cors.to_yaml}
       stub_request(:put, "#{@baseURI}").
         with(:body=>@cors.to_json,
              :headers=>{'Authorization'=>'token TTTTTTTTTT',
@@ -125,7 +125,7 @@ RSpec.describe MrMurano::Webservice::Cors do
     end
 
     it "file in $project" do
-      File.open(File.join(@projectDir, 'bob.yaml'), 'w'){|io| io << @cors.to_yaml}
+      File.open(File.join(@project_dir, 'bob.yaml'), 'w'){|io| io << @cors.to_yaml}
       $project['routes.cors'] = 'bob.yaml'
       stub_request(:put, "#{@baseURI}").
         with(:body=>@cors.to_json,
@@ -138,7 +138,7 @@ RSpec.describe MrMurano::Webservice::Cors do
     end
 
     it "file defaults thru $project" do
-      File.open(File.join(@projectDir, 'cors.yaml'), 'w'){|io| io << @cors.to_yaml}
+      File.open(File.join(@project_dir, 'cors.yaml'), 'w'){|io| io << @cors.to_yaml}
       stub_request(:put, "#{@baseURI}").
         with(:body=>@cors.to_json,
              :headers=>{'Authorization'=>'token TTTTTTTTTT',

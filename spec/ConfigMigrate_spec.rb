@@ -17,7 +17,7 @@ RSpec.describe MrMurano::ConfigMigrate do
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
 
-    @lry = Pathname.new(@projectDir) + '.Solutionfile.secret'
+    @lry = Pathname.new(@project_dir) + '.Solutionfile.secret'
     FileUtils.copy(File.join(@testdir, 'spec/fixtures/SolutionFiles/secret.json'), @lry.to_path)
 
     @mrt = MrMurano::ConfigMigrate.new

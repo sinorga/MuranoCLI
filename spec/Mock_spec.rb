@@ -6,7 +6,7 @@ require '_workspace'
 RSpec.describe MrMurano::Mock, "#mock" do
   include_context "WORKSPACE"
   before(:example) do
-    FileUtils.mkpath(@projectDir + '/routes')
+    FileUtils.mkpath(@project_dir + '/routes')
     $cfg = MrMurano::Config.new
     $cfg.load
 
