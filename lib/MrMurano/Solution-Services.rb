@@ -84,14 +84,14 @@ module MrMurano
 
     def docmp(item_a, item_b)
       if item_a[:updated_at].nil? && item_a[:local_path]
-        ct = cachedUpdateTimeFor(item_a[:local_path])
+        ct = cached_update_time_for(item_a[:local_path])
         item_a[:updated_at] = ct unless ct.nil?
         item_a[:updated_at] = item_a[:local_path].mtime.getutc if ct.nil?
       elsif item_a[:updated_at].is_a?(String)
         item_a[:updated_at] = DateTime.parse(item_a[:updated_at]).to_time.getutc
       end
       if item_b[:updated_at].nil? && item_b[:local_path]
-        ct = cachedUpdateTimeFor(item_b[:local_path])
+        ct = cached_update_time_for(item_b[:local_path])
         item_b[:updated_at] = ct unless ct.nil?
         item_b[:updated_at] = item_b[:local_path].mtime.getutc if ct.nil?
       elsif item_b[:updated_at].is_a?(String)
@@ -100,7 +100,7 @@ module MrMurano
       item_a[:updated_at].to_time.round != item_b[:updated_at].to_time.round
     end
 
-    def cacheFileName
+    def cache_file_name
       [
         'cache',
         self.class.to_s.gsub(/\W+/, '_'),
@@ -115,7 +115,7 @@ module MrMurano
         sha1: Digest::SHA1.file(local_path.to_s).hexdigest,
         updated_at: time.to_datetime.iso8601(3),
       }
-      cache_file = $cfg.file_at(cacheFileName)
+      cache_file = $cfg.file_at(cache_file_name)
       if cache_file.file?
         cache_file.open('r+') do |io|
           # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
@@ -135,9 +135,9 @@ module MrMurano
       time
     end
 
-    def cachedUpdateTimeFor(local_path)
+    def cached_update_time_for(local_path)
       cksm = Digest::SHA1.file(local_path.to_s).hexdigest
-      cache_file = $cfg.file_at(cacheFileName)
+      cache_file = $cfg.file_at(cache_file_name)
       return nil unless cache_file.file?
       ret = nil
       cache_file.open('r') do |io|
