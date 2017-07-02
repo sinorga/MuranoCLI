@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -48,6 +48,15 @@ end
 
 global_option('--[no-]progress', %(Disable spinner and progress message)) do |value|
   $cfg['tool.no-progress'] = !value
+end
+
+exclude_help = %(
+Except config values from the specified scope(s).
+        SCOPES can be 1 scope or comma-separated list of
+        #{MrMurano::Config::CFG_SCOPES.map(&:to_s)}
+).strip
+global_option('--exclude-scopes SCOPES', Array, exclude_help) do |value|
+  $cfg.exclude_scopes = value.map(&:to_sym)
 end
 
 # 2017-06-30: Being more flexible. And more consistent. Some commands

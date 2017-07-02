@@ -144,6 +144,9 @@ module MrMurano
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new)
 
+      # The user can exclude certain scopes.
+      @exclude_scopes = []
+
       # All these set()'s are against the :defaults config.
       # So no disk writing ensues. And these serve as defaults
       # unless, say, a SolutionFile says otherwise.
@@ -268,6 +271,7 @@ module MrMurano
     def get(key, scope=CFG_SCOPES)
       scope = [scope] unless scope.is_a? Array
       paths = @paths.select { |p| scope.include? p.kind }
+      paths = paths.reject { |p| @exclude_scopes.include? p.kind }
 
       section, ikey = key.split('.')
       paths.each do |path|
@@ -319,6 +323,10 @@ module MrMurano
     # For setting internal, this-run-only values.
     def []=(key, value)
       set(key, value, :internal)
+    end
+
+    def exclude_scopes=(skip_scopes)
+      @exclude_scopes = skip_scopes
     end
 
     ## Dump out a combined config
