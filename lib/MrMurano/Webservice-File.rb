@@ -143,7 +143,7 @@ module MrMurano
       # @param root [Pathname,String] Root path for this resource type from config files
       # @param path [Pathname,String] Path to local item
       # @return [Item] hash of the details for the remote item for this path
-      def toRemoteItem(from, path)
+      def to_remote_item(from, path)
         item = super(from, path)
         name = item[:name]
         name = '/' if name == $cfg['files.default_page']

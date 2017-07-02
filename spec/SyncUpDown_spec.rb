@@ -86,7 +86,7 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@project_dir + '/tsud/one.lua')
       FileUtils.touch(@project_dir + '/tsud/two.lua')
       t = TSUD.new
-      expect(t).to receive(:toRemoteItem).and_return(
+      expect(t).to receive(:to_remote_item).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
       ret = t.status
@@ -110,7 +110,7 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'},{:name=>'two.lua'}
       ])
-      expect(t).to receive(:toRemoteItem).and_return(
+      expect(t).to receive(:to_remote_item).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
       ret = t.status
@@ -133,7 +133,7 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'},{:name=>'two.lua'}
       ])
-      expect(t).to receive(:toRemoteItem).and_return(
+      expect(t).to receive(:to_remote_item).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
       expect(t).to receive(:docmp).twice.and_return(false)
@@ -157,7 +157,7 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(t).to receive(:list).once.and_return([
         {:name=>'one.lua'}
       ])
-      expect(t).to receive(:toRemoteItem).and_return(
+      expect(t).to receive(:to_remote_item).and_return(
         {:name=>'one.lua'}
       )
       expect(t).to receive(:dodiff).once.and_return("diffed output")
@@ -192,22 +192,22 @@ RSpec.describe MrMurano::SyncUpDown do
           MrMurano::SyncUpDown::Item.new({:name=>'seven.lua', :updated_at=>ITEM_UPDATED_AT}), # todel
           MrMurano::SyncUpDown::Item.new({:name=>'eight.lua', :updated_at=>ITEM_UPDATED_AT}), # todel
         ])
-        expect(@t).to receive(:toRemoteItem).
+        expect(@t).to receive(:to_remote_item).
           with(anything(), pathname_globs('**/one.lua')).
           and_return(MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}))
-        expect(@t).to receive(:toRemoteItem).
+        expect(@t).to receive(:to_remote_item).
           with(anything(), pathname_globs('**/two.lua')).
           and_return(MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT}))
-        expect(@t).to receive(:toRemoteItem).
+        expect(@t).to receive(:to_remote_item).
           with(anything(), pathname_globs('**/three.lua')).
           and_return(MrMurano::SyncUpDown::Item.new({:name=>'three.lua', :updated_at=>ITEM_UPDATED_AT}))
-        expect(@t).to receive(:toRemoteItem).
+        expect(@t).to receive(:to_remote_item).
           with(anything(), pathname_globs('**/four.lua')).
           and_return(MrMurano::SyncUpDown::Item.new({:name=>'four.lua', :updated_at=>ITEM_UPDATED_AT}))
-        expect(@t).to receive(:toRemoteItem).
+        expect(@t).to receive(:to_remote_item).
           with(anything(), pathname_globs('**/five.lua')).
           and_return(MrMurano::SyncUpDown::Item.new({:name=>'five.lua', :updated_at=>ITEM_UPDATED_AT}))
-        expect(@t).to receive(:toRemoteItem).
+        expect(@t).to receive(:to_remote_item).
           with(anything(), pathname_globs('**/six.lua')).
           and_return(MrMurano::SyncUpDown::Item.new({:name=>'six.lua', :updated_at=>ITEM_UPDATED_AT}))
 
@@ -305,7 +305,7 @@ RSpec.describe MrMurano::SyncUpDown do
       @t = TSUD.new
     end
     it "finds local items" do
-      expect(@t).to receive(:toRemoteItem).and_return(
+      expect(@t).to receive(:to_remote_item).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
       ret = @t.localitems(Pathname.new(@project_dir + '/tsud').realpath)
@@ -317,8 +317,8 @@ RSpec.describe MrMurano::SyncUpDown do
       ])
     end
 
-    it "takes an array from toRemoteItem" do
-      expect(@t).to receive(:toRemoteItem).and_return(
+    it "takes an array from to_remote_item" do
+      expect(@t).to receive(:to_remote_item).and_return(
         [{:name=>'one:1'},{:name=>'one:2'}],
         [{:name=>'two:1'},{:name=>'two:2'}]
         )
@@ -415,7 +415,7 @@ RSpec.describe MrMurano::SyncUpDown do
       ])
 
       expect(@t).to receive(:upload).twice.with(kind_of(Pathname), kind_of(MrMurano::SyncUpDown::Item), true)
-      expect(@t).to receive(:toRemoteItem).and_return(
+      expect(@t).to receive(:to_remote_item).and_return(
         {:name=>'one.lua'},{:name=>'two.lua'}
       )
       @t.syncup({:update=>true})
@@ -458,7 +458,7 @@ RSpec.describe MrMurano::SyncUpDown do
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
-      expect(@t).to receive(:toRemoteItem).and_return(
+      expect(@t).to receive(:to_remote_item).and_return(
         MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),
         MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
       )
@@ -479,7 +479,7 @@ RSpec.describe MrMurano::SyncUpDown do
 #      FileUtils.touch(@project_dir + '/tsud/one.lua')
 #      FileUtils.touch(@project_dir + '/bundles/mybun/tsud/two.lua')
 #
-#      expect(@t).to receive(:toRemoteItem).and_return(
+#      expect(@t).to receive(:to_remote_item).and_return(
 #        {:name=>'two.lua'},{:name=>'one.lua'}
 #      )
 #      ret = @t.locallist
