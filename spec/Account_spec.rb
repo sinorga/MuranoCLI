@@ -15,7 +15,7 @@ RSpec.describe MrMurano::Account, "token" do
     $cfg['business.id'] = 'XYZxyz'
     $cfg['product.id'] = 'XYZ'
 
-    @acc = MrMurano::Account.new
+    @acc = MrMurano::Account.instance
   end
 
   after(:example) do
@@ -35,7 +35,7 @@ RSpec.describe MrMurano::Account, "token" do
       $cfg['user.name'] = "bob"
       expect(@pswd).to receive(:get).once.and_return("built")
 
-      ret = @acc._loginInfo
+      ret = @acc.login_info
       expect(ret).to eq({
         :email => "bob", :password=>"built"
       })
@@ -48,7 +48,7 @@ RSpec.describe MrMurano::Account, "token" do
       expect($cfg).to receive(:set).with('user.name', 'bob', :user).once.and_call_original
       expect(@pswd).to receive(:get).once.and_return("built")
 
-      ret = @acc._loginInfo
+      ret = @acc.login_info
       expect(ret).to eq({
         :email => "bob", :password=>"built"
       })
@@ -61,7 +61,7 @@ RSpec.describe MrMurano::Account, "token" do
       expect($terminal).to receive(:ask).once.and_return('dog')
       expect(@pswd).to receive(:set).once.with('bizapi.hosted.exosite.io','bob','dog')
 
-      ret = @acc._loginInfo
+      ret = @acc.login_info
       expect(ret).to eq({
         :email => "bob", :password=>"dog"
       })
@@ -70,7 +70,7 @@ RSpec.describe MrMurano::Account, "token" do
 
   context "token" do
     before(:example) do
-      allow(@acc).to receive(:_loginInfo).and_return({:email=>'bob',:password=>'v'})
+      allow(@acc).to receive(:login_info).and_return({:email=>'bob',:password=>'v'})
     end
 
     it "gets a token" do
@@ -100,7 +100,7 @@ RSpec.describe MrMurano::Account, "token" do
 
     it "uses existing token, even with new instance" do
       @acc.token_reset("quxx")
-      acc = MrMurano::Account.new
+      acc = MrMurano::Account.instance
       ret = acc.token
       expect(ret).to eq("quxx")
     end
@@ -120,7 +120,7 @@ RSpec.describe MrMurano::Account do
     $cfg['business.id'] = 'XYZxyz'
     $cfg['product.id'] = 'XYZ'
 
-    @acc = MrMurano::Account.new
+    @acc = MrMurano::Account.instance
     allow(@acc).to receive(:token).and_return("TTTTTTTTTT")
   end
   after(:example) do
@@ -153,7 +153,7 @@ RSpec.describe MrMurano::Account do
       expect(ret).to eq(bizlist)
     end
 
-    it "askes for account when missing" do
+    it "asks for account when missing" do
       bizlist = [
         {:bizid=>"XXX",
          :role=>"admin",
@@ -166,7 +166,7 @@ RSpec.describe MrMurano::Account do
         to_return(body: bizlist)
 
       $cfg['user.name'] = nil
-      expect(@acc).to receive(:_loginInfo) do |arg|
+      expect(@acc).to receive(:login_info) do |arg|
         $cfg['user.name'] = 'BoB@place.net'
       end
 

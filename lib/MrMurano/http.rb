@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -18,7 +18,7 @@ module MrMurano
   module Http
     def token
       return @token unless @token.nil?
-      acc = Account.new
+      acc = MrMurano::Account.instance
       @token = acc.token
       raise 'Not logged in!' if @token.nil?
       # MAYBE: Check that ADC is enabled on the business. If not, tell

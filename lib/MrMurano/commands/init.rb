@@ -104,7 +104,7 @@ command :init do |c|
   c.action do |args, options|
     options.default :force=>false, :mkdirs=>true
 
-    acc = MrMurano::Account.new
+    acc = MrMurano::Account.instance
 
     validate_dir!(acc, args, options)
 
