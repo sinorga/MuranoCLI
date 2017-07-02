@@ -33,7 +33,7 @@ RSpec.describe MrMurano::Http do
     end
 
     it "gets one" do
-      expect(@acc).to receive(:adc_compat_check)
+      #expect(@acc).to receive(:adc_compat_check)
       expect(@acc).to receive(:token).and_return("ABCDEFG")
       ret = @tst.token
       expect(ret).to eq("ABCDEFG")
