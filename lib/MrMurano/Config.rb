@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -278,6 +278,48 @@ module MrMurano
       nil
     end
 
+    def set(key, value, scope=:project)
+      section, ikey = key.split('.', 2)
+      raise 'Invalid key' if section.nil?
+      if ikey.nil?
+        # If key isn't dotted, then assume the tool section.
+        ikey = section
+        section = 'tool'
+      end
+
+      paths = @paths.select { |p| scope == p.kind }
+      raise "Unknown scope ‘#{scope}’" if paths.empty?
+      raise "Too many scopes ‘#{scope}’" if paths.length > 1
+
+      cfg = paths.first
+      data = cfg.data
+      tomod = data[section]
+      tomod[ikey] = value unless value.nil?
+      tomod.delete(ikey) if value.nil?
+      data[section] = tomod
+      # Remove empty sections to make test results more predictable.
+      # Interesting: IniFile.each only returns sections with key-vals,
+      #              so call IniFile.each_section instead, which includes
+      #              empty empty section. Here's what "each" looks like:
+      #                 data.each do |sectn, param, val|
+      #                   puts "#{param} = #{val} [in section: #{sectn}]"
+      data.each_section do |sectn|
+        data.delete_section(sectn) if data[sectn].empty?
+      end
+
+      cfg.write
+    end
+
+    # key is <section>.<key>
+    def [](key)
+      get(key)
+    end
+
+    # For setting internal, this-run-only values.
+    def []=(key, value)
+      set(key, value, :internal)
+    end
+
     ## Dump out a combined config
     def dump
       # have a fake, merge all into it, then dump it.
@@ -350,48 +392,6 @@ module MrMurano
         end
       end
       locats
-    end
-
-    def set(key, value, scope=:project)
-      section, ikey = key.split('.', 2)
-      raise 'Invalid key' if section.nil?
-      if ikey.nil?
-        # If key isn't dotted, then assume the tool section.
-        ikey = section
-        section = 'tool'
-      end
-
-      paths = @paths.select { |p| scope == p.kind }
-      raise "Unknown scope ‘#{scope}’" if paths.empty?
-      raise "Too many scopes ‘#{scope}’" if paths.length > 1
-
-      cfg = paths.first
-      data = cfg.data
-      tomod = data[section]
-      tomod[ikey] = value unless value.nil?
-      tomod.delete(ikey) if value.nil?
-      data[section] = tomod
-      # Remove empty sections to make test results more predictable.
-      # Interesting: IniFile.each only returns sections with key-vals,
-      #              so call IniFile.each_section instead, which includes
-      #              empty empty section. Here's what "each" looks like:
-      #                 data.each do |sectn, param, val|
-      #                   puts "#{param} = #{val} [in section: #{sectn}]"
-      data.each_section do |sectn|
-        data.delete_section(sectn) if data[sectn].empty?
-      end
-
-      cfg.write
-    end
-
-    # key is <section>.<key>
-    def [](key)
-      get(key)
-    end
-
-    # For setting internal, this-run-only values.
-    def []=(key, value)
-      set(key, value, :internal)
     end
   end
 
