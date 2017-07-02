@@ -175,6 +175,8 @@ module MrMurano
     end
 
     def initialize
+      # FIXME/VERIFY/2017-07-02: Check that products do not have Modules.
+      @solntype = 'application.id'
       super
       @uriparts << 'library'
       @itemkey = :alias
