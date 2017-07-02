@@ -31,6 +31,20 @@ end
 module Commander
   class Command
     attr_accessor :project_not_required
+
+    def verify_arg_count!(args, max_args=0)
+      if max_args.zero?
+        if args.count.positive?
+          MrMurano::Verbose::error('Not expecting any arguments')
+          exit 2
+        end
+      else
+        if args.count > max_args
+          MrMurano::Verbose::error("Not expecting more than #{max_args} arguments")
+          exit 2
+        end
+      end
+    end
   end
 
   class Runner
