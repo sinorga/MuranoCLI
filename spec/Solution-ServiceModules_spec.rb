@@ -223,7 +223,7 @@ RSpec.describe MrMurano::Module do
         }
         tio.close
 
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         ret = @srv.upload(tio.path,
           MrMurano::Module::ModuleItem.new(
@@ -250,7 +250,7 @@ RSpec.describe MrMurano::Module do
         }
         tio.close
 
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         cacheFile.open('w') do |cfio|
           cfio << {tio.path=>{:sha1=>"6",
                               :updated_at=>Time.now.getutc.to_datetime.iso8601(3)}
@@ -306,7 +306,7 @@ RSpec.describe MrMurano::Module do
       end
 
       it "cache miss" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         Tempfile.open('foo') do |tio|
           tio << "something"
@@ -324,7 +324,7 @@ RSpec.describe MrMurano::Module do
       end
 
       it "cache hit" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         Tempfile.open('foo') do |tio|
           tio << "something"
           tio.close
@@ -370,7 +370,7 @@ RSpec.describe MrMurano::Module do
       end
 
       it "cache miss" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         Tempfile.open('foo') do |tio|
           tio << "something"
@@ -388,7 +388,7 @@ RSpec.describe MrMurano::Module do
       end
 
       it "cache hit" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         Tempfile.open('foo') do |tio|
           tio << "something"
           tio.close
