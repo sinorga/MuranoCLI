@@ -25,10 +25,12 @@ module MrMurano
     end
 
     def self.makePretty(line, options)
-      out=''
-      out << HighLine.color("#{line[:type] || '--'} ".upcase, :subject)
-      out << HighLine.color("[#{line[:subject] || ''}]", :subject)
-      out << " "
+      # 2017-07-02: Changing shovel operator << to +=
+      # to support Ruby 3.0 frozen string literals.
+      out = ''
+      out += HighLine.color("#{line[:type] || '--'} ".upcase, :subject)
+      out += HighLine.color("[#{line[:subject] || ''}]", :subject)
+      out += ' '
       if line.has_key?(:timestamp) then
         if line[:timestamp].kind_of? Numeric then
           if options.localtime then
@@ -40,32 +42,32 @@ module MrMurano
           curtime = line[:timestamp]
         end
       else
-        curtime = "<no timestamp>"
+        curtime = '<no timestamp>'
       end
-      out << HighLine.color(curtime, :timestamp)
-      out << ":\n"
+      out += HighLine.color(curtime, :timestamp)
+      out += ":\n"
       if line.has_key?(:data) then
         data = line[:data]
 
         if data.kind_of?(Hash) then
           if data.has_key?(:request) and data.has_key?(:response) then
-            out << "---------\nrequest:"
-            out << makeJsonPretty(data[:request], options)
+            out += "---------\nrequest:"
+            out += makeJsonPretty(data[:request], options)
 
-            out << "\n---------\nresponse:"
-            out << makeJsonPretty(data[:response], options)
+            out += "\n---------\nresponse:"
+            out += makeJsonPretty(data[:response], options)
           else
-            out << makeJsonPretty(data, options)
+            out += makeJsonPretty(data, options)
           end
         else
-          out << data.to_s
+          out += data.to_s
         end
 
       else
         line.delete :type
         line.delete :timestamp
         line.delete :subject
-        out << makeJsonPretty(line, options)
+        out += makeJsonPretty(line, options)
       end
       out
     end

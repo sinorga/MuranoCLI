@@ -122,10 +122,12 @@ module MrMurano
 
       def tolocalname(item, key)
         name = ''
-        name << item[:path].split('/').reject{|i|i.empty?}.join('-')
-        name << '.'
-        name << item[:method].downcase
-        name << '.lua'
+        # 2017-07-02: Changing shovel operator << to +=
+        # to support Ruby 3.0 frozen string literals.
+        name += item[:path].split('/').reject { |i| i.empty? }.join('-')
+        name += '.'
+        name += item[:method].downcase
+        name += '.lua'
       end
 
       def to_remote_item(from, path)
@@ -133,7 +135,7 @@ module MrMurano
         items = []
         path = Pathname.new(path) unless path.kind_of? Pathname
         cur = nil
-        lineno=0
+        lineno = 0
         path.readlines().each do |line|
           md = @match_header.match(line)
           if not md.nil? then
@@ -147,6 +149,7 @@ module MrMurano
                                 :line=>lineno,
                                 :script=>line)
           elsif not cur.nil? and not cur[:script].nil? then
+            # MAYBE/2017-07-02: Frozen string literal: change << to += ??
             cur[:script] << line
           end
           lineno += 1

@@ -1,6 +1,12 @@
+# Last Modified: 2017.07.02 /coding: utf-8
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
+require 'tempfile'
 require 'MrMurano/version'
 require 'MrMurano/Account'
-require 'tempfile'
 
 RSpec.describe MrMurano::Passwords, "#pwd" do
   before(:example) do
@@ -235,8 +241,5 @@ this.is.a.host:
       end
     end
   end
-
-
 end
 
-#  vim: set ai et sw=2 ts=2 :
