@@ -1,3 +1,13 @@
+# Last Modified: 2017.07.02 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
+# 2017-07-01: This ordered list hacks around having
+# individual files include all the files they need.
+
 require 'yaml'
 require 'json-schema'
 require 'pathname'
@@ -5,10 +15,17 @@ require 'MrMurano/verbosing'
 require 'MrMurano/Config'
 require 'MrMurano/hash'
 
+# FIXME/EXPLAIN/2017-06-30: Is a project file a legacy construct?
+#   I believe MurCLI currently stores config in .murano/config,
+#   and it uses a known set of directories for storing Murano
+#   things. Is a solution file just a way to specify your own
+#   paths to things? Is there any reason to prefer using a
+#   solution file to not using one?
+
 module MrMurano
   ##
-  # A Project File that describes details about a project that is synced into
-  # Murano
+  # A Project File that describes details about a project that is
+  # synced into Murano.
   class ProjectFile
     include Verbose
 
@@ -33,8 +50,8 @@ module MrMurano
       ## Returns a sparse hash of the data in self
       # @return [Hash] Just the non-nil members of this
       def save
-        ret={}
-        self.members.reject{|key| [:legacy].include? key}.each do |key|
+        ret = {}
+        self.members.reject { |key| [:legacy].include? key }.each do |key|
           ret[key] = self[key] unless self[key].nil?
         end
         ret
@@ -114,6 +131,7 @@ module MrMurano
     def project_file
       @prjFile
     end
+
     # Get a binding to the data for building the example ProjectFile
     def data_binding
       @data.get_binding
@@ -139,30 +157,43 @@ module MrMurano
     # All of these are currently stored in $cfg, but under different names.
     def default_value_for(key)
       keymap = {
+        # The left-side is the SolutionFile key;
+        # the right-side is the $cfg key.
+
         'assets.location' => 'location.files',
         'assets.include' => 'files.searchFor',
         'assets.exclude' => 'files.ignoring',
+
         'assets.default_page' => 'files.default_page',
+
         'modules.location' => 'location.modules',
         'modules.include' => 'modules.searchFor',
         'modules.exclude' => 'modules.ignoring',
+
         'routes.location' => 'location.endpoints',
         'routes.include' => 'endpoints.searchFor',
         'routes.exclude' => 'endpoints.ignoring',
+
         'routes.cors' => 'location.cors',
+
         'services.location' => 'location.eventhandlers',
         'services.include' => 'eventhandler.searchFor',
         'services.exclude' => 'eventhandler.ignoring',
+
         'resources.location' => 'location.resources',
         'resources.include' => 'product.spec',
         'resources.exclude' => 'product.ignoring',
       }.freeze
       needSplit = %r{.*\.(searchFor|ignoring)$}.freeze
       return nil unless keymap.has_key? key
-      # *.{include,exclude} want arrays returned. But what they map to is
-      # strings.
+      # *.{include,exclude} want arrays returned.
+      # But what they map to is strings.
       cfg_key = keymap[key]
       ret = ($cfg[cfg_key] or '')
+      # split uses $; when no delimiter is specified.
+      #   In Ruby, $; is $FS or $FIELD_SEPARATOR.
+      #   It defaults to nil, which splits on whitespace.
+      #   https://ruby-doc.org/stdlib-2.3.3/libdoc/English/rdoc/English.html
       ret = ret.split() if cfg_key =~ needSplit
       ret
     end
@@ -225,7 +256,7 @@ module MrMurano
 
       data = Hash.transform_keys_to_symbols(data)
 
-      # get format version; little different for older format.
+      # Get format version; little different for older format.
       if @prjFile.basename.to_s == "Solutionfile.json" then
         fmtvers = (data[:version] or '0.2.0')
       else
@@ -351,8 +382,5 @@ module MrMurano
     alias load_0 load_0_3_0
   end
 
-
 end
-
-#  vim: set ai et sw=2 ts=2 :
 
