@@ -76,6 +76,7 @@ Style/ConditionalAssignment:
 # "The name of this source file (Xxxxxxx.rb) should use snake_case."
 Style/FileName:
   Exclude:
+    - 'lib/MrMurano.rb'
     - 'lib/MrMurano/Account.rb'
     - 'lib/MrMurano/Business.rb'
     - 'lib/MrMurano/Config-Migrate.rb'
