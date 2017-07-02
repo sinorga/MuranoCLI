@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -35,7 +35,7 @@ List businesses.
   c.project_not_required = true
 
   c.action do |args, options|
-    acc = MrMurano::Account.new
+    acc = MrMurano::Account.instance
 
     MrMurano::Verbose.whirly_start 'Looking for businesses...'
     data = acc.businesses

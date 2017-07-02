@@ -13,7 +13,7 @@ Show readable information about the current configuration.
       ::Commander::UI.enable_paging
       say MrMurano::SubCmdGroupHelp.new(c).get_help
     else
-      acc = MrMurano::Account.new
+      acc = MrMurano::Account.instance
 
       selectedBusinessId = $cfg['business.id']
       selectedBusiness = nil
