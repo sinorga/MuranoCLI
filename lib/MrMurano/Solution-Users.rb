@@ -9,7 +9,7 @@ module MrMurano
   ##
   # User Management common things
   class UserBase < SolutionBase
-    def list()
+    def list
       get()
     end
 
