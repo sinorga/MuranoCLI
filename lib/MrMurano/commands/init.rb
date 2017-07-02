@@ -1,16 +1,24 @@
-require 'MrMurano/Account'
-require 'MrMurano/Config'
-require 'MrMurano/Config-Migrate'
-require 'MrMurano/Solution-Services'
-require 'MrMurano/verbosing'
+# Last Modified: 2017.07.02 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'erb'
 require 'inflecto'
 require 'rainbow'
+require 'MrMurano/verbosing'
+require 'MrMurano/Account'
+require 'MrMurano/Business'
+require 'MrMurano/Config'
+require 'MrMurano/Config-Migrate'
+require 'MrMurano/Solution-Services'
+require 'MrMurano/commands/business'
+require 'MrMurano/commands/solution'
 
-MURANO_SIGN_UP_URL = "https://exosite.com/signup/"
-
-def get_description
-  %{
+def init_cmd_description
+  %(
 
 The init command helps you create a new Murano project
 ======================================================
@@ -20,7 +28,7 @@ Example
 
   Create a new project in a new directory:
 
-    #{File.basename $PROGRAM_NAME} init my-new-app
+    #{MrMurano::EXE_NAME} init my-new-app
 
 Example
 -------
@@ -28,7 +36,7 @@ Example
   Create a project in the current directory, or rewrite an existing project:
 
     cd project/path
-    #{File.basename $PROGRAM_NAME} init
+    #{MrMurano::EXE_NAME} init
 
 Solutions
 ---------
@@ -56,7 +64,7 @@ You will be asked to log on to your Business account.
 
   - To create a new Murano business account, visit:
 
-    #{MURANO_SIGN_UP_URL}
+    #{MrMurano::SIGN_UP_URL}
 
   - Once logged on, you can choose to store your logon token so you
     can skip this step when using Murano CLI.
@@ -89,65 +97,89 @@ that you can edit.
 
     http://docs.exosite.com/
 
-  }.strip
+  ).strip
 end
 
 command :init do |c|
-  c.syntax = %{murano init}
-  c.summary = %{The easy way to start a project}
-  c.description = get_description
-  c.option '--force', %{Overwrite existing Business and Solution IDs found in the config}
-  c.option '--purge', %{Remove Project directories and files, and recreate anew}
-  c.option '--[no-]mkdirs', %{Create default directories}
+  c.syntax = %(murano init)
+  c.summary = %(The easy way to start a project)
+  c.description = init_cmd_description
+
+  c.option('--refresh', %(Ignore Business and Solution IDs found in the config))
+  c.option('--purge', %(Remove Project directories and files, and recreate anew))
+  c.option('--[no-]mkdirs', %(Create default directories))
+
+  # This command can be run without a project config.
   c.project_not_required = true
 
   c.action do |args, options|
-    options.default :force=>false, :mkdirs=>true
+    options.default(refresh: false, mkdirs: true)
 
     acc = MrMurano::Account.instance
 
+    c.verify_arg_count!(args, 1)
     validate_dir!(acc, args, options)
 
-    puts ''
-    say "Creating project at #{Rainbow($cfg['location.base'].to_s).underline}"
-    puts ''
+    puts('')
+    say("Creating project at #{Rainbow($cfg['location.base'].to_s).underline}")
+    puts('')
 
-    # Try to import a .Solutionfile.secret
+    # Try to import a .Solutionfile.secret.
+    # NOTE/2017-06-29: .Solutionfile.secret and SolutionFile (see ProjectFile.rb)
+    # are old MurCLI constructs; here we just try to migrate from the old format
+    # to the new format (where config goes in .murano/config and there's an
+    # explicit directory structure; the user cannot specify a different file
+    # hierarchy).
     MrMurano::ConfigMigrate.new.import_secret
 
-    # If they have never logged in, then asking for the business.id will also ask
-    # for their username and password.
-    say "Found User #{Rainbow($cfg['user.name']).underline}"
-    puts '' # `say ''` doesn't actually print anything
+    # See if the config already specifies a Business ID. If not, see if the
+    # config contains a username and password; otherwise, ask for them. With
+    # a username and password, get the list of businesses from Murano; if
+    # just one found, use that; if more than one found, ask user which one
+    # to use; else, if no businesses found, spit out the new-account URL
+    # and tell the user to use their browser to create a new Business.
+    say("Found User #{Rainbow($cfg['user.name']).underline}")
+    puts('')
 
-    # 1. Get Business ID
-    acquireBusinessId(options, acc)
-    # 2. Get/Create Application ID
-    aid, aname, newApp = solution_find_or_ask_ID(options, acc, :application, MrMurano::Application)
-    # 3. Get/Create Product ID
-    pid, pname, newPrd = solution_find_or_ask_ID(options, acc, :product, MrMurano::Product)
+    # Find and verify Business by ID (from $cfg) or by name (from --business),
+    # or ask user which business to use.
+    biz = business_find_or_ask(acc, ask_user: options.refresh)
 
-    linkSolutions(pid, pname, aid, aname)
+    # Verify or ask user to create Solutions.
+    sol_opts = {
+      create_ok: true,
+      update_cfg: true,
+      ignore_cfg: options.refresh,
+      verbose: true,
+    }
+    # Get/Create Application ID
+    appl = solution_find_or_create(biz: biz, type: :application, **sol_opts)
+    # Get/Create Product ID
+    prod = solution_find_or_create(biz: biz, type: :product, **sol_opts)
+
+    # Automatically link solutions.
+    link_opts = { verbose: true }
+    link_solutions(appl, prod, link_opts)
 
     # If no ProjectFile, then write a ProjectFile.
-    writeProjectFile
+    write_project_file
 
     # Make the directory structure.
-    makeDirectories if options.mkdirs
+    make_directories if options.mkdirs
 
     # Murano creates a bunch of empty event handlers. Grab them now.
-    unless options.purge
-      syncdownBoilerplate
-    else
+    if options.purge
 # FIXME: Add test for this
       # Be destructive
-      syncdownFiles :delete=>true, :create=>true, :update=>true
+      syncdown_files(delete: true, create: true, update: true)
+    else
+      syncdown_boilerplate
     end
 
-    blatherSuccess
+    blather_success
   end
 
-  def highlightID(id)
+  def highlight_id(id)
     Rainbow(id).aliceblue.bright.underline
   end
 
@@ -156,22 +188,22 @@ command :init do |c|
     # any Murano elements changed. But there's not much utility in that.
     # So maybe we should just not let users run a --dry init.
     #if $cfg['tool.dry']
-    #  acc.error "Cannot run a --dry init."
+    #  acc.error 'Cannot run a --dry init.'
     #  exit 2
     #end
 
-    if args.count > 1 then
-      acc.error "Please only specify 1 path"
-      exit 2
+    if args.count > 1
+      acc.error('Please only specify 1 path')
+      exit(2)
     end
 
-    unless args.count > 0
+    if args.empty?
       target_dir = Pathname.new(Dir.pwd)
     else
       target_dir = Pathname.new(args[0])
-      unless Dir.exist? target_dir.to_path
+      unless Dir.exist?(target_dir.to_path)
         if target_dir.exist?
-          acc.error "Target exists but is not a directory: #{target_dir.to_path}"
+          acc.error("Target exists but is not a directory: #{target_dir.to_path}")
           exit 1
         end
 # FIXME: Add test for this
@@ -180,28 +212,28 @@ command :init do |c|
       Dir.chdir target_dir
     end
 
-    # The home directory already has its own .murano/ folder, so we cannot
-    # create a project therein.
-    if Pathname.new(Dir.pwd).realpath == Pathname.new(Dir.home).realpath then
-      acc.error "Cannot init a project in your HOME directory."
-      exit 2
+    # The home directory already has its own .murano/ folder,
+    # so we cannot create a project therein.
+    if Pathname.new(Dir.pwd).realpath == Pathname.new(Dir.home).realpath
+      acc.error('Cannot init a project in your HOME directory.')
+      exit(2)
     end
 
     # Only create a new project in an empty directory,
     # or a recognized Murano CLI project.
-    unless $cfg.projectExists or options.force
+    unless $cfg.project_exists || options.refresh
       # Get a list of files, ignoring the dot meta entries.
-      files = Dir.entries target_dir.to_path
+      files = Dir.entries(target_dir.to_path)
       files -= %w[. ..]
-      if files.length > 0
+      unless files.empty?
         # Check for a .murano/ directory. If might be empty, which
-        # is why $cfg.projectExists might have been false.
-        unless files.include? CFG_DIR_NAME
-          acc.warning "The project directory contains unknown files."
-          confirmed = acc.ask_yes_no("Really init project? [Y/n] ", true)
+        # is why $cfg.project_exists might have been false.
+        unless files.include?(MrMurano::Config::CFG_DIR_NAME)
+          acc.warning 'The project directory contains unknown files.'
+          confirmed = acc.ask_yes_no('Really init project? [Y/n] ', true)
           unless confirmed
 # FIXME: Add test for this
-            acc.warning "abort!"
+            acc.warning('abort!')
             exit 1
           end
         end
@@ -211,120 +243,47 @@ command :init do |c|
     target_dir
   end
 
-  def acquireBusinessId(options, acc)
-    exists = false
-    if not options.force and not $cfg['business.id'].nil? then
-      # Verify that the business exists.
-      MrMurano::Verbose::whirly_start "Verifying Business..."
-      biz = acc.overview do |request, http|
-        response = http.request(request)
-        if response.is_a? Net::HTTPSuccess then
-          exists = true
-          response = acc.workit_response(response)
-        end
-        # Ruby is so weird. In the do block, we can return a value
-        # to the caller (which called yield). But don't use the
-        # return keyword, lest we also leave our enclosing function
-        # (acquireBusinessId); just leave the value as the last line.
-        #  [2017-06-14: [lb] still learning Ruby nuances.]
-        response
-      end
-      MrMurano::Verbose::whirly_stop
-      if exists
-        say "Found Business #{Rainbow(biz[:name]).underline} <#{$cfg['business.id']}>"
-      else
-        say "Could not find Business #{$cfg['business.id']} referenced in the config"
-        puts ''
-      end
-    end
-
-    unless exists
-      bizz = acc.businesses
-      if bizz.count == 1 then
-        bizid = bizz.first
-        say "This user has one business. Using #{Rainbow(bizid[:name]).underline}"
-        $cfg.set('business.id', bizid[:bizid], :project)
-        $cfg.set('business.name', bizid[:name], :project)
-      elsif bizz.count == 0 then
-        acc.warning "This user has not created any businesses."
-        say "Please log on to exosite.com to create a free account. Visit:"
-        say "  #{MURANO_SIGN_UP_URL}"
-        exit 3
-      else
-        choose do |menu|
-          menu.prompt = "Please select the Business to use:"
-          menu.flow = :columns_across
-          bizz.sort{|a,b| a[:name]<=>b[:name]}.each do |b|
-            menu.choice(b[:name]) do
-              $cfg.set('business.id', b[:bizid], :project)
-              $cfg.set('business.name', b[:name], :project)
-            end
-          end
-        end
-      end
-    end
-    puts '' # blank line
+  def write_project_file
+    return if $project.using_projectfile
+    tmpl = File.read(
+      File.join(
+        File.dirname(__FILE__), '..', 'template', 'projectFile.murano.erb'
+      )
+    )
+    tmpl = ERB.new(tmpl)
+    res = tmpl.result($project.data_binding)
+    pr_file = $project['info.name'] + '.murano'
+    say("Writing Project file to #{pr_file}")
+    puts('')
+    File.open(pr_file, 'w') { |io| io << res }
   end
 
-  def linkSolutions(pid, pname, aid, aname)
-    # Automatically link solutions.
-    if pid and aid then
-      MrMurano::Verbose::whirly_start "Linking solutions..."
-      sercfg = MrMurano::ServiceConfig.new
-      ret = sercfg.create(pid, pname) do |request, http|
-        response = http.request(request)
-        MrMurano::Verbose::whirly_stop
-        if response.is_a? Net::HTTPSuccess then
-          say "Linked #{aname} and #{pname}"
-        elsif response.is_a? Net::HTTPConflict
-          say "Verified #{aname} and #{pname} are linked"
-        else
-          acc.error "Unable to link solutions because #{Rainbow(response.message).underline}"
-        end
-      end
-      puts ''
-    end
-  end
-
-  def writeProjectFile
-    if not $project.usingProjectfile then
-      tmpl = File.read(File.join(File.dirname(__FILE__), '..', 'template', 'projectFile.murano.erb'))
-      tmpl = ERB.new(tmpl)
-      res = tmpl.result($project.data_binding)
-      prFile = $project['info.name'] + '.murano'
-      say "Writing Project file to #{prFile}"
-      puts ''
-      File.open(prFile, 'w') {|io| io << res}
-    end
-  end
-
-  def makeDirectories
+  def make_directories
     base = $cfg['location.base']
-    base = Pathname.new(base) unless base.kind_of? Pathname
-    %w{
+    base = Pathname.new(base) unless base.is_a?(Pathname)
+    %w[
       location.files
       location.endpoints
       location.modules
       location.eventhandlers
       location.resources
-    }.each do |cfgi|
+    ].each do |cfgi|
       path = $cfg[cfgi]
-      path = Pathname.new(path) unless path.kind_of? Pathname
+      path = Pathname.new(path) unless path.is_a?(Pathname)
       path = base + path
-      unless path.exist? then
-        path = path.dirname unless path.extname.empty?
-        unless $cfg['tool.dry']
-          path.mkpath
-        else
-          say "--dry: Not creating project directory: #{path.to_s}"
-        end
+      next if path.exist?
+      path = path.dirname unless path.extname.empty?
+      if !$cfg['tool.dry']
+        path.mkpath
+      else
+        say("--dry: Not creating project directory: #{path}")
       end
     end
-    say 'Created default directories'
-    puts ''
+    say('Created default directories')
+    puts('')
   end
 
-  def syncdownBoilerplate
+  def syncdown_boilerplate
     # Murano creates a bunch of empty event handlers. Grab them now.
     # E.g., for the application, you'll see around 20 interface_<operationId>
     # event handlers, and one named device2_event.lua; for the product, you'll
@@ -341,68 +300,63 @@ command :init do |c|
 
     # Automatically pull down eventhandler stubs that Murano creates for new solutions.
     # Iterate over: MrMurano::EventHandlerSolnPrd, MrMurano::EventHandlerSolnApp.
-    MrMurano::SyncRoot.each_filtered :eventhandlers => true do |name, type, klass, desc|
-      MrMurano::Verbose::whirly_start "Checking #{desc}..."
+    MrMurano::SyncRoot.each_filtered(eventhandlers: true) do |_name, _type, klass, desc|
+      MrMurano::Verbose.whirly_start("Checking #{desc}...")
       begin
         syncable = klass.new
       rescue MrMurano::ConfigError => err
-        acc.error "Could not fetch status for #{desc}: #{err}"
+        acc.error("Could not fetch status for #{desc}: #{err}")
         # MAYBE: exit?
-      rescue StandardError => err
+      rescue StandardError => _err
         raise
       else
         # Get list of changes. Leave :delete => true and :update => true so we
         # can tell if there are existing files, in which case skip the pull.
-        stat = syncable.status({
-          :asdown => true,
-          :eventhandlers => true,
-        })
-        if stat[:todel].any? or stat[:tomod].any?
-          MrMurano::Verbose::whirly_stop
-          say "Skipping #{desc}: local files found"
-          puts ''
+        stat = syncable.status(
+          asdown: true,
+          eventhandlers: true,
+        )
+        if stat[:todel].any? || stat[:tomod].any?
+          MrMurano::Verbose.whirly_stop
+          say("Skipping #{desc}: local files found")
+          puts('')
         else
           stat[:toadd].each do |item|
-            unless $cfg['tool.dry']
-              MrMurano::Verbose::whirly_msg "Pulling item #{item[:synckey]}"
+            if !$cfg['tool.dry']
+              MrMurano::Verbose.whirly_msg("Pulling item #{item[:synckey]}")
               dest = syncable.tolocalpath(syncable.location, item)
               syncable.download(dest, item)
             else
-              say "--dry: Not pulling item #{item[:synckey]}"
+              say("--dry: Not pulling item #{item[:synckey]}")
             end
           end
         end
       end
-      MrMurano::Verbose::whirly_stop
+      MrMurano::Verbose.whirly_stop
     end
   end
 
-  def blatherSuccess
-    say 'Success!'
-    puts ''
+  def blather_success
+    say('Success!')
+    puts('')
     id_postfix = ' ID'
-    important_ids = %w{business product application}.freeze
+    important_ids = %w[business product application].freeze
     importantest_width = important_ids.map do |id_name|
       cfg_key = id_name + '.id'
       $cfg[cfg_key].length + id_postfix.length
-    end.max # Ruby is so weird! Max the map. [lb]
+    end.max # Max the map; get the length of the longest ID.
     important_ids.each do |id_name|
       # cfg_key is, e.g., 'business.id', 'product.id', 'application.id'
       cfg_key = id_name + '.id'
-      unless $cfg[cfg_key].nil?
-        #say "#{id_name.capitalize} ID: #{highlightID($cfg[cfg_key])}"
-        # Right-aligned:
-        tmpl = "%%%ds: %%s" % importantest_width
-        # Left-aligned:
-        #tmpl = "%%-%ds: %%s" % importantest_width
-
-        say tmpl % [id_name.capitalize + id_postfix, highlightID($cfg[cfg_key]),]
-      end
+      next if $cfg[cfg_key].nil?
+      #say "#{id_name.capitalize} ID: #{highlight_id($cfg[cfg_key])}"
+      # Right-aligned:
+      tmpl = format('%%%ds: %%s', importantest_width)
+      # Left-aligned:
+      #tmpl = format('%%-%ds: %%s', importantest_width)
+      say(format(tmpl, id_name.capitalize + id_postfix, highlight_id($cfg[cfg_key])))
     end
-    puts ''
+    puts('')
   end
-
 end
-
-#  vim: set ai et sw=2 ts=2 :
 
