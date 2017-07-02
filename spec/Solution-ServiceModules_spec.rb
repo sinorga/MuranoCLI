@@ -18,7 +18,7 @@ RSpec.describe MrMurano::Module do
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/")
   end
 

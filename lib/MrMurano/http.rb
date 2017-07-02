@@ -66,7 +66,7 @@ module MrMurano
     end
 
     # Default endpoint unless Class overrides it.
-    def endPoint(path)
+    def endpoint(path)
       URI('https://' + $cfg['net.host'] + '/api:1/' + path.to_s)
     end
 
@@ -155,13 +155,13 @@ module MrMurano
     end
 
     def get(path='', query=nil, no_error: false, &block)
-      uri = endPoint(path)
+      uri = endpoint(path)
       uri.query = URI.encode_www_form(query) unless query.nil?
       workit(set_def_headers(Net::HTTP::Get.new(uri)), no_error: no_error, &block)
     end
 
     def post(path='', body={}, &block)
-      uri = endPoint(path)
+      uri = endpoint(path)
       req = Net::HTTP::Post.new(uri)
       set_def_headers(req)
       req.body = JSON.generate(body)
@@ -169,7 +169,7 @@ module MrMurano
     end
 
     def postf(path='', form={}, &block)
-      uri = endPoint(path)
+      uri = endpoint(path)
       req = Net::HTTP::Post.new(uri)
       set_def_headers(req)
       req.content_type = 'application/x-www-form-urlencoded; charset=utf-8'
@@ -178,7 +178,7 @@ module MrMurano
     end
 
     def put(path='', body={}, &block)
-      uri = endPoint(path)
+      uri = endpoint(path)
       req = Net::HTTP::Put.new(uri)
       set_def_headers(req)
       req.body = JSON.generate(body)
@@ -186,7 +186,7 @@ module MrMurano
     end
 
     def patch(path='', body={}, &block)
-      uri = endPoint(path)
+      uri = endpoint(path)
       req = Net::HTTP::Patch.new(uri)
       set_def_headers(req)
       req.body = JSON.generate(body)
@@ -194,7 +194,7 @@ module MrMurano
     end
 
     def delete(path='', &block)
-      uri = endPoint(path)
+      uri = endpoint(path)
       workit(set_def_headers(Net::HTTP::Delete.new(uri)), &block)
     end
   end

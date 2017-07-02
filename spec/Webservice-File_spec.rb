@@ -21,7 +21,7 @@ RSpec.describe MrMurano::Webservice::File do
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("#{@baseURI}/")
   end
 

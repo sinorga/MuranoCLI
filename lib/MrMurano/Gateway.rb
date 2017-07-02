@@ -26,7 +26,7 @@ module MrMurano
       # Uses the uriparts and path
       # @param path String: any additional parts for the URI
       # @return URI: The full URI for this enpoint.
-      def endPoint(path='')
+      def endpoint(path='')
         parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
         s = parts.map{|v| v.to_s}.join('/')
         URI(s + path.to_s)
@@ -283,10 +283,10 @@ module MrMurano
       # @param expire [Number] Expire time for all identities (ignored)
       # @return [void]
       def enable_batch(local, expire=nil)
-        # Need to modify @uriparts for just this endPoint call.
+        # Need to modify @uriparts for just this endpoint call.
         uriparts = @uriparts
         @uriparts[-1] = :identities
-        uri = endPoint()
+        uri = endpoint()
         @uriparts = uriparts
 
         file = HTTP::FormData::File.new(local.to_s, {:content_type=>'text/csv'})
