@@ -301,7 +301,7 @@ module MrMurano
     # @param root [Pathname,String] Root path for this resource type from config files
     # @param path [Pathname,String] Path to local item
     # @return [Item] hash of the details for the remote item for this path
-    def toRemoteItem(root, path)
+    def to_remote_item(root, path)
       # This mess brought to you by Windows short path names.
       path = Dir.glob(path.to_s).first
       root = Dir.glob(root.to_s).first
@@ -536,7 +536,7 @@ module MrMurano
         end
       end.map do |path|
         path = Pathname.new(path).realpath
-        item = toRemoteItem(from, path)
+        item = to_remote_item(from, path)
         if item.kind_of?(Array) then
           item.compact.map{|i| i[:local_path] = path; i}
         elsif not item.nil? then

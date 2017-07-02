@@ -128,7 +128,7 @@ module MrMurano
         name << '.lua'
       end
 
-      def toRemoteItem(from, path)
+      def to_remote_item(from, path)
         # Path could be have multiple endpoints in side, so a loop.
         items = []
         path = Pathname.new(path) unless path.kind_of? Pathname

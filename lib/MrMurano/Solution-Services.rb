@@ -204,7 +204,7 @@ module MrMurano
       ret[:items].map { |i| ModuleItem.new(i) }
     end
 
-    def toRemoteItem(_from, path)
+    def to_remote_item(_from, path)
       name = path.basename.to_s.sub(/\..*/, '')
       ModuleItem.new(name: name)
     end
@@ -310,7 +310,7 @@ module MrMurano
       "#{item[:name]}.lua"
     end
 
-    def toRemoteItem(from, path)
+    def to_remote_item(from, path)
       # This allows multiple events to be in the same file. This is a lie.
       # This only finds the last event in a file.
       # :legacy support doesn't allow for that. But that's ok.

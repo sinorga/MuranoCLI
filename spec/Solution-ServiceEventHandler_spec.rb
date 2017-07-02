@@ -297,7 +297,7 @@ end
     end
   end
 
-  context "toRemoteItem" do
+  context "to_remote_item" do
     before(:example) do
       allow(@srv).to receive(:warning)
     end
@@ -310,7 +310,7 @@ end
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         expect(ret).to eq({:service=>'device',
                            :event=>'datapoint',
                            :type=>nil,
@@ -330,7 +330,7 @@ end
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         expect(ret).to eq(nil)
       end
     end
@@ -344,7 +344,7 @@ end
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         expect(ret).to eq(
           MrMurano::EventHandler::EventHandlerItem.new(
             :service=>'device',
