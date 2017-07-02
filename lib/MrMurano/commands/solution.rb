@@ -180,7 +180,7 @@ Delete all solutions.
   c.action do |args, options|
     c.verify_arg_count!(args)
     name_or_id = '*'
-    n_deleted, n_faulted = solution_delete(name_or_id, options)
+    n_deleted, n_faulted = solution_delete(name_or_id, yes: options.yes)
     solution_delete_report(n_deleted, n_faulted)
   end
 end
