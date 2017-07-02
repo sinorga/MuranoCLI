@@ -68,6 +68,12 @@ module Commander
         MrMurano::Verbose::whirly_stop
         MrMurano::Verbose::error err.message
         exit 1
+      rescue LocalJumpError => err
+        # This happens when you `return` from a command, since
+        # commands are blocks, and returning from a block would
+        # really mean returning from the thing running the block,
+        # which would be bad. So Ruby barfs instead.
+        return
       rescue StandardError => err
         raise
       end
