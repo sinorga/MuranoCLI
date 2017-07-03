@@ -1,3 +1,10 @@
+# Last Modified: 2017.07.03 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
 require 'open3'
 require 'pathname'
@@ -17,6 +24,7 @@ RSpec.describe 'murano domain', :cmd, :needs_password do
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
   end
+
   after(:example) do
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @product_name))
     expect(out).to eq('')
@@ -38,13 +46,10 @@ RSpec.describe 'murano domain', :cmd, :needs_password do
     #expect(out.split('.', 2)[0]).to match(/^[a-zA-Z0-9]{16,17}$/)
     #expect(out.chomp).to end_with("m2.exosite.io")
     out.lines.each do |line|
-      expect(line).to match(/^(Product|Application): [a-z0-9]+ <[a-z0-9]+> [.a-z0-9]+$/)
+      expect(line).to match(/^(Product|Application): domain[Tt]est[a-z0-9]+ <[a-z0-9]+> https:\/\/[.a-z0-9]+$/)
     end
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
-
 end
-
-#  vim: set ai et sw=2 ts=2 :
 
