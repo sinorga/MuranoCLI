@@ -84,7 +84,7 @@ def business_find_or_ask(acc, ask_user: false)
     biz = business_locate!(acc, match_bid, match_name, match_either)
   else
     biz = business_from_config unless ask_user
-    biz = businesses_ask_which if biz.nil?
+    biz = businesses_ask_which(acc) if biz.nil?
   end
   # Save the 'business.id' and 'business.name' to the project config.
   biz.write
@@ -134,7 +134,7 @@ def businesses_ask_which(acc)
     biz = bizes.first
     say("This user has one business. Using #{biz.pretty_name_and_id}")
   elsif bizes.count.zero?
-    acc.warning('This user has not created any businesses.')
+    MrMurano::Verbose.warning('This user has not created any businesses.')
     say('Please log on to exosite.com to create a free account. Visit:')
     say("  #{MrMurano::SIGN_UP_URL}")
     exit 3
