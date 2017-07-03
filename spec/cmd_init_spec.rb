@@ -35,7 +35,9 @@ RSpec.describe 'murano init', :cmd do
       ]
     end
     expecting += [
-      t.a_string_matching(%r{Linked \w+ and \w+\n}),
+      t.a_string_matching(%r{Linked ‘\w+’ and ‘\w+’\n}),
+      "\n",
+      t.a_string_matching(%r{Created default event handler\n}),
       "\n",
     ]
     if opts[:expect_proj_file_write]

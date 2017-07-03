@@ -22,12 +22,15 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
-    expect(out).to a_string_starting_with("Linked product #{@product_name}")
+    #expect(out).to a_string_starting_with("Linked product #{@product_name}")
+    olines = out.lines
+    expect(olines[0]).to eq("Linked ‘#{@product_name}’ to ‘#{@applctn_name}’\n")
+    expect(olines[1]).to eq("Created default event handler\n")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    # Skipping assign unset. Murano will clean up, right?
+    # VERIFY/2017-07-03: Skipping assign unset. Murano will clean up, right?
 
     out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
     expect(out).to eq('')
