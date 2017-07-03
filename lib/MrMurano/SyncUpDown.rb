@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -796,7 +796,7 @@ module MrMurano
       # both products and applications, if a user only created one solution,
       # then some syncables will have their sid set to -1, because there's
       # not a corresponding solution in Murano.
-      raise 'Syncable missing sid?!' unless self.sid?
+      raise 'Syncable missing sid?!' unless self&.sid?
 
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
