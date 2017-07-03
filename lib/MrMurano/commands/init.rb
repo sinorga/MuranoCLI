@@ -169,7 +169,7 @@ command :init do |c|
 
     # Murano creates a bunch of empty event handlers. Grab them now.
     if options.purge
-# FIXME: Add test for this
+      # FIXME/2017-07-02: Add test for this
       # Be destructive
       syncdown_files(delete: true, create: true, update: true)
     else
@@ -206,7 +206,7 @@ command :init do |c|
           acc.error("Target exists but is not a directory: #{target_dir.to_path}")
           exit 1
         end
-# FIXME: Add test for this
+        # FIXME/2017-07-02: Add test for this
         target_dir.mkpath
       end
       Dir.chdir target_dir
@@ -232,7 +232,7 @@ command :init do |c|
           acc.warning 'The project directory contains unknown files.'
           confirmed = acc.ask_yes_no('Really init project? [Y/n] ', true)
           unless confirmed
-# FIXME: Add test for this
+            # FIXME/2017-07-02: Add test for this
             acc.warning('abort!')
             exit 1
           end
