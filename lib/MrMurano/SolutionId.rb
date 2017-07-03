@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,6 +13,7 @@ module MrMurano
     attr_reader :valid_sid
 
     def init_sid!(sid=nil)
+      @valid_sid = false
       unless defined?(@solntype) && @solntype
         # Note that 'solution.id' isn't an actual config setting;
         # see instead 'application.id' and 'product.id'. We just
@@ -38,12 +39,16 @@ module MrMurano
 
     def sid=(sid)
       sid = INVALID_SID if sid.nil? || sid.empty?
-      @valid_sid = false if sid.to_s.empty? || sid == INVALID_SID || sid != @sid
+      @valid_sid = false if sid.to_s.empty? || sid == INVALID_SID || (defined?(@sid) && sid != @sid)
       @sid = sid
       # MAGIC_NUMBER: The 2nd element is the solution ID, e.g., solution/<sid>/...
       raise "Unexpected @uriparts_sidex #{@uriparts_sidex}" unless @uriparts_sidex == 1
       # We're called on initialize before @uriparts is built, so don't always do this.
       @uriparts[@uriparts_sidex] = @sid if defined?(@uriparts)
+    end
+
+    def affirm_valid
+      @valid_sid = true
     end
 
     def valid_sid?
