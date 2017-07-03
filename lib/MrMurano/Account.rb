@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -72,7 +72,7 @@ module MrMurano
     @token = nil
 
     def token
-      token_fetch if @token.nil?
+      token_fetch unless defined?(@token) && !@token.to_s.empty?
       @token
     end
 
