@@ -432,7 +432,7 @@ RSpec.describe MrMurano::SyncUpDown do
       FileUtils.touch(@project_dir + '/tsud/one.lua')
       FileUtils.touch(@project_dir + '/tsud/two.lua')
 
-      @t.syncdown({:delete=>true})
+      @t.syncdown(delete: true)
       expect(FileTest.exist?(@project_dir + '/tsud/one.lua')).to be false
       expect(FileTest.exist?(@project_dir + '/tsud/two.lua')).to be false
     end
@@ -444,7 +444,7 @@ RSpec.describe MrMurano::SyncUpDown do
       ])
 
       expect(@t).to receive(:fetch).twice.and_yield("--foo\n")
-      @t.syncdown({:create=>true})
+      @t.syncdown(create: true)
       expect(FileTest.exist?(@project_dir + '/tsud/one.lua')).to be true
       expect(FileTest.exist?(@project_dir + '/tsud/two.lua')).to be true
     end
@@ -462,7 +462,7 @@ RSpec.describe MrMurano::SyncUpDown do
         MrMurano::SyncUpDown::Item.new({:name=>'one.lua', :updated_at=>ITEM_UPDATED_AT}),
         MrMurano::SyncUpDown::Item.new({:name=>'two.lua', :updated_at=>ITEM_UPDATED_AT})
       )
-      @t.syncdown({:update=>true})
+      @t.syncdown(update: true)
       expect(FileTest.exist?(@project_dir + '/tsud/one.lua')).to be true
       expect(FileTest.exist?(@project_dir + '/tsud/two.lua')).to be true
     end
