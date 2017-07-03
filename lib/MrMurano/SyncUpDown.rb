@@ -147,6 +147,8 @@ module MrMurano
       attr_accessor :type
       # @return [String] For testing, the updated_at time the server would otherwise indicate.
       attr_accessor :updated_at
+      # @return [Integer] In the event of a duplicated synckey, the duplicate's order number.
+      attr_accessor :dup_count
 
       # Initialize a new Item with a few, or all, attributes.
       # @param hsh [Hash{Symbol=>Object}, Item] Initial values
@@ -474,33 +476,68 @@ module MrMurano
     #
     # This collects items in the project and all bundles.
     # @return [Array<Item>] items found
-    def locallist()
-      # so. if @locationbase/bundles exists
-      #  gather and merge: @locationbase/bundles/*/@location
-      # then merge @locationbase/@location
-      #
-
-#      bundleDir = $cfg['location.bundles'] or 'bundles'
-#      bundleDir = 'bundles' if bundleDir.nil?
+    #
+    # 2017-07-02: [lb] removed this commented-out code from the locallist
+    # body. I think it's for older Solutionfiles, like 0.2.0 and 0.3.0.
+    #def locallist
+    #  # so. if @locationbase/bundles exists
+    #  #  gather and merge: @locationbase/bundles/*/@location
+    #  # then merge @locationbase/@location
+    #  #
+    #  bundleDir = $cfg['location.bundles'] or 'bundles'
+    #  bundleDir = 'bundles' if bundleDir.nil?
+    #  items = {}
+    #  if (@locationbase + bundleDir).directory?
+    #    (@locationbase + bundleDir).children.sort.each do |bndl|
+    #      if (bndl + @location).exist?
+    #        verbose("Loading from bundle #{bndl.basename}")
+    #        bitems = localitems(bndl + @location)
+    #        bitems.map!{|b| b[:bundled] = true; b} # mark items from bundles.
+    #        # use synckey for quicker merging.
+    #        bitems.each { |b| items[synckey(b)] = b }
+    #      end
+    #    end
+    #  end
+    #end
+    #
+    def locallist(skip_warn: false)
       items = {}
-#      if (@locationbase + bundleDir).directory? then
-#        (@locationbase + bundleDir).children.sort.each do |bndl|
-#          if (bndl + @location).exist? then
-#            verbose("Loading from bundle #{bndl.basename}")
-#            bitems = localitems(bndl + @location)
-#            bitems.map!{|b| b[:bundled] = true; b} # mark items from bundles.
-#
-#
-#            # use synckey for quicker merging.
-#            bitems.each { |b| items[synckey(b)] = b }
-#          end
-#        end
-#      end
-      if location.exist? then
+      if location.exist?
+        # Get a list of SyncUpDown::Item's, or a class derived thereof.
         bitems = localitems(location)
-        # use synckey for quicker merging.
-        bitems.each { |b| items[synckey(b)] = b }
-      else
+        # Use synckey for quicker merging.
+        # 2017-07-02: Argh. If two files have the same identity, this
+        # simple loop masks that there are two files with the same identity!
+        #bitems.each { |b| items[synckey(b)] = b }
+        warns = {}
+        bitems.each do |item|
+          skey = synckey(item)
+          if items.key? skey
+            warns[skey] = 0 unless warns.key?(skey)
+            if warns[skey].zero?
+              items[skey].dup_count = warns[skey]
+              # The dumb_synckey is just so we don't overwrite the
+              # original item, or other duplicates, in the hash.
+              dumb_synckey = "#{skey}-#{warns[skey]}"
+              # This just sets the alias for the output, so duplicates look unique.
+              item[@itemkey.to_sym] = dumb_synckey
+              # Don't delete the original item, so that other dupes see it.
+              #items.delete(skey)
+              msg = "Duplicate local file(s) found for ‘#{skey}’"
+              msg += " for ‘#{self.class.description}’" if self.class&.description
+              msg += '!'
+              warning(msg)
+            end
+            warns[skey] += 1
+            item.dup_count = warns[skey]
+            dumb_synckey = "#{skey}-#{warns[skey]}"
+            item[@itemkey.to_sym] = dumb_synckey
+            items[dumb_synckey] = item
+          else
+            items[skey] = item
+          end
+        end
+      elsif !skip_warn
         warning "Skipping missing location #{location}"
       end
       items.values
@@ -644,6 +681,7 @@ module MrMurano
     def syncdown(options={}, selected=[])
       options = elevate_hash(options)
       options[:asdown] = true
+      options[:skip_missing_warning] = true
 
       into = location ###
       syncdown_before(into)
@@ -763,18 +801,24 @@ module MrMurano
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
 
-      there = _matcher(list(), selected)     # Array<Item>
-      here = _matcher(locallist(), selected) # Array<Item>
+      # Fetch arrays of items there, and items here/local.
+      there = list
+      there = _matcher(there, selected)
+      local = locallist(skip_warn: options[:skip_missing_warning])
+      local = _matcher(local, selected)
 
       therebox = {}
       there.each do |item|
         item[:synckey] = synckey(item)
-        therebox[ item[:synckey] ] = item
+        therebox[item[:synckey]] = item
       end
-      herebox = {}
-      here.each do |item|
-        item[:synckey] = synckey(item)
-        herebox[ item[:synckey] ] = item
+      localbox = {}
+      local.each do |item|
+        skey = synckey(item)
+        # 2017-07-02: Check for local duplicates.
+        skey += "-#{item.dup_count}" unless item.dup_count.nil?
+        item[:synckey] = skey
+        localbox[item[:synckey]] = item
       end
       toadd = []
       todel = []

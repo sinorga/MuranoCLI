@@ -404,10 +404,14 @@ module MrMurano
       super
     end
 
+    def self.description
+      %(Product Event Handlers)
+    end
+
     ##
     # Get a list of local items filtered by solution type.
     # @return [Array<Item>] Product solution events found
-    def locallist
+    def locallist(skip_warn: false)
       llist = super
       # This is a kludge to distinguish between Product services
       # and Application services: assume that Murano only ever
@@ -434,10 +438,14 @@ module MrMurano
       super
     end
 
+    def self.description
+      %(Application Event Handlers)
+    end
+
     ##
     # Get a list of local items filtered by solution type.
     # @return [Array<Item>] Application solution events found
-    def locallist
+    def locallist(skip_warn: false)
       llist = super
       # "Style/InverseMethods: Use reject! instead of inverting select!."
       #llist.select! { |i| !PRODUCT_SERVICES.include? i.service }
@@ -447,8 +455,8 @@ module MrMurano
   end
 
   # Order here matters, because spec/cmd_init_spec.rb
-  SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', %(Application Event Handlers), true)
-  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', %(Product Event Handlers), true)
+  SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', EventHandlerSolnApp.description, true)
+  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', EventHandlerSolnPrd.description, true)
   # FIXME/2017-06-20: Should we use separate directories for prod vs app?
   #   [lb] thinks so if the locallist/PRODUCT_SERVICES kludge fails in the future.
   #SyncRoot.add('services', EventHandlerSolnApp, 'E', %(Application Event Handlers), true)
