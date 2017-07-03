@@ -56,10 +56,11 @@ module MrMurano
       remaining = -1
       while remaining != 0
         ret = super
-        if ret.nil?
+        if ret.nil? and !@suppress_error
           warning "No solution with ID: #{@sid}"
           exit 1
         end
+        return nil if ret.nil?
         # Pagination: Check if more data.
         if ret.is_a?(Hash) && ret.key?(:total) && ret.key?(:items)
           if total.nil?
@@ -98,6 +99,8 @@ module MrMurano
             aggregate[:items].concat ret[:items]
           end
         else
+          # ret is not a hash, or it's missing :total or :items.
+          warning "Unexpected: aggregate set: #{aggregate} / ret: #{ret}" unless aggregate.nil?
           aggregate = ret
           remaining = 0
         end
