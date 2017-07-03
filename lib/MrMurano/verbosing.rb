@@ -48,6 +48,13 @@ module MrMurano
     # +data+:: Data to write. Preferably a Hash with :headers and :rows
     # +ios+:: Output stream to write to, if nil, then use $stdout
     # Output is either a nice visual table or CSV.
+
+    TABULARIZE_DATA_FORMAT_ERROR = 'Unexpected data format: do not know how to tabularize.'
+
+    def tabularize(data, ios=nil)
+      MrMurano::Verbose.tabularize(data, ios)
+    end
+
     def self.tabularize(data, ios=nil)
       fmt = $cfg['tool.outformat']
       ios = $stdout if ios.nil?
@@ -67,7 +74,7 @@ module MrMurano
         # MAYBE/2017-07-02: Does shover operator work on frozen string literals?
         data.each { |i| rows << i }
       else
-        error 'Unexpected data format: do not know how to tabularize.'
+        error TABULARIZE_DATA_FORMAT_ERROR
         return
       end
       if fmt =~ /csv/i
@@ -85,10 +92,6 @@ module MrMurano
         table.rows = rows unless rows.nil?
         ios.puts table
       end
-    end
-
-    def tabularize(data, ios=nil)
-      MrMurano::Verbose.tabularize(data, ios)
     end
 
     ## Format and print the object
