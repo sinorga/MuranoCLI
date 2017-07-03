@@ -28,7 +28,7 @@ module MrMurano
         #@uriparts = [:service, @sid, :webservice]
         @uriparts = [:solution, @sid]
         @itemkey = :id
-        @locationbase = $cfg['location.base']
+        #@locationbase = $cfg['location.base']
         @location = nil
       end
 
