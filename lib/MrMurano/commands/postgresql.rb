@@ -2,7 +2,9 @@ require 'MrMurano/Solution-ServiceConfig'
 
 module MrMurano
   class Postgresql < ServiceConfig
-    def initialize
+    def initialize(sid=nil)
+      # FIXME/2017-07-03: What soln types have PSQLs?
+      @solntype = 'application.id'
       super
       @serviceName = 'postgresql'
     end

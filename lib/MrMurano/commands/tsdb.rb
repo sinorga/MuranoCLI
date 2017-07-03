@@ -5,7 +5,9 @@ require 'MrMurano/SubCmdGroupContext'
 module MrMurano
   module ServiceConfigs
     class Tsdb < ServiceConfig
-      def initialize
+      def initialize(sid=nil)
+        # FIXME/2017-07-03: What soln types have TSDBs?
+        @solntype = 'application.id'
         super
         @serviceName = 'tsdb'
       end
