@@ -48,7 +48,8 @@ module MrMurano
     end
 
     def create(pid, name=nil, &block) #? script_key?
-      name = pid if name.nil?
+      name = pid if name.to_s.empty?
+      raise 'Missing name/script_key?' if name.to_s.empty?
       # See pegasus_registry PostServiceConfig for the POST properties.
       #   pegasus_registry/api/swagger/paths/serviceconfig.yaml
       #   pegasus_registry/api/swagger/definitions/serviceconfig.yaml
