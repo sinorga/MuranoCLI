@@ -308,7 +308,7 @@ Run All Rspec Tests
 
 .. code-block:: bash
 
-    rspec --tag '~not_in_okami'
+    rspce
 
 Run Single Rspec Test
 ^^^^^^^^^^^^^^^^^^^^^
@@ -317,7 +317,36 @@ E.g.,
 
 .. code-block:: bash
 
+    rspec ./spec/cmd_syncup_spec.rb
+
+Run Tagged Rspec Test
+^^^^^^^^^^^^^^^^^^^^^
+
+The test might look like::
+
+    it "status", :not_in_okami do
+
+And running it would look like::
+
     rspec --tag '~not_in_okami' ./spec/cmd_syncup_spec.rb
+
+Run Specific "Example" from Rspec Test
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Run just one test within a file.
+
+The test file might look like::
+
+    RSpec.describe 'murano status', :cmd, :needs_password do
+      ...
+      context "with ProjectFile" do
+        ...
+        it "status" do
+            ...
+
+And you could run just that test with::
+
+    rspec ./spec/cmd_status_spec.rb -e "murano status with ProjectFile status"
 
 Run All Tests and Capture Colorful Output to HTML
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

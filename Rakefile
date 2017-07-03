@@ -47,7 +47,7 @@ desc 'Run RSpec'
 task :rspec do
     Dir.mkdir("report") unless File.directory?("report")
     rv=RUBY_VERSION.gsub(/\./,'_')
-    sh %{rspec --format html --out report/index-#{rv}.html --format documentation --tag '~not_in_okami'}
+    sh %{rspec --format html --out report/index-#{rv}.html --format documentation}
 end
 task :test => [:test_clean_up, :rspec]
 
@@ -168,9 +168,9 @@ if Gem.win_platform? then
     desc 'Run rspec on cmd tests using murano.exe'
     task :murano_exe_test => ['murano.exe'] do
         Dir.mkdir("report") unless File.directory?("report")
-        rv=RUBY_VERSION.gsub(/\./,'_')
+        rv = RUBY_VERSION.gsub(/\./, '_')
         ENV['CI_MR_EXE'] = '1'
-        sh %{rspec --format html --out report/murano_exe-#{rv}.html --format documentation --tag cmd --tag '~not_in_okami'}
+        sh %{rspec --format html --out report/murano_exe-#{rv}.html --format documentation --tag cmd}
     end
     task :test => [:murano_exe_test]
 
