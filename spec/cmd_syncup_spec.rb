@@ -28,7 +28,10 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
-    expect(out).to a_string_starting_with("Linked product #{@product_name}")
+    #expect(out).to a_string_starting_with("Linked product #{@product_name}")
+    olines = out.lines
+    expect(olines[0]).to eq("Linked ‘#{@product_name}’ to ‘#{@applctn_name}’\n")
+    expect(olines[1]).to eq("Created default event handler\n")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
@@ -49,14 +52,13 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
       FileUtils.move('assets', 'files')
       FileUtils.mkpath('specs')
-      FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
+      FileUtils.copy(
+        File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'),
+        'specs/resources.yaml',
+      )
     end
 
     it "syncup" do
-# FIXME/2017-06-23: This test failing horribly, because of files copied over.
-#  devdata.lua specifies: --#EVENT device2 data_in
-#  but Murano doesn't have this event, I don't think [lb].
-#  It does have --#EVENT device2 event
       out, err, status = Open3.capture3(capcmd('murano', 'syncup'))
       expect(out).to eq('')
       expect(err).to eq('')
