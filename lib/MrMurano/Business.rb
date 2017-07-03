@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -27,6 +27,8 @@ module MrMurano
 
     attr_accessor :bid
     attr_accessor :name
+    attr_accessor :role
+    attr_reader :meta
 
     def initialize(data=nil)
       if data.nil?
@@ -41,6 +43,10 @@ module MrMurano
 
     def valid?
       @valid
+    end
+
+    def bizid
+      @bid
     end
 
     def ==(them)
@@ -61,6 +67,8 @@ module MrMurano
       return unless @valid
       @bid = data[:bizid]
       @name = data[:name]
+      @role = data[:role]
+      @meta = data
     end
 
     def write(scope=:project)

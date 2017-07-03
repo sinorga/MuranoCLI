@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -38,33 +38,36 @@ List businesses.
     acc = MrMurano::Account.instance
 
     MrMurano::Verbose.whirly_start 'Looking for businesses...'
-    data = acc.businesses
+    bizz = acc.businesses
     MrMurano::Verbose.whirly_stop
 
-    io=nil
+    io = nil
     if options.output then
       io = File.open(options.output, 'w')
     end
 
     if options.idonly then
       headers = [:bizid]
-      data = data.map{|row| [row[:bizid]]}
+      bizz = bizz.map(&:bizid)
     elsif not options.all then
       headers = [:bizid, :role, :name]
-      data = data.map{|r| [r[:bizid], r[:role], r[:name]]}
+      bizz = bizz.map { |biz| [biz.bizid, biz.role, biz.name] }
     else
-      headers = data[0].keys
-      data = data.map{|r| headers.map{|h| r[h]}}
+      headers = bizz[0].meta.keys
+      bizz = bizz.map { |biz| headers.map { |key| biz.meta[key] } }
     end
 
-    acc.outf(data, io) do |dd, ios|
+    acc.outf(bizz, io) do |dd, ios|
       if options.idonly then
         ios.puts dd.join(' ')
       else
-        acc.tabularize({
-          :headers=>headers.map{|h| h.to_s},
-          :rows=>dd
-        }, ios)
+        acc.tabularize(
+          {
+            headers: headers.map{|h| h.to_s},
+            rows: dd,
+          },
+          ios,
+        )
       end
     end
     io.close unless io.nil?
