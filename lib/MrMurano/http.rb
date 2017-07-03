@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -129,7 +129,7 @@ module MrMurano
       error resp
     end
 
-    def workit(request, no_error: false, &block)
+    def workit(request, &block)
       curldebug(request)
       if block_given?
         yield request, http()
@@ -139,7 +139,8 @@ module MrMurano
         when Net::HTTPSuccess
           workit_response(response)
         else
-          unless @suppress_error || no_error
+          # One problem with mixins is initialization...
+          unless defined?(@suppress_error) && @suppress_error
             showHttpError(request, response)
           end
           nil
@@ -156,10 +157,10 @@ module MrMurano
       end
     end
 
-    def get(path='', query=nil, no_error: false, &block)
+    def get(path='', query=nil, &block)
       uri = endpoint(path)
       uri.query = URI.encode_www_form(query) unless query.nil?
-      workit(set_def_headers(Net::HTTP::Get.new(uri)), no_error: no_error, &block)
+      workit(set_def_headers(Net::HTTP::Get.new(uri)), &block)
     end
 
     def post(path='', body={}, &block)
