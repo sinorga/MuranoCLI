@@ -540,23 +540,25 @@ module MrMurano
     def localitems(from)
       # TODO: Profile this.
       debug "#{self.class.to_s}: Getting local items from: #{from}"
-      searchIn = from.to_s
-      sf = searchFor.map{|i| ::File.join(searchIn, i)}
+      search_in = from.to_s
+      sf = searchFor.map { |i| ::File.join(search_in, i) }
       debug "#{self.class.to_s}: Globs: #{sf}"
-      Dir[*sf].flatten.compact.reject do |p|
+      items = Dir[*sf].flatten.compact.reject do |p|
         ::File.directory?(p) or ignoring.any? do |i|
           ::File.fnmatch(i,p)
         end
-      end.map do |path|
+      end
+      items = items.map do |path|
         path = Pathname.new(path).realpath
         item = to_remote_item(from, path)
-        if item.kind_of?(Array) then
-          item.compact.map{|i| i[:local_path] = path; i}
-        elsif not item.nil? then
+        if item.kind_of?(Array)
+          item.compact.map { |i| i[:local_path] = path; i }
+        elsif not item.nil?
           item[:local_path] = path
           item
         end
-      end.flatten.compact
+      end
+      items.flatten.compact
     end
 
     #######################################################################
