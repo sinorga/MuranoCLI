@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -96,7 +96,10 @@ Link a solution to an event handler of another solution.
     # For now, link links the one product to the one application.
     # LATER: Users can link any solutions with Interface service.
     # FIXME: Should probably make --product and --application options?
-    appl, prod = get_product_and_application!(skip_verify: true)
+    #appl, prod = get_product_and_application!(skip_verify: true)
+    # 2017-07-03: On second thought, do verify, so we fetch the
+    # correct solution name to use as "script_key".
+    appl, prod = get_product_and_application!(skip_verify: false)
     link_opts = { warn_on_conflict: true }
     link_solutions(appl, prod, link_opts)
   end
