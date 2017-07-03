@@ -394,8 +394,8 @@ module MrMurano
       md = pattern_pattern.match(pattern)
       return false if md.nil?
       debug "match pattern: '#{md[:service]}' '#{md[:event]}'"
-      return false unless md[:service].empty? || item[:service].casecmp(md[:service])
-      return false unless md[:event].empty? || item[:event].casecmp(md[:event])
+      return false unless md[:service].empty? || item[:service].casecmp(md[:service]).zero?
+      return false unless md[:event].empty? || item[:event].casecmp(md[:event]).zero?
       true # Both match (or are empty.)
     end
 
