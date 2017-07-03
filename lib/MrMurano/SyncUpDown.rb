@@ -739,7 +739,7 @@ module MrMurano
           io << item[:local_path].read
         end
       end
-      df = ""
+      stdout_and_stderr = ''
       begin
         download(Pathname.new(trmt.path), item)
 
@@ -750,14 +750,15 @@ module MrMurano
         cmd << trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
         cmd << tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
 
-        df, _ = Open3.capture2e(*cmd)
+        stdout_and_stderr, _status = Open3.capture2e(*cmd)
+        stdout_and_stderr = '<Nothing changed (must be timestamp difference)>' if stdout_and_stderr.empty?
       ensure
         trmt.close
         trmt.unlink
         tlcl.close
         tlcl.unlink
       end
-      df
+      stdout_and_stderr
     end
 
     ##
