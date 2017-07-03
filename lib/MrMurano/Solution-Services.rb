@@ -346,8 +346,8 @@ module MrMurano
             script: line,
           )
         elsif !cur.nil? && !cur[:script].nil?
-          # MAYBE/2017-07-02: Frozen string literal: change << to += ??
-          cur[:script] << line
+          # 2017-07-02: Frozen string literal: change << to +=
+          cur[:script] += line
         end
         lineno += 1
       end
