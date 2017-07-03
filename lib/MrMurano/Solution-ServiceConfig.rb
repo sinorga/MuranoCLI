@@ -10,7 +10,7 @@ require 'MrMurano/Solution'
 module MrMurano
   # …/serviceconfig
   class ServiceConfig < SolutionBase
-    def initialize(sid)
+    def initialize(sid=nil)
       super
       @uriparts << 'serviceconfig'
       @scid = nil

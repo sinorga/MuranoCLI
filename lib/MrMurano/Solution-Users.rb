@@ -9,8 +9,12 @@ module MrMurano
   ##
   # User Management common things
   class UserBase < SolutionBase
+    def initialize
+      super
+    end
+
     def list
-      get()
+      get
     end
 
     def fetch(id)
@@ -86,6 +90,7 @@ module MrMurano
         return []
       end
 
+      # MAYBE/2017-07-03: Do we care if there are duplicate keys in the yaml? See dup_count.
       here = []
       from.open { |io| here = YAML.load(io) }
       here = [] if here == false

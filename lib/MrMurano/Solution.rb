@@ -126,11 +126,6 @@ module MrMurano
 
   class Solution < SolutionBase
     def initialize(sid=nil)
-      unless sid
-        if !defined?(@solntype) || @solntype.nil?
-          raise 'Solution subclass must set @solntype'
-        end
-      end
       # Does it matter if we use :sid or :apiId?
       meta = sid if sid.is_a?(Hash)
       sid = sid[:sid] if sid.is_a?(Hash)

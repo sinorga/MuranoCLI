@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -18,6 +18,10 @@ module MrMurano
   ##
   # Things that servers do that is common.
   class ServiceBase < SolutionBase
+    def initialize(sid=nil)
+      super
+    end
+
     def mkalias(_remote)
       # :nocov:
       raise 'Needs to be implemented in child'
@@ -174,7 +178,7 @@ module MrMurano
       attr_accessor :solution_id
     end
 
-    def initialize
+    def initialize(sid=nil)
       # FIXME/VERIFY/2017-07-02: Check that products do not have Modules.
       @solntype = 'application.id'
       super
@@ -237,7 +241,7 @@ module MrMurano
       attr_accessor :type
     end
 
-    def initialize(sid)
+    def initialize(sid=nil)
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
