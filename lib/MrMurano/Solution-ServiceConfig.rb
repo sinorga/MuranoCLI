@@ -154,5 +154,19 @@ module MrMurano
     end
   end
   # :nocov:
+
+  class ServiceConfigApplication < ServiceConfig
+    def initialize(sid=nil)
+      @solntype = 'application.id'
+      super
+    end
+  end
+
+  class ServiceConfigProduct < ServiceConfig
+    def initialize(sid=nil)
+      @solntype = 'product.id'
+      super
+    end
+  end
 end
 
