@@ -147,6 +147,8 @@ module MrMurano
       attr_accessor :type
       # @return [String] For testing, the updated_at time the server would otherwise indicate.
       attr_accessor :updated_at
+      # @return [Integer] Non-nil if multiple conflicting files found for same item.
+      attr_accessor :dup_count
 
       # Initialize a new Item with a few, or all, attributes.
       # @param hsh [Hash{Symbol=>Object}, Item] Initial values
