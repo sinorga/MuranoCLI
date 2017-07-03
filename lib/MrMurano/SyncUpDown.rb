@@ -751,7 +751,6 @@ module MrMurano
         cmd << tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
 
         stdout_and_stderr, _status = Open3.capture2e(*cmd)
-        stdout_and_stderr = '<Nothing changed (must be timestamp difference)>' if stdout_and_stderr.empty?
       ensure
         trmt.close
         trmt.unlink
@@ -836,7 +835,10 @@ module MrMurano
         mrg = localbox[key].reject { |k, v| k == itemkey }
         mrg = therebox[key].merge(mrg)
         if docmp(localbox[key], therebox[key])
-          mrg[:diff] = dodiff(mrg.to_h) if options[:diff] and mrg[:selected]
+          if options[:diff] and mrg[:selected]
+            mrg[:diff] = dodiff(mrg.to_h)
+            mrg[:diff] = '<Nothing changed (may be timestamp difference?)>' if mrg[:diff].empty?
+          end
           tomod << mrg
         else
           unchg << mrg
