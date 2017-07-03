@@ -183,7 +183,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "dumps" do
+    it "dumps", :project_file_2017_07_03 do
       @saved_cfg = ENV['MURANO_CONFIGFILE']
       ENV['MURANO_CONFIGFILE'] = nil
       cfg = MrMurano::Config.new
@@ -191,7 +191,7 @@ RSpec.describe MrMurano::Config do
       cfg['sync.bydefault'] = 'files'
       ret = cfg.dump
 
-      rawwant = IO.read(File.join(@testdir.to_path, 'spec','fixtures','dumped_config'))
+      rawwant = IO.read(File.join(@testdir.to_path, 'spec', 'fixtures', 'dumped_config'))
       template = ERB.new(rawwant)
       want = template.result(binding)
 
