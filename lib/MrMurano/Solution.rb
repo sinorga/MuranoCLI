@@ -264,10 +264,12 @@ module MrMurano
       type.to_s.capitalize
     end
 
+    # FIXME/Rubocop/2017-07-02: Style/AccessorMethodName:
     def set_name(name=nil)
       # Use duck typing instead of `is_a? String` to be more duck-like.
       if name.respond_to?(:to_str) && name != ''
         @name = name
+        # FIXME/Rubocop/2017-07-02: Double-negation
         @valid_name = !!@name.match(name_validate_regex)
       else
         @name = ''
@@ -275,6 +277,7 @@ module MrMurano
       end
     end
 
+    # FIXME/Rubocop/2017-07-02: Style/AccessorMethodName:
     def set_name!(name)
       raise 'Expecting name, not nothing' unless name && name != ''
       raise MrMurano::ConfigError.new(name_validate_help) unless name.match(name_validate_regex)
@@ -301,6 +304,7 @@ module MrMurano
       super
     end
 
+    # FIXME/2017-07-02: Test long names:
     # Murano Appl:
     #     /^[a-zA-Z0-9-\s]{1,63}$/
     #   E.g., longest acceptable name:
@@ -311,6 +315,8 @@ module MrMurano
     #     Yassssssssssssssssssss11111111111111111111111111111111111111111
     # Either (should be too long):
     #     abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz345678901234567890123456789
+
+    # FIXME/2017-06-28: Test uppercase characters again.
 
     # SYNC_ME: See regex in bizapi: lib/api/route/business/solution.js
     def name_validate_regex
