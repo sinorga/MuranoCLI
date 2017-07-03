@@ -176,11 +176,14 @@ RSpec.describe MrMurano::Gateway::Resources do
 
   context "syncdown" do
     before(:example) do
-      expect(@gw).to receive(:locallist).once.and_return([
-        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
-        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"fuzz"},
-        {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"}
-      ])
+      expect(@gw).to receive(:locallist).once.and_return(
+        [
+          {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
+          {:format=>"string", :unit=>"c", :settable=>true, :alias=>"fuzz"},
+          {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"}
+        ],
+        [],
+      )
 
       @io = instance_double("IO")
       @p = instance_double('Pathname')
