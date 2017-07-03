@@ -147,8 +147,6 @@ module MrMurano
       attr_accessor :type
       # @return [String] For testing, the updated_at time the server would otherwise indicate.
       attr_accessor :updated_at
-      # @return [Integer] In the event of a duplicated synckey, the duplicate's order number.
-      attr_accessor :dup_count
 
       # Initialize a new Item with a few, or all, attributes.
       # @param hsh [Hash{Symbol=>Object}, Item] Initial values
@@ -515,7 +513,7 @@ module MrMurano
           if items.key? skey
             warns[skey] = 0 unless warns.key?(skey)
             if warns[skey].zero?
-              items[skey].dup_count = warns[skey]
+              items[skey][:dup_count] = warns[skey]
               # The dumb_synckey is just so we don't overwrite the
               # original item, or other duplicates, in the hash.
               dumb_synckey = "#{skey}-#{warns[skey]}"
@@ -529,7 +527,7 @@ module MrMurano
               warning(msg)
             end
             warns[skey] += 1
-            item.dup_count = warns[skey]
+            item[:dup_count] = warns[skey]
             dumb_synckey = "#{skey}-#{warns[skey]}"
             item[@itemkey.to_sym] = dumb_synckey
             items[dumb_synckey] = item
@@ -816,7 +814,7 @@ module MrMurano
       local.each do |item|
         skey = synckey(item)
         # 2017-07-02: Check for local duplicates.
-        skey += "-#{item.dup_count}" unless item.dup_count.nil?
+        skey += "-#{item[:dup_count]}" unless item[:dup_count].nil?
         item[:synckey] = skey
         localbox[item[:synckey]] = item
       end
