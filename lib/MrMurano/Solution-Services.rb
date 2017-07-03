@@ -322,12 +322,16 @@ module MrMurano
       cur = nil
       lineno = 0
       path.readlines.each do |line|
+        # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
         md = @match_header.match(line)
         if !md.nil?
           # [lb] asks: Is this too hacky?
           if md[:service] == 'device2'
             event_event = 'event'
             event_type = md[:event]
+            # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's not 'event'.
+            #   Want this?:
+            #     event_type = 'event' if event_type == 'data_in'
           else
             event_event = md[:event]
             event_type = nil
