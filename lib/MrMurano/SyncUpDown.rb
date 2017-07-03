@@ -745,11 +745,10 @@ module MrMurano
 
         MrMurano::Verbose.whirly_stop
 
-        # 2017-07-02: Changing shovel operator << to +=
-        # to support Ruby 3.0 frozen string literals.
+        # 2017-07-03: No worries, Ruby 3.0 frozen string literals, cmd is a list.
         cmd = $cfg['diff.cmd'].shellsplit
-        cmd += trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
-        cmd += tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        cmd << trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        cmd << tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
 
         df, _ = Open3.capture2e(*cmd)
       ensure
