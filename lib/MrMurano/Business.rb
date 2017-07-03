@@ -282,6 +282,7 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
         exit 1
       end
       sol.sid = resp[:id]
+      sol.affirm_valid
       # 2017-06-29: The code used to hunt for the solution ID, because
       #   POST business/<bizid>/solution/ used to not return anything,
       #   but now it returns the solution ID.
