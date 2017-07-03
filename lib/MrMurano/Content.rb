@@ -13,18 +13,19 @@ module MrMurano
   ## The details of talking to the Content service.
   module Content
     class Base
+      include Http
+      include Verbose
+      include SolutionId
+
       def initialize
-        @sid = $cfg['product.id']
-        raise MrMurano::ConfigError.new("No product id!") if @sid.nil?
-        @uriparts = [:service, @sid, :content, :item]
+        @solntype = 'product.id'
         @uriparts_sidex = 1
+        init_sid!
+        @uriparts = [:service, @sid, :content, :item]
         @itemkey = :id
         #@locationbase = $cfg['location.base']
         @location = nil
       end
-
-      include Http
-      include Verbose
 
       ## Generate an endpoint in Murano
       # Uses the uriparts and path

@@ -1,10 +1,17 @@
-require 'uri'
-require 'net/http'
+# Last Modified: 2017.07.03 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'http/form_data'
 require 'json-schema'
-require 'MrMurano/Config'
+require 'net/http'
+require 'uri'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
+require 'MrMurano/Config'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
@@ -12,16 +19,18 @@ module MrMurano
   # This is where interfacing to real hardware happens.
   module Gateway
     class GweBase
+      include Http
+      include Verbose
+      include SolutionId
+
       def initialize
-        @sid = $cfg['product.id']
-        raise MrMurano::ConfigError.new("No Product ID specified in config") if @sid.to_s.empty?
+        @solntype = 'product.id'
+        @uriparts_sidex = 1
+        init_sid!
         @uriparts = [:service, @sid, :device2]
         @uriparts_sidex = 1
         @itemkey = :id
       end
-
-      include Http
-      include Verbose
 
       ## Generate an endpoint in Murano
       # Uses the uriparts and path
