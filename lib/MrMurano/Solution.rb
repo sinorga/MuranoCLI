@@ -281,7 +281,11 @@ module MrMurano
     end
 
     def quoted_name
-      "‘#{@name}’"
+      if @name.to_s.empty?
+        ''
+      else
+        "‘#{@name}’"
+      end
     end
 
     def valid?
