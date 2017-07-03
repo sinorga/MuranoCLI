@@ -7,6 +7,7 @@ require 'http/form_data'
 require 'MrMurano/Config'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
+require 'MrMurano/SolutionId'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano

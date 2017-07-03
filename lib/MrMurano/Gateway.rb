@@ -12,6 +12,7 @@ require 'uri'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
 require 'MrMurano/Config'
+require 'MrMurano/SolutionId'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
