@@ -87,10 +87,10 @@ module MrMurano
       end
 
       here = []
-      from.open {|io| here = YAML.load(io) }
+      from.open { |io| here = YAML.load(io) }
       here = [] if here == false
 
-      here.map{|i| Hash.transform_keys_to_symbols(i)}
+      here.map { |i| Hash.transform_keys_to_symbols(i) }
     end
   end
 

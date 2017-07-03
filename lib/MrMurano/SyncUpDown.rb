@@ -81,7 +81,7 @@ module MrMurano
       @@syncset = [] unless defined?(@@syncset)
       self.checkSAME(opt)
       @@syncset.each do |a|
-        if opt[a.name.to_sym] or opt[a.type.to_sym] then
+        if opt[a.name.to_sym] or opt[a.type.to_sym]
           yield a.name, a.type, a.class, a.desc
         end
       end
@@ -95,11 +95,11 @@ module MrMurano
     # @return [nil]
     def self.checkSAME(opt)
       @@syncset = [] unless defined?(@@syncset)
-      if opt[:all] then
+      if opt[:all]
         @@syncset.each { |a| opt[a.name.to_sym] = true }
       else
         any = @@syncset.select {|a| opt[a.name.to_sym] or opt[a.type.to_sym]}
-        if any.empty? then
+        if any.empty?
           bydef = $cfg['sync.bydefault'].split
           @@syncset.select{ |a| bydef.include? a.name }.each{ |a| opt[a.name.to_sym] = true }
         end
@@ -131,7 +131,7 @@ module MrMurano
       attr_accessor :local_path
       # FIXME/EXPLAIN: ??? what is this?
       attr_accessor :id
-      # @return [String] The lua code for this item. (not all items use this.)
+      # @return [String] The Lua code for this item. (not all items use this.)
       attr_accessor :script
       # @return [Integer] The line in #local_path where this #script starts.
       attr_accessor :line
@@ -141,7 +141,7 @@ module MrMurano
       attr_accessor :diff
       # @return [Boolean] When filtering, did this item pass.
       attr_accessor :selected
-      # FIXME/EXPLAIN: ??? what is this?
+      # @return [String] The constructed name used to match local items to remote items.
       attr_accessor :synckey
       # @return [String] For device2, the event type.
       attr_accessor :type
@@ -303,7 +303,7 @@ module MrMurano
     #######################################################################
 
     #######################################################################
-    # Methods that could be overriden
+    # Methods that could be overridden
 
     ##
     # Compute a remote item hash from the local path
@@ -319,7 +319,7 @@ module MrMurano
       root = Dir.glob(root.to_s).first
       path = Pathname.new(path)
       root = Pathname.new(root)
-      Item.new(:name => path.realpath.relative_path_from(root.realpath).to_s)
+      Item.new(name: path.realpath.relative_path_from(root.realpath).to_s)
     end
 
     ##
@@ -385,13 +385,13 @@ module MrMurano
     # @param local [Pathname] Full path of where to download to
     # @param item [Item] The item to download
     def download(local, item)
-#      if item[:bundled] then
+#      if item[:bundled]
 #        warning "Not downloading into bundled item #{synckey(item)}"
 #        return
 #      end
       local.dirname.mkpath
       id = item[@itemkey.to_sym]
-      if id.nil? then
+      if id.nil?
         debug "!!! Missing '#{@itemkey}', using :id instead!"
         debug ":id => #{item[:id]}"
         id = item[:id]
@@ -446,11 +446,13 @@ module MrMurano
 
     def syncup_before
     end
+
     def syncup_after
     end
 
     def syncdown_before(local)
     end
+
     def syncdown_after(local)
     end
 
@@ -458,17 +460,17 @@ module MrMurano
     #######################################################################
 
 
-    # So, for bundles this needs to look at all the places and build up the merged
-    # stack of local items.
+    # So, for bundles this needs to look at all the places
+    # and build up the merged stack of local items.
     #
-    # Which means it needs the from to be split into the base and the sub so we can
-    # inject bundle directories.
+    # Which means it needs the from to be split into the base
+    # and the sub so we can inject bundle directories.
 
     ##
     # Get a list of local items.
     #
-    # Children should never need to override this.  Instead they should override
-    # #localitems
+    # Children should never need to override this.
+    # Instead they should override #localitems.
     #
     # This collects items in the project and all bundles.
     # @return [Array<Item>] items found
@@ -501,7 +503,6 @@ module MrMurano
       else
         warning "Skipping missing location #{location}"
       end
-
       items.values
     end
 
@@ -604,26 +605,26 @@ module MrMurano
       todel = dt[:todel]
       tomod = dt[:tomod]
 
-      if options[:delete] then
+      if options[:delete]
         todel.each do |item|
           sync_update_progress("Removing item #{item[:synckey]}")
-          unless $cfg['tool.dry'] then
+          unless $cfg['tool.dry']
             remove(item[itemkey])
           end
         end
       end
-      if options[:create] then
+      if options[:create]
         toadd.each do |item|
           sync_update_progress("Adding item #{item[:synckey]}")
-          unless $cfg['tool.dry'] then
+          unless $cfg['tool.dry']
             upload(item[:local_path], item.reject{|k,v| k==:local_path}, false)
           end
         end
       end
-      if options[:update] then
+      if options[:update]
         tomod.each do |item|
           sync_update_progress("Updating item #{item[:synckey]}")
-          unless $cfg['tool.dry'] then
+          unless $cfg['tool.dry']
             upload(item[:local_path], item.reject{|k,v| k==:local_path}, true)
           end
         end
@@ -650,28 +651,28 @@ module MrMurano
       todel = dt[:todel]
       tomod = dt[:tomod]
 
-      if options[:delete] then
+      if options[:delete]
         todel.each do |item|
           sync_update_progress("Removing item #{item[:synckey]}")
-          unless $cfg['tool.dry'] then
+          unless $cfg['tool.dry']
             dest = tolocalpath(into, item)
             removelocal(dest, item)
           end
         end
       end
-      if options[:create] then
+      if options[:create]
         toadd.each do |item|
           sync_update_progress("Adding item #{item[:synckey]}")
-          unless $cfg['tool.dry'] then
+          unless $cfg['tool.dry']
             dest = tolocalpath(into, item)
             download(dest, item)
           end
         end
       end
-      if options[:update] then
+      if options[:update]
         tomod.each do |item|
           sync_update_progress("Updating item #{item[:synckey]}")
-          unless $cfg['tool.dry'] then
+          unless $cfg['tool.dry']
             dest = tolocalpath(into, item)
             download(dest, item)
           end
@@ -689,7 +690,7 @@ module MrMurano
     def dodiff(item)
       trmt = Tempfile.new([tolocalname(item, @itemkey) + '_remote_', '.lua'])
       tlcl = Tempfile.new([tolocalname(item, @itemkey) + '_local_', '.lua'])
-      if item.has_key? :script then
+      if item.key?(:script)
         Pathname.new(tlcl.path).open('wb') do |io|
           io << item[:script]
         end
@@ -726,13 +727,13 @@ module MrMurano
     # @param patterns [Array<String>] Filters for _matcher
     def _matcher(items, patterns)
       items.map do |item|
-        if patterns.empty? then
+        if patterns.empty?
           item[:selected] = true
         else
           item[:selected] = patterns.any? do |pattern|
-            if pattern.to_s[0] == '#' then
+            if pattern.to_s[0] == '#'
               match(item, pattern)
-            elsif item.local_path.nil? then
+            elsif item.local_path.nil?
               false
             else
               item[:local_path].fnmatch(pattern)
@@ -777,25 +778,25 @@ module MrMurano
       todel = []
       tomod = []
       unchg = []
-      if options[:asdown] then
-        todel = (herebox.keys - therebox.keys).map{|key| herebox[key] }
-        toadd = (therebox.keys - herebox.keys).map{|key| therebox[key] }
+      if options[:asdown]
+        todel = (localbox.keys - therebox.keys).map { |key| localbox[key] }
+        toadd = (therebox.keys - localbox.keys).map { |key| therebox[key] }
       else
-        toadd = (herebox.keys - therebox.keys).map{|key| herebox[key] }
-        todel = (therebox.keys - herebox.keys).map{|key| therebox[key] }
+        toadd = (localbox.keys - therebox.keys).map { |key| localbox[key] }
+        todel = (therebox.keys - localbox.keys).map { |key| therebox[key] }
       end
-      (herebox.keys & therebox.keys).each do |key|
+      (localbox.keys & therebox.keys).each do |key|
         # Want here to override there except for itemkey.
-        mrg = herebox[key].reject{|k,v| k==itemkey}
+        mrg = localbox[key].reject { |k, v| k == itemkey }
         mrg = therebox[key].merge(mrg)
-        if docmp(herebox[key], therebox[key]) then
+        if docmp(localbox[key], therebox[key])
           mrg[:diff] = dodiff(mrg.to_h) if options[:diff] and mrg[:selected]
           tomod << mrg
         else
           unchg << mrg
         end
       end
-      if options[:unselected] then
+      if options[:unselected]
         { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
       else
         {
