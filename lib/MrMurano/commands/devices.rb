@@ -161,7 +161,8 @@ If an alias is not settable, this will fail.
     end
 
     ret = prd.write(snid, set)
-    prd.outf ret unless ret.to_s.empty?
+    # On success, write returns empty curlies {}. So check nil or empty.
+    prd.outf(ret) unless ret.nil? or ret.empty?
   end
 end
 
