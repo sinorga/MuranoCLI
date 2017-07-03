@@ -19,7 +19,7 @@ module MrMurano
         @uriparts = [:service, @sid, :content, :item]
         @uriparts_sidex = 1
         @itemkey = :id
-        @locationbase = $cfg['location.base']
+        #@locationbase = $cfg['location.base']
         @location = nil
       end
 
