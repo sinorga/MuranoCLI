@@ -25,28 +25,45 @@ module MrMurano
     include Http
     include Verbose
 
-    attr_accessor :bid
-    attr_accessor :name
+    #attr_accessor :bid
+    #attr_accessor :name
     attr_accessor :role
     attr_reader :meta
 
     def initialize(data=nil)
-      if data.nil?
-        @bid = $cfg['business.id'].to_s
-        @name = $cfg['business.name'].to_s
-      else
-        self.meta = data
-      end
+      @bid = nil
+      @name = nil
       @valid = false
       @user_bizes = {}
+      unless data.nil?
+        self.meta = data
+      end
     end
 
     def valid?
       @valid
     end
 
+    def bid
+      return @bid unless @bid.to_s.empty?
+      $cfg['business.id'].to_s
+    end
+
+    def bid=(bid)
+      @bid = bid
+    end
+
+    def name
+      return @name unless @name.to_s.empty?
+      $cfg['business.name'].to_s
+    end
+
+    def name=(name)
+      @name = name
+    end
+
     def bizid
-      @bid
+      self.bid
     end
 
     def ==(them)
@@ -56,7 +73,7 @@ module MrMurano
     protected
 
     def state
-      [@bid, @name, @valid, @user_bizes]
+      [bid, name, @valid, @user_bizes]
     end
 
     public
@@ -72,8 +89,8 @@ module MrMurano
     end
 
     def write(scope=:project)
-      $cfg.set('business.id', @bid, scope)
-      $cfg.set('business.name', @name, scope)
+      $cfg.set('business.id', bid, scope)
+      $cfg.set('business.name', name, scope)
       self
     end
 
@@ -94,10 +111,9 @@ module MrMurano
     #end
 
     def must_business_id!
-      raise MrMurano::ConfigError.new(missing_business_id_msg) if @bid.nil?
+      raise MrMurano::ConfigError.new(Business.missing_business_id_msg) if bid.to_s.empty?
     end
 
-# FIXME: Do I need to escape the backticks?
     def self.missing_business_id_msg
       %(
 Missing Business ID.
@@ -109,7 +125,7 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
     end
 
     def pretty_name_and_id
-      "‘#{Rainbow(@name).underline}’ <#{@bid}>"
+      "‘#{Rainbow(name).underline}’ <#{bid}>"
     end
 
     # ---------------------------------------------------------------------
@@ -141,7 +157,7 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
       #     :perModelDevices=>10, :perApiUsers=>10}, :lineitems=>[]}
       # EXPLAIN/2017-06-30: Which value(s) tell us if ADC is enabled?
       whirly_start('Fetching Business...')
-      data = get("business/#{@bid}/overview", &block)
+      data = get("business/#{bid}/overview", &block)
       whirly_stop
       @valid = !data.nil?
       @name = data[:name] if @valid
@@ -164,7 +180,7 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
       raise "Unknown type(#{type})" unless type == :all || ALLOWED_TYPES.include?(type)
       # Cache the result since sometimes both products() and applications() are called.
       if invalidate || @user_bizes[type].nil?
-        got = get('business/' + @bid + '/solution/')
+        got = get('business/' + bid + '/solution/')
         @user_bizes[type] = got
       end
       solz = @user_bizes[type].dup
@@ -218,7 +234,7 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
       end
       whirly_start 'Creating solution...'
       resp = post(
-        'business/' + @bid + '/solution/',
+        'business/' + bid + '/solution/',
         label: sol.name,
         type: sol.type,
       ) do |request, http|
@@ -296,7 +312,7 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
 
     def delete_solution(sid)
       must_business_id!
-      delete('business/' + @bid + '/solution/' + sid)
+      delete('business/' + bid + '/solution/' + sid)
     end
 
     # ---------------------------------------------------------------------
