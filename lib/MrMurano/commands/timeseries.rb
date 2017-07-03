@@ -3,7 +3,9 @@ require 'MrMurano/Solution-ServiceConfig'
 
 module MrMurano
   class Timeseries < ServiceConfig
-    def initialize
+    def initialize(sid=nil)
+      # FIXME/2017-07-03: What soln types have timeseries?
+      @solntype = 'application.id'
       super
       @serviceName = 'timeseries'
     end

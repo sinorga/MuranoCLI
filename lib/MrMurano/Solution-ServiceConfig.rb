@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -108,7 +108,7 @@ module MrMurano
   # A much better UI/UX happens with human intervention.
   # :nocov:
   class Services < SolutionBase
-    def initialize
+    def initialize(sid=nil)
       super
       @uriparts << 'service'
     end
