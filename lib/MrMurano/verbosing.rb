@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -48,7 +48,7 @@ module MrMurano
     # +data+:: Data to write. Preferably a Hash with :headers and :rows
     # +ios+:: Output stream to write to, if nil, then use $stdout
     # Output is either a nice visual table or CSV.
-    def tabularize(data, ios=nil)
+    def self.tabularize(data, ios=nil)
       fmt = $cfg['tool.outformat']
       ios = $stdout if ios.nil?
       cols = nil
@@ -85,6 +85,10 @@ module MrMurano
         table.rows = rows unless rows.nil?
         ios.puts table
       end
+    end
+
+    def tabularize(data, ios=nil)
+      MrMurano::Verbose.tabularize(data, ios)
     end
 
     ## Format and print the object

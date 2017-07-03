@@ -66,7 +66,14 @@ RSpec.describe 'murano link', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'link', 'unset'))
-    expect(out).to a_string_starting_with("Unlinked #{@solz_name}")
+    #expect(out).to a_string_starting_with("Unlinked #{@solz_name}")
+    # E.g.,
+    #   Unlinked ‘linktest3e7def1b86a1d680’ from ‘linktest3e7def1b86a1d680’\n
+    #   Removed ‘h2thqll2z9sqoooc0_w4w3vxla11ngg4cok_event’ from ‘linktest3e7def1b86a1d680\n
+    olines = out.lines
+    expect(olines[0]).to eq("Unlinked ‘#{@solz_name}’ from ‘#{@solz_name}’\n")
+    expect(olines[1]).to a_string_starting_with("Removed ‘")
+    expect(olines[1]).to match(/^Removed ‘[_a-z0-9]*’ from ‘#{@solz_name}’\n$/)
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end

@@ -39,15 +39,18 @@ List the solutions that are linked.
 
     c.verify_arg_count!(args)
 
-    MrMurano::Verbose.whirly_start('Looking for links...')
-
+    MrMurano::Verbose.whirly_start('Fetching product list...')
     biz = MrMurano::Business.new
     products = biz.products
-    pids = products.map { |p| p[:apiId] }
+    MrMurano::Verbose.whirly_stop
+    pids = products.map(&:apiId)
 
-    sercfg = MrMurano::ServiceConfig.new
+    appl = solution_find_or_create(biz: biz, type: :application)
+
+    MrMurano::Verbose.whirly_msg 'Fetching application services...'
+    sercfg = MrMurano::ServiceConfig.new(appl.sid)
+    #scfgs = sercfg.list('?select=service,id,solution_id,script_key,alias')
     scfgs = sercfg.list
-
     MrMurano::Verbose.whirly_stop
 
     scfgs.select! { |s| pids.include? s[:service] }
@@ -69,7 +72,7 @@ List the solutions that are linked.
       if options.idonly
         ios.puts dd.join(' ')
       else
-        biz.tabularize(
+        MrMurano::Verbose.tabularize(
           {
             headers: headers.map(&:to_s),
             rows: dd,
@@ -116,7 +119,9 @@ Unlink a solution.
   c.action do |args, _options|
     c.verify_arg_count!(args)
 
-    appl, prod = get_product_and_application!(skip_verify: true)
+    #appl, prod = get_product_and_application!(skip_verify: true)
+    # 2017-07-03: On second thought, do not skip_verify, so we get the soln name.
+    appl, prod = get_product_and_application!(skip_verify: false)
 
     sercfg = MrMurano::ServiceConfig.new(appl.sid)
     MrMurano::Verbose.whirly_msg 'Fetching services...'
@@ -137,7 +142,9 @@ Unlink a solution.
       sercfg.debug "Deleting #{svc[:service]} : #{svc[:script_key]} : #{svc[:id]}"
       ret = sercfg.remove(svc[:id])
       if !ret.nil?
-        say("Unlinked ‘#{svc[:script_key]}’ from #{appl.quoted_name}")
+        msg = "Unlinked ‘#{svc[:script_key]}’"
+        msg += " from #{appl.quoted_name}" unless appl.quoted_name.to_s.empty?
+        say(msg)
       else
         sercfg.warning "Failed to unlink ‘#{svc[:id]}’"
       end
@@ -158,11 +165,13 @@ Unlink a solution.
 
     hdlrs.each do |evth|
       evthlr.debug "Deleting #{evth[:service]} : #{evth[:alias]} : #{evth[:id]}"
-      ret = hdlrs.remove(evth[:id])
+      ret = evthlr.remove(evth[:id])
       if !ret.nil?
-        say("Removed ‘#{evth[:alias]}’ from #{appl.quoted_name}")
+        msg = "Removed ‘#{evth[:alias]}’"
+        msg += " from #{appl.quoted_name}" unless appl.quoted_name.to_s.empty?
+        say(msg)
       else
-        hdlrs.warning "Failed to remove handler ‘#{svc[:id]}’"
+        MrMurano::Verbose.warning "Failed to remove handler ‘#{svc[:id]}’"
       end
     end
   end
