@@ -1,5 +1,5 @@
 # Last Modified: 2017.07.03 /coding: utf-8
-# frozen_string_literal: true
+# frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.

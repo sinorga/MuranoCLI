@@ -1,3 +1,10 @@
+# Last Modified: 2017.07.03 /coding: utf-8
+# frozen_string_literal: probably not yet
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
 require 'open3'
 require 'pathname'
@@ -69,6 +76,4 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
   # TODO: With Solutionfile 0.2.0
   # TODO: With Solutionfile 0.3.0
 end
-
-#  vim: set ai et sw=2 ts=2 :
 
