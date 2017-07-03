@@ -8,8 +8,19 @@ class TSUD
   include MrMurano::Verbose
   include MrMurano::SyncUpDown
   def initialize
+    # 2017-07-03: See MrMurano::SolutionBase.state for the list of attrs.
+    @sid = 'XYZ'
+    @valid_sid = true
+    @uriparts = []
+    @solntype = 'application.id'
     @itemkey = :name
     @project_section = :routes
+  end
+  def sid
+    @sid
+  end
+  def sid?
+    @valid_sid
   end
   def fetch(id)
   end

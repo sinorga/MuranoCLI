@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -42,14 +42,14 @@ module MrMurano
         if !$cfg.nil? && $cfg['tool.dry']
           # $cfg.nil? when run from spec tests that don't load it with:
           #   include_context "CI_CMD"
-          $cfg.warning('--dry: Not writing config file')
+          MrMurano::Config.warning('--dry: Not writing config file')
           return
         end
         self[:path] = Pathname.new(path) unless path.is_a?(Pathname)
         # Ensure path to the file exists.
         unless path.dirname.exist?
           path.dirname.mkpath
-          $cfg.fix_modes(path.dirname)
+          MrMurano::Config.fix_modes(path.dirname)
         end
         self[:data] = IniFile.new(filename: path.to_s) if self[:data].nil?
         self[:data].save
@@ -87,12 +87,20 @@ module MrMurano
 
     CFG_SOLUTION_ID_KEYS = %w[application.id product.id].freeze
 
-    def warning(msg)
+    def self.warning(msg)
       $stderr.puts HighLine.color(msg, :yellow)
     end
 
-    def error(msg)
+    def warning(msg)
+      MrMurano::Config.warning(msg)
+    end
+
+    def self.error(msg)
       $stderr.puts HighLine.color(msg, :red)
+    end
+
+    def error(msg)
+      MrMurano::Config.error(msg)
     end
 
     def migrate_old_env
@@ -226,12 +234,16 @@ module MrMurano
     end
     private :find_project_dir
 
-    def fix_modes(path)
+    def self.fix_modes(path)
       if path.directory?
         path.chmod(0o700)
       elsif path.file?
         path.chmod(0o600)
       end
+    end
+
+    def fix_modes(path)
+      MrMurano::Config.fix_modes(path)
     end
 
     def file_at(name, scope=:project)
