@@ -70,12 +70,16 @@ module MrMurano
       debug "f: #{local} >> #{pst.reject { |k, _| k == :script }.to_json}"
       # Try PUT. If 404, then POST.
       # I.e., PUT if not exists, else POST to create.
+      updated_at = nil
       put('/' + mkalias(remote), pst) do |request, http|
         response = http.request(request)
         case response
-        # rubocop:disable Lint/EmptyWhen: "Avoid when branches without a body."
         when Net::HTTPSuccess
+          # A first upload will see a 200 response and a JSON body.
+          # A subsequent upload of the same item sees 204 and no body.
           #return JSON.parse(response.body)
+          _isj, jsn = isJSON(response.body)
+          updated_at = jsn[:updated_at] unless jsn.nil?
         when Net::HTTPNotFound
           verbose "Doesn't exist, creating"
           post('/', pst)
@@ -83,7 +87,7 @@ module MrMurano
           showHttpError(request, response)
         end
       end
-      cacheUpdateTimeFor(local)
+      cache_update_time_for(local, updated_at)
     end
 
     def docmp(item_a, item_b)
@@ -113,8 +117,12 @@ module MrMurano
       ].join('.')
     end
 
-    def cacheUpdateTimeFor(local_path, time=nil)
-      time = Time.now.getutc if time.nil?
+    def cache_update_time_for(local_path, time=nil)
+      if time.nil?
+        time = Time.now.getutc
+      elsif time.is_a?(String)
+        time = DateTime.parse(time)
+      end
       entry = {
         sha1: Digest::SHA1.file(local_path.to_s).hexdigest,
         updated_at: time.to_datetime.iso8601(3),
