@@ -17,7 +17,7 @@ require 'resolv-replace'
 module MrMurano
   module Http
     def token
-      return @token unless @token.nil?
+      return @token if defined?(@token) && !@token.to_s.empty?
       acc = MrMurano::Account.instance
       @token = acc.token
       raise 'Not logged in!' if @token.nil?
