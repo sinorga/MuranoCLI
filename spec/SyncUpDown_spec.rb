@@ -54,14 +54,14 @@ RSpec.describe MrMurano::SyncUpDown do
       t = TSUD.new
       expect(t).to receive(:warning).once.with(/Skipping missing location.*/)
       ret = t.status
-      expect(ret).to eq({:toadd=>[], :todel=>[], :tomod=>[], :unchg=>[]})
+      expect(ret).to eq({toadd: [], todel: [], tomod: [], unchg: [], skipd: []})
     end
 
     it "finds nothing in empty directory" do
       FileUtils.mkpath(@project_dir + '/tsud')
       t = TSUD.new
       ret = t.status
-      expect(ret).to eq({:toadd=>[], :todel=>[], :tomod=>[], :unchg=>[]})
+      expect(ret).to eq({toadd: [], todel: [], tomod: [], unchg: [], skipd: []})
     end
 
     it "finds things there but not here" do
@@ -75,7 +75,9 @@ RSpec.describe MrMurano::SyncUpDown do
         :toadd=>[],
         :todel=>[{:name=>1, :synckey=>1}, {:name=>2, :synckey=>2}, {:name=>3, :synckey=>3}],
         :tomod=>[],
-        :unchg=>[]})
+        :unchg=>[],
+        :skipd=>[],
+      })
     end
 
     it "finds things there but not here; asdown" do
@@ -89,7 +91,9 @@ RSpec.describe MrMurano::SyncUpDown do
         :todel=>[],
         :toadd=>[{:name=>1, :synckey=>1}, {:name=>2, :synckey=>2}, {:name=>3, :synckey=>3}],
         :tomod=>[],
-        :unchg=>[]})
+        :unchg=>[],
+        :skipd=>[],
+      })
     end
 
     it "finds things here but not there" do
@@ -110,7 +114,9 @@ RSpec.describe MrMurano::SyncUpDown do
         ],
         :todel=>[],
         :tomod=>[],
-        :unchg=>[]})
+        :unchg=>[],
+        :skipd=>[],
+      })
     end
 
     it "finds things here and there" do
@@ -134,7 +140,9 @@ RSpec.describe MrMurano::SyncUpDown do
         ],
         :todel=>[],
         :toadd=>[],
-        :unchg=>[]})
+        :unchg=>[],
+        :skipd=>[],
+      })
     end
     it "finds things here and there; but they're the same" do
       FileUtils.mkpath(@project_dir + '/tsud')
@@ -158,7 +166,9 @@ RSpec.describe MrMurano::SyncUpDown do
         ],
         :todel=>[],
         :toadd=>[],
-        :tomod=>[]})
+        :tomod=>[],
+        :skipd=>[],
+      })
     end
 
     it "calls diff" do
@@ -181,7 +191,9 @@ RSpec.describe MrMurano::SyncUpDown do
         ],
         :todel=>[],
         :toadd=>[],
-        :unchg=>[]})
+        :unchg=>[],
+        :skipd=>[],
+      })
     end
 
     context "Filtering" do
@@ -252,7 +264,9 @@ RSpec.describe MrMurano::SyncUpDown do
              :local_path=>pathname_globs('**/one.lua')}),
             have_attributes({:name=>'two.lua', :synckey=>'two.lua',
              :local_path=>pathname_globs('**/two.lua')}),
-          ]})
+          ],
+          :skipd=>[],
+        })
       end
 
       it "Finds local path globs" do
@@ -267,16 +281,20 @@ RSpec.describe MrMurano::SyncUpDown do
           :tomod=>[
             have_attributes(:name=>'two.lua', :synckey=>'two.lua',
              :local_path=>an_instance_of(Pathname)),
-          ]})
+          ],
+          :skipd=>[],
+        })
       end
 
       it "Finds nothing with specific matcher" do
         ret = @t.status({}, ['#foo'])
         expect(ret).to match({
-          :unchg=>[ ],
-          :toadd=>[ ],
-          :todel=>[ ],
-          :tomod=>[ ]})
+          :unchg=>[],
+          :toadd=>[],
+          :todel=>[],
+          :tomod=>[],
+          :skipd=>[],
+        })
       end
 
       it "gets all the details" do
@@ -303,7 +321,9 @@ RSpec.describe MrMurano::SyncUpDown do
                             :local_path=>pathname_globs('**/one.lua')),
           have_attributes(:name=>'two.lua', :synckey=>'two.lua', :selected=>true,
                           :local_path=>pathname_globs('**/two.lua')),
-          ]})
+          ],
+          :skipd=>[],
+        })
       end
     end
   end
