@@ -102,6 +102,8 @@ module MrMurano
   # …/role
   class Role < UserBase
     def initialize
+      @solntype = 'application.id'
+      #@solntype = 'product.id'
       super
       @uriparts << 'role'
       @itemkey = :role_id
@@ -113,6 +115,10 @@ module MrMurano
   # :nocov:
   class User < UserBase
     def initialize
+      # 2017-07-03: [lb] tried 'product.id' and got 403 Forbidden;
+      #   And I tried 'application.id' and get() returned an empty [].
+      @solntype = 'application.id'
+      #@solntype = 'product.id'
       super
       @uriparts << 'user'
     end
