@@ -668,6 +668,7 @@ module MrMurano
           end
         end
       end
+      MrMurano::Verbose.whirly_stop(force: true)
       syncup_after
     end
 
