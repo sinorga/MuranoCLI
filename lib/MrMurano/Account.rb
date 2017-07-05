@@ -28,6 +28,10 @@ module MrMurano
     include Http
     include Verbose
 
+    def initialize
+      @token = nil
+    end
+
     def host
       $cfg['net.host'].to_s
     end
@@ -69,10 +73,8 @@ module MrMurano
 
     # ---------------------------------------------------------------------
 
-    @token = nil
-
     def token
-      token_fetch unless defined?(@token) && !@token.to_s.empty?
+      token_fetch if @token.to_s.empty?
       @token
     end
 
