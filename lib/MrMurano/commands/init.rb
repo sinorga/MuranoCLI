@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -343,7 +343,7 @@ command :init do |c|
     say('Success!')
     puts('')
     id_postfix = ' ID'
-    important_ids = %w[business product application].freeze
+    important_ids = %w[business application product].freeze
     importantest_width = important_ids.map do |id_name|
       cfg_key = id_name + '.id'
       $cfg[cfg_key].length + id_postfix.length
