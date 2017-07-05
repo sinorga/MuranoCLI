@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -44,7 +44,7 @@ module MrMurano
 
     def scid
       return @scid unless @scid.nil?
-      @scid = scid_for_name(@serviceName)
+      @scid = scid_for_name(@service_name)
     end
 
     def create(pid, name=nil, &block) #? script_key?
@@ -80,7 +80,7 @@ module MrMurano
     end
 
     def call(opid, meth=:get, data=nil, id=scid, &block)
-      raise "Service '#{@serviceName}' not enabled for this Solution" if id.nil?
+      raise "Service '#{@service_name}' not enabled for this Solution" if id.nil?
       call = "/#{id}/call/#{opid}"
       debug "Will call: #{call}"
       case meth
@@ -122,7 +122,7 @@ module MrMurano
 
     def sid
       return @sid unless @sid.nil?
-      @sid = sid_for_name(@serviceName)
+      @sid = sid_for_name(@service_name)
     end
 
     def list

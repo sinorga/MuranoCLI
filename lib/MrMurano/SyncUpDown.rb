@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -538,7 +538,7 @@ module MrMurano
           end
         end
       elsif !skip_warn
-        warning "Skipping missing location #{location}"
+        warning "Skipping missing location ‘#{location}’"
       end
       items.values
     end

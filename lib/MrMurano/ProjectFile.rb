@@ -183,6 +183,8 @@ module MrMurano
         'services.exclude' => 'eventhandler.ignoring',
 
         'resources.location' => 'location.resources',
+        # EXPLAIN/2017-07-05: [lb] not finding either resources.include
+        # nor product.spec used anywhere.
         'resources.include' => 'product.spec',
         'resources.exclude' => 'product.ignoring',
       }.freeze
