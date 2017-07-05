@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -10,6 +10,12 @@ require 'MrMurano/Account'
 require '_workspace'
 
 RSpec.describe MrMurano::Passwords, "#pwd" do
+  # Weird: This tests works on its own without the "WORKSPACE",
+  # but when run with other tests, it fails. (2017-07-05: I think
+  # I just added the $cfg lines, because MrMurano::Passwords
+  # expects $cfg to be loaded... [lb].)
+  include_context "WORKSPACE"
+
   before(:example) do
     @saved_cfg = ENV['MURANO_CONFIGFILE']
     ENV['MURANO_CONFIGFILE'] = nil
