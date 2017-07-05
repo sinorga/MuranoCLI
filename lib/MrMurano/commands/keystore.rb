@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,7 +13,7 @@ module MrMurano
       # FIXME/2017-07-03: Do products have a keystore service? What about other soln types?
       @solntype = 'application.id'
       super
-      @serviceName = 'keystore'
+      @service_name = 'keystore'
     end
 
     def keyinfo

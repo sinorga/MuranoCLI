@@ -8,8 +8,8 @@
     "listen": "modules/listen.lua"
   },
   "services": {
-    "device2": {
-      "event": "event_handler/product.lua"
+    "device": {
+      "datapoint": "event_handler/product.lua"
     },
     "timer": {
       "timer": "event_handler/timer.lua"

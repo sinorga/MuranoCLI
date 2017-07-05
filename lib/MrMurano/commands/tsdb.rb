@@ -9,7 +9,7 @@ module MrMurano
         # FIXME/2017-07-03: What soln types have TSDBs?
         @solntype = 'application.id'
         super
-        @serviceName = 'tsdb'
+        @service_name = 'tsdb'
       end
 
       def write(data)

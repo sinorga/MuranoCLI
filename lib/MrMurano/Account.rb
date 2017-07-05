@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -110,7 +110,7 @@ module MrMurano
     def businesses(match_bid=nil, match_name=nil, match_either=nil)
       # Ask user for name and password, if not saved to config and password files.
       login_info if user.empty?
-      raise "Missing user?!" if user.empty?
+      raise 'Missing user?!' if user.empty?
 
       MrMurano::Verbose.whirly_start 'Fetching Businesses...'
       bizes = get('user/' + user + '/membership/')
@@ -132,39 +132,35 @@ module MrMurano
 
     # ---------------------------------------------------------------------
 
-    # MAYBE: Let user manage user accounts.
-    # 2017-06-30: [lb] commenting out these unused fcns., because coverage
-    # (i.e., there aren't any tests for these, and nothing calls them).
+    # 2017-07-05: [lb] notes that the remaining methods are not called.
 
-    #def new_account(email, name, company='')
-    #  post('key/', {
-    #    email: email,
-    #    name: name,
-    #    company: company,
-    #    source: 'signup',
-    #  })
-    #end
+    def new_account(email, name, company='')
+      # this is a kludge.  If we're gonna support this, do it better.
+      @@token = ''
+      @token = ''
+      post('key/', email: email, name: name, company: company, source: 'signup')
+    end
 
-    #def reset_account(email)
-    #  post('key/', { email: email, source: 'reset', })
-    #end
+    def reset_account(email)
+      post('key/', email: email, source: 'reset')
+    end
 
-    #def accept_account(token, password)
-    #  post("key/#{token}", { password: password, })
-    #end
+    def accept_account(token, password)
+      # this is a kludge.  If we're gonna support this, do it better.
+      @@token = ''
+      @token = ''
+      post("key/#{token}", password: password)
+    end
 
     # ---------------------------------------------------------------------
 
-    # MAYBE: Let user manage businesses.
-    # 2017-06-30: [lb] commenting out these unused fcns., because coverage.
+    def new_business(name)
+      post('business/', name: name)
+    end
 
-    #def new_business(name)
-    #  post('business/', { name: name, })
-    #end
-
-    #def delete_business(id)
-    #  delete("business/#{id}")
-    #end
+    def delete_business(id)
+      delete("business/#{id}")
+    end
   end
 end
 

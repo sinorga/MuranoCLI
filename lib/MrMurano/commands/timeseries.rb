@@ -7,7 +7,7 @@ module MrMurano
       # FIXME/2017-07-03: What soln types have timeseries?
       @solntype = 'application.id'
       super
-      @serviceName = 'timeseries'
+      @service_name = 'timeseries'
     end
 
     def query(query)
