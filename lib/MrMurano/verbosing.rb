@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -146,8 +146,8 @@ module MrMurano
       MrMurano::Progress.instance.whirly_start(msg)
     end
 
-    def whirly_stop
-      MrMurano::Progress.instance.whirly_stop
+    def whirly_stop(force: false)
+      MrMurano::Progress.instance.whirly_stop(force: force)
     end
 
     def whirly_linger
@@ -162,8 +162,8 @@ module MrMurano
       MrMurano::Progress.instance.whirly_start(msg)
     end
 
-    def self.whirly_stop
-      MrMurano::Progress.instance.whirly_stop
+    def self.whirly_stop(force: false)
+      MrMurano::Progress.instance.whirly_stop(force: force)
     end
 
     def self.whirly_linger

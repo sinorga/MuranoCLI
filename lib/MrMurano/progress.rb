@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -49,9 +49,13 @@ module MrMurano
       @whirly_cols, _rows = HighLine::SystemExtensions.terminal_size
     end
 
-    def whirly_stop
+    def whirly_stop(force: false)
       return if $cfg['tool.no-progress'] || !defined?(@whirly_time)
-      @whirly_users -= 1
+      if force
+        @whirly_users = 0
+      else
+        @whirly_users -= 1
+      end
       return unless @whirly_users.zero?
 
       whirly_linger
