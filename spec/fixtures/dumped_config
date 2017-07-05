@@ -17,9 +17,6 @@ eventhandlers = services
 resources = specs/resources.yaml
 cors = cors.yaml
 
-[sync]
-bydefault = files
-
 [files]
 default_page = index.html
 searchFor = **/*
@@ -40,3 +37,6 @@ ignoring = *_test.lua *_spec.lua .*
 
 [diff]
 cmd = <%= Gem.win_platform? ? 'fc' : 'diff -u' %>
+
+[sync]
+bydefault = files

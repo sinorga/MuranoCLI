@@ -183,7 +183,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "dumps", :project_file_2017_07_03 do
+    it "dumps" do
       @saved_cfg = ENV['MURANO_CONFIGFILE']
       ENV['MURANO_CONFIGFILE'] = nil
       cfg = MrMurano::Config.new
