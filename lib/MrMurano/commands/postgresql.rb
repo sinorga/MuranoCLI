@@ -95,7 +95,7 @@ Queries can include $# escapes that are filled from the --param option.
         ios
       )
     end
-    io&.close
+    io.close unless io.nil?
   end
 end
 

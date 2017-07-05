@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -81,7 +81,7 @@ List the solutions that are linked.
         )
       end
     end
-    io&.close
+    io.close unless io.nil?
   end
 end
 alias_command 'assign list', 'link list'

@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -332,7 +332,9 @@ List solution in the current business.
     end
     # "The Safe Navigation Operator (&.) in Ruby"
     #  http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/
-    io&.close
+    # The safe nav op was only added in Ruby 2.3.0, and we support 2.0.
+    #io&.close
+    io.close unless io.nil?
   end
 end
 alias_command 'product list', 'solution list', '--type', 'product', '--no-all'

@@ -368,7 +368,7 @@ module MrMurano
         if !cfg_paths.empty?
           cfg = cfg_paths.first
 
-          if cfg.path&.exist?
+          if !cfg.path.nil? && cfg.path.exist?
             path = "Path: #{cfg.path}\n"
           elsif %i[internal defaults].include? cfg.kind
             # cfg.path is nil.

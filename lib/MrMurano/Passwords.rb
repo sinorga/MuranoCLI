@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -91,7 +91,7 @@ module MrMurano
     ## Get all hosts and usernames. Does not return passwords.
     def list
       ret = {}
-      @data&.each_pair { |key, value| ret[key] = value.keys }
+      @data.each_pair { |key, value| ret[key] = value.keys } unless @data.nil?
       ret
     end
   end
