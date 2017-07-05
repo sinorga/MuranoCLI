@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -21,7 +21,7 @@ module MrMurano
     #  :defaults    Internal hardcoded defaults
     # NOTE: This list is ordered, such that values stored in upper scopes
     #   mask values of the same keys in the lower scopes.
-    CFG_SCOPES = %w[internal specified env project user defaults].map(&:to_sym).freeze
+    CFG_SCOPES = %i[internal specified env project user defaults].freeze
 
     ConfigFile = Struct.new(:kind, :path, :data) do
       def load
