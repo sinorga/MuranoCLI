@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -266,8 +266,7 @@ module MrMurano
         fmtvers = (data[:formatversion] || '1.0.0')
       end
 
-      # FIXME/2017-07-02: "Performance/StringReplacement: Use tr instead of gsub."
-      methodname = "load_#{fmtvers.gsub(/\./, '_')}".to_sym
+      methodname = "load_#{fmtvers.tr('.', '_')}".to_sym
       debug "Will try to #{methodname}"
       if respond_to? methodname
         errorlist = __send__(methodname, data)
@@ -289,11 +288,6 @@ module MrMurano
     def ifset(src, skey, dest, dkey)
       dest[dkey] = src[skey] if src.key? skey
     end
-
-    # FIXME/2017-06-30: Is load_1_0_0 the normal code path for new projects?
-    #   I.e., after \`murano init\`, does running MurCLI go through here?
-    #   [lb] just leaving himself a note to understand this better, esp.
-    #   to help support help others migrate their projects...
 
     # Load data in the 1.0.0 format.
     # @param data [Hash] the data to load
