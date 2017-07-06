@@ -35,8 +35,9 @@ module MrMurano
         # 2017-07-01: Rubocop suggests using safe_load.
         #  https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-load
         #  https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-safe_load
-        #@data = YAML.load(io)
-        @data = YAML.safe_load(io)
+        # 2017-07-05: Oh, I don't think safe_load exists in Ruby 2 or 2.2...
+        @data = YAML.load(io)
+        #@data = YAML.safe_load(io)
       end
     end
 
