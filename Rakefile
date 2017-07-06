@@ -113,21 +113,21 @@ namespace :push do
 
         desc "Make a release in Github"
         task :makeRelease do
-            # ENV['GITHUB_TOKEN'] set by CI.
-            # ENV['GITHUB_USER'] set by CI.
-            # ENV['GITHUB_REPO'] set by CI
-            # Create Release
-            sh %{github-release info --tag #{tagName}} do |ok, res|
-                if not ok then
-          # if version contains more than #.#.#, mark it as pre-release
-          if %r{v\d+\.\d+\.\d+(.*)}.match(tagname)[1].nil? then
-                    sh %{github-release release --tag #{tagName}}
-          else
-            sh %{github-release release --tag #{tagName} -p}
-                end
+          # ENV['GITHUB_TOKEN'] set by CI.
+          # ENV['GITHUB_USER'] set by CI.
+          # ENV['GITHUB_REPO'] set by CI
+          # Create Release
+          sh %{github-release info --tag #{tagName}} do |ok, res|
+            if not ok then
+              # if version contains more than #.#.#, mark it as pre-release
+              if %r{v\d+\.\d+\.\d+(.*)}.match(tagName)[1].nil? then
+                sh %{github-release release --tag #{tagName}}
+              else
+                sh %{github-release release --tag #{tagName} -p}
+              end
             end
+          end
         end
-    end
 
         desc 'Push gem up to Github Releases'
         task :gem => [:makeRelease, :build] do
