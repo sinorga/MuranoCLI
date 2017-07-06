@@ -119,10 +119,15 @@ namespace :push do
             # Create Release
             sh %{github-release info --tag #{tagName}} do |ok, res|
                 if not ok then
+          # if version contains more than #.#.#, mark it as pre-release
+          if %r{v\d+\.\d+\.\d+(.*)}.match(tagname)[1].nil? then
                     sh %{github-release release --tag #{tagName}}
+          else
+            sh %{github-release release --tag #{tagName} -p}
                 end
             end
         end
+    end
 
         desc 'Push gem up to Github Releases'
         task :gem => [:makeRelease, :build] do
@@ -201,5 +206,5 @@ if Gem.win_platform? then
     end
 end
 
-#  vim: set sw=4 ts=4 :
+#  vim: set et sw=2 ts=2 :
 

@@ -152,6 +152,18 @@ module MrMurano
       end
       calls
     end
+
+    def all_events
+      sevs = list
+      ret = []
+      sevs.each do |srv|
+        scm = schema(srv[:id]) or {}
+        (scm['x-events'.to_sym] or {}).each_pair do |event, info|
+          ret << [srv[:alias], event]
+        end
+      end
+      ret
+    end
   end
   # :nocov:
 
