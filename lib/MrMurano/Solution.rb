@@ -56,7 +56,7 @@ module MrMurano
       remaining = -1
       while remaining != 0
         ret = super
-        if ret.nil? and !@suppress_error
+        if ret.nil? && !@suppress_error
           warning "No solution with ID: #{@sid}"
           exit 1
         end
@@ -151,7 +151,7 @@ module MrMurano
 
     def state
       parts = super
-      parts += [@name, @meta, @valid]
+      parts + [@name, @meta, @valid]
     end
 
     public
@@ -268,7 +268,7 @@ module MrMurano
       if name.respond_to?(:to_str) && name != ''
         @name = name
         # FIXME/Rubocop/2017-07-02: Double-negation
-        @valid_name = !!@name.match(name_validate_regex)
+        @valid_name = !@name.match(name_validate_regex).nil?
       else
         @name = ''
         @valid_name = false
