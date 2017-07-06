@@ -21,7 +21,7 @@ RSpec.describe MrMurano::Webservice::File do
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("#{@baseURI}/")
   end
 
@@ -96,8 +96,8 @@ RSpec.describe MrMurano::Webservice::File do
 
   context "uploads" do
     before(:example) do
-      FileUtils.mkpath(@projectDir + '/files')
-      @lp = Pathname.new(@projectDir + '/files/one.text')
+      FileUtils.mkpath(@project_dir + '/files')
+      @lp = Pathname.new(@project_dir + '/files/one.text')
       @lp.open('w') {|io| io << %{Just some text}}
       @lp = @lp.realpath
     end
@@ -196,16 +196,16 @@ RSpec.describe MrMurano::Webservice::File do
     end
   end
 
-  context "toRemoteItem" do
+  context "to_remote_item" do
     before(:example) do
-      FileUtils.mkpath(@projectDir + '/files')
-      @lp = Pathname.new(@projectDir + '/files/one.text')
+      FileUtils.mkpath(@project_dir + '/files')
+      @lp = Pathname.new(@project_dir + '/files/one.text')
       @lp.open('w') {|io| io << %{Just some text}}
       @lp = @lp.realpath
     end
     it "gets item" do
-      prj = Pathname.new(@projectDir).realpath
-      ret = @srv.toRemoteItem(prj, @lp)
+      prj = Pathname.new(@project_dir).realpath
+      ret = @srv.to_remote_item(prj, @lp)
       expect(ret).to eq({
         :path=>"/files/one.text",
         :mime_type=>"text/plain",

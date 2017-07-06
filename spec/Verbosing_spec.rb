@@ -1,6 +1,13 @@
+# Last Modified: 2017.07.03 /coding: utf-8
+# frozen_string_literal: probably not yet
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'highline/import'
-require 'MrMurano/version'
 require 'MrMurano/hash'
+require 'MrMurano/version'
 require 'MrMurano/verbosing'
 require 'MrMurano/Config'
 require '_workspace'
@@ -128,7 +135,9 @@ RSpec.describe MrMurano::Verbose do
 
       it "errors if it can't" do
         $stdout = StringIO.new
-        expect(@tst).to receive(:error).with("Don't know how to tabularize data.").once
+        # 2017-07-03: [lb] converted to class func.
+        #expect(@tst).to receive(:error).with(MrMurano::Verbose::TABULARIZE_DATA_FORMAT_ERROR).once
+        expect(MrMurano::Verbose).to receive(:error).with(MrMurano::Verbose::TABULARIZE_DATA_FORMAT_ERROR).once
         @tst.tabularize(12)
       end
 
@@ -274,6 +283,5 @@ RSpec.describe MrMurano::Verbose do
       expect($stdout.string).to eq("pop\n")
     end
   end
-
 end
-#  vim: set ai et sw=2 ts=2 :
+

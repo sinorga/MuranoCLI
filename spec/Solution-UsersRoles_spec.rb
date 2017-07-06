@@ -18,7 +18,7 @@ RSpec.describe MrMurano::Role do
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/")
   end
 
@@ -111,7 +111,7 @@ RSpec.describe MrMurano::Role do
 
   context "downloads" do
     before(:example) do
-      @lry = Pathname.new(@projectDir) + 'roles.yaml'
+      @lry = Pathname.new(@project_dir) + 'roles.yaml'
       @grl = {:role_id=>"guest", :parameter=>[{:name=>"could"}]}
     end
 
@@ -134,7 +134,7 @@ RSpec.describe MrMurano::Role do
 
   context "removing local roles" do
     before(:example) do
-      @lry = Pathname.new(@projectDir) + 'roles.yaml'
+      @lry = Pathname.new(@project_dir) + 'roles.yaml'
       @grl = {:role_id=>"guest", :parameter=>[{:name=>"could"}]}
     end
 
@@ -167,14 +167,14 @@ RSpec.describe MrMurano::Role do
   end
 
   it "tolocalpath is into" do
-    lry = Pathname.new(@projectDir) + 'roles.yaml'
+    lry = Pathname.new(@project_dir) + 'roles.yaml'
     ret = @srv.tolocalpath(lry, {:role_id=>"guest", :parameter=>[{:name=>"could"}]})
     expect(ret).to eq(lry)
   end
 
   context "list local items" do
     before(:example) do
-      @lry = Pathname.new(@projectDir) + 'roles.yaml'
+      @lry = Pathname.new(@project_dir) + 'roles.yaml'
     end
 
     it "when missing" do

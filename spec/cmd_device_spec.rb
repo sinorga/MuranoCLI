@@ -1,3 +1,10 @@
+# Last Modified: 2017.07.03 /coding: utf-8
+# frozen_string_literal: probably not yet
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
 require 'open3'
 require 'pathname'
@@ -80,7 +87,10 @@ RSpec.describe 'murano device', :cmd, :needs_password do
 
   it "writes and reads" do
     FileUtils.mkpath('specs')
-    FileUtils.copy(File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'), 'specs/resources.yaml')
+    FileUtils.copy(
+      File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'),
+      'specs/resources.yaml',
+    )
 
     out, err, status = Open3.capture3(capcmd('murano', 'syncup', '--resources'))
     expect(out).to eq('')
@@ -111,7 +121,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
 #    expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'write', '12345', 'state=42'))
-    expect(out).to eq("")
+    expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
@@ -126,9 +136,6 @@ RSpec.describe 'murano device', :cmd, :needs_password do
       /^(\+-+){4}\+$/,
     ])
     expect(status.exitstatus).to eq(0)
-
   end
-
 end
 
-#  vim: set ai et sw=2 ts=2 :

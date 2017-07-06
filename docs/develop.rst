@@ -148,7 +148,8 @@ run into problems with different ruby projects using different
 versions of different libraries. So you'll probably want to
 use a ruby version manager, such as
 `Ruby Version Manager <https://rvm.io/>`__,
-or `chruby <https://github.com/postmodern/chruby>`__.
+or `chruby <https://github.com/postmodern/chruby>`__
+or `rbenv <https://github.com/rbenv/rbenv>`__.
 
 - If you're having problems building or running MuranoCLI,
   ``gem env`` is a good way to see how the ruby environment
@@ -307,7 +308,7 @@ Run All Rspec Tests
 
 .. code-block:: bash
 
-    rspec --tag '~not_in_okami'
+    rspce
 
 Run Single Rspec Test
 ^^^^^^^^^^^^^^^^^^^^^
@@ -316,7 +317,36 @@ E.g.,
 
 .. code-block:: bash
 
+    rspec ./spec/cmd_syncup_spec.rb
+
+Run Tagged Rspec Test
+^^^^^^^^^^^^^^^^^^^^^
+
+The test might look like::
+
+    it "status", :not_in_okami do
+
+And running it would look like::
+
     rspec --tag '~not_in_okami' ./spec/cmd_syncup_spec.rb
+
+Run Specific "Example" from Rspec Test
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Run just one test within a file.
+
+The test file might look like::
+
+    RSpec.describe 'murano status', :cmd, :needs_password do
+      ...
+      context "with ProjectFile" do
+        ...
+        it "status" do
+            ...
+
+And you could run just that test with::
+
+    rspec ./spec/cmd_status_spec.rb -e "murano status with ProjectFile status"
 
 Run All Tests and Capture Colorful Output to HTML
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

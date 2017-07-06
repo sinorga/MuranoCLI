@@ -6,7 +6,10 @@ require 'MrMurano/Setting'
 command 'setting list' do |c|
   c.syntax = %{murano setting list}
   c.summary = %{List which services and settings are avalible.}
-  c.description = %{List which services and settings are avalible.}
+  c.description = %{
+List which services and settings are avalible.
+  }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     setting = MrMurano::Setting.new
@@ -16,23 +19,31 @@ command 'setting list' do |c|
     setting.outf dd
   end
 end
+alias_command 'settings list', 'setting list'
 
 command 'setting read' do |c|
   c.syntax = %{murano setting read <service>.<setting> [<sub-key>]}
   c.summary = %{Read a setting on a Service}
-  c.description = %{Read a setting on a Service}
+  c.description = %{
+Read a setting on a Service.
+  }.strip
   c.option '-o', '--output FILE', String, %{File to save output to}
 
   c.action do |args, options|
+    setting = MrMurano::Setting.new
+
+    if args.count < 1
+      setting.error "Missing <service>.<setting>"
+      exit 1
+    end
     service, pref = args[0].split('.')
     subkey = args[1]
 
-    setting = MrMurano::Setting.new
     ret = setting.read(service, pref)
 
     ret = ret.access(subkey) unless subkey.nil?
 
-    io=nil
+    io = nil
     if options.output then
       io = File.open(options.output, 'w')
     end
@@ -44,24 +55,25 @@ end
 command 'setting write' do |c|
   c.syntax = %{murano setting write <service>.<setting> <sub-key> [<value>...]}
   c.summary = %{Write a setting on a Service}
-  c.description = %{Write a setting on a Service, or just part of a setting.
+  c.description = %{
+Write a setting on a Service, or just part of a setting.
 
-  if <value> is omitted on command line, then it is read from STDIN.
+if <value> is omitted on command line, then it is read from STDIN.
 
-  This always does a read-modify-write.
+This always does a read-modify-write.
 
-  If a sub-key doesn't exist, that entire path will be created as dicts.
-  }
+If a sub-key doesn't exist, that entire path will be created as dicts.
+  }.strip
 
   c.option '--bool', %{Set Value type to boolean}
   c.option '--num', %{Set Value type to number}
-  c.option '--string', %{Set Value type to string. (this is default)}
+  c.option '--string', %{Set Value type to string (this is default)}
   c.option '--json', %{Value is parsed as JSON}
   c.option '--array', %{Set Value type to array of strings}
   c.option '--dict', %{Set Value type to a dictionary of strings}
 
   c.option '--append', %{When sub-key is an array, append values instead of replacing}
-  c.option '--merge', %{When sub-key is a dict, merge values instead of replacing. (child dicts are also merged)}
+  c.option '--merge', %{When sub-key is a dict, merge values instead of replacing (child dicts are also merged)}
 
   c.example %{murano setting write Gateway.protocol devmode --bool yes}, %{}
   c.example %{murano setting write Gateway.identity_format options.length --int 24}, %{}
@@ -150,7 +162,6 @@ command 'setting write' do |c|
       value = value.to_s
     end
 
-
     ret = setting.read(service, pref)
     setting.verbose %{Read value: #{ret}}
 
@@ -175,10 +186,9 @@ command 'setting write' do |c|
     end
     setting.verbose %{Going to write composed value: #{ret}}
 
-    setting.write(service, pref, ret) unless $cfg['tool.dry']
-
+    setting.write(service, pref, ret)
   end
 end
 
-
 #  vim: set ai et sw=2 ts=2 :
+

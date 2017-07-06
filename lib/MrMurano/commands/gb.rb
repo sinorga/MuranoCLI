@@ -7,8 +7,11 @@ require 'pp'
 
 command :_gb do |c|
   c.syntax = %{murano _gb <class> <method> (<args>)}
-  c.summary = %{Call internal class methods directly.}
-  c.description = %{Call internal class methods directly.}
+  c.summary = %{Call internal class methods directly}
+  c.description = %{
+Call internal class methods directly.
+  }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     cls = args[0]
@@ -30,5 +33,5 @@ command :_gb do |c|
   end
 end
 
-
 #  vim: set ai et sw=2 ts=2 :
+

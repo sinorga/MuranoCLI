@@ -8,7 +8,7 @@ require 'MrMurano/Webservice'
 module MrMurano
   module Webservice
     # Static File content
-    class File < Base
+    class File < WebserviceBase
       # File Specific details on an Item
       class FileItem < Item
         # @return [String] path for URL maps to this static file
@@ -85,7 +85,7 @@ module MrMurano
 
         path = remote[:path]
         path = path[1..-1] if path[0] == '/'
-        uri = endPoint('upload/' + URI.encode_www_form_component(path))
+        uri = endpoint('upload/' + URI.encode_www_form_component(path))
         # kludge past for a bit.
         #`curl -s -H 'Authorization: token #{@token}' '#{uri.to_s}' -F file=@#{local.to_s}`
 
@@ -143,7 +143,7 @@ module MrMurano
       # @param root [Pathname,String] Root path for this resource type from config files
       # @param path [Pathname,String] Path to local item
       # @return [Item] hash of the details for the remote item for this path
-      def toRemoteItem(from, path)
+      def to_remote_item(from, path)
         item = super(from, path)
         name = item[:name]
         name = '/' if name == $cfg['files.default_page']

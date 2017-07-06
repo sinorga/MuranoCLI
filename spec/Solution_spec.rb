@@ -16,12 +16,16 @@ RSpec.describe MrMurano::Solution do
     $cfg['product.id'] = 'XYZ'
     $cfg['application.id'] = 'XYZ'
 
-    @srv = MrMurano::Solution.new
+    # NOTE: This test works on either Product or Application.
+    # MAYBE: Add Application to this test.
+    @srv = MrMurano::Product.new
+    #@srv = MrMurano::Application.new
+
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/")
   end
 
@@ -92,3 +96,4 @@ RSpec.describe MrMurano::Solution do
 end
 
 #  vim: set ai et sw=2 ts=2 :
+

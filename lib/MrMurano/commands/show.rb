@@ -2,7 +2,10 @@
 command 'show' do |c|
   c.syntax = %(murano show)
   c.summary = %(Show readable information about the current configuration)
-  c.description = %(Show readable information about the current configuration)
+  c.description = %(
+Show readable information about the current configuration.
+  ).strip
+  c.project_not_required = true
 
   c.action do |args, options|
 
@@ -10,7 +13,7 @@ command 'show' do |c|
       ::Commander::UI.enable_paging
       say MrMurano::SubCmdGroupHelp.new(c).get_help
     else
-      acc = MrMurano::Account.new
+      acc = MrMurano::Account.instance
 
       selectedBusinessId = $cfg['business.id']
       selectedBusiness = nil
@@ -75,7 +78,10 @@ end
 command 'show location' do |c|
   c.syntax = %(murano show location)
   c.summary = %(Show readable location information)
-  c.description = %(Show readable information about the current configuration)
+  c.description = %(
+Show readable information about the current configuration.
+  ).strip
+  c.project_not_required = true
 
   c.action do |args, options|
     puts %(base: #{$cfg['location.base']})
@@ -84,3 +90,4 @@ command 'show location' do |c|
 end
 
 #  vim: set ai et sw=2 ts=2 :
+

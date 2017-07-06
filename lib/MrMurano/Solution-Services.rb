@@ -1,69 +1,85 @@
-require 'uri'
+# Last Modified: 2017.07.03 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'cgi'
-require 'net/http'
-require 'json'
-require 'yaml'
 require 'date'
 require 'digest/sha1'
+require 'json'
+require 'net/http'
+require 'uri'
+require 'yaml'
 require 'MrMurano/Solution'
 
 module MrMurano
   ##
   # Things that servers do that is common.
   class ServiceBase < SolutionBase
+    def initialize(sid=nil)
+      super
+    end
 
-    def mkalias(remote)
+    def mkalias(_remote)
       # :nocov:
-      raise "Needs to be implemented in child"
+      raise 'Needs to be implemented in child'
       # :nocov:
     end
 
-    def mkname(remote)
+    def mkname(_remote)
       # :nocov:
-      raise "Needs to be implemented in child"
+      raise 'Needs to be implemented in child'
       # :nocov:
     end
 
     def fetch(name)
-      raise "Missing name!" if name.nil?
-      raise "Empty name!" if name.empty?
-      ret = get('/'+CGI.escape(name))
-      error "Unexpected result type, assuming empty instead: #{ret}" unless ret.kind_of? Hash
-      ret = {} unless ret.kind_of? Hash
-      if block_given? then
-        yield (ret[:script] or '')
+      raise 'Missing name!' if name.nil?
+      raise 'Empty name!' if name.empty?
+      ret = get('/' + CGI.escape(name))
+      error "Unexpected result type, assuming empty instead: #{ret}" unless ret.is_a?(Hash)
+      ret = {} unless ret.is_a?(Hash)
+      if block_given?
+        yield (ret[:script] || '')
       else
-        ret[:script] or ''
+        ret[:script] || ''
       end
     end
 
     # ??? remove
     def remove(name)
-      delete('/'+name)
+      delete('/' + name)
     end
 
     # @param modify Bool: True if item exists already and this is changing it
-    def upload(local, remote, modify=false)
-      local = Pathname.new(local) unless local.kind_of? Pathname
-      raise "no file" unless local.exist?
+    def upload(local, remote, _modify=false)
+      local = Pathname.new(local) unless local.is_a?(Pathname)
+      raise 'no file' unless local.exist?
 
       # we assume these are small enough to slurp.
       script = local.read
 
-      pst = remote.to_h.merge({
-        :solution_id => $cfg[@solntype],
-        :script => script,
-        :alias => mkalias(remote),
-        :name => mkname(remote),
-      })
-      debug "f: #{local} >> #{pst.reject{|k,_| k==:script}.to_json}"
+      pst = remote.to_h.merge(
+        #solution_id: $cfg[@solntype],
+        solution_id: @sid,
+        script: script,
+        alias: mkalias(remote),
+        name: mkname(remote),
+      )
+      debug "f: #{local} >> #{pst.reject { |k, _| k == :script }.to_json}"
       # Try PUT. If 404, then POST.
       # I.e., PUT if not exists, else POST to create.
-      put('/'+mkalias(remote), pst) do |request, http|
+      updated_at = nil
+      put('/' + mkalias(remote), pst) do |request, http|
         response = http.request(request)
         case response
         when Net::HTTPSuccess
+          # A first upload will see a 200 response and a JSON body.
+          # A subsequent upload of the same item sees 204 and no body.
           #return JSON.parse(response.body)
+          _isj, jsn = isJSON(response.body)
+          updated_at = jsn[:updated_at] unless jsn.nil?
         when Net::HTTPNotFound
           verbose "Doesn't exist, creating"
           post('/', pst)
@@ -71,43 +87,50 @@ module MrMurano
           showHttpError(request, response)
         end
       end
-      cacheUpdateTimeFor(local)
+      cache_update_time_for(local, updated_at)
     end
 
-    def docmp(itemA, itemB)
-      if itemA[:updated_at].nil? and itemA[:local_path] then
-        ct = cachedUpdateTimeFor(itemA[:local_path])
-        itemA[:updated_at] = ct unless ct.nil?
-        itemA[:updated_at] = itemA[:local_path].mtime.getutc if ct.nil?
-      elsif itemA[:updated_at].kind_of? String then
-        itemA[:updated_at] = DateTime.parse(itemA[:updated_at]).to_time.getutc
+    def docmp(item_a, item_b)
+      if item_a[:updated_at].nil? && item_a[:local_path]
+        ct = cached_update_time_for(item_a[:local_path])
+        item_a[:updated_at] = ct unless ct.nil?
+        item_a[:updated_at] = item_a[:local_path].mtime.getutc if ct.nil?
+      elsif item_a[:updated_at].is_a?(String)
+        item_a[:updated_at] = DateTime.parse(item_a[:updated_at]).to_time.getutc
       end
-      if itemB[:updated_at].nil? and itemB[:local_path] then
-        ct = cachedUpdateTimeFor(itemB[:local_path])
-        itemB[:updated_at] = ct unless ct.nil?
-        itemB[:updated_at] = itemB[:local_path].mtime.getutc if ct.nil?
-      elsif itemB[:updated_at].kind_of? String then
-        itemB[:updated_at] = DateTime.parse(itemB[:updated_at]).to_time.getutc
+      if item_b[:updated_at].nil? && item_b[:local_path]
+        ct = cached_update_time_for(item_b[:local_path])
+        item_b[:updated_at] = ct unless ct.nil?
+        item_b[:updated_at] = item_b[:local_path].mtime.getutc if ct.nil?
+      elsif item_b[:updated_at].is_a?(String)
+        item_b[:updated_at] = DateTime.parse(item_b[:updated_at]).to_time.getutc
       end
-      return itemA[:updated_at].to_time.round != itemB[:updated_at].to_time.round
+      item_a[:updated_at].to_time.round != item_b[:updated_at].to_time.round
     end
 
-    def cacheFileName
-      ['cache',
-       self.class.to_s.gsub(/\W+/,'_'),
-       @sid,
-       'yaml'].join('.')
+    def cache_file_name
+      [
+        'cache',
+        self.class.to_s.gsub(/\W+/, '_'),
+        @sid,
+        'yaml',
+      ].join('.')
     end
 
-    def cacheUpdateTimeFor(local_path, time=nil)
-      time = Time.now.getutc if time.nil?
+    def cache_update_time_for(local_path, time=nil)
+      if time.nil?
+        time = Time.now.getutc
+      elsif time.is_a?(String)
+        time = DateTime.parse(time)
+      end
       entry = {
-        :sha1=>Digest::SHA1.file(local_path.to_s).hexdigest,
-        :updated_at=>time.to_datetime.iso8601(3)
+        sha1: Digest::SHA1.file(local_path.to_s).hexdigest,
+        updated_at: time.to_datetime.iso8601(3),
       }
-      cacheFile = $cfg.file_at(cacheFileName)
-      if cacheFile.file? then
-        cacheFile.open('r+') do |io|
+      cache_file = $cfg.file_at(cache_file_name)
+      if cache_file.file?
+        cache_file.open('r+') do |io|
+          # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
           cache = YAML.load(io)
           cache = {} unless cache
           io.rewind
@@ -115,7 +138,7 @@ module MrMurano
           io << cache.to_yaml
         end
       else
-        cacheFile.open('w') do |io|
+        cache_file.open('w') do |io|
           cache = {}
           cache[local_path.to_s] = entry
           io << cache.to_yaml
@@ -124,21 +147,22 @@ module MrMurano
       time
     end
 
-    def cachedUpdateTimeFor(local_path)
+    def cached_update_time_for(local_path)
       cksm = Digest::SHA1.file(local_path.to_s).hexdigest
-      cacheFile = $cfg.file_at(cacheFileName)
-      return nil unless cacheFile.file?
+      cache_file = $cfg.file_at(cache_file_name)
+      return nil unless cache_file.file?
       ret = nil
-      cacheFile.open('r') do |io|
+      cache_file.open('r') do |io|
+        # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
         cache = YAML.load(io)
         return nil unless cache
-        if cache.has_key?(local_path.to_s) then
+        if cache.key?(local_path.to_s)
           entry = cache[local_path.to_s]
           debug("For #{local_path}:")
-          debug(" cached: #{entry.to_s}")
+          debug(" cached: #{entry}")
           debug(" cm: #{cksm}")
-          if entry.kind_of?(Hash) then
-            if entry[:sha1] == cksm and entry.has_key?(:updated_at) then
+          if entry.is_a?(Hash)
+            if entry[:sha1] == cksm && entry.key?(:updated_at)
               ret = DateTime.parse(entry[:updated_at])
             end
           end
@@ -148,10 +172,10 @@ module MrMurano
     end
   end
 
-  # Libraries or better known as Modules.
-  class Library < ServiceBase
+  # What Murano calls "Modules". Snippets of Lua code.
+  class Module < ServiceBase
     # Module Specific details on an Item
-    class LibraryItem < Item
+    class ModuleItem < Item
       # @return [String] Internal Alias name
       attr_accessor :alias
       # @return [String] Timestamp when this was updated.
@@ -162,51 +186,48 @@ module MrMurano
       attr_accessor :solution_id
     end
 
-    def initialize
+    def initialize(sid=nil)
+      # FIXME/VERIFY/2017-07-02: Check that products do not have Modules.
+      @solntype = 'application.id'
       super
       @uriparts << 'library'
       @itemkey = :alias
       @project_section = :modules
     end
 
-    def tolocalname(item, key)
+    def tolocalname(item, _key)
       name = item[:name]
       "#{name}.lua"
     end
 
     def mkalias(remote)
-      unless remote.name.nil? then
-        [$cfg[@solntype], remote[:name]].join('_')
-      else
-        raise "Missing parts! #{remote.to_h.to_json}"
-      end
+      raise "Missing parts! #{remote.to_h.to_json}" if remote.name.nil?
+      #[$cfg[@solntype], remote[:name]].join('_')
+      [@sid, remote[:name]].join('_')
     end
 
     def mkname(remote)
-      unless remote.name.nil? then
-        remote[:name]
-      else
-        raise "Missing parts! #{remote.to_h.to_json}"
-      end
+      raise "Missing parts! #{remote.to_h.to_json}" if remote.name.nil?
+      remote[:name]
     end
 
     def list
-      ret = get()
-      return [] unless ret.is_a?(Hash) and !ret.has_key?(:error)
-      return [] unless ret.has_key?(:items)
-      ret[:items].map{|i| LibraryItem.new(i)}
+      ret = get
+      return [] unless ret.is_a?(Hash) && !ret.key?(:error)
+      return [] unless ret.key?(:items)
+      ret[:items].map { |i| ModuleItem.new(i) }
     end
 
-    def toRemoteItem(from, path)
+    def to_remote_item(_from, path)
       name = path.basename.to_s.sub(/\..*/, '')
-      LibraryItem.new(:name => name)
+      ModuleItem.new(name: name)
     end
 
     def synckey(item)
       item[:name]
     end
   end
-  SyncRoot.add('modules', Library, 'M', %{Modules}, true)
+  SyncRoot.add('modules', Module, 'M', %(Modules), true)
 
   # Services aka EventHandlers
   class EventHandler < ServiceBase
@@ -228,116 +249,140 @@ module MrMurano
       attr_accessor :type
     end
 
-    def initialize
+    def initialize(sid=nil)
       super
       @uriparts << 'eventhandler'
       @itemkey = :alias
-      @project_section = :services
+      #@project_section = :services
+      raise 'Subclass missing @project_section' unless @project_section
       @match_header = /--#EVENT (?<service>\S+) (?<event>\S+)/
     end
 
     def mkalias(remote)
-      if remote.service.nil? or remote.event.nil? then
-        raise "Missing parts! #{remote.to_h.to_json}"
-      else
-        [$cfg[@solntype], remote[:service], remote[:event]].join('_')
-      end
+      raise "Missing parts! #{remote.to_h.to_json}" if remote.service.nil? || remote.event.nil?
+      #[$cfg[@solntype], remote[:service], remote[:event]].join('_')
+      [@sid, remote[:service], remote[:event]].join('_')
     end
 
     def mkname(remote)
-      if remote.service.nil? or remote.event.nil? then
-        raise "Missing parts! #{remote.to_h.to_json}"
-      else
-        [remote[:service], remote[:event]].join('_')
-      end
+      raise "Missing parts! #{remote.to_h.to_json}" if remote.service.nil? || remote.event.nil?
+      [remote[:service], remote[:event]].join('_')
     end
 
-    def list
-      ret = get()
-      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+    def list(call=nil, data=nil, &block)
+      ret = get(call, data, &block)
+      return [] if ret.is_a?(Hash) && ret.key?(:error)
       # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
-      skiplist = ($cfg['eventhandler.skiplist'] or '').split
-      ret[:items].reject { |i|
-        i.has_key?(:service) and i.has_key?(:event) and
-        ( skiplist.include? i[:service] or
-          skiplist.include? "#{i[:service]}.#{i[:event]}"
+      skiplist = ($cfg['eventhandler.skiplist'] || '').split
+      items = ret[:items].reject do |i|
+        keep = (
+          i.key?(:service) &&
+          i.key?(:event) && (
+            skiplist.include?(i[:service]) ||
+            skiplist.include?("#{i[:service]}.#{i[:event]}")
+          )
         )
-      }.map{|i| EventHandlerItem.new(i)}
+        keep
+      end
+      items.map { |i| EventHandlerItem.new(i) }
     end
 
     def fetch(name)
-      ret = get('/'+CGI.escape(name))
-      if ret.nil? then
+      ret = get('/' + CGI.escape(name))
+      if ret.nil?
         error "Fetch for #{name} returned nil; skipping"
         return ''
       end
-      aheader = (ret[:script].lines.first or "").chomp
+      aheader = (ret[:script].lines.first || '').chomp
       dheader = "--#EVENT #{ret[:service]} #{ret[:event]}"
-      if block_given? then
+      if block_given?
         yield dheader + "\n" if aheader != dheader
         yield ret[:script]
       else
+        # 2017-07-02: Changing shovel operator << to +=
+        # to support Ruby 3.0 frozen string literals.
         res = ''
-        res << dheader + "\n" if aheader != dheader
-        res << ret[:script]
+        res += dheader + "\n" if aheader != dheader
+        res += ret[:script]
         res
       end
     end
 
-    def tolocalname(item, key)
+    def default_event_script(service_or_sid, &block)
+      post(
+        '/',
+        {
+          solution_id: @sid,
+          service: service_or_sid,
+          event: 'event',
+          script: 'print(event)',
+        },
+        &block
+      )
+    end
+
+    def tolocalname(item, _key)
       "#{item[:name]}.lua"
     end
 
-    def toRemoteItem(from, path)
+    def to_remote_item(from, path)
       # This allows multiple events to be in the same file. This is a lie.
       # This only finds the last event in a file.
       # :legacy support doesn't allow for that. But that's ok.
-      path = Pathname.new(path) unless path.kind_of? Pathname
+      path = Pathname.new(path) unless path.is_a?(Pathname)
       cur = nil
-      lineno=0
-      path.readlines().each do |line|
+      lineno = 0
+      path.readlines.each do |line|
+        # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
         md = @match_header.match(line)
-        if not md.nil? then
+        if !md.nil?
           # [lb] asks: Is this too hacky?
-          if md[:service] == 'device2' then
+          if md[:service] == 'device2'
             event_event = 'event'
             event_type = md[:event]
+            # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's not 'event'.
+            #   Want this?:
+            #     event_type = 'event' if event_type == 'data_in'
           else
             event_event = md[:event]
             event_type = nil
           end
           # header line.
-          cur = EventHandlerItem.new(:service=>md[:service],
-                                     :event=>event_event,
-                                     :type=>event_type,
-                                     :local_path=>path,
-                                     :line=>lineno,
-                                     :script=>line)
-        elsif not cur.nil? and not cur[:script].nil? then
-          cur[:script] << line
+          cur = EventHandlerItem.new(
+            service: md[:service],
+            event: event_event,
+            type: event_type,
+            local_path: path,
+            line: lineno,
+            script: line,
+          )
+        elsif !cur.nil? && !cur[:script].nil?
+          # 2017-07-02: Frozen string literal: change << to +=
+          cur[:script] += line
         end
         lineno += 1
       end
       cur[:line_end] = lineno unless cur.nil?
 
       # If cur is nil here, then we need to do a :legacy check.
-      if cur.nil? and $project['services.legacy'].kind_of? Hash then
+      if cur.nil? && $project['services.legacy'].is_a?(Hash)
         spath = path.relative_path_from(from)
         debug "No headers: #{spath}"
         service, event = $project['services.legacy'][spath.to_s]
         debug "Legacy lookup #{spath} => [#{service}, #{event}]"
-        unless service.nil? or event.nil? then
-          warning "Event in #{spath} missing header, but has legacy support."
-          warning "Please add the header \"--#EVENT #{service} #{event}\""
-          cur = EventHandlerItem.new(:service=>service,
-                                     :event=>event,
-                                     :type=>nil,
-                                     :local_path=>path,
-                                     :line=>0,
-                                     :line_end => lineno,
-                                     :script=>path.read() # FIXME: ick, fix this.
-                                    )
+        unless service.nil? || event.nil?
+          warning %(Event in #{spath} missing header, but has legacy support.)
+          warning %(Please add the header "--#EVENT #{service} #{event}")
+          cur = EventHandlerItem.new(
+            service: service,
+            event: event,
+            type: nil,
+            local_path: path,
+            line: 0,
+            line_end: lineno,
+            script: path.read, # FIXME: ick, fix this.
+          )
         end
       end
       cur
@@ -349,15 +394,8 @@ module MrMurano
       md = pattern_pattern.match(pattern)
       return false if md.nil?
       debug "match pattern: '#{md[:service]}' '#{md[:event]}'"
-
-      unless md[:service].empty? then
-        return false unless item[:service].downcase == md[:service].downcase
-      end
-
-      unless md[:event].empty? then
-        return false unless item[:event].downcase == md[:event].downcase
-      end
-
+      return false unless md[:service].empty? || item[:service].casecmp(md[:service]).zero?
+      return false unless md[:event].empty? || item[:event].casecmp(md[:event]).zero?
       true # Both match (or are empty.)
     end
 
@@ -366,47 +404,74 @@ module MrMurano
     end
   end
 
+  PRODUCT_SERVICES = %w[device2 interface].freeze
+
   class EventHandlerSolnPrd < EventHandler
-    def initialize
+    def initialize(sid=nil)
       @solntype = 'product.id'
+      # FIXME/2017-06-20: Should we use separate directories for prod vs app?
+      #   See also :services in PrfFile and elsewhere;
+      #   we could use @@class_var to DRY.
+      @project_section = :services
       super
+    end
+
+    def self.description
+      %(Product Event Handlers)
     end
 
     ##
     # Get a list of local items filtered by solution type.
     # @return [Array<Item>] Product solution events found
-    def locallist()
+    def locallist(skip_warn: false)
       llist = super
-      # This feels like a hack to [lb], but I don't know of a better
-      # way to tell what files are associated with what solution
-      # without putting that in the Lua script, e.g., like changing
-      #     --#EVENT device2 data_in
-      # to this:
-      #     --#EVENT product device2 data_in
-      # Having this here means there's less stuff user can get wrong.
-      llist.select!{|i| i.service == "device2"}
+      # This is a kludge to distinguish between Product services
+      # and Application services: assume that Murano only ever
+      # identifies Product services as 'device2' || 'interface'.
+      # If this weren't always the case, we'd have two obvious options:
+      #   1) Store Product and Application eventhandlers in separate
+      #      directories (and update the SyncRoot.add()s, below); or,
+      #   2) Put the solution type in the Lua script,
+      #      e.g., change this:
+      #        --#EVENT device2 data_in
+      #      to this:
+      #        --#EVENT product device2 data_in
+      # For now, the @service indicator is sufficient.
+      llist.select! { |i| PRODUCT_SERVICES.include? i.service }
       llist
     end
   end
 
   class EventHandlerSolnApp < EventHandler
-    def initialize
+    def initialize(sid=nil)
       @solntype = 'application.id'
+      # FIXME/2017-06-20: Should we use separate directories for prod vs app?
+      @project_section = :services
       super
+    end
+
+    def self.description
+      %(Application Event Handlers)
     end
 
     ##
     # Get a list of local items filtered by solution type.
     # @return [Array<Item>] Application solution events found
-    def locallist()
+    def locallist(skip_warn: false)
       llist = super
-      llist.select!{|i| i.service != "device2"}
+      # "Style/InverseMethods: Use reject! instead of inverting select!."
+      #llist.select! { |i| !PRODUCT_SERVICES.include? i.service }
+      llist.reject! { |i| PRODUCT_SERVICES.include? i.service }
       llist
     end
   end
 
-  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', %{Product Event Handlers}, true)
-  SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', %{Application Event Handlers}, true)
-
+  # Order here matters, because spec/cmd_init_spec.rb
+  SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', EventHandlerSolnApp.description, true)
+  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', EventHandlerSolnPrd.description, true)
+  # FIXME/2017-06-20: Should we use separate directories for prod vs app?
+  #   [lb] thinks so if the locallist/PRODUCT_SERVICES kludge fails in the future.
+  #SyncRoot.add('services', EventHandlerSolnApp, 'E', %(Application Event Handlers), true)
+  #SyncRoot.add('interfaces', EventHandlerSolnPrd, 'E', %(Product Event Handlers), true)
 end
-#  vim: set ai et sw=2 ts=2 :
+

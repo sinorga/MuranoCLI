@@ -1,14 +1,34 @@
+# Last Modified: 2017.07.05 /coding: utf-8
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
+require 'tempfile'
 require 'MrMurano/version'
 require 'MrMurano/Account'
-require 'tempfile'
+require '_workspace'
 
 RSpec.describe MrMurano::Passwords, "#pwd" do
+  # Weird: This tests works on its own without the "WORKSPACE",
+  # but when run with other tests, it fails. (2017-07-05: I think
+  # I just added the $cfg lines, because MrMurano::Passwords
+  # expects $cfg to be loaded... [lb].)
+  include_context "WORKSPACE"
+
   before(:example) do
+    @saved_cfg = ENV['MURANO_CONFIGFILE']
+    ENV['MURANO_CONFIGFILE'] = nil
+    $cfg = MrMurano::Config.new
+    $cfg.load
+
     @saved_pwd = ENV['MURANO_PASSWORD']
     ENV['MURANO_PASSWORD'] = nil
   end
   after(:example) do
     ENV['MURANO_PASSWORD'] = @saved_pwd
+
+    ENV['MURANO_CONFIGFILE'] = @saved_cfg
   end
 
   it "Creates a file " do
@@ -235,8 +255,5 @@ this.is.a.host:
       end
     end
   end
-
-
 end
 
-#  vim: set ai et sw=2 ts=2 :
