@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -47,7 +47,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
     def fmtr(item)
       if item.key? :local_path
         lp = item[:local_path].relative_path_from(Pathname.pwd).to_s
-        if item.key?(:line) && item[:line].positive?
+        if item.key?(:line) && item[:line] > 0
           return "#{lp}:#{item[:line]}"
         end
         lp

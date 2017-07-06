@@ -70,7 +70,7 @@ module MrMurano
       return if $cfg['tool.no-progress'] || !defined?(@whirly_time)
       not_so_fast = 0.55 - (Time.now - @whirly_time)
       remove_instance_variable(:@whirly_time)
-      sleep(not_so_fast) if not_so_fast.positive?
+      sleep(not_so_fast) if not_so_fast > 0
     end
 
     def whirly_msg(msg)

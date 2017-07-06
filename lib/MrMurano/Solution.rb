@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.04 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -88,7 +88,7 @@ module MrMurano
               end
             end
           end
-          if remaining.positive?
+          if remaining > 0
             query = query.dup
             #query.push ['limit', 20]
             query.push ['offset', total - remaining]

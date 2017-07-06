@@ -34,7 +34,7 @@ module Commander
 
     def verify_arg_count!(args, max_args=0)
       if max_args.zero?
-        if args.count.positive?
+        if args.count > 0
           MrMurano::Verbose.error('Not expecting any arguments')
           exit 2
         end
