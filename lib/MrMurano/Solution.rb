@@ -27,8 +27,8 @@ module MrMurano
       @project_section = nil unless defined?(@project_section)
     end
 
-    def ==(them)
-      them.class == self.class && them.state == state
+    def ==(other)
+      other.class == self.class && other.state == state
     end
 
     protected

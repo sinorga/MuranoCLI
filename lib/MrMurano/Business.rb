@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.05 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -66,8 +66,8 @@ module MrMurano
       self.bid
     end
 
-    def ==(them)
-      them.class == self.class && them.state == state
+    def ==(other)
+      other.class == self.class && other.state == state
     end
 
     protected
