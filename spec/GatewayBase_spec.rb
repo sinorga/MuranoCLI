@@ -3,7 +3,7 @@ require 'MrMurano/version'
 require 'MrMurano/Gateway'
 require '_workspace'
 
-RSpec.describe MrMurano::Gateway::Base do
+RSpec.describe MrMurano::Gateway::GweBase do
   include_context "WORKSPACE"
   before(:example) do
     MrMurano::SyncRoot.reset
@@ -12,12 +12,12 @@ RSpec.describe MrMurano::Gateway::Base do
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
 
-    @gw = MrMurano::Gateway::Base.new
+    @gw = MrMurano::Gateway::GweBase.new
     allow(@gw).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
-    uri = @gw.endPoint('/')
+    uri = @gw.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/")
   end
 

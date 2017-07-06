@@ -3,7 +3,7 @@ require 'MrMurano/Solution-Services'
 require 'tempfile'
 require '_workspace'
 
-RSpec.describe MrMurano::Library do
+RSpec.describe MrMurano::Module do
   include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
@@ -13,12 +13,12 @@ RSpec.describe MrMurano::Library do
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['application.id'] = 'XYZ'
 
-    @srv = MrMurano::Library.new
+    @srv = MrMurano::Module.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/")
   end
 
@@ -143,7 +143,7 @@ RSpec.describe MrMurano::Library do
         tio.close
 
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -173,7 +173,7 @@ RSpec.describe MrMurano::Library do
 
         ret = @srv.upload(
           tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -199,7 +199,7 @@ RSpec.describe MrMurano::Library do
 
         expect(@srv).to receive(:error).and_return(nil)
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -223,10 +223,10 @@ RSpec.describe MrMurano::Library do
         }
         tio.close
 
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -250,14 +250,14 @@ RSpec.describe MrMurano::Library do
         }
         tio.close
 
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         cacheFile.open('w') do |cfio|
           cfio << {tio.path=>{:sha1=>"6",
                               :updated_at=>Time.now.getutc.to_datetime.iso8601(3)}
           }.to_yaml
         end
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -306,7 +306,7 @@ RSpec.describe MrMurano::Library do
       end
 
       it "cache miss" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         Tempfile.open('foo') do |tio|
           tio << "something"
@@ -324,7 +324,7 @@ RSpec.describe MrMurano::Library do
       end
 
       it "cache hit" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         Tempfile.open('foo') do |tio|
           tio << "something"
           tio.close
@@ -370,7 +370,7 @@ RSpec.describe MrMurano::Library do
       end
 
       it "cache miss" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         Tempfile.open('foo') do |tio|
           tio << "something"
@@ -388,7 +388,7 @@ RSpec.describe MrMurano::Library do
       end
 
       it "cache hit" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         Tempfile.open('foo') do |tio|
           tio << "something"
           tio.close
@@ -442,21 +442,21 @@ RSpec.describe MrMurano::Library do
 
     it "raises on alias without name" do
       expect {
-        @srv.mkname( MrMurano::Library::EventHandlerItem.new() )
+        @srv.mkname( MrMurano::Module::EventHandlerItem.new() )
       }.to raise_error(NameError)
     end
 
     it "raises on name without name" do
       expect {
-        @srv.mkalias( MrMurano::Library::EventHandlerItem.new() )
+        @srv.mkalias( MrMurano::Module::EventHandlerItem.new() )
       }.to raise_error(NameError)
     end
   end
 
-  context "toRemoteItem" do
+  context "to_remote_item" do
     it "reads one" do
-      path = Pathname.new(@projectDir) + 'test.lua'
-      ret = @srv.toRemoteItem(nil, path)
+      path = Pathname.new(@project_dir) + 'test.lua'
+      ret = @srv.to_remote_item(nil, path)
       expect(ret).to eq({:name=>'test'})
     end
   end

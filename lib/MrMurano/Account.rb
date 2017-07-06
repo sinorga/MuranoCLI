@@ -1,290 +1,168 @@
-require 'uri'
-require 'net/http'
-require 'json'
+# Last Modified: 2017.07.05 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'date'
+require 'json'
+require 'net/http'
 require 'pathname'
+require 'uri'
 require 'yaml'
-require 'MrMurano/Config'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
+require 'MrMurano/Business'
+require 'MrMurano/Config'
+require 'MrMurano/Passwords'
+require 'MrMurano/Solution'
 
 module MrMurano
-  class Passwords
-    include Verbose
-    def initialize(path=nil)
-      path = $cfg.file_at('passwords', :user) if path.nil?
-      path = Pathname.new(path) unless path.kind_of? Pathname
-      @path = path
-      @data = nil
-    end
-    def load()
-      if @path.exist? then
-        @path.chmod(0600)
-        @path.open('rb') do |io|
-          @data = YAML.load(io)
-        end
-      end
-    end
-    def save()
-      @path.dirname.mkpath unless @path.dirname.exist?
-      @path.open('wb') do |io|
-        io << @data.to_yaml
-      end
-      @path.chmod(0600)
-    end
-    def set(host, user, pass)
-      unless @data.kind_of? Hash then
-        @data = {host=>{user=>pass}}
-        return
-      end
-      hd = @data[host]
-      if hd.nil? or not hd.kind_of?(Hash) then
-        @data[host] = {user=>pass}
-        return
-      end
-      @data[host][user] = pass
-      return
-    end
-    def get(host, user)
-      return ENV['MURANO_PASSWORD'] unless ENV['MURANO_PASSWORD'].nil?
-      unless ENV['MR_PASSWORD'].nil? then
-        warning %{Using depercated ENV "MR_PASSWORD", please rename to "MURANO_PASSWORD"}
-        return ENV['MR_PASSWORD']
-      end
-      return nil unless @data.kind_of? Hash
-      return nil unless @data.has_key? host
-      return nil unless @data[host].kind_of? Hash
-      return nil unless @data[host].has_key? user
-      return @data[host][user]
-    end
-
-    ## Remove the password for a user
-    def remove(host, user)
-      if @data.kind_of? Hash then
-        hd = @data[host]
-        if not hd.nil? and hd.kind_of?(Hash) then
-          if hd.has_key? user then
-            @data[host].delete user
-          end
-        end
-      end
-    end
-
-    ## Get all hosts and usernames. (does not return the passwords)
-    def list
-      ret = {}
-      @data.each_pair{|key,value| ret[key] = value.keys} unless @data.nil?
-      ret
-    end
-  end
-
   class Account
+    # The tool only works for a single user. To avoid fetching the
+    # token multiple times (and to avoid having to pass an Account
+    # object around), we make the class a singleton.
+    include Singleton
+
     include Http
     include Verbose
 
-    def endPoint(path)
-      URI('https://' + $cfg['net.host'] + '/api:1/' + path.to_s)
+    def initialize
+      @token = nil
     end
 
-    def _loginInfo
-      host = $cfg['net.host']
-      user = $cfg['user.name']
-      if user.nil? or user.empty? then
-        error("No Murano user account found; please login")
-        user = ask("User name: ")
-        $cfg.set('user.name', user, :user)
+    def host
+      $cfg['net.host'].to_s
+    end
+
+    def user
+      $cfg['user.name'].to_s
+    end
+
+    def endpoint(path)
+      URI('https://' + host + '/api:1/' + path.to_s)
+    end
+
+    # ---------------------------------------------------------------------
+
+    def login_info
+      warned_once = false
+      if user.empty?
+        error('No Murano user account found. Please login')
+        warned_once = true
+        username = ask('User name: ')
+        $cfg.set('user.name', username, :user)
       end
-      pff = $cfg.file_at('passwords', :user)
-      pf = Passwords.new(pff)
-      pf.load
-      pws = pf.get(host, user)
-      if pws.nil? then
-        error("Couldn't find password for #{user}")
-        pws = ask("Password:  ") { |q| q.echo = "*" }
-        pf.set(host, user, pws)
-        pf.save
+      pwd_path = $cfg.file_at('passwords', :user)
+      pwd_file = MrMurano::Passwords.new(pwd_path)
+      pwd_file.load
+      user_pass = pwd_file.get(host, user)
+      if user_pass.nil?
+        error("No Murano password found for #{user}") unless warned_once
+        user_pass = ask('Password: ') { |q| q.echo = '*' }
+        pwd_file.set(host, user, user_pass)
+        pwd_file.save
       end
-      {
-        :email => $cfg['user.name'],
-        :password => pws
+      creds = {
+        email: user,
+        password: user_pass,
       }
+      creds
     end
 
-    # Store the token in a class variable so that we only fetch it once per run
-    # session of this tool
-    @@token = nil
-    def token
-      if @@token.nil? then
-        # Cannot have token call token, so cannot use workit.
-        uri = endPoint('token/')
-        request = Net::HTTP::Post.new(uri)
-        request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
-        request.content_type = 'application/json'
-        curldebug(request)
-        #request.basic_auth(username(), password())
-        request.body = JSON.generate(_loginInfo)
+    # ---------------------------------------------------------------------
 
-        response = http.request(request)
-        case response
-        when Net::HTTPSuccess
-          token = JSON.parse(response.body, json_opts)
-          @@token = token[:token]
-        else
-          showHttpError(request, response)
-          error "Check to see if username and password are correct."
-          @@token = nil
-        end
-      end
-      @@token
+    def token
+      token_fetch if @token.to_s.empty?
+      @token
     end
 
     def token_reset(value=nil)
-      @@token = value
+      @token = value
     end
 
-    def adc_compat_check
-#      unless $cfg['business.id'].nil? then
-#        unless has_projects?($cfg['business.id']) then
-#          # This is 3.x which does not support projects!
-#          warning('!'*80)
-#          warning "Your business requires MuranoCLI 2.x"
-#          warning "Some features may not work correctly."
-#          warning('!'*80)
-#        end
-#      end
+    def token_fetch
+      # Cannot have token call token, so cannot use Http::workit.
+      uri = endpoint('token/')
+      request = Net::HTTP::Post.new(uri)
+      request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
+      request.content_type = 'application/json'
+      curldebug(request)
+      #request.basic_auth(username(), password())
+      request.body = JSON.generate(login_info)
+
+      MrMurano::Verbose.whirly_start('Logging in...')
+      response = http.request(request)
+      MrMurano::Verbose.whirly_stop
+
+      case response
+      when Net::HTTPSuccess
+        token = JSON.parse(response.body, json_opts)
+        @token = token[:token]
+      else
+        showHttpError(request, response)
+        error 'Check to see if username and password are correct.'
+        @token = nil
+      end
     end
 
-    #------------------------------------------------------------------------
-    def new_account(email, name, company="")
-      post('key/', {
-        :email=>email,
-        :name=>name,
-        :company=>company,
-        :source=>'signup',
-      })
+    # ---------------------------------------------------------------------
+
+    def businesses(match_bid=nil, match_name=nil, match_either=nil)
+      # Ask user for name and password, if not saved to config and password files.
+      login_info if user.empty?
+      raise 'Missing user?!' if user.empty?
+
+      MrMurano::Verbose.whirly_start 'Fetching Businesses...'
+      bizes = get('user/' + user + '/membership/')
+      MrMurano::Verbose.whirly_stop
+
+      # 2017-06-30: The data for each message contains a :bizid, :role, and :name.
+      #   :role is probably generally "owner".
+
+      bizes.select! { |biz| biz[:bizid] == match_bid } unless match_bid.to_s.empty?
+      bizes.select! { |biz| biz[:name] == match_name } unless match_name.to_s.empty?
+      unless match_either.to_s.empty?
+        bizes.select! do |biz|
+          biz[:name] == match_either || biz[:bizid] == match_either
+        end
+      end
+
+      bizes.map { |meta| MrMurano::Business.new(meta) }
+    end
+
+    # ---------------------------------------------------------------------
+
+    # 2017-07-05: [lb] notes that the remaining methods are not called.
+
+    def new_account(email, name, company='')
+      # this is a kludge.  If we're gonna support this, do it better.
+      @@token = ''
+      @token = ''
+      post('key/', email: email, name: name, company: company, source: 'signup')
     end
 
     def reset_account(email)
-      post('key/', { :email=>email, :source=>'reset' })
+      post('key/', email: email, source: 'reset')
     end
 
     def accept_account(token, password)
-      post("key/#{token}", {:password=>password})
+      # this is a kludge.  If we're gonna support this, do it better.
+      @@token = ''
+      @token = ''
+      post("key/#{token}", password: password)
     end
 
-    #------------------------------------------------------------------------
-    def businesses
-      _loginInfo if $cfg['user.name'].nil?
-      get('user/' + $cfg['user.name'] + '/membership/')
-    end
+    # ---------------------------------------------------------------------
 
     def new_business(name)
-      post('business/', {:name=>name})
+      post('business/', name: name)
     end
 
     def delete_business(id)
       delete("business/#{id}")
     end
-
-    def overview(id=nil)
-      id = $cfg['business.id'] if id.nil?
-      get("business/#{id}/overview")
-    end
-
-    def has_projects?(id)
-      ret = get("business/#{id}/overview")
-      return false unless ret.kind_of? Hash
-      return false unless ret.has_key? :tier
-      tier = ret[:tier]
-      return false unless tier.kind_of? Hash
-      return false unless tier.has_key? :enableProjects
-      return tier[:enableProjects]
-    end
-
-    #------------------------------------------------------------------------
-    #ALLOWED_TYPES = [:domain,:onepApi,:dataApi,:application,:product].freeze
-    ALLOWED_TYPES = [:application,:product].freeze
-
-    def solutions(type=:all, invalidate=false)
-      debug "Getting all solutions of type #{type}"
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      type = type.to_sym
-      raise "Unknown type(#{type})" unless type == :all or ALLOWED_TYPES.include? type
-      # Cache the result since sometimes both products() and applications() are called.
-      if !instance_variable_defined?("@bizSolns") or invalidate
-        got = get('business/' + $cfg['business.id'] + '/solution/')
-        @bizSolns = got
-      end
-      solz = @bizSolns.dup
-      unless type == :all
-        solz.select!{|i| i[:type] == type.to_s}
-      end
-      solz
-    end
-
-    # SYNC_ME: See regex in bizapi: lib/api/route/business/solution.js
-    #
-    # NOTE: 2017-06-02: In bizapi, it's: /^?![0-9][a-zA-Z0-9]{1,63}$/
-    #           but this code has been checking /^[a-zA-Z0-9]{0,62}$/
-    #                      and [lb] is hesitant to change it to 63 now.
-    #
-    # FIXME: Allow uppercase once pegasus_registry fixed.
-    #SOLN_NAME_REGEX = /^(?![0-9])[a-zA-Z0-9]{1,62}$/
-    #SOLN_NAME_HELP = "Solution name must contain only letters and/or numbers"
-    #
-    # For now, lowercase only.
-    SOLN_NAME_REGEX = /^(?![0-9])[a-z0-9]{1,62}$/
-    SOLN_NAME_HELP = "Solution name must contain only lowercase letters and/or numbers, and may not start with a number"
-    #
-    # MUR-2454: Dashes no longer allowed in sol'n name
-    # Legacy check (good old days, before soln name was also a Lua variable name):
-    #SOLN_NAME_REGEX = /^[a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9]{0,1}|[a-zA-Z0-9]{0,62})$/
-    #SOLN_NAME_HELP = "Solution name must be a valid domain name component"
-
-    ## Create a new solution in the current business
-    def new_solution(name, type)
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      type = type.to_s.to_sym
-      raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
-      # FIXME: Allow uppercase once pegasus_registry fixed.
-      raise MrMurano::ConfigError.new(SOLN_NAME_HELP) unless name.match(SOLN_NAME_REGEX)
-      post('business/' + $cfg['business.id'] + '/solution/', {:label=>name, :type=>type})
-    end
-
-    def delete_solution(apiId)
-      raise "Missing Business ID" if $cfg['business.id'].nil?
-      delete('business/' + $cfg['business.id'] + '/solution/' + apiId)
-    end
-
-    #------------------------------------------------------------------------
-    def products
-      solutions(:product)
-    end
-
-    ## Create a new product in the current business
-    def new_product(name, type=:product)
-      new_solution(name, type)
-    end
-
-    def delete_product(modelId)
-      delete_solution(modelId)
-    end
-
-    #------------------------------------------------------------------------
-    def applications
-      solutions(:application)
-    end
-
-    ## Create a new application in the current business
-    def new_application(name, type=:application)
-      new_solution(name, type)
-    end
-
-    def delete_application(modelId)
-      delete_solution(modelId)
-    end
-
   end
 end
 
-#  vim: set ai et sw=2 ts=2 :

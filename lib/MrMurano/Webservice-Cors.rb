@@ -4,7 +4,7 @@ require 'MrMurano/Webservice'
 
 module MrMurano
   module Webservice
-    class Settings < Base
+    class Settings < WebserviceBase
       def initialize
         super
         @uriparts << 'cors'
@@ -21,7 +21,7 @@ module MrMurano
       end
     end
 
-    class Cors < Base
+    class Cors < WebserviceBase
       def initialize
         super
         @uriparts << 'cors'

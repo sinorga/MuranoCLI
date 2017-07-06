@@ -9,8 +9,12 @@ module MrMurano
   ##
   # User Management common things
   class UserBase < SolutionBase
-    def list()
-      get()
+    def initialize
+      super
+    end
+
+    def list
+      get
     end
 
     def fetch(id)
@@ -86,17 +90,20 @@ module MrMurano
         return []
       end
 
+      # MAYBE/2017-07-03: Do we care if there are duplicate keys in the yaml? See dup_count.
       here = []
-      from.open {|io| here = YAML.load(io) }
+      from.open { |io| here = YAML.load(io) }
       here = [] if here == false
 
-      here.map{|i| Hash.transform_keys_to_symbols(i)}
+      here.map { |i| Hash.transform_keys_to_symbols(i) }
     end
   end
 
   # …/role
   class Role < UserBase
     def initialize
+      @solntype = 'application.id'
+      #@solntype = 'product.id'
       super
       @uriparts << 'role'
       @itemkey = :role_id
@@ -108,6 +115,10 @@ module MrMurano
   # :nocov:
   class User < UserBase
     def initialize
+      # 2017-07-03: [lb] tried 'product.id' and got 403 Forbidden;
+      #   And I tried 'application.id' and get() returned an empty [].
+      @solntype = 'application.id'
+      #@solntype = 'product.id'
       super
       @uriparts << 'user'
     end

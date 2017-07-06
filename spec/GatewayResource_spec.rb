@@ -11,13 +11,15 @@ RSpec.describe MrMurano::Gateway::Resources do
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['product.id'] = 'XYZ'
+    $project = MrMurano::ProjectFile.new
+    $project.load
 
     @gw = MrMurano::Gateway::Resources.new
     allow(@gw).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
-    uri = @gw.endPoint('/')
+    uri = @gw.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2/")
   end
 
@@ -83,7 +85,7 @@ RSpec.describe MrMurano::Gateway::Resources do
   context "local items" do
     it "succeeds" do
       resfile = Pathname.new('resources.yaml')
-      src = File.join(@testdir, 'spec','fixtures','gateway_resource_files', 'resources.yaml')
+      src = File.join(@testdir, 'spec', 'fixtures', 'gateway_resource_files', 'resources.yaml')
       FileUtils.copy(src, resfile.to_path)
       ret = @gw.localitems(resfile)
       expect(ret).to eq([
@@ -116,14 +118,14 @@ RSpec.describe MrMurano::Gateway::Resources do
 
     it "isn't yaml" do
       resfile = Pathname.new('resources.yaml')
-      src = File.join(@testdir, 'spec','fixtures','gateway_resource_files', 'resources.notyaml')
+      src = File.join(@testdir, 'spec', 'fixtures', 'gateway_resource_files', 'resources.notyaml')
       FileUtils.copy(src, resfile.to_path)
       expect{ @gw.localitems(resfile) }.to raise_error(JSON::Schema::ValidationError)
     end
 
     it "isn't valid" do
       resfile = Pathname.new('resources.yaml')
-      src = File.join(@testdir, 'spec','fixtures','gateway_resource_files', 'resources.notyaml')
+      src = File.join(@testdir, 'spec', 'fixtures', 'gateway_resource_files', 'resources.notyaml')
       FileUtils.copy(src, resfile.to_path)
       expect{ @gw.localitems(resfile) }.to raise_error(JSON::Schema::ValidationError)
     end
@@ -176,11 +178,29 @@ RSpec.describe MrMurano::Gateway::Resources do
 
   context "syncdown" do
     before(:example) do
-      expect(@gw).to receive(:locallist).once.and_return([
-        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
-        {:format=>"string", :unit=>"c", :settable=>true, :alias=>"fuzz"},
-        {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"}
-      ])
+      # 2017-07-05: [lb] not sure what I had to add this just now;
+      # this test had been working fine... I added a check for
+      # duplicate local resource in locallist(), but this smells
+      # really funny. I cannot explain how this test used to work,
+      # nor why it started failing; but I had to add a mkpath on
+      # 'specs', and I changed the copy to go into the specs/
+      # directory, and I removed the extra empty array in the
+      # and_return check.
+      FileUtils.mkpath('specs')
+      resfile = Pathname.new(File.join('specs', 'resources.yaml'))
+      src = File.join(@testdir, 'spec', 'fixtures', 'gateway_resource_files', 'resources.yaml')
+      FileUtils.copy(src, resfile.to_path)
+
+      expect(@gw).to receive(:locallist).once.and_return(
+        [
+          {:format=>"string", :unit=>"c", :settable=>true, :alias=>"bob"},
+          {:format=>"string", :unit=>"c", :settable=>true, :alias=>"fuzz"},
+          {:format=>"string", :unit=>"bits", :settable=>true, :alias=>"gruble"}
+        ],
+        # 2017-07-05: [lb] also had to remove this check.
+        # locallist returns a single array, not two of them!
+        #[],
+      )
 
       @io = instance_double("IO")
       @p = instance_double('Pathname')

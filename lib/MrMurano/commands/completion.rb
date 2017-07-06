@@ -8,6 +8,9 @@ class ::Commander::Runner
 
   # Not so sure this should go in Runner, but where else?
 
+  # The shells for which we have completion templates.
+  SHELL_TYPES = [:bash, :zsh].freeze
+
   ##
   # Change the '--[no-]foo' switch into '--no-foo' and '--foo'
   def flatswitches(option)
@@ -23,7 +26,7 @@ class ::Commander::Runner
   end
 
   ##
-  # If the switches take an argument, retun =
+  # If the switches take an argument, return =
   def takesArg(option, yes='=', no='')
     if option[:switches].select { |switch| switch =~ /\s\S+$/ }.empty? then
       no
@@ -92,21 +95,29 @@ end
 command :completion do |c|
   c.syntax = %{murano completion}
   c.summary = %{Generate a completion file}
-  c.description = %{For starts, this is zsh only. Because that is what I use.
+  c.description = %{
+Create a Tab completion file for either the Bash or Z shell.
 
-eval "$(murano completion)"
+E.g.,
+
+  eval "$(murano completion)"
+
 or
-murano completion > _murano
-source _murano
-}
+
+  murano completion > _murano
+  source _murano
+  }.strip
   c.option '--subs', 'List sub commands'
   #c.option '--opts CMD', 'List options for subcommand'
   #c.option '--gopts', 'List global options'
+  c.option '--shell TYPE', Commander::Runner::SHELL_TYPES, %{Shell flavor of output (default: Bash)}
+  c.project_not_required = true
 
   # Changing direction.
   # Will poop out the file to be included as the completion script.
 
   c.action do |args, options|
+    options.default :shell => :bash
 
     runner = ::Commander::Runner.instance
 
@@ -138,15 +149,23 @@ source _murano
       end
 
     else
-
-      tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), "zshcomplete.erb")), nil, '-<>')
+      case options.shell
+      when :bash
+        cmpltnTmplt = "completion-bash.erb"
+      when :zsh
+        cmpltnTmplt = "completion-zsh.erb"
+      else
+        MrMurano::Verbose.error "Impossible shell option specified: #{options.shell.to_s}"
+        exit 2
+      end
+      tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), cmpltnTmplt)), nil, '-<>')
 
       pc = CompletionContext.new(runner)
       puts tmpl.result(pc.get_binding)
     end
 
-
   end
 end
 
 #  vim: set ai et sw=2 ts=2 :
+

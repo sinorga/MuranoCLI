@@ -17,7 +17,7 @@ RSpec.describe MrMurano::Content::Base do
   end
 
   it "initializes" do
-    uri = @ct.endPoint('/')
+    uri = @ct.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/service/XYZ/content/item/")
   end
 
@@ -66,7 +66,7 @@ RSpec.describe MrMurano::Content::Base do
 
   context "uploads" do
     before(:example) do
-      @tup = Pathname.new(@projectDir) + 'Solutionfile.json'
+      @tup = Pathname.new(@project_dir) + 'Solutionfile.json'
       FileUtils.copy(File.join(@testdir, 'spec/fixtures/SolutionFiles/basic.json'), @tup.to_path)
     end
 

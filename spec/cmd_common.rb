@@ -17,6 +17,8 @@ RSpec.shared_context "CI_CMD" do
     end
     args.push '--trace'
     args.push '-c', 'fullerror'
+    # The spinner output would make it hard to write expects().
+    args.push '--no-progress'
 
     if Gem.win_platform? then
       cmd = args.map do |i|
@@ -47,6 +49,18 @@ RSpec.shared_context "CI_CMD" do
     "#{name.downcase}#{Random.new.rand.hash.abs.to_s(16)}"
   end
 
+  def mk_symlink
+    # Make it easy to debug tests, e.g., add breakpoint before capcmd('murano', ...)
+    # run test, then open another terminal window and `cd /tmp/murcli-test`.
+    @dev_symlink = File.join(Dir.tmpdir(), "murcli-test")
+    FileUtils.rm(@dev_symlink, :force => true)
+    FileUtils.ln_s(Dir.pwd, @dev_symlink)
+  end
+
+  def rm_symlink
+    FileUtils.rm(@dev_symlink, :force => true)
+  end
+
   before(:example) do
     $cfg = MrMurano::Config.new
     $cfg.load
@@ -61,9 +75,11 @@ RSpec.shared_context "CI_CMD" do
         @tmpdir = File.join(hdir, 'project')
         Dir.mkdir(@tmpdir)
         Dir.chdir(@tmpdir) do
+          mk_symlink
           Timeout::timeout(300) do
             ex.run
           end
+          rm_symlink
         end
       end
     end

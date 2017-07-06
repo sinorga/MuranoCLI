@@ -1,18 +1,34 @@
+# Last Modified: 2017.07.05 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'MrMurano/Solution'
 
 module MrMurano
   # …/serviceconfig
   class ServiceConfig < SolutionBase
-    def initialize
+    def initialize(sid=nil)
       super
       @uriparts << 'serviceconfig'
       @scid = nil
     end
 
-    def list
-      ret = get()
-      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+    def list(call=nil, data=nil, &block)
+      ret = get(call, data, &block)
+      return [] if ret.is_a?(Hash) && ret.key?(:error)
       ret[:items]
+    end
+
+    def search(svc_name)
+      #path = nil
+      #path = '?select=id,service,script_key'
+      # 2017-07-02: This is what yeti-ui adds.
+      # FIXME/EXPLAIN/2017-07-02: What's "UUID" that web UI uses?
+      path = '?select=service,id,solution_id,script_key,alias'
+      super(svc_name, path)
     end
 
     def fetch(id)
@@ -20,25 +36,35 @@ module MrMurano
     end
 
     def scid_for_name(name)
-      name = name.to_s unless name.kind_of? String
-      scr = list().select{|i| i[:service] == name}.first
+      name = name.to_s unless name.is_a? String
+      scr = list.select { |i| i[:service] == name }.first
       return nil if scr.nil?
       scr[:id]
     end
 
     def scid
       return @scid unless @scid.nil?
-      @scid = scid_for_name(@serviceName)
+      @scid = scid_for_name(@service_name)
     end
 
-    def create(pid, name=nil)  #? script_key?
-      name = pid if name.nil?
+    def create(pid, name=nil, &block) #? script_key?
+      name = pid if name.to_s.empty?
+      raise 'Missing name/script_key?' if name.to_s.empty?
       # See pegasus_registry PostServiceConfig for the POST properties.
-      post('', {
-        :solution_id => @sid,
-        :service => pid,
-        :name => name,
-      })
+      #   pegasus_registry/api/swagger/paths/serviceconfig.yaml
+      #   pegasus_registry/api/swagger/definitions/serviceconfig.yaml
+      post(
+        '/',
+        {
+          solution_id: @sid,
+          service: pid,
+          # 2017-06-26: "name" seems to work, but "script_key" is what web UI uses.
+          #   See yeti-ui/bridge/src/js/api/services.js::linkApplicationService
+          #name: name,
+          script_key: name,
+        },
+        &block
+      )
     end
 
     def remove(id)
@@ -54,8 +80,8 @@ module MrMurano
     end
 
     def call(opid, meth=:get, data=nil, id=scid, &block)
-      raise "Service '#{@serviceName}' not enabled for this Solution" if id.nil?
-      call = "/#{id.to_s}/call/#{opid.to_s}"
+      raise "Service '#{@service_name}' not enabled for this Solution" if id.nil?
+      call = "/#{id}/call/#{opid}"
       debug "Will call: #{call}"
       case meth
       when :get
@@ -72,7 +98,6 @@ module MrMurano
         raise "Unknown method: #{meth}"
       end
     end
-
   end
 
   ## This is only used for debugging and deciphering APIs.
@@ -84,25 +109,25 @@ module MrMurano
   # A much better UI/UX happens with human intervention.
   # :nocov:
   class Services < SolutionBase
-    def initialize
+    def initialize(sid=nil)
       super
       @uriparts << 'service'
     end
 
     def sid_for_name(name)
-      name = name.to_s unless name.kind_of? String
-      scr = list().select{|i| i[:alias] == name}.first
+      name = name.to_s unless name.is_a? String
+      scr = list.select { |i| i[:alias] == name }.first
       scr[:id]
     end
 
     def sid
       return @sid unless @sid.nil?
-      @sid = sid_for_name(@serviceName)
+      @sid = sid_for_name(@service_name)
     end
 
     def list
-      ret = get()
-      return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+      ret = get
+      return [] if ret.is_a?(Hash) && ret.key?(:error)
       ret[:items]
     end
 
@@ -117,13 +142,12 @@ module MrMurano
       calls = []
       scm[:paths].each do |path, methods|
         methods.each do |method, params|
-          if params.kind_of?(Hash) then
-            call = [method]
-            call << path.to_s if all
-            call << params[:operationId]
-            call << (params['x-internal-use'.to_sym] or false) if all
-            calls << call
-          end
+          next unless params.is_a?(Hash)
+          call = [method]
+          call << path.to_s if all
+          call << params[:operationId]
+          call << (params['x-internal-use'.to_sym] || false) if all
+          calls << call
         end
       end
       calls
@@ -143,6 +167,18 @@ module MrMurano
   end
   # :nocov:
 
+  class ServiceConfigApplication < ServiceConfig
+    def initialize(sid=nil)
+      @solntype = 'application.id'
+      super
+    end
+  end
+
+  class ServiceConfigProduct < ServiceConfig
+    def initialize(sid=nil)
+      @solntype = 'product.id'
+      super
+    end
+  end
 end
 
-#  vim: set ai et sw=2 ts=2 :

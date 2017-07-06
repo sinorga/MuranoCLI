@@ -1,34 +1,45 @@
-require 'uri'
-require 'net/http'
+# Last Modified: 2017.07.03 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'http/form_data'
 require 'json-schema'
-require 'MrMurano/Config'
+require 'net/http'
+require 'uri'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
+require 'MrMurano/Config'
+require 'MrMurano/SolutionId'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
   ## The details of talking to the Gateway [Device2] service.
   # This is where interfacing to real hardware happens.
   module Gateway
-    class Base
-      def initialize
-        @pid = $cfg['product.id']
-        raise MrMurano::ConfigError.new("No product id!") if @pid.nil?
-        @uriparts = [:service, @pid, :device2]
-        @itemkey = :id
-      end
-
+    class GweBase
       include Http
       include Verbose
+      include SolutionId
+
+      def initialize
+        @solntype = 'product.id'
+        @uriparts_sidex = 1
+        init_sid!
+        @uriparts = [:service, @sid, :device2]
+        @uriparts_sidex = 1
+        @itemkey = :id
+      end
 
       ## Generate an endpoint in Murano
       # Uses the uriparts and path
       # @param path String: any additional parts for the URI
       # @return URI: The full URI for this enpoint.
-      def endPoint(path='')
+      def endpoint(path='')
         parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
-        s = parts.map{|v| v.to_s}.join('/')
+        s = parts.map(&:to_s).join('/')
         URI(s + path.to_s)
       end
       # …
@@ -36,65 +47,68 @@ module MrMurano
 
       # Get info for this gateway interface.
       def info
-        get()
+        get
       end
     end
 
-    class Settings < Base
+    class Settings < GweBase
       # Get the protocol settings
       def protocol
-        ret = get()
+        ret = get
         return {} if ret.nil?
-        return {} unless ret.kind_of? Hash
-        return {} unless ret.has_key? :protocol
-        return {} unless ret[:protocol].kind_of? Hash
-        return ret[:protocol]
+        return {} unless ret.is_a?(Hash)
+        return {} unless ret.key?(:protocol)
+        return {} unless ret[:protocol].is_a?(Hash)
+        ret[:protocol]
       end
 
       # Set the protocol settings
       def protocol=(x)
-        raise "Not Hash" unless x.kind_of? Hash
-        x.delete_if {|k,v| not [:name, :devmode].include? k}
-        patch('', {:protocol => x})
+        raise 'Not Hash' unless x.is_a?(Hash)
+        x.delete_if { |k, _v| !%i[name devmode].include?(k) }
+        patch('', protocol: x)
       end
 
       def identity_format
-        ret = get()
+        ret = get
         return {} if ret.nil?
-        return {} unless ret.kind_of? Hash
-        return {} unless ret.has_key? :identity_format
-        return {} unless ret[:identity_format].kind_of? Hash
-        return ret[:identity_format]
+        return {} unless ret.is_a?(Hash)
+        return {} unless ret.key?(:identity_format)
+        return {} unless ret[:identity_format].is_a?(Hash)
+        ret[:identity_format]
       end
 
       def identity_format=(x)
-        raise "Not Hash" unless x.kind_of? Hash
-        raise "Not Hash" if x.has_key? :options and not x[:options].kind_of? Hash
-        x.delete_if {|k,v| not [:type, :prefix, :options].include? k}
-        x[:options].delete_if {|k,v| not [:casing, :length].include? k}
-        patch('', {:identity_format=>x})
+        raise 'Not Hash' unless x.is_a?(Hash)
+        raise 'Not Hash' if x.key?(:options) && !x[:options].is_a?(Hash)
+        x.delete_if { |k, _v| !%i[type prefix options].include?(k) }
+        x[:options].delete_if { |k, _v| !%i[casing length].include?(k) }
+        patch('', identity_format: x)
       end
 
       def provisioning
-        ret = get()
+        ret = get
         return {} if ret.nil?
-        return {} unless ret.kind_of? Hash
-        return {} unless ret.has_key? :provisioning
-        return {} unless ret[:provisioning].kind_of? Hash
-        return ret[:provisioning]
+        return {} unless ret.is_a?(Hash)
+        return {} unless ret.key?(:provisioning)
+        return {} unless ret[:provisioning].is_a?(Hash)
+        ret[:provisioning]
       end
+
       def provisioning=(x)
-        raise "Not Hash" unless x.kind_of? Hash
-        raise "Not Hash" if x.has_key? :ip_whitelisting and not x[:ip_whitelisting].kind_of? Hash
-        x.delete_if {|k,v| not [:enabled, :auth_type, :generate_identity, :presenter_identity, :ip_whitelisting].include? k}
-        x[:ip_whitelisting].delete_if {|k,v| not [:enabled, :allowed].include? k}
-        patch('', {:provisioning=>x})
+        raise 'Not Hash' unless x.is_a?(Hash)
+        raise 'Not Hash' if x.key?(:ip_whitelisting) && !x[:ip_whitelisting].is_a?(Hash)
+        x.delete_if do |k, _v|
+          !%i[enabled auth_type generate_identity presenter_identity ip_whitelisting].include?(k)
+        end
+        x[:ip_whitelisting].delete_if { |k, _v| !%i[enabled allowed].include?(k) }
+        patch('', provisioning: x)
       end
     end
 
     ##############################################################################
     ## Working with the resources on a set of Devices. (Gateway)
-    class Resources < Base
+    class Resources < GweBase
       include SyncUpDown
       def initialize
         super
@@ -102,14 +116,14 @@ module MrMurano
         @project_section = :resources
       end
 
-      def list()
+      def list
         ret = get('')
-        return [] unless ret.has_key? :resources
+        return [] unless ret.key? :resources
 
         # convert hash to array.
         res = []
         ret[:resources].each_pair do |key, value|
-          res << value.merge({:alias=>key.to_s})
+          res << value.merge(alias: key.to_s)
         end
         res
       end
@@ -119,49 +133,51 @@ module MrMurano
         res = {}
         data.each do |value|
           key = value[:alias]
-          res[key] = value.reject{|k,v| k==:alias}
+          res[key] = value.reject { |k, _v| k == :alias }
         end
 
-        patch('', {:resources=>res})
+        patch('', resources: res)
       end
 
       ###################################################
-      def syncup_before()
-        @there = list()
+      def syncup_before
+        @there = list
       end
 
       def remove(itemkey)
-        @there.delete_if {|item| item[@itemkey] == itemkey}
+        @there.delete_if { |item| item[@itemkey] == itemkey }
       end
 
-      def upload(local, remote, modify)
-        @there.delete_if {|item| item[@itemkey] == remote[@itemkey]}
-        @there << remote.reject{|k,v| k==:synckey}
+      def upload(_local, remote, _modify)
+        @there.delete_if { |item| item[@itemkey] == remote[@itemkey] }
+        @there << remote.reject { |k, _v| k == :synckey }
       end
 
-      def syncup_after()
-        unless @there.empty?
+      def syncup_after
+        if !@there.empty?
           upload_all(@there)
         else
-          error "Nothing to sync"
+          error 'Nothing to sync'
         end
         @there = nil
       end
 
       ###################################################
-      def syncdown_before(local)
-        @here = locallist()
+      def syncdown_before(_local)
+        # FIXME/2017-07-02: Could there be duplicate gateway items?
+        #   [lb] just added code to SyncUpDown.locallist and am curious.
+        @here = locallist
       end
 
-      def download(local, item)
+      def download(_local, item)
         # needs to append/merge with file
         @here.delete_if do |i|
           i[@itemkey] == item[@itemkey]
         end
-        @here << item.reject{|k,v| k==:synckey}
+        @here << item.reject { |k, _v| k == :synckey }
       end
 
-      def removelocal(local, item)
+      def removelocal(_local, item)
         # needs to append/merge with file
         key = @itemkey.to_sym
         @here.delete_if do |it|
@@ -170,12 +186,12 @@ module MrMurano
       end
 
       def syncdown_after(local)
-        local.open('wb') do|io|
+        local.open('wb') do |io|
           # convert array to hash
           res = {}
           @here.each do |value|
             key = value[:alias]
-            res[key] = Hash.transform_keys_to_strings(value.reject{|k,v| k==:alias})
+            res[key] = Hash.transform_keys_to_strings(value.reject { |k, _v| k == :alias })
           end
           io.write res.to_yaml
         end
@@ -183,47 +199,49 @@ module MrMurano
       end
 
       ###################################################
-      def tolocalpath(into, item)
+      def tolocalpath(into, _item)
         into
       end
 
       def localitems(from)
-        from = Pathname.new(from) unless from.kind_of? Pathname
-        if not from.exist? then
-          warning "Skipping missing #{from.to_s}"
+        from = Pathname.new(from) unless from.is_a?(Pathname)
+        unless from.exist?
+          warning "Skipping missing #{from}"
           return []
         end
-        unless from.file? then
-          warning "Cannot read from #{from.to_s}"
+        unless from.file?
+          warning "Cannot read from #{from}"
           return []
         end
 
         here = {}
-        from.open {|io| here = YAML.load(io) }
+        # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
+        from.open { |io| here = YAML.load(io) }
         here = {} if here == false
 
         # Validate file against schema.
-        schemaPath = Pathname.new(File.dirname(__FILE__)) + 'schema/resource-v1.0.0.yaml'
-        schema = YAML.load_file(schemaPath.to_s)
+        schema_path = Pathname.new(File.dirname(__FILE__)) + 'schema/resource-v1.0.0.yaml'
+        # MAYBE/2017-07-03: Do we care if user duplicates keys in the yaml? See dup_count.
+        schema = YAML.load_file(schema_path.to_s)
         JSON::Validator.validate!(schema, here)
 
         res = []
         here.each_pair do |key, value|
-          res << Hash.transform_keys_to_symbols(value).merge({:alias=>key.to_s})
+          res << Hash.transform_keys_to_symbols(value).merge(alias: key.to_s)
         end
         res
       end
 
-      def docmp(itemA, itemB)
-        itemA != itemB
+      def docmp(item_a, item_b)
+        item_a != item_b
       end
     end
-    SyncRoot.add('resources', Resources, 'T', %{Resources.})
+    SyncRoot.add('resources', Resources, 'T', %(Resources))
 
     ##############################################################################
     ##
     # Talking to the devices on a Gateway
-    class Device < Base
+    class Device < GweBase
       def initialize
         super
         @uriparts << :identity
@@ -264,14 +282,15 @@ module MrMurano
       # @option opts [String] :privatekey Shared secret for hash, password, token types
       # @option opts [String,Integer] :expire For Cert, when it must be reprovisioned, otherwise when the activation window closes.
       def enable(id, opts=nil)
-        unless opts.nil? then
-          opts.reject!{|k,v| not [:type, :publickey, :privatekey, :expire].include?(k)}
-          if opts.has_key?(:publickey) and not opts[:publickey].kind_of?(String) then
+        if !opts.nil?
+          #opts.reject! { |k, _v| !%i[type publickey privatekey expire].include?(k) }
+          opts.select! { |k, _v| %i[type publickey privatekey expire].include?(k) }
+          if opts.key?(:publickey) && !opts[:publickey].is_a?(String)
             io = opts[:publickey]
             opts[:publickey] = io.read
           end
         else
-          opts={}
+          opts = {}
         end
         put("/#{CGI.escape(id.to_s)}", opts)
       end
@@ -282,15 +301,15 @@ module MrMurano
       # @param local [String, Pathname] CSV file of identifiers
       # @param expire [Number] Expire time for all identities (ignored)
       # @return [void]
-      def enable_batch(local, expire=nil)
-        # Need to modify @uriparts for just this endPoint call.
+      def enable_batch(local, _expire=nil)
+        # Need to modify @uriparts for just this endpoint call.
         uriparts = @uriparts
         @uriparts[-1] = :identities
-        uri = endPoint()
+        uri = endpoint
         @uriparts = uriparts
 
-        file = HTTP::FormData::File.new(local.to_s, {:content_type=>'text/csv'})
-        form = HTTP::FormData.create(:identities=>file)
+        file = HTTP::FormData::File.new(local.to_s, content_type: 'text/csv')
+        form = HTTP::FormData.create(identities: file)
         req = Net::HTTP::Post.new(uri)
         set_def_headers(req)
         req.content_type = form.content_type
@@ -312,9 +331,10 @@ module MrMurano
       #
       # @param identifier [String] Who to activate.
       def activate(identifier)
-        fqdn = Base.new.info()[:fqdn]
+        info = GweBase.new.info
+        fqdn = info[:fqdn]
         debug "Found FQDN: #{fqdn}"
-        fqdn = "#{@pid}.m2.exosite.io" if fqdn.nil?
+        fqdn = "#{@sid}.m2.exosite.io" if fqdn.nil?
 
         uri = URI("https://#{fqdn}/provision/activate")
         http = Net::HTTP.new(uri.host, uri.port)
@@ -322,9 +342,9 @@ module MrMurano
         http.start
         request = Net::HTTP::Post.new(uri)
         request.form_data = {
-          :vendor => @pid,
-          :model => @pid,
-          :sn => identifier
+          vendor: @sid,
+          model: @sid,
+          sn: identifier,
         }
         request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
         request['Authorization'] = nil
@@ -352,10 +372,7 @@ module MrMurano
       def read(identifier)
         get("/#{identifier}/state")
       end
-
     end
   end
 end
-
-#  vim: set ai et sw=2 ts=2 :
 

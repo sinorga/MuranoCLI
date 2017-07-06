@@ -2,19 +2,25 @@
 command :password do |c|
   c.syntax = %{murano password}
   c.summary = %{About password commands}
-  c.description = %{Sub-commands for working with usernames and passwords}
+  c.description = %{
+Commands for working with usernames and passwords.
+  }.strip
+  c.project_not_required = true
   c.action do |args, options|
     ::Commander::UI.enable_paging
     say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end
-
 alias_command 'password current', :config, 'user.name'
 
 command 'password list' do |c|
   c.syntax = %{murano password list}
   c.summary = %{List the usernames with saved passwords}
-  c.description = %{List the usernames and hosts that have been saved}
+  c.description = %{
+List the usernames and hosts that have been saved.
+  }.strip
+  c.project_not_required = true
+
   c.action do |args, options|
     psd = MrMurano::Passwords.new
     psd.load
@@ -31,13 +37,17 @@ command 'password list' do |c|
     end
   end
 end
+alias_command 'passwords list', 'password list'
 
 command 'password set' do |c|
   c.syntax = %{murano password set <username> [<host>]}
   c.summary = %{Set password for username}
-
+  c.description = %{
+Set password for username.
+  }.strip
   c.option '--password PASSWORD', String, %{The password to use}
   c.option '--from_env', %{Use password in MURANO_PASSWORD}
+  c.project_not_required = true
 
   c.action do |args, options|
     psd = MrMurano::Passwords.new
@@ -62,13 +72,16 @@ command 'password set' do |c|
 
     psd.set(host, username, pws)
     psd.save
-
   end
 end
 
 command 'password delete' do |c|
   c.syntax = %{murano password delete <username> [<host>]}
   c.summary = %{Delete password for username}
+  c.description = %{
+Delete password for username.
+  }.strip
+  c.project_not_required = true
 
   c.action do |args, options|
     psd = MrMurano::Passwords.new
@@ -89,3 +102,4 @@ command 'password delete' do |c|
 end
 
 #  vim: set ai et sw=2 ts=2 :
+

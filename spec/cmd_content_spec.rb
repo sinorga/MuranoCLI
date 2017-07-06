@@ -23,13 +23,15 @@ RSpec.describe 'murano content', :cmd, :needs_password do
 
   it "life cycle" do
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'list'))
-      expect(out.lines).to match([
-        a_string_matching(/^(\+-+){2}\+$/),
-        a_string_matching(/^\| Name\s+\| Size\s+\|$/),
-        a_string_matching(/^(\+-+){2}\+$/),
-        a_string_matching(/^(\+-+){2}\+$/),
-      ])
-      expect(err).to eq('')
+      #expect(out.lines).to match([
+      #  a_string_matching(/^(\+-+){2}\+$/),
+      #  a_string_matching(/^\| Name\s+\| Size\s+\|$/),
+      #  a_string_matching(/^(\+-+){2}\+$/),
+      #  a_string_matching(/^(\+-+){2}\+$/),
+      #])
+      #expect(err).to eq('')
+      expect(out.lines).to match([])
+      expect(err).to eq("\e[33mDid not find any content\e[0m\n")
       expect(status.exitstatus).to eq(0)
 
       FileUtils.copy(File.join(@testdir, 'spec/fixtures/dumped_config'), 'myFile')
@@ -78,13 +80,15 @@ RSpec.describe 'murano content', :cmd, :needs_password do
       expect(status.exitstatus).to eq(0)
 
       out, err, status = Open3.capture3(capcmd('murano', 'content', 'list'))
-      expect(err).to eq('')
-      expect(out.lines).to match([
-        a_string_matching(/^(\+-+){2}\+$/),
-        a_string_matching(/^\| Name\s+\| Size\s+\|$/),
-        a_string_matching(/^(\+-+){2}\+$/),
-        a_string_matching(/^(\+-+){2}\+$/),
-      ])
+      #expect(out.lines).to match([
+      #  a_string_matching(/^(\+-+){2}\+$/),
+      #  a_string_matching(/^\| Name\s+\| Size\s+\|$/),
+      #  a_string_matching(/^(\+-+){2}\+$/),
+      #  a_string_matching(/^(\+-+){2}\+$/),
+      #])
+      #expect(err).to eq('')
+      expect(out.lines).to match([])
+      expect(err).to eq("\e[33mDid not find any content\e[0m\n")
       expect(status.exitstatus).to eq(0)
   end
 

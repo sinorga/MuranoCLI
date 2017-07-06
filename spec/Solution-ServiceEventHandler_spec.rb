@@ -13,12 +13,18 @@ RSpec.describe MrMurano::EventHandler do
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['application.id'] = 'XYZ'
 
-    @srv = MrMurano::EventHandler.new
+    # 2017-06-23: EventHandler is an intermediate class now, and we
+    # cannot use it because its @project_section is not defined.
+    #@srv = MrMurano::EventHandler.new
+    # It shouldn't matter which final event handler class we use:
+    # the only different is if it uses application.id or product.id.
+    @srv = MrMurano::EventHandlerSolnApp.new
+    #@srv = MrMurano::EventHandlerSolnPrd.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/")
   end
 
@@ -291,7 +297,7 @@ end
     end
   end
 
-  context "toRemoteItem" do
+  context "to_remote_item" do
     before(:example) do
       allow(@srv).to receive(:warning)
     end
@@ -304,7 +310,7 @@ end
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         expect(ret).to eq({:service=>'device',
                            :event=>'datapoint',
                            :type=>nil,
@@ -324,7 +330,7 @@ end
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         expect(ret).to eq(nil)
       end
     end
@@ -338,7 +344,7 @@ end
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         expect(ret).to eq(
           MrMurano::EventHandler::EventHandlerItem.new(
             :service=>'device',

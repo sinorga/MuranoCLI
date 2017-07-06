@@ -7,10 +7,12 @@ require '_workspace'
 class Tst
   include MrMurano::Verbose
   include MrMurano::Http
+
   def initialize
     @token = nil
   end
 end
+
 RSpec.describe MrMurano::Http do
   include_context "WORKSPACE"
 
@@ -23,7 +25,8 @@ RSpec.describe MrMurano::Http do
   context "gets a token" do
     before(:example) do
       @acc = instance_double("MrMurano::Account")
-      allow(MrMurano::Account).to receive(:new).and_return(@acc)
+      #allow(MrMurano::Account).to receive(:new).and_return(@acc)
+      allow(MrMurano::Account).to receive(:instance).and_return(@acc)
     end
 
     it "already has one" do
@@ -33,7 +36,7 @@ RSpec.describe MrMurano::Http do
     end
 
     it "gets one" do
-      expect(@acc).to receive(:adc_compat_check)
+      #expect(@acc).to receive(:adc_compat_check)
       expect(@acc).to receive(:token).and_return("ABCDEFG")
       ret = @tst.token
       expect(ret).to eq("ABCDEFG")

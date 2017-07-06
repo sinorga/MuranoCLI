@@ -7,29 +7,32 @@ require 'http/form_data'
 require 'MrMurano/Config'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
+require 'MrMurano/SolutionId'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
   ## The details of talking to the Content service.
   module Content
     class Base
-      def initialize
-        @pid = $cfg['product.id']
-        raise MrMurano::ConfigError.new("No product id!") if @pid.nil?
-        @uriparts = [:service, @pid, :content, :item]
-        @itemkey = :id
-        @locationbase = $cfg['location.base']
-        @location = nil
-      end
-
       include Http
       include Verbose
+      include SolutionId
+
+      def initialize
+        @solntype = 'product.id'
+        @uriparts_sidex = 1
+        init_sid!
+        @uriparts = [:service, @sid, :content, :item]
+        @itemkey = :id
+        #@locationbase = $cfg['location.base']
+        @location = nil
+      end
 
       ## Generate an endpoint in Murano
       # Uses the uriparts and path
       # @param path String: any additional parts for the URI
       # @return URI: The full URI for this enpoint.
-      def endPoint(path='')
+      def endpoint(path='')
         parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
         s = parts.map{|v| v.to_s}.join('/')
         URI(s + path.to_s)

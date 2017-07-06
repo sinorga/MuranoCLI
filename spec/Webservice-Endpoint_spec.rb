@@ -20,7 +20,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("#{@baseURI}/")
   end
 
@@ -434,7 +434,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
     end
   end
 
-  context "toRemoteItem" do
+  context "to_remote_item" do
     it "reads one" do
       Tempfile.open("foo") do |tio|
         tio << %{--#ENDPOINT GET /one/two
@@ -443,7 +443,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         e = {:method=>"GET",
              :path=>"/one/two",
              :content_type=>"application/json",
@@ -468,7 +468,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
 
         expect(ret).to eq([
           {
@@ -510,7 +510,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         expect(ret).to eq([])
       end
     end
@@ -525,7 +525,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
         }.gsub(/^\s+/,'')
         tio.close
 
-        ret = @srv.toRemoteItem(nil, tio.path)
+        ret = @srv.to_remote_item(nil, tio.path)
         e = {:method=>"GET",
              :path=>"/one/two",
              :content_type=>"application/json",

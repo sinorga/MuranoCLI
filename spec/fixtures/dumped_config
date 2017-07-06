@@ -9,7 +9,7 @@ outformat = best
 host = bizapi.hosted.exosite.io
 
 [location]
-base = <%= File.realpath(@projectDir) %>
+base = <%= File.realpath(@project_dir) %>
 files = files
 endpoints = routes
 modules = modules
