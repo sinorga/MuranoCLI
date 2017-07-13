@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -407,7 +407,25 @@ module MrMurano
       # Give the local file the same timestamp as the remote, because diff.
       # FIXME/MUR-XXXX: Ideally, server should has a hash or something we can compare.
       if item[:updated_at]
-        FileUtils.touch [local.to_path,], :mtime => DateTime.parse(item[:updated_at]).to_time
+        mod_time = DateTime.parse(item[:updated_at]).to_time
+        begin
+          FileUtils.touch [local.to_path,], :mtime => mod_time
+        rescue Errno::EACCESS => err
+          # This happens on Windows...
+          require 'rbconfig'
+          # Check the platform, e.g., "linux-gnu", or other.
+          is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+          $stderr.puts(
+            "Unexpected: touch failed on non-Windows machine / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}"
+          ) unless is_windows
+
+          # FIXME/TEST/2017-07-13: Does ctime work instead? Or File.utime?
+          File.utime(mod_time, mod_time, local.to_path)
+
+          # FIXME/2017-07-13: This probably fails...
+          FileUtils.touch [local.to_path,], :ctime => mod_time
+        end
+
       else
         # FIXME/EXPLAIN/2017-06-23: Why is :updated_at not set?
         #     And why have I only triggered this from ./spec/cmd_syncdown_spec.rb ?
