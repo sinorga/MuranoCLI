@@ -1,8 +1,8 @@
-require 'MrMurano/Config'
 require 'pathname'
 require 'shellwords'
 require 'timeout'
 require 'tmpdir'
+require 'MrMurano/Config'
 
 RSpec.shared_context "CI_CMD" do
   def capcmd(*args)
@@ -52,7 +52,11 @@ RSpec.shared_context "CI_CMD" do
   def mk_symlink
     # Make it easy to debug tests, e.g., add breakpoint before capcmd('murano', ...)
     # run test, then open another terminal window and `cd /tmp/murcli-test`.
-    @dev_symlink = File.join(Dir.tmpdir(), "murcli-test")
+    # NOTE: When run on Jenkins, Dir.tmpdir() returns the path to the project directory!
+    #   Since this is for DEVs only, we can hack around this.
+    tmpdir = Dir.tmpdir()
+    return unless tmpdir == '/tmp'
+    @dev_symlink = File.join(tmpdir, "murcli-test")
     FileUtils.rm(@dev_symlink, :force => true)
     begin
       FileUtils.ln_s(Dir.pwd, @dev_symlink)
