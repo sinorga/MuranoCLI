@@ -231,6 +231,7 @@ command :init do |c|
         unless files.include?(MrMurano::Config::CFG_DIR_NAME)
           acc.warning 'The project directory contains unknown files.'
 # FIXME/2017-07-13: Why is Jenkins coming through here, but not my own, local tests?
+puts "Dir.tmpdir(): #{Dir.tmpdir()}"
 puts "Found files: #{files}"
 puts "Dir.pwd: #{Dir.pwd}"
           confirmed = acc.ask_yes_no('Really init project? [Y/n] ', true)
