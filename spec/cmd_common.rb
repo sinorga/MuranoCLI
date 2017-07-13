@@ -54,7 +54,17 @@ RSpec.shared_context "CI_CMD" do
     # run test, then open another terminal window and `cd /tmp/murcli-test`.
     @dev_symlink = File.join(Dir.tmpdir(), "murcli-test")
     FileUtils.rm(@dev_symlink, :force => true)
-    FileUtils.ln_s(Dir.pwd, @dev_symlink)
+    begin
+      FileUtils.ln_s(Dir.pwd, @dev_symlink)
+    rescue NotImplementedError => err
+      # This happens on Windows...
+      require 'rbconfig'
+      # Check the platform, e.g., "linux-gnu", or other.
+      is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+      $stderr.puts(
+        "Unexpected: ln_s failed on non-Windows machine / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}"
+      ) unless is_windows
+    end
   end
 
   def rm_symlink
