@@ -15,8 +15,13 @@ module MrMurano
   class Progress
     include Singleton
 
-    #def initialize
-    #end
+    def initialize
+      @whirly_msg = ''
+      @whirly_time = nil
+      @whirly_users = 0
+      @whirly_cols = 0
+      @whirly_paused = false
+    end
 
     EXO_QUADRANTS = [
       '▚',
@@ -94,7 +99,7 @@ module MrMurano
 
     def whirly_pause
       return if defined?(@whirly_paused) && @whirly_paused
-      return if @whirly_users.zero?
+      return if !defined?(@whirly_users) || @whirly_users.zero?
       @whirly_paused = true
       whirly_clear
     end
