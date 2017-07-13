@@ -108,11 +108,6 @@ module MrMurano
         showHttpError(request, response)
         error 'Check to see if username and password are correct.'
         @token = nil
-        # 2017-07-13: This doesn't seem like something we can ignore.
-# FIXME/2017-07-13: Trying to determine why Travis tests are failing...
-#        exit 99
-# FIXME/2017-07-13: Travis doesn't like the exit 99...
-        exit 1
       end
     end
 
