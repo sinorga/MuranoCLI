@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -190,7 +190,7 @@ module MrMurano
         :defaults,
       )
       set('eventhandler.ignoring', '*_test.lua *_spec.lua .*', :defaults)
-      set('eventhandler.skiplist', 'websocket webservice device.service_call', :defaults)
+      set('eventhandler.skiplist', 'websocket webservice device.service_call interface', :defaults)
 
       set('modules.searchFor', '*.lua */*.lua', :defaults)
       set('modules.ignoring', '*_test.lua *_spec.lua .*', :defaults)
