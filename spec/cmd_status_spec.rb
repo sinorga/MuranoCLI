@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -85,27 +85,27 @@ RSpec.describe 'murano status', :cmd, :needs_password do
 
   def match_remote_boilerplate_v1_0_0_service(slice)
     expect(slice).to contain_exactly(
-      " - E  device2_event\n",
-      " - E  interface_addGatewayResource\n",
-      " - E  interface_addIdentity\n",
-      " - E  interface_clearContent\n",
-      " - E  interface_deleteContent\n",
-      " - E  interface_downloadContent\n",
-      " - E  interface_getGatewayResource\n",
-      " - E  interface_getGatewaySettings\n",
-      " - E  interface_getIdentity\n",
-      " - E  interface_getIdentityState\n",
-      " - E  interface_infoContent\n",
-      " - E  interface_listContent\n",
-      " - E  interface_listIdentities\n",
-      " - E  interface_makeIdentity\n",
-      " - E  interface_removeGatewayResource\n",
-      " - E  interface_removeIdentity\n",
-      " - E  interface_setIdentityState\n",
-      " - E  interface_updateGatewayResource\n",
-      " - E  interface_updateGatewaySettings\n",
-      " - E  interface_updateIdentity\n",
-      " - E  interface_uploadContent\n",
+      #" - E  device2_event\n",
+      #" - E  interface_addGatewayResource\n",
+      #" - E  interface_addIdentity\n",
+      #" - E  interface_clearContent\n",
+      #" - E  interface_deleteContent\n",
+      #" - E  interface_downloadContent\n",
+      #" - E  interface_getGatewayResource\n",
+      #" - E  interface_getGatewaySettings\n",
+      #" - E  interface_getIdentity\n",
+      #" - E  interface_getIdentityState\n",
+      #" - E  interface_infoContent\n",
+      #" - E  interface_listContent\n",
+      #" - E  interface_listIdentities\n",
+      #" - E  interface_makeIdentity\n",
+      #" - E  interface_removeGatewayResource\n",
+      #" - E  interface_removeIdentity\n",
+      #" - E  interface_setIdentityState\n",
+      #" - E  interface_updateGatewayResource\n",
+      #" - E  interface_updateGatewaySettings\n",
+      #" - E  interface_updateIdentity\n",
+      #" - E  interface_uploadContent\n",
       " - E  timer_timer\n",
       " - E  tsdb_exportJob\n",
       " - E  user_account\n",
@@ -238,10 +238,10 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(olines[0]).to eq("Only on local machine:\n")
       match_syncable_contents_except_singleRoute(olines[1..7])
       expect(olines[8]).to eq("Only on remote server:\n")
-      match_remote_boilerplate_v1_0_0_service(olines[9..32])
-      expect(olines[33]).to eq("Nothing that differs\n")
-      #expect(olines[32]).to eq("Items that differ:\n")
-      #expect(olines[33..33]).to contain_exactly(
+      match_remote_boilerplate_v1_0_0_service(olines[9..11])
+      expect(olines[12]).to eq("Nothing that differs\n")
+      #expect(olines[11]).to eq("Items that differ:\n")
+      #expect(olines[12..12]).to contain_exactly(
       #  a_string_matching(/ M E  .*services\/devdata\.lua/),
       #)
       expect(status.exitstatus).to eq(0)
@@ -285,10 +285,10 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(olines[0]).to eq("Only on local machine:\n")
       match_syncable_contents_except_singleRoute(olines[1..7])
       expect(olines[8]).to eq("Only on remote server:\n")
-      match_remote_boilerplate_v1_0_0_service(olines[9..32])
-      expect(olines[33]).to eq("Nothing that differs\n")
-      #expect(olines[33]).to eq("Items that differ:\n")
-      #expect(olines[34..34]).to contain_exactly(
+      match_remote_boilerplate_v1_0_0_service(olines[9..11])
+      expect(olines[12]).to eq("Nothing that differs\n")
+      #expect(olines[11]).to eq("Items that differ:\n")
+      #expect(olines[12..12]).to contain_exactly(
       #  a_string_matching(/ M E  .*services\/devdata\.lua/),
       #)
       expect(status.exitstatus).to eq(0)
