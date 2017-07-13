@@ -72,7 +72,7 @@ RSpec.shared_context "CI_CMD" do
   end
 
   def rm_symlink
-    FileUtils.rm(@dev_symlink, :force => true)
+    FileUtils.rm(@dev_symlink, :force => true) if defined?(@dev_symlink)
   end
 
   before(:example) do
