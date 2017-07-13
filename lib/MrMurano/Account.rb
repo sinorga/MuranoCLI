@@ -109,7 +109,8 @@ module MrMurano
         error 'Check to see if username and password are correct.'
         @token = nil
         # 2017-07-13: This doesn't seem like something we can ignore.
-        exit 99
+# FIXME/2017-07-13: Trying to determine why Travis tests are failing...
+#        exit 99
       end
     end
 
