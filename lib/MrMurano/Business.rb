@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -180,10 +180,28 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
       raise "Unknown type(#{type})" unless type == :all || ALLOWED_TYPES.include?(type)
       # Cache the result since sometimes both products() and applications() are called.
       if invalidate || @user_bizes[type].nil?
-        got = get('business/' + bid + '/solution/')
-        @user_bizes[type] = got
+        #got = get('business/' + bid + '/solution/')
+        got = get('business/' + bid + '/solution/') do |request, http|
+          response = http.request(request)
+          case response
+          when Net::HTTPSuccess
+            workit_response(response)
+          when Net::HTTPForbidden # 403
+            # FIXME/CONFIRM/2017-07-13: Is this really what platform
+            # says when business has no solutions? I do not remember
+            # seeing this before... [lb]
+            nil
+          else
+            showHttpError(request, response)
+          end
+        end
+        @user_bizes[type] = got unless got.nil?
       end
-      solz = @user_bizes[type].dup
+      if @user_bizes[type].nil?
+        solz = []
+      else
+        solz = @user_bizes[type].dup
+      end
       solz.select! { |i| i[:type] == type.to_s } unless type == :all
 
       solz.select! { |sol| sol[:apiId] == match_sid } unless match_sid.to_s.empty?

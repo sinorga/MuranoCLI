@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -47,7 +47,7 @@ List the solutions that are linked.
 
     appl = solution_find_or_create(biz: biz, type: :application)
 
-    MrMurano::Verbose.whirly_msg 'Fetching application services...'
+    MrMurano::Verbose.whirly_msg('Fetching application services...')
     sercfg = MrMurano::ServiceConfig.new(appl.sid)
     #scfgs = sercfg.list('?select=service,id,solution_id,script_key,alias')
     scfgs = sercfg.list

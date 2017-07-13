@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -275,17 +275,17 @@ module MrMurano
       # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] || '').split
-      items = ret[:items].reject do |i|
-        keep = (
-          i.key?(:service) &&
-          i.key?(:event) && (
-            skiplist.include?(i[:service]) ||
-            skiplist.include?("#{i[:service]}.#{i[:event]}")
+      items = ret[:items].reject do |item|
+        toss = (
+          item.key?(:service) &&
+          item.key?(:event) && (
+            skiplist.include?(item[:service]) ||
+            skiplist.include?("#{item[:service]}.#{item[:event]}")
           )
         )
-        keep
+        toss
       end
-      items.map { |i| EventHandlerItem.new(i) }
+      items.map { |item| EventHandlerItem.new(item) }
     end
 
     def fetch(name)
