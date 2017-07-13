@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -37,12 +37,17 @@ module MrMurano
       # display a different message.
       @whirly_users = 0 unless defined?(@whirly_users)
       @whirly_users += 1
+      # The first Whirly message is the one we show.
       return if @whirly_users > 1
-
+      @whirly_msg = msg
       whirly_stop
+      whirly_show
+    end
+
+    def whirly_show
       Whirly.start(
         spinner: EXO_QUADRANTS,
-        status: msg,
+        status: @whirly_msg,
         append_newline: false,
       )
       @whirly_time = Time.now
@@ -57,8 +62,11 @@ module MrMurano
         @whirly_users -= 1
       end
       return unless @whirly_users.zero?
-
       whirly_linger
+      whirly_clear
+    end
+
+    def whirly_clear
       Whirly.stop
       # The progress indicator is always overwritten.
       return unless @whirly_cols
@@ -76,11 +84,25 @@ module MrMurano
     def whirly_msg(msg)
       return if $cfg['tool.no-progress']
       if defined?(@whirly_time)
+        @whirly_msg = msg
         #self.whirly_linger
-        Whirly.configure(status: msg)
+        Whirly.configure(status: @whirly_msg)
       else
         whirly_start msg
       end
+    end
+
+    def whirly_pause
+      return if defined?(@whirly_paused) && @whirly_paused
+      return if @whirly_users.zero?
+      @whirly_paused = true
+      whirly_clear
+    end
+
+    def whirly_unpause
+      return if !defined?(@whirly_paused) || !@whirly_paused
+      @whirly_paused = false
+      whirly_show
     end
   end
 end

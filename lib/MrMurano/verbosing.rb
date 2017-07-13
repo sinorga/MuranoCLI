@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -140,7 +140,9 @@ module MrMurano
       MrMurano::Verbose.pluralize?(word, count)
     end
 
-    # 2017-07-01: Whirly wrappers. Maybe delete someday.
+    # 2017-07-01: Whirly wrappers. Maybe delete someday
+    #   (after replacing all MrMurano::Verbose.whirly_*
+    #   with MrMurano::Progress.whirly_*).
 
     def whirly_start(msg)
       MrMurano::Progress.instance.whirly_start(msg)
@@ -158,6 +160,14 @@ module MrMurano
       MrMurano::Progress.instance.whirly_msg(msg)
     end
 
+    def whirly_pause
+      MrMurano::Progress.instance.whirly_pause
+    end
+
+    def whirly_unpause
+      MrMurano::Progress.instance.whirly_unpause
+    end
+
     def self.whirly_start(msg)
       MrMurano::Progress.instance.whirly_start(msg)
     end
@@ -172,6 +182,14 @@ module MrMurano
 
     def self.whirly_msg(msg)
       MrMurano::Progress.instance.whirly_msg(msg)
+    end
+
+    def self.whirly_pause
+      MrMurano::Progress.instance.whirly_pause
+    end
+
+    def self.whirly_unpause
+      MrMurano::Progress.instance.whirly_unpause
     end
   end
 end
