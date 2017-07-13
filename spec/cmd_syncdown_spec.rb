@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -103,7 +103,8 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
         "routes/api-onfire.get.lua",
         # 2017-07-03: services/ would not exist if we did not include fixtures/syncable_conflict/.
         "services",
-        "services/device2_event.lua",
+        # 2017-07-13: No longer syncing device2_event; is internal to platform.
+        #"services/device2_event.lua",
         "services/timer_timer.lua",
       )
 
