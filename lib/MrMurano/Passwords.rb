@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -67,7 +67,7 @@ module MrMurano
     end
 
     def get(host, user)
-      return ENV['MURANO_PASSWORD'] unless ENV['MURANO_PASSWORD'].nil?
+      return ENV['MURANO_PASSWORD'] unless ENV['MURANO_PASSWORD'].to_s.empty?
       unless ENV['MR_PASSWORD'].nil?
         warning %(
           Using deprecated environment variable, "MR_PASSWORD". Please rename to "MURANO_PASSWORD"
