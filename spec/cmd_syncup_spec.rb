@@ -65,7 +65,7 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       # just complain about it once?
       expect(elines).to satisfy { |v| elines.length == 2 }
       elines.each do |line|
-        expect(line).to start_with("\e[33mSkipping missing location ‘")
+        expect(line.encode!('UTF-8', 'UTF-8')).to start_with("\e[33mSkipping missing location ‘")
       end
     end
 

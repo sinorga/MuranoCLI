@@ -144,16 +144,18 @@ RSpec.describe 'murano status', :cmd, :needs_password do
 
       # NOTE: On Windows, touch doesn't work, so items differ.
       # Check the platform, e.g., "linux-gnu", or other.
-      is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-      if is_windows
-        expect(olines[10]).to eq("Items that differ:\n")
-        expect(olines[11..12]).to contain_exactly(
-          a_string_matching(/ M E  .*services\/timer_timer\.lua/),
-          a_string_matching(/ M E  .*services\/tsdb_exportJob\.lua/),
-        )
-      else
+      # 2017-07-14 08:51: Is there a race condition here? [lb] saw
+      # differences earlier, but then not after adding this...
+      #is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+      #if is_windows
+      #  expect(olines[10]).to eq("Items that differ:\n")
+      #  expect(olines[11..12]).to contain_exactly(
+      #    a_string_matching(/ M E  .*services\/timer_timer\.lua/),
+      #    a_string_matching(/ M E  .*services\/tsdb_exportJob\.lua/),
+      #  )
+      #else
         expect(olines[10]).to eq("Nothing that differs\n")
-      end
+      #end
 
       expect(status.exitstatus).to eq(0)
     end
