@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -94,6 +94,12 @@ RSpec.describe MrMurano::Account, "token" do
       expect(@acc).to receive(:error).twice.and_return(nil)
       ret = @acc.token
       expect(ret).to be_nil
+      # MAYBE/2017-07-13: Change Account.token method to put error and exit,
+      # just like Http.token method. ([lb] concerned that MurCLI might keep
+      # running without a valid token and then fail unexpectedly later.)
+      #expect {
+      #  @acc.token
+      #}.to raise_error(SystemExit).and output("\e[31mNot logged in!\e[0m\n").to_stderr
     end
 
     it "uses existing token" do

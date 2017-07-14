@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -20,7 +20,11 @@ module MrMurano
       return @token if defined?(@token) && !@token.to_s.empty?
       acc = MrMurano::Account.instance
       @token = acc.token
-      raise 'Not logged in!' if @token.nil?
+      #raise 'Not logged in!' if @token.nil?
+      if @token.nil?
+        error 'Not logged in!'
+        exit 1
+      end
       # MAYBE: Check that ADC is enabled on the business. If not, tell
       #   user to run Murano 2.x. See adc_compat_check for comments.
       #acc.adc_compat_check

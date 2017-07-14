@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -306,8 +306,11 @@ List solution in the current business.
       headers = %i[apiId domain]
       solz = solz.map { |row| [row.apiId, row.domain] }
     else
-      headers = (solz.first || {}).keys
-      solz = solz.map { |row| headers.map { |hdr| row[hdr] } }
+      headers = (solz.first.meta || {}).keys
+      if headers.include?(:apiId) and headers.include?(:sid)
+        headers.delete(:sid)
+      end
+      solz = solz.map { |row| headers.map { |hdr| row.meta[hdr] } }
     end
 
     if !solz.empty? || options.idonly

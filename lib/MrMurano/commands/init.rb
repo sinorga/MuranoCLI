@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -226,7 +226,7 @@ command :init do |c|
       files = Dir.entries(target_dir.to_path)
       files -= %w[. ..]
       unless files.empty?
-        # Check for a .murano/ directory. If might be empty, which
+        # Check for a .murano/ directory. It might be empty, which
         # is why $cfg.project_exists might have been false.
         unless files.include?(MrMurano::Config::CFG_DIR_NAME)
           acc.warning 'The project directory contains unknown files.'

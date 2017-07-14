@@ -42,12 +42,15 @@ RSpec.describe MrMurano::Http do
       expect(ret).to eq("ABCDEFG")
     end
 
-    it "raises when no logged in" do
+    it "raises when not logged in" do
       expect(@acc).to receive(:token).and_return(nil)
+      # 2017-07-13: The token command used to raise an error, but [lb]
+      # doesn't like seeing the "use --trace" message that Ruby spits
+      # out. So write to stderr and exit instead. Here, use check that
+      # the function exits by expecting it to raise SystemExit.
       expect {
         @tst.token
-      }.to raise_error "Not logged in!"
-
+      }.to raise_error(SystemExit).and output("\e[31mNot logged in!\e[0m\n").to_stderr
     end
   end
 

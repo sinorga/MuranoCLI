@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -49,20 +49,24 @@ module MrMurano
     def login_info
       warned_once = false
       if user.empty?
+        MrMurano::Verbose.whirly_pause
         error('No Murano user account found. Please login')
         warned_once = true
         username = ask('User name: ')
         $cfg.set('user.name', username, :user)
+        MrMurano::Verbose.whirly_unpause
       end
       pwd_path = $cfg.file_at('passwords', :user)
       pwd_file = MrMurano::Passwords.new(pwd_path)
       pwd_file.load
       user_pass = pwd_file.get(host, user)
       if user_pass.nil?
+        MrMurano::Verbose.whirly_pause
         error("No Murano password found for #{user}") unless warned_once
         user_pass = ask('Password: ') { |q| q.echo = '*' }
         pwd_file.set(host, user, user_pass)
         pwd_file.save
+        MrMurano::Verbose.whirly_unpause
       end
       creds = {
         email: user,

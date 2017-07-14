@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -407,7 +407,31 @@ module MrMurano
       # Give the local file the same timestamp as the remote, because diff.
       # FIXME/MUR-XXXX: Ideally, server should has a hash or something we can compare.
       if item[:updated_at]
-        FileUtils.touch [local.to_path,], :mtime => DateTime.parse(item[:updated_at]).to_time
+        mod_time = DateTime.parse(item[:updated_at]).to_time
+        begin
+          FileUtils.touch [local.to_path,], :mtime => mod_time
+        rescue Errno::EACCES => err
+          # This happens on Windows...
+          require 'rbconfig'
+          # Check the platform, e.g., "linux-gnu", or other.
+          is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+          $stderr.puts(
+            "Unexpected: touch failed on non-Windows machine / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}"
+          ) unless is_windows
+
+          # 2017-07-13: Nor does ctime work.
+          #   Errno::EACCES:
+          #   Permission denied @ utime_failed -
+          #     C:/Users/ADMINI~1/AppData/Local/Temp/2/one.lua_remote_20170714-1856-by2nzk.lua
+          #File.utime(mod_time, mod_time, local.to_path)
+
+          # 2017-07-14: So this probably fails, too...
+          #FileUtils.touch [local.to_path,], :ctime => mod_time
+
+          # MAYBE/2017-07-14: How to make diff work on Windows?
+          #   Would need to store timestamp in metafile?
+        end
+
       else
         # FIXME/EXPLAIN/2017-06-23: Why is :updated_at not set?
         #     And why have I only triggered this from ./spec/cmd_syncdown_spec.rb ?
