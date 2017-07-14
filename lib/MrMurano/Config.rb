@@ -39,7 +39,7 @@ module MrMurano
       def write
         return if kind == :internal
         return if kind == :defaults
-        if !$cfg.nil? && $cfg['tool.dry']
+        if defined?($cfg) && !$cfg.nil? && $cfg['tool.dry']
           # $cfg.nil? when run from spec tests that don't load it with:
           #   include_context "CI_CMD"
           MrMurano::Config.warning('--dry: Not writing config file')

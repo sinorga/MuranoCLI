@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.14 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -195,12 +195,21 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(olines[0]).to eq("Only on local machine:\n")
       match_syncable_contents(olines[1..8])
       expect(olines[9]).to eq("Nothing new remotely\n")
-      expect(olines[10]).to eq("Nothing that differs\n")
-      #expect(olines[10]).to eq("Items that differ:\n")
-      #expect(olines[11..12]).to include(
-      #  a_string_matching(/ M E  .*services\/timers\.lua/),
-      #  a_string_matching(/ M E  .*services\/devdata\.lua/),
-      #)
+
+      # NOTE: On Windows, touch doesn't work, so items differ.
+      require 'rbconfig'
+      # Check the platform, e.g., "linux-gnu", or other.
+      is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+      if is_windows
+        expect(olines[10]).to eq("Items that differ:\n")
+        expect(olines[11..12]).to include(
+          a_string_matching(/ M E  .*services\/timers\.lua/),
+          a_string_matching(/ M E  .*services\/devdata\.lua/),
+        )
+      else
+        expect(olines[10]).to eq("Nothing that differs\n")
+      end
+
       expect(status.exitstatus).to eq(0)
     end
   end
