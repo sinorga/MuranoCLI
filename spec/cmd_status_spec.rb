@@ -6,9 +6,11 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'fileutils'
+require 'json'
 require 'open3'
 require 'pathname'
-require 'json'
+require 'rbconfig'
+
 require 'cmd_common'
 
 RSpec.describe 'murano status', :cmd, :needs_password do
@@ -139,12 +141,20 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       #   will problem vary depending on what modules are loaded, and are likely
       #   to change over time...
       #match_remote_boilerplate_v1_0_0_service(olines[10..31])
-      expect(olines[10]).to eq("Nothing that differs\n")
-      #expect(olines[32]).to eq("Items that differ:\n")
-      #expect(olines[33..34]).to contain_exactly(
-      #  a_string_matching(/ M E  .*services\/timers\.lua/),
-      #  a_string_matching(/ M E  .*services\/devdata\.lua/),
-      #)
+
+      # NOTE: On Windows, touch doesn't work, so items differ.
+      # Check the platform, e.g., "linux-gnu", or other.
+      is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+      if is_windows
+        expect(olines[10]).to eq("Items that differ:\n")
+        expect(olines[11..12]).to contain_exactly(
+          a_string_matching(/ M E  .*services\/timer_timer\.lua/),
+          a_string_matching(/ M E  .*services\/tsdb_exportJob\.lua/),
+        )
+      else
+        expect(olines[10]).to eq("Nothing that differs\n")
+      end
+
       expect(status.exitstatus).to eq(0)
     end
 
@@ -197,14 +207,13 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(olines[9]).to eq("Nothing new remotely\n")
 
       # NOTE: On Windows, touch doesn't work, so items differ.
-      require 'rbconfig'
       # Check the platform, e.g., "linux-gnu", or other.
       is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
       if is_windows
         expect(olines[10]).to eq("Items that differ:\n")
         expect(olines[11..12]).to include(
-          a_string_matching(/ M E  .*services\/timers\.lua/),
-          a_string_matching(/ M E  .*services\/devdata\.lua/),
+          a_string_matching(/ M E  .*services\/timer_timer\.lua/),
+          a_string_matching(/ M E  .*services\/tsdb_exportJob\.lua/),
         )
       else
         expect(olines[10]).to eq("Nothing that differs\n")
