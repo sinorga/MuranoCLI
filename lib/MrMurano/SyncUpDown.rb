@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -419,11 +419,17 @@ module MrMurano
             "Unexpected: touch failed on non-Windows machine / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}"
           ) unless is_windows
 
-          # FIXME/TEST/2017-07-13: Does ctime work instead? Or File.utime?
-          File.utime(mod_time, mod_time, local.to_path)
+          # 2017-07-13: Nor does ctime work.
+          #   Errno::EACCES:
+          #   Permission denied @ utime_failed -
+          #     C:/Users/ADMINI~1/AppData/Local/Temp/2/one.lua_remote_20170714-1856-by2nzk.lua
+          #File.utime(mod_time, mod_time, local.to_path)
 
-          # FIXME/2017-07-13: This probably fails...
-          FileUtils.touch [local.to_path,], :ctime => mod_time
+          # 2017-07-14: So this probably fails, too...
+          #FileUtils.touch [local.to_path,], :ctime => mod_time
+
+          # MAYBE/2017-07-14: How to make diff work on Windows?
+          #   Would need to store timestamp in metafile?
         end
 
       else
