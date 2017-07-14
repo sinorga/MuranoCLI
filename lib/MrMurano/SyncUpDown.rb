@@ -410,7 +410,7 @@ module MrMurano
         mod_time = DateTime.parse(item[:updated_at]).to_time
         begin
           FileUtils.touch [local.to_path,], :mtime => mod_time
-        rescue Errno::EACCESS => err
+        rescue Errno::EACCES => err
           # This happens on Windows...
           require 'rbconfig'
           # Check the platform, e.g., "linux-gnu", or other.
