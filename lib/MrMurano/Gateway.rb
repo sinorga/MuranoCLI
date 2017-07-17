@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -292,7 +292,9 @@ module MrMurano
         else
           opts = {}
         end
+        whirly_start('Enabling Device...')
         put("/#{CGI.escape(id.to_s)}", opts)
+        whirly_stop
       end
       alias whitelist enable
       alias create enable
@@ -315,7 +317,9 @@ module MrMurano
         req.content_type = form.content_type
         req.content_length = form.content_length
         req.body = form.to_s
+        whirly_start('Enabling Devices...')
         workit(req)
+        whirly_stop
         nil
       end
 
@@ -332,6 +336,7 @@ module MrMurano
       # @param identifier [String] Who to activate.
       def activate(identifier)
         info = GweBase.new.info
+        raise "Gateway info not found for #{identifier}" if info.nil?
         fqdn = info[:fqdn]
         debug "Found FQDN: #{fqdn}"
         fqdn = "#{@sid}.m2.exosite.io" if fqdn.nil?
@@ -350,7 +355,11 @@ module MrMurano
         request['Authorization'] = nil
         request.content_type = 'application/x-www-form-urlencoded; charset=utf-8'
         curldebug(request)
+
+        whirly_start('Activating Device...')
         response = http.request(request)
+        whirly_stop
+
         case response
         when Net::HTTPSuccess
           return response.body
