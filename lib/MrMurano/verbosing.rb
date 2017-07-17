@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -20,11 +20,15 @@ module MrMurano
   # Verbose is a mixin for various terminal output features.
   module Verbose
     def verbose(msg)
+      whirly_pause
       say msg if $cfg['tool.verbose']
+      whirly_unpause
     end
 
     def debug(msg)
+      whirly_pause
       say msg if $cfg['tool.debug']
+      whirly_unpause
     end
 
     def warning(msg)

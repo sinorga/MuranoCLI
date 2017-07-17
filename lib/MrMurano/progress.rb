@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -33,7 +33,15 @@ module MrMurano
     ].freeze
 
     def whirly_start(msg)
-      say msg if $cfg['tool.verbose']
+      if $cfg['tool.verbose']
+        if @whirly_users > 0
+          whirly_pause
+        end
+        say msg
+        if @whirly_users > 0
+          whirly_unpause
+        end
+      end
       return if $cfg['tool.no-progress']
       # Count the number of calls to whirly_start, so that the
       # first call to whirly_start is the message that gets
