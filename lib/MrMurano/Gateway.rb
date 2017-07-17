@@ -363,6 +363,9 @@ module MrMurano
         case response
         when Net::HTTPSuccess
           return response.body
+        when Net::HTTPConflict
+          error('The specified device is already activated.')
+          exit 1
         else
           showHttpError(request, response)
         end
