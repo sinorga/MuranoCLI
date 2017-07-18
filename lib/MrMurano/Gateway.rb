@@ -263,19 +263,10 @@ module MrMurano
         raise "Unexpected: :local_path exists: #{item}" unless item[:local_path].to_s.empty?
         res = {}
         key = item[:alias]
-        item = item.reject { |k, _v| %i[alias synckey synctype].include? k }
+        item = item.reject { |k, _v| k == :alias || k == :synckey }
         res[key] = Hash.transform_keys_to_strings(item)
         ohash = ordered_hash(res)
         io << ohash.to_yaml
-      end
-
-      def diff_local_write(io, _merged, local)
-        raise "Unexpected: :local_path exists: #{local}" unless local[:local_path].to_s.empty?
-        res = {}
-        key = local[:alias]
-        local = local.reject { |k, _v| k == :alias || k == :synckey }
-        res[key] = Hash.transform_keys_to_strings(local)
-        io << res.to_yaml
       end
 
       ###################################################
