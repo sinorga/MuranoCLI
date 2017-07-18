@@ -806,8 +806,13 @@ module MrMurano
       end
       (localbox.keys & therebox.keys).each do |key|
         # Want 'local' to override 'there' except for itemkey.
-        mrg = localbox[key].reject { |k, _v| k == itemkey }
-        mrg = therebox[key].merge(mrg)
+        if options[:asdown]
+          mrg = therebox[key].reject { |k, _v| k == itemkey }
+          mrg = localbox[key].merge(mrg)
+        else
+          mrg = localbox[key].reject { |k, _v| k == itemkey }
+          mrg = therebox[key].merge(mrg)
+        end
         if docmp(localbox[key], therebox[key])
           if options[:diff] && mrg[:selected]
             mrg[:diff] = dodiff(mrg.to_h, localbox[key], therebox[key])
