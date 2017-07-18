@@ -280,6 +280,15 @@ module MrMurano
         io << res.to_yaml
       end
 
+      def diff_local_write(io, _merged, local)
+        raise "Unexpected: :local_path exists: #{local}" unless local[:local_path].to_s.empty?
+        res = {}
+        key = local[:alias]
+        local = local.reject { |k, _v| k == :alias || k == :synckey }
+        res[key] = Hash.transform_keys_to_strings(local)
+        io << res.to_yaml
+      end
+
       ###################################################
       def tolocalpath(into, _item)
         into
