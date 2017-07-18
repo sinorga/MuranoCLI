@@ -164,7 +164,7 @@ module MrMurano
       end
 
       ###################################################
-      def syncdown_before(_local)
+      def syncdown_before
         # FIXME/2017-07-02: Could there be duplicate gateway items?
         #   [lb] just added code to SyncUpDown.locallist and am curious.
         @here = locallist

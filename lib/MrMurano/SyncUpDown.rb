@@ -393,10 +393,10 @@ module MrMurano
     def syncup_after
     end
 
-    def syncdown_before(local)
+    def syncdown_before
     end
 
-    def syncdown_after(local)
+    def syncdown_after(_local)
     end
 
     #
@@ -581,7 +581,6 @@ module MrMurano
       options = elevate_hash(options)
       itemkey = @itemkey.to_sym
       options[:asdown] = false
-      syncup_before
       dt = status(options, selected)
       toadd = dt[:toadd]
       todel = dt[:todel]
@@ -625,14 +624,13 @@ module MrMurano
       options[:asdown] = true
       options[:skip_missing_warning] = true
 
-      into = location ###
-      syncdown_before(into)
       dt = status(options, selected)
 
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
 
+      into = location
       if options[:delete]
         todel.each do |item|
           sync_update_progress("Removing item #{item[:synckey]}")
@@ -732,6 +730,8 @@ module MrMurano
     # @param selected [Array<String>] Filters for _matcher
     # @return [Hash{Symbol=>Array<Item>}] Items grouped by the action that should be taken
     def status(options={}, selected=[])
+      options = elevate_hash(options)
+
       # 2017-07-02: Now that there are multiple solution types, and because
       # SyncRoot.add is called on different classes that go with either or
       # both products and applications, if a user only created one solution,
@@ -739,7 +739,12 @@ module MrMurano
       # not a corresponding solution in Murano.
       raise 'Syncable missing sid or not valid_sid??!' unless sid?
 
-      options = elevate_hash(options)
+      if options[:asdown]
+        syncdown_before
+      else
+        syncup_before
+      end
+
       itemkey = @itemkey.to_sym
 
       # Fetch arrays of items there, and items here/local.
