@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.18 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -78,6 +78,17 @@ Style/Documentation:
 #  http://www.rubydoc.info/github/bbatsov/RuboCop/RuboCop/Cop/Style/ConditionalAssignment
 Style/ConditionalAssignment:
   EnforcedStyle: assign_inside_condition
+
+# "Put empty method definitions on a single line."
+# You can do, e.g.,
+#     def my_method(some_var) end
+# except you cannot do
+#     def my_method end
+# but instead have to do
+#     def my_method() end
+# which then breaks another rule, Style/DefWithParentheses!
+Style/EmptyMethod:
+  Enabled: false
 
 # "The name of this source file (Xxxxxxx.rb) should use snake_case."
 Style/FileName:
