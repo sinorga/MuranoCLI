@@ -38,12 +38,25 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
   end
 
   c.option '--[no-]asdown', %(Report as if syncdown instead of syncup)
+  c.option '--[no-]asup', %(Report as if syncup instead of syncdown (default: true))
   c.option '--[no-]diff', %(For modified items, show a diff)
   c.option '--[no-]grouped', %(Group all adds, deletes, and mods together)
   c.option '--[no-]showall', %(List unchanged as well)
 
   c.action do |args, options|
-    options.default delete: true, create: true, update: true, diff: false, grouped: true
+    options.default(
+      asdown: nil,
+      asup: nil,
+      diff: false,
+      grouped: true,
+      showall: false,
+      # delete/create/update are not options the user can specify
+      # for status or diff commands; but the SyncUpDown class expects
+      # them.
+      delete: true,
+      create: true,
+      update: true,
+    )
 
     def fmtr(item)
       if item.key? :local_path
@@ -116,6 +129,25 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       end
 
       pretty(out, options) unless options.grouped
+    end
+
+    # Method code starts here!
+
+    # Check that user doesn't try to asdown and asup, or no-asdown and no-asup.
+    if options.asdown.nil? && options.asup.nil?
+      options.asdown = false
+      options.asup = true
+    elsif !options.asdown.nil? && !options.asup.nil?
+      if !(options.asdown ^ options.asup)
+        error('Please specify either --asdown or --asup, but not both!')
+        exit 1
+      end
+    elsif options.asdown.nil?
+      options.asdown = !options.asup
+    elsif options.asup.nil?
+      options.asup = !options.asdown
+    else
+      raise("Unexpected code path.")
     end
 
     MrMurano::SyncRoot.instance.each_filtered(options.__hash__) do |_name, type, klass, desc|
