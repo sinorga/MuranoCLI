@@ -691,6 +691,24 @@ module MrMurano
         cmd << tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
 
         stdout_and_stderr, _status = Open3.capture2e(*cmd)
+        # How important are the first two lines of the diff? E.g.,
+        #     --- /tmp/raw_data_remote_20170718-20183-gdyeg9.lua	2017-07-18 13:13:13.864051905 -0500
+        #     +++ /tmp/raw_data_local_20170718-20183-71o4me.lua	2017-07-18 13:13:14.520049397 -0500
+        # Seems like printing the path to a since-deleted temporary file is misleading.
+        if $cfg['diff.cmd'] == 'diff' || $cfg['diff.cmd'].start_with?('diff ')
+          lineno = 0
+          consise = stdout_and_stderr.lines.reject do |line|
+            lineno += 1
+            if lineno == 1 && line.start_with?('--- ')
+              true
+            elsif lineno == 2 && line.start_with?('+++ ')
+              true
+            else
+              false
+            end
+          end
+          stdout_and_stderr = consise.join
+        end
       ensure
         trmt.close
         trmt.unlink
