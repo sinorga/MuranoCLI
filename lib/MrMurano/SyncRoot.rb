@@ -27,7 +27,7 @@ module MrMurano
     # @param bydefault [Boolean] Is this part of the default sync group
     #
     # @return [nil]
-    def add(name, klass, type, desc, bydefault=false)
+    def add(name, klass, type, desc, bydefault)
       # 2017-06-20: Maybe possibly enforce unique name policy for --syncset options.
       #@syncset.each do |a|
       #  if a.name == name.to_s

@@ -19,7 +19,7 @@ RSpec.describe MrMurano::SyncRoot do
     class Role
     end
     MrMurano::SyncRoot.instance.add('user', User, 'U', "describe user", true)
-    MrMurano::SyncRoot.instance.add('role', Role, 'R', "describe role")
+    MrMurano::SyncRoot.instance.add('role', Role, 'R', "describe role", false)
 
     # This must happen after all syncables have been added.
     $cfg = MrMurano::Config.new
