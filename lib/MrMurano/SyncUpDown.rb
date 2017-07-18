@@ -12,11 +12,12 @@ require 'open3'
 require 'pathname'
 #require 'shellwords'
 require 'tempfile'
-require 'whirly'
-require 'MrMurano/hash'
-require 'MrMurano/Config'
-require 'MrMurano/ProjectFile'
-#require 'MrMurano/SyncRoot'
+require 'MrMurano/progress'
+require 'MrMurano/verbosing'
+#require 'MrMurano/hash'
+#require 'MrMurano/Config'
+#require 'MrMurano/ProjectFile'
+##require 'MrMurano/SyncRoot'
 
 module MrMurano
   ## The functionality of a Syncable thing.
@@ -604,21 +605,18 @@ module MrMurano
           remove(aitem[itemkey])
           num_synced += 1
         end
-        num_synced += 1 if options[:delete] && !$cfg['tool.dry']
       end
       toadd.each do |item|
         syncup_item(item, options, :create, 'Adding') do |aitem|
           upload(aitem[:local_path], aitem.reject { |k, _v| k == :local_path }, false)
           num_synced += 1
         end
-        num_synced += 1 if options[:create] && !$cfg['tool.dry']
       end
       tomod.each do |item|
         syncup_item(item, options, :update, 'Updating') do |aitem|
           upload(aitem[:local_path], aitem.reject { |k, _v| k == :local_path }, false)
           num_synced += 1
         end
-        num_synced += 1 if options[:update] && !$cfg['tool.dry']
       end
 
       syncup_after
