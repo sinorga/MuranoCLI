@@ -313,6 +313,10 @@ module MrMurano
       update_mtime(local, item)
     end
 
+    def diff_download(tmp_path, merged)
+      download(tmp_path, merged)
+    end
+
     ## Give the local file the same timestamp as the remote, because diff.
     #
     # @param local [Pathname] Full path of where to download to
@@ -399,7 +403,7 @@ module MrMurano
     def syncdown_after(_local)
     end
 
-    def diff_local_write(io, merged, _local)
+    def diff_item_write(io, merged, _local, _remote)
       io << merged[:local_path].read
     end
 
@@ -670,34 +674,41 @@ module MrMurano
     # WARNING: This will download the remote item to do the diff.
     #
     # @param merged [merged] The merged item to get a diff of
+    # @local local, unadulterated (non-merged) item
     # @return [String] The diff output
-    def dodiff(merged, local, other)
+    def dodiff(merged, local, asdown=false)
       trmt = Tempfile.new([tolocalname(merged, @itemkey) + '_remote_', '.lua'])
       tlcl = Tempfile.new([tolocalname(merged, @itemkey) + '_local_', '.lua'])
-      if merged.key?(:script)
-        Pathname.new(tlcl.path).open('wb') do |io|
+      Pathname.new(tlcl.path).open('wb') do |io|
+        if merged.key?(:script)
           io << merged[:script]
-        end
-      else
-        Pathname.new(tlcl.path).open('wb') do |io|
-          diff_local_write(io, merged, local)
+        else
+          # For most items, read the local file.
+          # For resources, it's a bit trickier.
+          # NOTE: This class adds a :selected key to the local item that we need
+          # to remove, since it's not part of the remote items that gets downloaded.
+          local = local.reject { |k, v| k == :selected }
+          diff_item_write(io, merged, local, nil)
         end
       end
       stdout_and_stderr = ''
       begin
         tmp_path = Pathname.new(trmt.path)
-        download(tmp_path, merged)
-        # The --resources (MrMurano::Gateway items) are collected individually
-        # on download() and only writ on syncdown_after; no other Syncables
-        # react to syncdown_after.
-        syncdown_after(tmp_path)
+        diff_download(tmp_path, merged)
 
         MrMurano::Verbose.whirly_stop
 
         # 2017-07-03: No worries, Ruby 3.0 frozen string literals, cmd is a list.
         cmd = $cfg['diff.cmd'].shellsplit
-        cmd << trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
-        cmd << tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        remote_path = trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        local_path = tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        if asdown
+          cmd << local_path
+          cmd << remote_path
+        else
+          cmd << remote_path
+          cmd << local_path
+        end
 
         stdout_and_stderr, _status = Open3.capture2e(*cmd)
         # How important are the first two lines of the diff? E.g.,
@@ -815,7 +826,7 @@ module MrMurano
         end
         if docmp(localbox[key], therebox[key])
           if options[:diff] && mrg[:selected]
-            mrg[:diff] = dodiff(mrg.to_h, localbox[key], therebox[key])
+            mrg[:diff] = dodiff(mrg.to_h, localbox[key], options[:asdown])
             mrg[:diff] = '<Nothing changed (may be timestamp difference?)>' if mrg[:diff].empty?
           end
           tomod << mrg
