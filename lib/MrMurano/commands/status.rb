@@ -53,7 +53,8 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
         end
         lp
       else
-        item[:synckey]
+        id = item[:synckey]
+        id += " (#{item[:pp_desc]})" unless item[:pp_desc].to_s.empty?
       end
     end
 
@@ -98,7 +99,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
     end
 
     @grouped = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
-    def gmerge(ret, type, options)
+    def gmerge(ret, type, desc, options)
       if options.grouped
         out = @grouped
       else
@@ -109,6 +110,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
         ret[kind].each do |item|
           item = item.to_h
           item[:pp_type] = type
+          item[:pp_desc] = desc
           out[kind] << item
         end
       end
@@ -133,7 +135,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
           ret = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
           ret[:skipd] << { synckey: desc }
         end
-        gmerge(ret, type, options)
+        gmerge(ret, type, desc, options)
       end
     end
     MrMurano::Verbose.whirly_stop
