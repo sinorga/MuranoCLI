@@ -1,9 +1,10 @@
-require 'uri'
-require 'net/http'
-require "http/form_data"
 require 'digest/sha1'
+require "http/form_data"
 require 'mime/types'
+require 'net/http'
+require 'uri'
 require 'MrMurano/Webservice'
+require 'MrMurano/SyncRoot'
 
 module MrMurano
   module Webservice
@@ -180,7 +181,7 @@ module MrMurano
       end
 
     end
-    SyncRoot.add('files', File, 'S', %{Static Files}, true)
+    SyncRoot.instance.add('files', File, 'S', %{Static Files}, true)
   end
 end
 #  vim: set ai et sw=2 ts=2 :

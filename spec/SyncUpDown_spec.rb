@@ -1,6 +1,7 @@
-require 'MrMurano/version'
 require 'MrMurano/verbosing'
+require 'MrMurano/version'
 require 'MrMurano/Config'
+require 'MrMurano/SyncRoot'
 require 'MrMurano/SyncUpDown'
 require '_workspace'
 
@@ -37,7 +38,7 @@ ITEM_UPDATED_AT="2017-06-24T00:45:15.564Z"
 RSpec.describe MrMurano::SyncUpDown do
   include_context "WORKSPACE"
   before(:example) do
-    MrMurano::SyncRoot.reset
+    MrMurano::SyncRoot.instance.reset
     $cfg = MrMurano::Config.new
     $cfg.load
     $project = MrMurano::ProjectFile.new

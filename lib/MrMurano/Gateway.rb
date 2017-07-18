@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.17 /coding: utf-8
+# Last Modified: 2017.07.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,6 +13,7 @@ require 'MrMurano/http'
 require 'MrMurano/verbosing'
 require 'MrMurano/Config'
 require 'MrMurano/SolutionId'
+require 'MrMurano/SyncRoot'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
@@ -236,7 +237,7 @@ module MrMurano
         item_a != item_b
       end
     end
-    SyncRoot.add('resources', Resources, 'T', %(Resources))
+    SyncRoot.instance.add('resources', Resources, 'T', %(Resources))
 
     ##############################################################################
     ##

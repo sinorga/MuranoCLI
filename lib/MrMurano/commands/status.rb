@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.07.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'MrMurano/verbosing'
+require 'MrMurano/SyncRoot'
 
 command :status do |c|
   c.syntax = %(murano status [options] [filters])
@@ -32,7 +33,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
   c.option '--all', 'Check everything'
 
   # Load options to control which things to status
-  MrMurano::SyncRoot.each_option do |s, l, d|
+  MrMurano::SyncRoot.instance.each_option do |s, l, d|
     c.option s, l, d
   end
 
@@ -115,7 +116,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       pretty(out, options) unless options.grouped
     end
 
-    MrMurano::SyncRoot.each_filtered(options.__hash__) do |_name, type, klass, desc|
+    MrMurano::SyncRoot.instance.each_filtered(options.__hash__) do |_name, type, klass, desc|
       MrMurano::Verbose.whirly_msg "Fetching #{desc}..."
       begin
         syncable = klass.new

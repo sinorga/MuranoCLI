@@ -4,6 +4,7 @@ require 'json'
 require 'yaml'
 require 'pp'
 require 'MrMurano/Solution'
+#require 'MrMurano/SyncRoot'
 
 module MrMurano
   ##
@@ -109,7 +110,7 @@ module MrMurano
       @itemkey = :role_id
     end
   end
-  #SyncRoot.add('roles', Role, 'R', %{Roles})
+  #SyncRoot.instance.add('roles', Role, 'R', %{Roles})
 
   # …/user
   # :nocov:
@@ -135,6 +136,6 @@ module MrMurano
     end
   end
   # :nocov:
-  #SyncRoot.add('users', User, 'U', %{Users})
+  #SyncRoot.instance.add('users', User, 'U', %{Users})
 end
 #  vim: set ai et sw=2 ts=2 :

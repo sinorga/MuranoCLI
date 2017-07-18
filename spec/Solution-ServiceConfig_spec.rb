@@ -1,12 +1,13 @@
 require 'MrMurano/version'
 require 'MrMurano/Solution-ServiceConfig'
+require 'MrMurano/SyncRoot'
 require 'tempfile'
 require '_workspace'
 
 RSpec.describe MrMurano::ServiceConfig do
   include_context "WORKSPACE"
   before(:example) do
-    MrMurano::SyncRoot.reset
+    MrMurano::SyncRoot.instance.reset
     $cfg = MrMurano::Config.new
     $cfg.load
     $project = MrMurano::ProjectFile.new

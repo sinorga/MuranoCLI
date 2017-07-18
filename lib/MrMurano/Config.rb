@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -9,6 +9,7 @@ require 'highline'
 require 'inifile'
 require 'pathname'
 require 'rainbow'
+require 'MrMurano/SyncRoot'
 
 module MrMurano
   class Config
@@ -175,7 +176,7 @@ module MrMurano
       set('location.resources', 'specs/resources.yaml', :defaults)
       set('location.cors', 'cors.yaml', :defaults)
 
-      set('sync.bydefault', SyncRoot.bydefault.join(' '), :defaults) if defined? SyncRoot
+      set('sync.bydefault', SyncRoot.instance.bydefault.join(' '), :defaults) if defined? SyncRoot
 
       set('files.default_page', 'index.html', :defaults)
       set('files.searchFor', '**/*', :defaults)

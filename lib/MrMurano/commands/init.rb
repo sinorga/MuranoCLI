@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.14 /coding: utf-8
+# Last Modified: 2017.07.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -14,6 +14,7 @@ require 'MrMurano/Business'
 require 'MrMurano/Config'
 require 'MrMurano/Config-Migrate'
 require 'MrMurano/Solution-Services'
+require 'MrMurano/SyncRoot'
 require 'MrMurano/commands/business'
 require 'MrMurano/commands/solution'
 
@@ -299,7 +300,7 @@ command :init do |c|
     # for user to fill in.
     # Automatically pull down eventhandler stubs that Murano creates for new solutions.
     # Iterate over: MrMurano::EventHandlerSolnPrd, MrMurano::EventHandlerSolnApp.
-    MrMurano::SyncRoot.each_filtered(eventhandlers: true) do |_name, _type, klass, desc|
+    MrMurano::SyncRoot.instance.each_filtered(eventhandlers: true) do |_name, _type, klass, desc|
       MrMurano::Verbose.whirly_start("Checking #{desc}...")
       begin
         syncable = klass.new
