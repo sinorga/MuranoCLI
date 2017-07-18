@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.14 /coding: utf-8
+# Last Modified: 2017.07.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -856,7 +856,7 @@ module MrMurano
         todel = (therebox.keys - localbox.keys).map { |key| therebox[key] }
       end
       (localbox.keys & therebox.keys).each do |key|
-        # Want here to override there except for itemkey.
+        # Want 'local' to override 'there' except for itemkey.
         mrg = localbox[key].reject { |k, v| k == itemkey }
         mrg = therebox[key].merge(mrg)
         if docmp(localbox[key], therebox[key])
