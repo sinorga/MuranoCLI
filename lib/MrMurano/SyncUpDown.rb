@@ -12,12 +12,11 @@ require 'open3'
 require 'pathname'
 #require 'shellwords'
 require 'tempfile'
-require 'MrMurano/progress'
-require 'MrMurano/verbosing'
-#require 'MrMurano/hash'
-#require 'MrMurano/Config'
-#require 'MrMurano/ProjectFile'
-##require 'MrMurano/SyncRoot'
+require 'whirly'
+require 'MrMurano/hash'
+require 'MrMurano/Config'
+require 'MrMurano/ProjectFile'
+#require 'MrMurano/SyncRoot'
 
 module MrMurano
   ## The functionality of a Syncable thing.

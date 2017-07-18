@@ -32,7 +32,7 @@ module MrMurano
     # @param bydefault [Boolean] Is this part of the default sync group
     #
     # @return [nil]
-    def add(name, klass, type, bydefault)
+    def add(name, klass, type, desc, bydefault=false)
       # 2017-06-20: Maybe possibly enforce unique name policy for --syncset options.
       #@syncset.each do |a|
       #  if a.name == name.to_s
@@ -40,7 +40,7 @@ module MrMurano
       #    $stderr.puts HighLine.color(msg, :yellow)
       #  end
       #end
-      @syncset << Syncable.new(name.to_s, klass, type, klass.description, bydefault)
+      @syncset << Syncable.new(name.to_s, klass, type, desc, bydefault)
       nil
     end
 
@@ -63,7 +63,7 @@ module MrMurano
     # @param block code to run on each
     def each
       @syncset = [] unless defined?(@syncset)
-      @syncset.each { |a| yield a.name, a.type, a.class, a.desc }
+      @syncset.each { |a| yield a.name, a.type, a.class }
     end
 
     ##

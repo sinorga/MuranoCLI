@@ -360,12 +360,45 @@ command :init do |c|
     #
     # See:
     #   sphinx-api/src/views/interface/productService.swagger.json
-    num_synced = syncdown_files(delete: false, create: true, update: false)
-    if num_synced > 0
-      inflection = MrMurano::Verbose.pluralize?('item', num_synced)
-      say("Synced #{num_synced} #{inflection}")
-    else
-      say('Items already synced')
+
+    # Automatically pull down eventhandler stubs that Murano creates for new solutions.
+    # Iterate over: MrMurano::EventHandlerSolnPrd, MrMurano::EventHandlerSolnApp.
+    MrMurano::SyncRoot.instance.each_filtered(eventhandlers: true) do |_name, _type, klass, desc|
+      MrMurano::Verbose.whirly_start("Checking #{desc}...")
+      begin
+        syncable = klass.new
+      rescue MrMurano::ConfigError => err
+        acc.error("Could not fetch status for #{desc}: #{err}")
+        # MAYBE: exit?
+      rescue StandardError => _err
+        raise
+      else
+        # If the user didn't make both an application and a product,
+        # then some syncables won't have their IDs set.
+        next unless syncable.sid?
+        # Get list of changes. Leave :delete => true and :update => true so we
+        # can tell if there are existing files, in which case skip the pull.
+        stat = syncable.status(
+          asdown: true,
+          eventhandlers: true,
+        )
+        if stat[:todel].any? || stat[:tomod].any?
+          MrMurano::Verbose.whirly_stop
+          say("Skipping #{desc}: local files found")
+          puts('')
+        else
+          stat[:toadd].each do |item|
+            if !$cfg['tool.dry']
+              MrMurano::Verbose.whirly_msg("Pulling item #{item[:synckey]}")
+              dest = syncable.tolocalpath(syncable.location, item)
+              syncable.download(dest, item)
+            else
+              say("--dry: Not pulling item #{item[:synckey]}")
+            end
+          end
+        end
+      end
+      MrMurano::Verbose.whirly_stop
     end
     puts('')
   end

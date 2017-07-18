@@ -217,7 +217,7 @@ module MrMurano
       end
     end
 
-    SyncRoot.instance.add('endpoints', Endpoint, 'A', true)
+    SyncRoot.instance.add('endpoints', Endpoint, 'A', %{Endpoints}, true)
   end
 end
 

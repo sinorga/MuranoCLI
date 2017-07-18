@@ -1,3 +1,10 @@
+# Last Modified: 2017.07.26 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'MrMurano/version'
 require 'MrMurano/Config'
 require 'MrMurano/ProjectFile'
@@ -24,8 +31,8 @@ RSpec.describe MrMurano::SyncRoot do
         %(describe role)
       end
     end
-    MrMurano::SyncRoot.instance.add('user', User, 'U', true)
-    MrMurano::SyncRoot.instance.add('role', Role, 'R', false)
+    MrMurano::SyncRoot.instance.add('user', User, 'U', "describe user", true)
+    MrMurano::SyncRoot.instance.add('role', Role, 'R', "describe role")
 
     # This must happen after all syncables have been added.
     $cfg = MrMurano::Config.new
@@ -85,6 +92,5 @@ RSpec.describe MrMurano::SyncRoot do
     end
     expect(ret).to eq([["-u", "--[no-]user", "describe user"], ["-r", "--[no-]role", "describe role"]])
   end
-
 end
-#  vim: set ai et sw=2 ts=2 :
+
