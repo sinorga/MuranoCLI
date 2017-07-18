@@ -405,7 +405,7 @@ module MrMurano
     def syncdown_after(_local)
     end
 
-    def diff_item_write(io, merged, _local, _remote)
+    def diff_local_write(io, merged, _local)
       io << merged[:local_path].read
     end
 
@@ -713,13 +713,12 @@ module MrMurano
     # WARNING: This will download the remote item to do the diff.
     #
     # @param merged [merged] The merged item to get a diff of
-    # @local local, unadulterated (non-merged) item
     # @return [String] The diff output
-    def dodiff(merged, local, asdown=false)
+    def dodiff(merged, local, other)
       trmt = Tempfile.new([tolocalname(merged, @itemkey) + '_remote_', '.lua'])
       tlcl = Tempfile.new([tolocalname(merged, @itemkey) + '_local_', '.lua'])
-      Pathname.new(tlcl.path).open('wb') do |io|
-        if merged.key?(:script)
+      if merged.key?(:script)
+        Pathname.new(tlcl.path).open('wb') do |io|
           io << merged[:script]
         else
           # For most items, read the local file.
@@ -733,7 +732,11 @@ module MrMurano
       stdout_and_stderr = ''
       begin
         tmp_path = Pathname.new(trmt.path)
-        diff_download(tmp_path, merged)
+        download(tmp_path, merged)
+        # The --resources (MrMurano::Gateway items) are collected individually
+        # on download() and only writ on syncdown_after; no other Syncables
+        # react to syncdown_after.
+        syncdown_after(tmp_path)
 
         MrMurano::Verbose.whirly_stop
 
@@ -867,7 +870,7 @@ module MrMurano
         end
         if docmp(localbox[key], therebox[key])
           if options[:diff] && mrg[:selected]
-            mrg[:diff] = dodiff(mrg.to_h, localbox[key], options[:asdown])
+            mrg[:diff] = dodiff(mrg.to_h, localbox[key], therebox[key])
             mrg[:diff] = '<Nothing changed (may be timestamp difference?)>' if mrg[:diff].empty?
           end
           tomod << mrg
