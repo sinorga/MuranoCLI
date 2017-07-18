@@ -42,6 +42,26 @@ class Hash
     end
     self
   end
+
+  # The following alias and keys and each method are used to
+  # "sort a Ruby Hash for comparison", i.e., so Hash.to_yaml
+  # also produces the same output for a given Hash. (In Ruby 1,
+  # you could monkey patch Hash.to_yaml, but in Ruby 2, the
+  # to_yaml method is defined on Object and is implemented in
+  # a convoluted manner; see, e.g., lib/ruby/2.3.0/psych*.)
+  #
+  # Ref:
+  #   https://coderwall.com/p/uwmmea/sort-a-ruby-hash-for-comparison
+
+  alias hkeys keys
+
+  def keys
+    hkeys.sort { |a, b| a.to_s <=> b.to_s }
+  end
+
+  def each
+    keys.each { |k| yield k, self[k] }
+  end
 end
 
 def ordered_hash(dict)
