@@ -399,6 +399,10 @@ module MrMurano
     def syncdown_after(_local)
     end
 
+    def diff_local_write(io, merged, _local)
+      io << merged[:local_path].read
+    end
+
     #
     #######################################################################
 
@@ -665,23 +669,28 @@ module MrMurano
     #
     # WARNING: This will download the remote item to do the diff.
     #
-    # @param item [Item] The item to get a diff of
+    # @param merged [merged] The merged item to get a diff of
     # @return [String] The diff output
-    def dodiff(item)
-      trmt = Tempfile.new([tolocalname(item, @itemkey) + '_remote_', '.lua'])
-      tlcl = Tempfile.new([tolocalname(item, @itemkey) + '_local_', '.lua'])
-      if item.key?(:script)
+    def dodiff(merged, local, other)
+      trmt = Tempfile.new([tolocalname(merged, @itemkey) + '_remote_', '.lua'])
+      tlcl = Tempfile.new([tolocalname(merged, @itemkey) + '_local_', '.lua'])
+      if merged.key?(:script)
         Pathname.new(tlcl.path).open('wb') do |io|
-          io << item[:script]
+          io << merged[:script]
         end
       else
         Pathname.new(tlcl.path).open('wb') do |io|
-          io << item[:local_path].read
+          diff_local_write(io, merged, local)
         end
       end
       stdout_and_stderr = ''
       begin
-        download(Pathname.new(trmt.path), item)
+        tmp_path = Pathname.new(trmt.path)
+        download(tmp_path, merged)
+        # The --resources (MrMurano::Gateway items) are collected individually
+        # on download() and only writ on syncdown_after; no other Syncables
+        # react to syncdown_after.
+        syncdown_after(tmp_path)
 
         MrMurano::Verbose.whirly_stop
 
@@ -801,7 +810,7 @@ module MrMurano
         mrg = therebox[key].merge(mrg)
         if docmp(localbox[key], therebox[key])
           if options[:diff] && mrg[:selected]
-            mrg[:diff] = dodiff(mrg.to_h)
+            mrg[:diff] = dodiff(mrg.to_h, localbox[key], therebox[key])
             mrg[:diff] = '<Nothing changed (may be timestamp difference?)>' if mrg[:diff].empty?
           end
           tomod << mrg
