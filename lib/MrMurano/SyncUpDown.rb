@@ -574,9 +574,9 @@ module MrMurano
 
     def sync_update_progress(msg)
       if $cfg['tool.no-progress']
-        verbose msg
+        say(msg)
       else
-        MrMurano::Verbose.whirly_msg "#{msg}..."
+        MrMurano::Verbose.whirly_interject { verbose(msg + "\n") }
       end
     end
 
