@@ -63,7 +63,7 @@ module MrMurano
     # @param block code to run on each
     def each
       @syncset = [] unless defined?(@syncset)
-      @syncset.each { |a| yield a.name, a.type, a.class }
+      @syncset.each { |a| yield a.name, a.type, a.class, a.desc }
     end
 
     ##
