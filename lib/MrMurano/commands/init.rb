@@ -123,7 +123,9 @@ command :init do |c|
     validate_dir!(acc, args, options)
 
     puts('')
-    say("Creating project at #{Rainbow($cfg['location.base'].to_s).underline}")
+    verbage = $cfg.project_exists ? 'Rebasing' : 'Creating'
+    say("#{verbage} project at #{Rainbow($cfg['location.base'].to_s).underline}")
+
     puts('')
 
     # Try to import a .Solutionfile.secret.
