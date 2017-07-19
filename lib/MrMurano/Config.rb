@@ -9,10 +9,13 @@ require 'highline'
 require 'inifile'
 require 'pathname'
 require 'rainbow'
+require 'MrMurano/verbosing'
 require 'MrMurano/SyncRoot'
 
 module MrMurano
   class Config
+    include Verbose
+
     # Config scopes:
     #  :internal    transient this-run-only things (also -c options)
     #  :specified   from --configfile
@@ -43,7 +46,7 @@ module MrMurano
         if defined?($cfg) && !$cfg.nil? && $cfg['tool.dry']
           # $cfg.nil? when run from spec tests that don't load it with:
           #   include_context "CI_CMD"
-          MrMurano::Config.warning('--dry: Not writing config file')
+          MrMurano::Verbose.warning('--dry: Not writing config file')
           return
         end
         self[:path] = Pathname.new(path) unless path.is_a?(Pathname)
@@ -88,27 +91,11 @@ module MrMurano
 
     CFG_SOLUTION_ID_KEYS = %w[application.id product.id].freeze
 
-    def self.warning(msg)
-      $stderr.puts HighLine.color(msg, :yellow)
-    end
-
-    def warning(msg)
-      MrMurano::Config.warning(msg)
-    end
-
-    def self.error(msg)
-      $stderr.puts HighLine.color(msg, :red)
-    end
-
-    def error(msg)
-      MrMurano::Config.error(msg)
-    end
-
     def migrate_old_env
       return if ENV[CFG_OLD_ENV_NAME].nil?
       warning %(ENV "#{CFG_OLD_ENV_NAME}" is no longer supported. Rename it to "#{CFG_ENV_NAME}")
       unless ENV[CFG_ENV_NAME].nil?
-        error %(Both "#{CFG_ENV_NAME}" and "#{CFG_OLD_ENV_NAME}" defined, please remove "#{CFG_OLD_ENV_NAME}".)
+        warning %(Both "#{CFG_ENV_NAME}" and "#{CFG_OLD_ENV_NAME}" defined, please remove "#{CFG_OLD_ENV_NAME}".)
       end
       ENV[CFG_ENV_NAME] = ENV[CFG_OLD_ENV_NAME]
     end
