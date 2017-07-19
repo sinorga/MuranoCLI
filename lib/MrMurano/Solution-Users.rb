@@ -46,7 +46,7 @@ module MrMurano
           showHttpError(request, response)
         end
       end
-      remote.reject! { |k, _v| k == :synckey || k == :bundled }
+      remote.reject! { |k, _v| %i[bundles synckey synctype].include? k }
       post('/', remote)
     end
 
@@ -62,7 +62,7 @@ module MrMurano
       here.delete_if do |i|
         Hash.transform_keys_to_symbols(i)[@itemkey] == item[@itemkey]
       end
-      here << item.reject { |k, _v| k == :synckey }
+      here << item.reject { |k, _v| %i[synckey synctype].include? k }
       local.open('wb') do |io|
         io.write here.map { |i| Hash.transform_keys_to_strings(i) }.to_yaml
       end

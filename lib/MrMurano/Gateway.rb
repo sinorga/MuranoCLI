@@ -157,7 +157,7 @@ module MrMurano
 
       def upload(_local, remote, _modify)
         @there.delete_if { |item| item[@itemkey] == remote[@itemkey] }
-        @there << remote.reject { |k, _v| k == :synckey }
+        @there << remote.reject { |k, _v| %i[synckey synctype].include? k }
       end
 
       def syncup_after
@@ -183,7 +183,7 @@ module MrMurano
         @here.delete_if do |i|
           i[@itemkey] == item[@itemkey]
         end
-        @here << item.reject { |k, _v| k == :synckey }
+        @here << item.reject { |k, _v| %i[synckey synctype].include? k }
       end
 
       def diff_download(tmp_path, merged)
@@ -234,7 +234,7 @@ module MrMurano
         raise "Unexpected: :local_path exists: #{item}" unless item[:local_path].to_s.empty?
         res = {}
         key = item[:alias]
-        item = item.reject { |k, _v| k == :alias || k == :synckey }
+        item = item.reject { |k, _v| %i[alias synckey synctype].include? k }
         res[key] = Hash.transform_keys_to_strings(item)
         io << res.to_yaml
       end
