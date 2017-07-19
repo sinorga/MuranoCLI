@@ -27,6 +27,10 @@ module MrMurano
         @project_section = :assets
       end
 
+      def self.description
+        %(Static Files)
+      end
+
       ##
       # Get a list of all of the static content
       # @return [Array<FileItem>] List of items on server
@@ -179,9 +183,9 @@ module MrMurano
         return (itemA[:mime_type] != itemB[:mime_type] or
           itemA[:checksum] != itemB[:checksum])
       end
-
     end
-    SyncRoot.instance.add('files', File, 'S', %{Static Files}, true)
+
+    SyncRoot.instance.add('files', File, 'S', true)
   end
 end
 #  vim: set ai et sw=2 ts=2 :

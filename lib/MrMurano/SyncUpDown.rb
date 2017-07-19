@@ -46,6 +46,8 @@ module MrMurano
       attr_accessor :selected
       # @return [String] The constructed name used to match local items to remote items.
       attr_accessor :synckey
+      # @return [String] The syncable type.
+      attr_accessor :synctype
       # @return [String] For device2, the event type.
       attr_accessor :type
       # @return [String] For testing, the updated_at time the server would otherwise indicate.
@@ -794,6 +796,7 @@ module MrMurano
       therebox = {}
       there.each do |item|
         item[:synckey] = synckey(item)
+        item[:synctype] = self.class.description
         therebox[item[:synckey]] = item
       end
       localbox = {}
@@ -802,6 +805,7 @@ module MrMurano
         # 2017-07-02: Check for local duplicates.
         skey += "-#{item[:dup_count]}" unless item[:dup_count].nil?
         item[:synckey] = skey
+        item[:synctype] = self.class.description
         localbox[item[:synckey]] = item
       end
       toadd = []

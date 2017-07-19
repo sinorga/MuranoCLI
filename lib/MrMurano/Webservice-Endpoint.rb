@@ -36,6 +36,10 @@ module MrMurano
         @match_header = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/
       end
 
+      def self.description
+        %(Endpoints)
+      end
+
       ##
       # This gets all data about all endpoints
       def list
@@ -213,7 +217,7 @@ module MrMurano
       end
     end
 
-    SyncRoot.instance.add('endpoints', Endpoint, 'A', %{Endpoints}, true)
+    SyncRoot.instance.add('endpoints', Endpoint, 'A', true)
   end
 end
 

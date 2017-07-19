@@ -120,8 +120,12 @@ module MrMurano
       @uriparts << 'role'
       @itemkey = :role_id
     end
+
+    def self.description
+      %(Roles)
+    end
   end
-  #SyncRoot.instance.add('roles', Role, 'R', %{Roles}, false)
+  #SyncRoot.instance.add('roles', Role, 'R', false)
 
   # …/user
   # :nocov:
@@ -133,6 +137,10 @@ module MrMurano
       #@solntype = 'product.id'
       super
       @uriparts << 'user'
+    end
+
+    def self.description
+      %(Users)
     end
 
     # @param modify Bool: True if item exists already and this is changing it
@@ -147,6 +155,6 @@ module MrMurano
     end
   end
   # :nocov:
-  #SyncRoot.instance.add('users', User, 'U', %{Users}, false)
+  #SyncRoot.instance.add('users', User, 'U', false)
 end
 

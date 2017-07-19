@@ -111,10 +111,15 @@ module MrMurano
     ## Working with the resources on a set of Devices. (Gateway)
     class Resources < GweBase
       include SyncUpDown
+
       def initialize
         super
         @itemkey = :alias
         @project_section = :resources
+      end
+
+      def self.description
+        %(Resources)
       end
 
       def list
@@ -276,7 +281,7 @@ module MrMurano
     # call was ignored bydefault (you'd have to add --resources to syncup,
     # syncdown, diff, and status commands). Against Murano, this call seems
     # normal speed, so including by default.
-    SyncRoot.instance.add('resources', Resources, 'T', %(Resources), true)
+    SyncRoot.instance.add('resources', Resources, 'T', true)
 
     ##############################################################################
     ##
