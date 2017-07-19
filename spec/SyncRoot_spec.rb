@@ -50,14 +50,14 @@ RSpec.describe MrMurano::SyncRoot do
 
   it "iterates on each" do
     ret=[]
-    MrMurano::SyncRoot.instance.each{|a,b,c| ret << a}
+    MrMurano::SyncRoot.instance.each { |a, _b, _c, _d| ret << a }
     expect(ret).to eq(["user", "role"])
   end
 
   it "iterates only on selected" do
     @options.role = true
     ret=[]
-    MrMurano::SyncRoot.instance.each_filtered(@options) {|a,b,c,d| ret << a}
+    MrMurano::SyncRoot.instance.each_filtered(@options) { |a, _b, _c, _d| ret << a }
     expect(ret).to eq(["role"])
   end
 
@@ -80,8 +80,8 @@ RSpec.describe MrMurano::SyncRoot do
 
   it "builds option params" do
     ret=[]
-    MrMurano::SyncRoot.instance.each_option do |s,l,d|
-      ret << [s,l,d]
+    MrMurano::SyncRoot.instance.each_option do |s, l, d|
+      ret << [s, l, d]
     end
     expect(ret).to eq([["-u", "--[no-]user", "describe user"], ["-r", "--[no-]role", "describe role"]])
   end
