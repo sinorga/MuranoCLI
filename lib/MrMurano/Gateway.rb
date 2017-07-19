@@ -214,23 +214,6 @@ module MrMurano
         end
       end
 
-      def diff_download(tmp_path, merged)
-        @there = list if @there.nil?
-        items = @there.reject { |item| item[:alias] != merged[:alias] }
-        if items.length > 1
-          error(
-            "Unexpected: more than 1 resource with the same alias: #{merged[:alias]} / #{items}"
-          )
-        end
-        Pathname.new(tmp_path).open('wb') do |io|
-          if !items.length.zero?
-            diff_item_write(io, merged, nil, items.first)
-          else
-            io << "\n"
-          end
-        end
-      end
-
       def removelocal(_local, item)
         # needs to append/merge with file
         key = @itemkey.to_sym
@@ -263,7 +246,7 @@ module MrMurano
         raise "Unexpected: :local_path exists: #{item}" unless item[:local_path].to_s.empty?
         res = {}
         key = item[:alias]
-        item = item.reject { |k, _v| k == :alias || k == :synckey }
+        item = item.reject { |k, _v| %i[alias synckey synctype].include? k }
         res[key] = Hash.transform_keys_to_strings(item)
         ohash = ordered_hash(res)
         io << ohash.to_yaml
