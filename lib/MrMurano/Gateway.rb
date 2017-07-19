@@ -9,6 +9,7 @@ require 'http/form_data'
 require 'json-schema'
 require 'net/http'
 require 'uri'
+require 'MrMurano/hash'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
 require 'MrMurano/Config'
@@ -241,7 +242,8 @@ module MrMurano
             key = value[:alias]
             res[key] = Hash.transform_keys_to_strings(value.reject { |k, _v| k == :alias })
           end
-          io.write res.to_yaml
+          ohash = ordered_hash(res)
+          io.write ohash.to_yaml
         end
       end
 
@@ -253,7 +255,8 @@ module MrMurano
         key = item[:alias]
         item = item.reject { |k, _v| %i[alias synckey synctype].include? k }
         res[key] = Hash.transform_keys_to_strings(item)
-        io << res.to_yaml
+        ohash = ordered_hash(res)
+        io << ohash.to_yaml
       end
 
       def diff_item_write(io, _merged, local, remote)

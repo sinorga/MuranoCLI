@@ -49,6 +49,7 @@ explicitly specifying the version. For instance,
   s.add_runtime_dependency('json-schema', '~> 2.7.0')
   s.add_runtime_dependency('mime-types', '~> 3.1')
   s.add_runtime_dependency('mime-types-data', '~> 3.2016.0521')
+  s.add_runtime_dependency('orderedhash', '~> 0.0.6')
   s.add_runtime_dependency('paint', '~> 2.0.0')
   s.add_runtime_dependency('rainbow', '~> 2.2.2')
   s.add_runtime_dependency('terminal-table', '~> 1.7.3')
