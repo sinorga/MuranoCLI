@@ -589,37 +589,54 @@ module MrMurano
     # @param selected [Array<String>] Filters for _matcher
     def syncup(options={}, selected=[])
       options = elevate_hash(options)
-      itemkey = @itemkey.to_sym
       options[:asdown] = false
+
+      num_synced = 0
+
       dt = status(options, selected)
+
       toadd = dt[:toadd]
       todel = dt[:todel]
       tomod = dt[:tomod]
 
-      if options[:delete]
-        todel.each do |item|
-          sync_update_progress("Removing item #{item[:synckey]}")
-          remove(item[itemkey]) unless $cfg['tool.dry']
+      itemkey = @itemkey.to_sym
+      todel.each do |item|
+        syncup_item(item, options, :delete, "Removing") do |item|
+          remove(item[itemkey])
         end
+        num_synced += 1 if options[:delete] && !$cfg['tool.dry']
       end
-      if options[:create]
-        toadd.each do |item|
-          sync_update_progress("Adding item #{item[:synckey]}")
-          unless $cfg['tool.dry']
-            upload(item[:local_path], item.reject { |k, _v| k == :local_path }, false)
-          end
+      toadd.each do |item|
+        syncup_item(item, options, :create, "Adding") do |item|
+          upload(item[:local_path], item.reject { |k, _v| k == :local_path }, false)
         end
+        num_synced += 1 if options[:create] && !$cfg['tool.dry']
       end
-      if options[:update]
-        tomod.each do |item|
-          sync_update_progress("Updating item #{item[:synckey]}")
-          unless $cfg['tool.dry']
-            upload(item[:local_path], item.reject { |k, _v| k == :local_path }, true)
-          end
+      tomod.each do |item|
+        syncup_item(item, options, :update, "Updating") do |item|
+          upload(item[:local_path], item.reject { |k, _v| k == :local_path }, false)
         end
+        num_synced += 1 if options[:update] && !$cfg['tool.dry']
       end
       MrMurano::Verbose.whirly_stop(force: true)
       syncup_after
+
+      num_synced
+    end
+
+    def syncup_item(item, options, action, verbage)
+      prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
+      prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
+      sync_update_progress(prog_msg)
+      if options[action]
+        if !$cfg['tool.dry']
+          yield item
+        else
+          say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
+        end
+      elsif $cfg['tool.verbose']
+        say("--no-#{action}: Skipping item #{item[:synckey]}")
+      end
     end
 
     ## Make things in local project look like Murano
@@ -634,6 +651,8 @@ module MrMurano
       options[:asdown] = true
       options[:skip_missing_warning] = true
 
+      num_synced = 0
+
       dt = status(options, selected)
 
       toadd = dt[:toadd]
@@ -641,34 +660,43 @@ module MrMurano
       tomod = dt[:tomod]
 
       into = location
-      if options[:delete]
-        todel.each do |item|
-          sync_update_progress("Removing item #{item[:synckey]}")
-          unless $cfg['tool.dry']
-            dest = tolocalpath(into, item)
-            removelocal(dest, item)
-          end
+      todel.each do |item|
+        syncdown_item(item, into, options, :delete, "Removing") do |dest, item|
+          removelocal(dest, item)
         end
+        num_synced += 1 if options[:delete] && !$cfg['tool.dry']
       end
-      if options[:create]
-        toadd.each do |item|
-          sync_update_progress("Adding item #{item[:synckey]}")
-          unless $cfg['tool.dry']
-            dest = tolocalpath(into, item)
-            download(dest, item)
-          end
+      toadd.each do |item|
+        syncdown_item(item, into, options, :create, "Adding") do |dest, item|
+          download(dest, item)
         end
+        num_synced += 1 if options[:create] && !$cfg['tool.dry']
       end
-      if options[:update]
-        tomod.each do |item|
-          sync_update_progress("Updating item #{item[:synckey]}")
-          unless $cfg['tool.dry']
-            dest = tolocalpath(into, item)
-            download(dest, item)
-          end
+      tomod.each do |item|
+        syncdown_item(item, into, options, :update, "Updating") do |dest, item|
+          download(dest, item)
         end
+        num_synced += 1 if options[:update] && !$cfg['tool.dry']
       end
       syncdown_after(into)
+
+      num_synced
+    end
+
+    def syncdown_item(item, into, options, action, verbage)
+      prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
+      prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
+      sync_update_progress(prog_msg)
+      if options[action]
+        if !$cfg['tool.dry']
+          dest = tolocalpath(into, item)
+          yield dest, item
+        else
+          say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
+        end
+      elsif $cfg['tool.verbose']
+        say("--no-#{action}: Skipping item #{item[:synckey]}")
+      end
     end
 
     ## Call external diff tool on item
