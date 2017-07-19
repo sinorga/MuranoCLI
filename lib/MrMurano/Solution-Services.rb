@@ -237,7 +237,7 @@ module MrMurano
       %(Script Module)
     end
   end
-  SyncRoot.instance.add('modules', Module, 'M', %(Modules), true)
+  SyncRoot.instance.add('modules', Module, 'M', true)
 
   # Services aka EventHandlers
   class EventHandler < ServiceBase
@@ -477,11 +477,11 @@ module MrMurano
   end
 
   # Order here matters, because spec/cmd_init_spec.rb
-  SyncRoot.instance.add('eventhandlers', EventHandlerSolnApp, 'E', EventHandlerSolnApp.description, true)
-  SyncRoot.instance.add('eventhandlers', EventHandlerSolnPrd, 'E', EventHandlerSolnPrd.description, true)
+  SyncRoot.instance.add('eventhandlers', EventHandlerSolnApp, 'E', true)
+  SyncRoot.instance.add('eventhandlers', EventHandlerSolnPrd, 'E', true)
   # FIXME/2017-06-20: Should we use separate directories for prod vs app?
   #   [lb] thinks so if the locallist/PRODUCT_SERVICES kludge fails in the future.
-  #SyncRoot.instance.add('services', EventHandlerSolnApp, 'E', %(Application Event Handlers), true)
-  #SyncRoot.instance.add('interfaces', EventHandlerSolnPrd, 'E', %(Product Event Handlers), true)
+  #SyncRoot.instance.add('services', EventHandlerSolnApp, 'E', true)
+  #SyncRoot.instance.add('interfaces', EventHandlerSolnPrd, 'E', true)
 end
 

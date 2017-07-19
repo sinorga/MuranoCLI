@@ -184,7 +184,8 @@ module MrMurano
           itemA[:checksum] != itemB[:checksum])
       end
     end
-    SyncRoot.instance.add('files', File, 'S', %{Static Files}, true)
+
+    SyncRoot.instance.add('files', File, 'S', true)
   end
 end
 #  vim: set ai et sw=2 ts=2 :

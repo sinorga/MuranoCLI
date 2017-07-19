@@ -127,7 +127,7 @@ module MrMurano
       %(Roles)
     end
   end
-  #SyncRoot.instance.add('roles', Role, 'R', %{Roles}, false)
+  #SyncRoot.instance.add('roles', Role, 'R', false)
 
   # …/user
   # :nocov:
@@ -157,6 +157,6 @@ module MrMurano
     end
   end
   # :nocov:
-  #SyncRoot.instance.add('users', User, 'U', %{Users}, false)
+  #SyncRoot.instance.add('users', User, 'U', false)
 end
 
