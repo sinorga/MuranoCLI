@@ -143,13 +143,10 @@ module MrMurano
       end
 
       @project_dir, @project_exists = find_project_dir
-      migrate_old_config(@project_dir)
-      @paths << ConfigFile.new(:project, @project_dir + CFG_FILE_NAME)
-      # We'll create the CFG_DIR_NAME on write().
 
-      migrate_old_config(Pathname.new(Dir.home))
+      @paths << ConfigFile.new(:project, @project_dir + CFG_FILE_NAME)
+
       @paths << ConfigFile.new(:user, Pathname.new(Dir.home) + CFG_FILE_NAME)
-      # We'll create the CFG_DIR_NAME on write().
 
       @paths << ConfigFile.new(:defaults, nil, IniFile.new)
 
@@ -234,6 +231,23 @@ module MrMurano
       [result, false]
     end
     private :find_project_dir
+
+    def validate_cmd(runner)
+      # Most commands should be run from within a Murano project (sub-)directory.
+      # If user is running a project command not within a project directory,
+      # we'll print a message now and exit the app from run_active_command later.
+      the_cmd = runner.active_command
+      unless the_cmd.name == 'help' || the_cmd.project_not_required || @project_exists
+        error %(The "#{the_cmd.name}" command only works in a Murano project.)
+        say %(Please change to a project directory, or run `murano init` to create a new project.)
+        # Note that commnander-rb uses an at_exit hook, which we hack around.
+        runner.command_exit = 1
+        return
+      end
+
+      migrate_old_config(@project_dir)
+      migrate_old_config(Pathname.new(Dir.home))
+    end
 
     def self.fix_modes(path)
       if path.directory?
