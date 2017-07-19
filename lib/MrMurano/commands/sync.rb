@@ -16,13 +16,14 @@ end
 
 def syncdown_files(options, args=nil)
   args = [] if args.nil?
+  num_synced = 0
   MrMurano::SyncRoot.instance.each_filtered(options) do |_name, _type, klass, desc|
     MrMurano::Verbose.whirly_msg "Syncing #{desc}..."
     sol = klass.new
-    sol.syncdown(options, args)
-    sleep 1
+    num_synced += sol.syncdown(options, args)
   end
   MrMurano::Verbose.whirly_stop
+  num_synced
 end
 
 command :syncdown do |c|

@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.18 /coding: utf-8
+# Last Modified: 2017.07.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -6,7 +6,6 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'erb'
-require 'inflecto'
 require 'rainbow'
 require 'MrMurano/verbosing'
 require 'MrMurano/Account'
@@ -17,6 +16,7 @@ require 'MrMurano/Solution-Services'
 require 'MrMurano/SyncRoot'
 require 'MrMurano/commands/business'
 require 'MrMurano/commands/solution'
+require 'MrMurano/commands/sync'
 
 def init_cmd_description
   %(
@@ -108,13 +108,14 @@ command :init do |c|
 
   c.option('--refresh', %(Ignore Business and Solution IDs found in the config))
   c.option('--purge', %(Remove Project directories and files, and recreate anew))
+  c.option('--[no-]sync', %(Pull down existing remote files (generally a good thing) (default: true)))
   c.option('--[no-]mkdirs', %(Create default directories))
 
   # This command can be run without a project config.
   c.project_not_required = true
 
   c.action do |args, options|
-    options.default(refresh: false, mkdirs: true)
+    options.default(refresh: false, purge: false, sync: true, mkdirs: true)
 
     acc = MrMurano::Account.instance
 
@@ -165,16 +166,14 @@ command :init do |c|
     # If no ProjectFile, then write a ProjectFile.
     write_project_file
 
-    # Make the directory structure.
-    make_directories if options.mkdirs
+    if options.mkdirs
+      # Make the directory structure.
+      make_directories(purge: options.purge)
 
-    # Murano creates a bunch of empty event handlers. Grab them now.
-    if options.purge
-      # FIXME/2017-07-02: Add test for this
-      # Be destructive
-      syncdown_files(delete: true, create: true, update: true)
-    else
-      syncdown_boilerplate
+      # For new solutions, Murano creates a few empty and example event handlers.
+      # For existing solutions, the user might already have created some files.
+      # Grab them now.
+      syncdown_new_and_existing if options.sync
     end
 
     blather_success
@@ -219,6 +218,11 @@ command :init do |c|
       acc.error('Cannot init a project in your HOME directory.')
       exit(2)
     end
+    # Might as well block root path, too.
+    if Pathname.new(Dir.pwd).realpath == File::SEPARATOR
+      acc.error('Cannot init a project in your root directory.')
+      exit(2)
+    end
 
     # Only create a new project in an empty directory,
     # or a recognized Murano CLI project.
@@ -259,9 +263,12 @@ command :init do |c|
     File.open(pr_file, 'w') { |io| io << res }
   end
 
-  def make_directories
+  def make_directories(purge: false)
     base = $cfg['location.base']
     base = Pathname.new(base) unless base.is_a?(Pathname)
+    num_locats = 0
+    num_mkpaths = 0
+    num_rmpaths = 0
     %w[
       location.files
       location.endpoints
@@ -269,74 +276,84 @@ command :init do |c|
       location.eventhandlers
       location.resources
     ].each do |cfgi|
-      path = $cfg[cfgi]
-      path = Pathname.new(path) unless path.is_a?(Pathname)
-      path = base + path
-      next if path.exist?
-      path = path.dirname unless path.extname.empty?
-      if !$cfg['tool.dry']
-        path.mkpath
-      else
-        say("--dry: Not creating project directory: #{path}")
-      end
+      num_locats += 1
+      n_mkdirs, n_rmdirs = make_directory(cfgi, base, purge)
+      num_mkpaths += n_mkdirs
+      num_rmpaths += n_rmdirs
     end
-    say('Created default directories')
+    if num_rmpaths > 0
+      say('Removed existing directories')
+      puts('')
+    end
+    if num_mkpaths > 0
+      if num_mkpaths == num_locats
+        say('Created default directories')
+      else
+        say('Created some default directories')
+      end
+    else
+      say('Default directories already exist')
+    end
     puts('')
   end
 
-  def syncdown_boilerplate
-    # Murano creates a bunch of empty event handlers. Grab them now.
-    # E.g., for the product, you'll see around 20 interface_<operationId>
-    # event handlers for the interaction with the application and one named device2_event.lua for receive the device data;
-    # For the application, you'll see about 4 event handlers, including
-    # timer_timer.lua, tsdb_exportJob.lua, and user_account.lua. The product
-    # interface handlers are basic stubs, like
-    #       --#EVENT interface <operationId>
-    #       operation.solution_id = nil
-    #       return Device2.<operationId>(operation)
+  def make_directory(cfgi, base, purge)
+    path = $cfg[cfgi]
+    path = Pathname.new(path) unless path.is_a?(Pathname)
+    path = base + path
+    # The path is generally a directory, but sometimes
+    # it's a file (e.g., spec/resources.yaml).
+    basedir = path
+    basedir = basedir.dirname unless basedir.extname.empty?
+    raise "Unexpected: bad basedir" if basedir.to_s.empty? || basedir == File::SEPARATOR
+    found_basedir = false
+    basedir.ascend do |path|
+      if path == base
+        found_basedir = true
+        break
+      end
+    end
+    unless found_basedir
+      say("Please fix your config: location.* values should be a subdir of location.base (#{base})")
+      exit 1
+    end
+    dry = $cfg['tool.dry']
+    num_rmdir = 0
+    if purge
+      MrMurano::Verbose.warning("--dry: Not purging existing directory: #{basedir}") if dry
+      files = Dir.glob("#{basedir}/*")
+      FileUtils.rm_rf(files, noop: dry)
+      FileUtils.rmdir(basedir, noop: dry)
+      MrMurano::Verbose.verbose("Removed #{basedir}")
+      num_rmdir += 1
+    end
+    return 0, num_rmdir if path.exist?
+    MrMurano::Verbose.warning("--dry: Not creating default directory: #{basedir}") if dry
+    FileUtils.mkdir_p(basedir, noop: dry)
+    FileUtils.touch(path, noop: dry) if path != basedir
+    return 1, num_rmdir
+  end
+
+  def syncdown_new_and_existing
+    # If the user already has an existing project, grab its files.
+    #
+    # If Murano creates any default eventhandlers, grab those
+    # (e.g., the timer event, tsdb exportJob, and user account
+    # are all created by the platform; and our own method,
+    # link_solutions, creates a boilerplate event handler that
+    # yeti-ui expects to find (you'll have issues in the web UI
+    # if this script doesn't exist)).
+    #
     # See:
     #   sphinx-api/src/views/interface/productService.swagger.json
-    # The application handlers are different, and serve as example boilerplate
-    # for user to fill in.
-    # Automatically pull down eventhandler stubs that Murano creates for new solutions.
-    # Iterate over: MrMurano::EventHandlerSolnPrd, MrMurano::EventHandlerSolnApp.
-    MrMurano::SyncRoot.instance.each_filtered(eventhandlers: true) do |_name, _type, klass, desc|
-      MrMurano::Verbose.whirly_start("Checking #{desc}...")
-      begin
-        syncable = klass.new
-      rescue MrMurano::ConfigError => err
-        acc.error("Could not fetch status for #{desc}: #{err}")
-        # MAYBE: exit?
-      rescue StandardError => _err
-        raise
-      else
-        # If the user didn't make both an application and a product,
-        # then some syncables won't have their IDs set.
-        next unless syncable.sid?
-        # Get list of changes. Leave :delete => true and :update => true so we
-        # can tell if there are existing files, in which case skip the pull.
-        stat = syncable.status(
-          asdown: true,
-          eventhandlers: true,
-        )
-        if stat[:todel].any? || stat[:tomod].any?
-          MrMurano::Verbose.whirly_stop
-          say("Skipping #{desc}: local files found")
-          puts('')
-        else
-          stat[:toadd].each do |item|
-            if !$cfg['tool.dry']
-              MrMurano::Verbose.whirly_msg("Pulling item #{item[:synckey]}")
-              dest = syncable.tolocalpath(syncable.location, item)
-              syncable.download(dest, item)
-            else
-              say("--dry: Not pulling item #{item[:synckey]}")
-            end
-          end
-        end
-      end
-      MrMurano::Verbose.whirly_stop
+    num_synced = syncdown_files(delete: false, create: true, update: false)
+    if num_synced > 0
+      inflection = MrMurano::Verbose.pluralize?('item', num_synced)
+      say("Synced #{num_synced} #{inflection}")
+    else
+      say('Items already synced')
     end
+    puts('')
   end
 
   def blather_success
