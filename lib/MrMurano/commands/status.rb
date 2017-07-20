@@ -67,7 +67,8 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
         lp
       else
         id = item[:synckey]
-        id += " (#{item[:pp_desc]})" unless item[:pp_desc].to_s.empty?
+        id += " (#{item[:pp_desc]})" unless item[:pp_desc].to_s.empty? || item[:pp_desc] == item[:synckey]
+        id
       end
     end
 
