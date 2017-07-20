@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -598,6 +598,9 @@ module MrMurano
       else
         sol.set_name!(solname)
       end
+      # MAYBE/2017-07-20: Detect if Business is ADC enabled. If not,
+      # creating a solution fails, e.g.,
+      #   Request Failed: 409: [409] upgrade
       sol = sol.biz.new_solution!(sol.name, sol.type) unless sol.name.to_s.empty?
       say "Created new #{sol.pretty_desc(add_type: true)}" if @verbose
       puts '' if @verbose
