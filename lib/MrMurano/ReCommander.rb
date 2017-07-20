@@ -31,6 +31,7 @@ end
 module Commander
   class Command
     attr_accessor :project_not_required
+    attr_accessor :restrict_to_cur_dir
 
     def verify_arg_count!(args, max_args=0)
       if max_args.zero?

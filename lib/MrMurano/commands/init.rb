@@ -113,6 +113,9 @@ command :init do |c|
 
   # This command can be run without a project config.
   c.project_not_required = true
+  # This command should not walk up the directory tree
+  # looking for a .murano/config project config file.
+  c.restrict_to_cur_dir = true
 
   c.action do |args, options|
     options.default(refresh: false, purge: false, sync: true, mkdirs: true)
