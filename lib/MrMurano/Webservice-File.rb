@@ -120,11 +120,11 @@ module MrMurano
             a << %{-X #{request.method}}
             a << %{'#{request.uri.to_s}'}
             a << %{-F file=@#{local.to_s}}
-            if $cfg['tool.curlfile_f'].nil?
+            if $cfg.curlfile_f.nil?
               puts a.join(' ')
             else
-              $cfg['tool.curlfile_f'] << a.join(' ') + "\n\n"
-              $cfg['tool.curlfile_f'].flush
+              $cfg.curlfile_f << a.join(' ') + "\n\n"
+              $cfg.curlfile_f.flush
             end
           end
 

@@ -37,7 +37,6 @@ module MrMurano
         self[:path] = Pathname.new(path) unless path.is_a? Pathname
         self[:data] = IniFile.new(filename: path.to_s) if self[:data].nil?
         self[:data].restore
-        init_curl_file
       end
 
       def write
@@ -59,27 +58,12 @@ module MrMurano
         self[:data].save
         path.chmod(0o600)
       end
-
-      # To capture curl calls when running rspec, write to a file.
-      def init_curl_file
-        if self[:data]['tool']['curldebug'] && !self[:data]['tool']['curlfile'].to_s.strip.empty?
-          if self[:data]['tool']['curlfile_f'].nil?
-            self[:data]['tool']['curlfile_f'] = File.open(self[:data]['tool']['curlfile'], 'a')
-            # MEH: Call $cfg['tool.curlfile_f'].close() at some point? Or let Ruby do on exit.
-            self[:data]['tool']['curlfile_f'] << Time.now.to_s + "\n"
-            self[:data]['tool']['curlfile_f'] << "murano #{ARGV.join(' ')}\n"
-            self[:data]['tool']['curlfile_f'].flush
-          end
-        elsif !self[:data]['tool']['curlfile_f'].nil?
-          self[:data]['tool']['curlfile_f'].close
-          self[:data]['tool']['curlfile_f'] = nil
-        end
-      end
     end
 
     attr_reader :paths
     attr_reader :projectDir
     attr_reader :project_exists
+    attr_reader :curlfile_f
 
     CFG_ENV_NAME = %(MURANO_CONFIGFILE)
     CFG_FILE_NAME = %(.murano/config)
@@ -279,6 +263,8 @@ module MrMurano
     def load
       # - read/write config file in [Project, User, System] (all are optional)
       @paths.each(&:load)
+      # If user wants curl commands dumped to a file, open that file.
+      init_curl_file
     end
 
     ## Load specified file into the config stack
@@ -424,6 +410,22 @@ module MrMurano
         end
       end
       locats
+    end
+
+    # To capture curl calls when running rspec, write to a file.
+    def init_curl_file
+      if self['tool.curldebug'] && !self['tool.curlfile'].to_s.strip.empty?
+        if @curlfile_f.nil?
+          @curlfile_f = File.open(self['tool.curlfile'], 'a')
+          # MEH: Call @curlfile_f.close() at some point? Or let Ruby do on exit.
+          @curlfile_f << Time.now.to_s + "\n"
+          @curlfile_f << "murano #{ARGV.join(' ')}\n"
+          @curlfile_f.flush
+        end
+      elsif !@curlfile_f.nil?
+        @curlfile_f.close
+        @curlfile_f = nil
+      end
     end
   end
 
