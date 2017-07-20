@@ -295,7 +295,13 @@ module MrMurano
         schema_path = Pathname.new(File.dirname(__FILE__)) + 'schema/resource-v1.0.0.yaml'
         # MAYBE/2017-07-03: Do we care if user duplicates keys in the yaml? See dup_count.
         schema = YAML.load_file(schema_path.to_s)
-        JSON::Validator.validate!(schema, here)
+        begin
+          JSON::Validator.validate!(schema, here)
+        rescue JSON::Schema::ValidationError => err
+          error("There is an error in the config file, #{from}")
+          error(%("#{err.message}"))
+          exit 1
+        end
 
         res = []
         here.each_pair do |key, value|
