@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Last Modified: 2017.07.18 /coding: utf-8
+# Last Modified: 2017.07.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -37,9 +37,9 @@ program :description, %(
 default_command :help
 
 # Look for .murano/config files.
-$cfg = MrMurano::Config.new
+$cfg = MrMurano::Config.new(::Commander::Runner.instance)
 $cfg.load
-$cfg.validate_cmd(::Commander::Runner.instance)
+$cfg.validate_cmd
 
 # Look for a (legacy) Solutionfile.json.
 $project = MrMurano::ProjectFile.new
