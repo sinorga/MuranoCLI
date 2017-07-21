@@ -600,7 +600,7 @@ module MrMurano
     # @return [Array<Item>] Items found
     def localitems(from)
       # TODO: Profile this.
-      debug "#{self.class.to_s}: Getting local items from: #{from}"
+      debug "#{self.class.to_s}: Getting local items from: #{from.to_s}"
       search_in = from.to_s
       sf = searchFor.map { |i| ::File.join(search_in, i) }
       debug "#{self.class.to_s}: Globs: #{sf}"
@@ -883,4 +883,3 @@ module MrMurano
     end
   end
 end
-

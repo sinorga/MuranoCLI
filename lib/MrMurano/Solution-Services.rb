@@ -190,13 +190,13 @@ module MrMurano
       # FIXME/VERIFY/2017-07-02: Check that products do not have Modules.
       @solntype = 'application.id'
       super
-      @uriparts << 'library'
+      @uriparts << 'module'
       @itemkey = :alias
       @project_section = :modules
     end
 
-    def tolocalname(item, _key)
-      name = item[:name]
+    def tolocalname(item, key)
+      name = item[:name].tr('.', '/')
       "#{name}.lua"
     end
 
@@ -212,22 +212,22 @@ module MrMurano
     end
 
     def list
-      ret = get
+      ret = get()
+      error ret.to_h.to_json
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       return [] unless ret.key?(:items)
       ret[:items].map { |i| ModuleItem.new(i) }
     end
 
-    def to_remote_item(_from, path)
-      name = path.basename.to_s.sub(/\..*/, '')
-      ModuleItem.new(name: name)
+    def to_remote_item(root, path)
+      name = path.relative_path_from(root).to_s.sub(/\.lua$/i, '').tr('/','.')
+      ModuleItem.new(:name => name)
     end
 
     def synckey(item)
       item[:name]
     end
   end
-  SyncRoot.add('modules', Module, 'M', %(Modules), true)
 
   # Services aka EventHandlers
   class EventHandler < ServiceBase
@@ -474,4 +474,3 @@ module MrMurano
   #SyncRoot.add('services', EventHandlerSolnApp, 'E', %(Application Event Handlers), true)
   #SyncRoot.add('interfaces', EventHandlerSolnPrd, 'E', %(Product Event Handlers), true)
 end
-

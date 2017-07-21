@@ -285,19 +285,18 @@ command :init do |c|
 
   def syncdown_boilerplate
     # Murano creates a bunch of empty event handlers. Grab them now.
-    # E.g., for the application, you'll see around 20 interface_<operationId>
-    # event handlers, and one named device2_event.lua; for the product, you'll
-    # see about 4 event handlers, including one named device2_event.lua (also:
-    # timer_timer.lua, tsdb_exportJob.lua, and user_account.lua). The application
+    # E.g., for the product, you'll see around 20 interface_<operationId>
+    # event handlers for the interaction with the application and one named device2_event.lua for receive the device data;
+    # For the application, you'll see about 4 event handlers, including
+    # timer_timer.lua, tsdb_exportJob.lua, and user_account.lua. The product
     # interface handlers are basic stubs, like
     #       --#EVENT interface <operationId>
     #       operation.solution_id = nil
     #       return Device2.<operationId>(operation)
-    # The product handlers are different, and serve as example boilerplate
-    # for user to fill in.
     # See:
     #   sphinx-api/src/views/interface/productService.swagger.json
-
+    # The application handlers are different, and serve as example boilerplate
+    # for user to fill in.
     # Automatically pull down eventhandler stubs that Murano creates for new solutions.
     # Iterate over: MrMurano::EventHandlerSolnPrd, MrMurano::EventHandlerSolnApp.
     MrMurano::SyncRoot.each_filtered(eventhandlers: true) do |_name, _type, klass, desc|
@@ -362,4 +361,3 @@ command :init do |c|
     puts('')
   end
 end
-

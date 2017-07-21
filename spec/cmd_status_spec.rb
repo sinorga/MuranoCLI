@@ -313,4 +313,3 @@ RSpec.describe 'murano status', :cmd, :needs_password do
     end
   end
 end
-
