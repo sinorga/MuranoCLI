@@ -6,7 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 module MrMurano
-  VERSION = '3.0.1.beta.4'
+  VERSION = '3.0.0.beta.4'
   EXE_NAME = File.basename($PROGRAM_NAME)
   SIGN_UP_URL = 'https://exosite.com/signup/'
 end

@@ -466,8 +466,8 @@ module MrMurano
     #
     # @param dest [Pathname] Full path of item to be removed
     # @param item [Item] Full details of item to be removed
-    def removelocal(dest, item)
-      dest.unlink
+    def removelocal(dest, _item)
+      dest.unlink if dest.exist?
     end
 
     def syncup_before
@@ -600,10 +600,10 @@ module MrMurano
     # @return [Array<Item>] Items found
     def localitems(from)
       # TODO: Profile this.
-      debug "#{self.class.to_s}: Getting local items from: #{from.to_s}"
+      debug "#{self.class}: Getting local items from: #{from}"
       search_in = from.to_s
       sf = searchFor.map { |i| ::File.join(search_in, i) }
-      debug "#{self.class.to_s}: Globs: #{sf}"
+      debug "#{self.class}: Globs: #{sf}"
       items = Dir[*sf].flatten.compact.reject do |p|
         ::File.directory?(p) or ignoring.any? do |i|
           ::File.fnmatch(i,p)

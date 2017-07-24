@@ -195,7 +195,7 @@ module MrMurano
       @project_section = :modules
     end
 
-    def tolocalname(item, key)
+    def tolocalname(item, _key)
       name = item[:name].tr('.', '/')
       "#{name}.lua"
     end
@@ -212,22 +212,26 @@ module MrMurano
     end
 
     def list
-      ret = get()
-      error ret.to_h.to_json
+      ret = get
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       return [] unless ret.key?(:items)
       ret[:items].map { |i| ModuleItem.new(i) }
     end
 
     def to_remote_item(root, path)
-      name = path.relative_path_from(root).to_s.sub(/\.lua$/i, '').tr('/','.')
-      ModuleItem.new(:name => name)
+      name = path.relative_path_from(root).to_s.sub(/\.lua$/i, '').tr('/', '.')
+      ModuleItem.new(name: name)
     end
 
     def synckey(item)
       item[:name]
     end
+
+    def self.description
+      %(Script Module)
+    end
   end
+  SyncRoot.add('modules', Module, 'M', %(Modules), true)
 
   # Services aka EventHandlers
   class EventHandler < ServiceBase

@@ -458,13 +458,13 @@ RSpec.describe MrMurano::Module do
       root = Pathname.new(@project_dir)
       path = Pathname.new(@project_dir) + 'test.lua'
       ret = @srv.to_remote_item(root, path)
-      expect(ret).to eq({:name=>'test'})
+      expect(ret).to eq(name: 'test')
     end
     it "reads sub folder one" do
       root = Pathname.new(@project_dir)
       path = Pathname.new(@project_dir) + 'src/test.lua'
       ret = @srv.to_remote_item(root, path)
-      expect(ret).to eq({:name=>'src.test'})
+      expect(ret).to eq(name: 'src.test')
     end
   end
 end
