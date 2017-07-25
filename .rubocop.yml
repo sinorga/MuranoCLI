@@ -1,7 +1,12 @@
-# Last Modified: 2017.07.18 /coding: utf-8
+# Last Modified: 2017.07.25 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
+
+# USAGE:
+#
+#   cd /exo/clients/exosite/MuranoCLI
+#   rubocop -D -c .rubocop.yml
 
 # "Incorrect indentation detected (column X instead of Y)."
 Layout/CommentIndentation:
@@ -22,6 +27,7 @@ Layout/TrailingBlankLines:
 # "Script file murano doesn't have execute permission."
 Lint/ScriptPermission:
   Exclude:
+    - 'bin/mr'
     - 'bin/murano'
 
 # "Assignment Branch Condition size for XXX is too high."
@@ -93,6 +99,8 @@ Style/EmptyMethod:
 # "The name of this source file (Xxxxxxx.rb) should use snake_case."
 Style/FileName:
   Exclude:
+    - 'Gemfile'
+    - 'MuranoCLI.gemspec'
     - 'lib/MrMurano.rb'
     - 'lib/MrMurano/Account.rb'
     - 'lib/MrMurano/Business.rb'
@@ -109,7 +117,9 @@ Style/FileName:
     - 'lib/MrMurano/Solution-Services.rb'
     - 'lib/MrMurano/Solution-Users.rb'
     - 'lib/MrMurano/Solution.rb'
+    - 'lib/MrMurano/SolutionId.rb'
     - 'lib/MrMurano/SubCmdGroupContext.rb'
+    - 'lib/MrMurano/SyncRoot.rb'
     - 'lib/MrMurano/SyncUpDown.rb'
     - 'lib/MrMurano/Webservice-Cors.rb'
     - 'lib/MrMurano/Webservice-Endpoint.rb'
@@ -140,4 +150,66 @@ Style/TrailingCommaInLiteral:
   # Rather than disable, tweak for multiline lists, so Rubocop will
   # still tell you not to use trailing comma in single-line list.
   EnforcedStyleForMultiline: "consistent_comma"
+
+# "Use safe navigation (&.) instead of checking if an object exists before
+#  calling the method."
+#
+# - "The Safe Navigation Operator (&.) in Ruby"
+#    http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/
+#
+# The safe nav op was only added in Ruby 2.3.0, and we support 2.0.
+Style/SafeNavigation:
+  Enabled: false
+
+# FIXME/2017-07-25: Finishing linting all the files!
+#   These files have not been linted since Rubocop was adopted.
+AllCops:
+  Include:
+    - 'bin/mr'
+    - 'bin/murano'
+    # These are included by default:
+    #- '**/Gemfile'
+    #- '**/Rakefile'
+    #- 'MuranoCLI.gemspec'
+  Exclude:
+    # HINT: You can use regexp in this list.
+    #- !ruby/regexp /old_and_unused\.rb$/
+    #
+    # 2017-07-25: It's probably not worth our time to lint the spec tests.
+    - 'spec/**/*'
+    #
+    # FIXME/2017-07-25: Enable Rakefile check! [Currently: 106 offenses]
+    - '**/Rakefile'
+    #
+    # FIXME/2017-07-25: Finish linting these files, and delete from this list.
+    - 'lib/MrMurano/Config-Migrate.rb'
+    - 'lib/MrMurano/Content.rb'
+    - 'lib/MrMurano/Gateway.rb'
+    - 'lib/MrMurano/Mock.rb'
+    - 'lib/MrMurano/ReCommander.rb'
+    - 'lib/MrMurano/Setting.rb'
+    - 'lib/MrMurano/SubCmdGroupContext.rb'
+    - 'lib/MrMurano/Webservice-Cors.rb'
+    - 'lib/MrMurano/Webservice-Endpoint.rb'
+    - 'lib/MrMurano/Webservice-File.rb'
+    - 'lib/MrMurano/Webservice.rb'
+    - 'lib/MrMurano/commands.rb'
+    - 'lib/MrMurano/hash.rb'
+    - 'lib/MrMurano/http.rb'
+    - 'lib/MrMurano/makePretty.rb'
+    - 'lib/MrMurano/commands/business.rb'
+    - 'lib/MrMurano/commands/completion-bash.erb'
+    - 'lib/MrMurano/commands/completion-zsh.erb'
+    - 'lib/MrMurano/commands/completion.rb'
+    - 'lib/MrMurano/commands/content.rb'
+    - 'lib/MrMurano/commands/cors.rb'
+    - 'lib/MrMurano/commands/devices.rb'
+    - 'lib/MrMurano/commands/gb.rb'
+    - 'lib/MrMurano/commands/keystore.rb'
+    - 'lib/MrMurano/commands/logs.rb'
+    - 'lib/MrMurano/commands/mock.rb'
+    - 'lib/MrMurano/commands/password.rb'
+    - 'lib/MrMurano/commands/settings.rb'
+    - 'lib/MrMurano/commands/timeseries.rb'
+    - 'lib/MrMurano/commands/tsdb.rb'
 
