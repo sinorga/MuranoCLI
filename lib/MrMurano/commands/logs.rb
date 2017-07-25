@@ -11,10 +11,10 @@ require 'MrMurano/Solution'
 command :logs do |c|
   c.syntax = %(murano logs [options])
   c.summary = %(Get the logs for a solution)
-  c.description = %{
+  c.description = %(
 Get the logs for a solution.
-  }.strip
-  c.option '-f','--follow', %(Follow logs from server)
+  ).strip
+  c.option '-f', '--follow', %(Follow logs from server)
   c.option '--[no-]pretty', %(Reformat JSON blobs in logs.)
   c.option '--[no-]localtime', %(Adjust Timestamps to be in local time)
   c.option '--raw', %(Don't do any formating of the log data)
@@ -28,10 +28,11 @@ Get the logs for a solution.
   command_add_solution_pickers c
 
   c.action do |args, options|
+    c.verify_arg_count!(args)
     options.default pretty: true, localtime: true, raw: false
 
     unless options.type
-      MrMurano::Verbose.error "Please specify the --type of solution"
+      MrMurano::Verbose.error 'Please specify the --type of solution'
       exit 1
     end
 
@@ -48,7 +49,7 @@ Get the logs for a solution.
       # Open a lasting connection and continually feed makePretty().
       begin
         sol.get('/logs?polling=true') do |request, http|
-          request["Accept-Encoding"] = "None"
+          request['Accept-Encoding'] = 'None'
           http.request(request) do |response|
             remainder = ''
             response.read_body do |chunk|
@@ -62,11 +63,9 @@ Get the logs for a solution.
                   begin
                     js = JSON.parse(
                       m,
-                      {
-                        :allow_nan => true,
-                        :symbolize_names => true,
-                        :create_additions => false,
-                      }
+                      allow_nan: true,
+                      symbolize_names: true,
+                      create_additions: false,
                     )
                     puts MrMurano::Pretties.makePretty(js, options)
                   rescue
