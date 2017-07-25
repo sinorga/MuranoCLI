@@ -207,7 +207,6 @@ AllCops:
     - 'lib/MrMurano/commands/keystore.rb'
     - 'lib/MrMurano/commands/logs.rb'
     - 'lib/MrMurano/commands/mock.rb'
-    - 'lib/MrMurano/commands/password.rb'
     - 'lib/MrMurano/commands/settings.rb'
     - 'lib/MrMurano/commands/timeseries.rb'
     - 'lib/MrMurano/commands/tsdb.rb'
