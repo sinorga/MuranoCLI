@@ -151,11 +151,14 @@ command :init do |c|
     # just one found, use that; if more than one found, ask user which one
     # to use; else, if no businesses found, spit out the new-account URL
     # and tell the user to use their browser to create a new Business.
-    say("Found User #{Rainbow($cfg['user.name']).underline}")
-    puts('')
+    unless $cfg['user.name'].to_s.empty?
+      say("Found User #{Rainbow($cfg['user.name']).underline}")
+      puts('')
+    end
 
     # Find and verify Business by ID (from $cfg) or by name (from --business),
-    # or ask user which business to use.
+    # or ask user which business to use. If user has not logged on, they will
+    # be asked for their username and/or password first.
     biz = business_find_or_ask(acc, ask_user: options.refresh)
 
     # Verify or ask user to create Solutions.
