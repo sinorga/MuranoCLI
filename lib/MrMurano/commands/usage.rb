@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.07.25 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,7 +13,7 @@ command :usage do |c|
   c.description = %(
 Get usage info for solution(s).
   ).strip
-  # Add the flags: --types, --ids, --names, --[no]-header.
+  # Add the flags: --type, --ids, --names, --[no]-header.
   command_add_solution_pickers(c)
 
   c.action do |args, options|

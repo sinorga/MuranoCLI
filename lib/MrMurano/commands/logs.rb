@@ -21,12 +21,10 @@ Get the logs for a solution.
   # FIXME/2017-06-23: It'd be nice to allow :all
   #   But then we'd have to interleave output somehow with --follow,
   #   maybe using separate threads?
-  #c.option('--type TYPE', MrMurano::Business::ALLOWED_TYPES+[:all],
-  #  %{Log solution(s) of the specified type (default: all)})
-  c.option('--type TYPE', MrMurano::Business::ALLOWED_TYPES,
-    %{Log solution of the specified type})
+  # For now, command_add_solution_pickers adds --type and user must
+  # specify either "application" or "product".
 
-  # Add the flags: --types, --ids, --names, --[no]-header.
+  # Add the flags: --type, --ids, --names, --[no]-header.
   command_add_solution_pickers c
 
   c.action do |args,options|
