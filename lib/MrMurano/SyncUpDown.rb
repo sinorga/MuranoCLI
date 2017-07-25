@@ -671,21 +671,18 @@ module MrMurano
           removelocal(dest, aitem)
           num_synced += 1
         end
-        num_synced += 1 if options[:delete] && !$cfg['tool.dry']
       end
       toadd.each do |item|
         syncdown_item(item, into, options, :create, 'Adding') do |dest, aitem|
           download(dest, aitem)
           num_synced += 1
         end
-        num_synced += 1 if options[:create] && !$cfg['tool.dry']
       end
       tomod.each do |item|
         syncdown_item(item, into, options, :update, 'Updating') do |dest, aitem|
           download(dest, aitem)
           num_synced += 1
         end
-        num_synced += 1 if options[:update] && !$cfg['tool.dry']
       end
       syncdown_after(into)
 
