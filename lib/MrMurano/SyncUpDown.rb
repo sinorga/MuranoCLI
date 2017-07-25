@@ -603,23 +603,25 @@ module MrMurano
       todel.each do |item|
         syncup_item(item, options, :delete, 'Removing') do |aitem|
           remove(aitem[itemkey])
+          num_synced += 1
         end
-        num_synced += 1 if options[:delete] && !$cfg['tool.dry']
       end
       toadd.each do |item|
         syncup_item(item, options, :create, 'Adding') do |aitem|
           upload(aitem[:local_path], aitem.reject { |k, _v| k == :local_path }, false)
+          num_synced += 1
         end
-        num_synced += 1 if options[:create] && !$cfg['tool.dry']
       end
       tomod.each do |item|
         syncup_item(item, options, :update, 'Updating') do |aitem|
           upload(aitem[:local_path], aitem.reject { |k, _v| k == :local_path }, false)
+          num_synced += 1
         end
-        num_synced += 1 if options[:update] && !$cfg['tool.dry']
       end
-      MrMurano::Verbose.whirly_stop(force: true)
+
       syncup_after
+
+      MrMurano::Verbose.whirly_stop(force: true)
 
       num_synced
     end
@@ -632,10 +634,14 @@ module MrMurano
         if !$cfg['tool.dry']
           yield item
         else
-          say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
+          MrMurano::Verbose.whirly_interject do
+            say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
+          end
         end
       elsif $cfg['tool.verbose']
-        say("--no-#{action}: Skipping item #{item[:synckey]}")
+        MrMurano::Verbose.whirly_interject do
+          say("--no-#{action}: Skipping item #{item[:synckey]}")
+        end
       end
     end
 
@@ -663,20 +669,20 @@ module MrMurano
       todel.each do |item|
         syncdown_item(item, into, options, :delete, 'Removing') do |dest, aitem|
           removelocal(dest, aitem)
+          num_synced += 1
         end
-        num_synced += 1 if options[:delete] && !$cfg['tool.dry']
       end
       toadd.each do |item|
         syncdown_item(item, into, options, :create, 'Adding') do |dest, aitem|
           download(dest, aitem)
+          num_synced += 1
         end
-        num_synced += 1 if options[:create] && !$cfg['tool.dry']
       end
       tomod.each do |item|
         syncdown_item(item, into, options, :update, 'Updating') do |dest, aitem|
           download(dest, aitem)
+          num_synced += 1
         end
-        num_synced += 1 if options[:update] && !$cfg['tool.dry']
       end
       syncdown_after(into)
 
