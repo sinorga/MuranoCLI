@@ -1,4 +1,10 @@
-# -*- encoding: utf-8 -*-
+# Last Modified: 2017.07.25 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 require_relative 'lib/MrMurano/version.rb'
 
@@ -10,7 +16,7 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
   s.homepage    = 'https://github.com/exosite/MuranoCLI'
   s.summary     = 'Do more from the command line with Murano'
-  s.description = %{Do more from the command line with Murano
+  s.description = %(Do more from the command line with Murano
 
   Push and pull data from Murano.
   Get status on what things have changed.
@@ -19,11 +25,11 @@ Gem::Specification.new do |s|
   and so much more.
 
   This gem was formerly known as MrMurano.
-  }
+)
   s.required_ruby_version = '~> 2.0'
 
   # FIXME: 2017-05-25: Remove this message eventually.
-  s.post_install_message = %{
+  s.post_install_message = %(
 MuranoCLI v3.0 introduces backwards-incompatible changes.
 
 If your business was created with MuranoCLI v2.x, you will
@@ -32,7 +38,7 @@ explicitly specifying the version. For instance,
 
   murano _2.2.4_ --version
 
-}
+)
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
