@@ -92,7 +92,7 @@ If section is left out, then key is assumed to be in the 'tool' section.
   end
 
   def get_scope_from_options(options)
-    verify_scope_options!(options)
+    num_scopes = verify_scope_options!(options)
     return nil if num_scopes.zero?
     scope = nil
     scope = :user if options.user
@@ -108,7 +108,7 @@ If section is left out, then key is assumed to be in the 'tool' section.
     num_scopes += 1 if options.project
     num_scopes += 1 if options.env
     num_scopes += 1 if options.specified
-    return unless num_scopes > 1
+    return num_scopes unless num_scopes > 1
     MrMurano::Verbose.error(
       'Ambiguous: Please specify only one of --user, --project, --env, or --specified'
     )
