@@ -186,7 +186,6 @@ AllCops:
     - 'lib/MrMurano/Content.rb'
     - 'lib/MrMurano/Gateway.rb'
     - 'lib/MrMurano/Mock.rb'
-    - 'lib/MrMurano/ReCommander.rb'
     - 'lib/MrMurano/Setting.rb'
     - 'lib/MrMurano/SubCmdGroupContext.rb'
     - 'lib/MrMurano/Webservice-Cors.rb'
