@@ -38,7 +38,7 @@ module MrMurano
     end
 
     def sid=(sid)
-      sid = INVALID_SID if sid.nil? || sid.empty?
+      sid = INVALID_SID if sid.nil? || !sid.is_a?(String) || sid.empty?
       @valid_sid = false if sid.to_s.empty? || sid == INVALID_SID || (defined?(@sid) && sid != @sid)
       @sid = sid
       # MAGIC_NUMBER: The 2nd element is the solution ID, e.g., solution/<sid>/...
