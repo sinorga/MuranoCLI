@@ -204,7 +204,7 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
         end
       end
 
-      solz.map do |meta|
+      solz.map! do |meta|
         case meta[:type].to_sym
         when :application
           MrMurano::Application.new(meta)
@@ -215,6 +215,10 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
           MrMurano::Solution.new(meta)
         end
       end
+
+      # Sort results.
+      solz.sort_by!(&:name)
+      solz.sort_by! { |sol| ALLOWED_TYPES.index(sol.type) }
     end
 
     ## Given a type (:application or :product), return a Solution instance.
