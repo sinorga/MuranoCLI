@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'MrMurano/Account'
+require 'MrMurano/Config'
 
 command 'login' do |c|
   c.syntax = %(murano login)
@@ -13,12 +14,13 @@ command 'login' do |c|
   c.description = %(
 Log into Murano.
 
-If you are having trouble logging in, try deleting the saved password first.
+If you are having trouble logging in, try deleting the saved password first:
 
-  `murano password delete <username>`
+  murano password delete <username>
   ).strip
   c.option '--show-token', %(Shows the API token)
   c.project_not_required = true
+  c.prompt_if_logged_off = true
 
   c.action do |args, options|
     c.verify_arg_count!(args)

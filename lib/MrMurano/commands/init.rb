@@ -116,6 +116,8 @@ command :init do |c|
   # This command should not walk up the directory tree
   # looking for a .murano/config project config file.
   c.restrict_to_cur_dir = true
+  # Ask for user password if not found.
+  c.prompt_if_logged_off = true
 
   c.action do |args, options|
     options.default(refresh: false, purge: false, sync: true, mkdirs: true)

@@ -213,6 +213,10 @@ module MrMurano
     end
     private :find_project_dir
 
+    def active_command
+      @runner.active_command
+    end
+
     def validate_cmd
       # Most commands should be run from within a Murano project (sub-)directory.
       # If user is running a project command not within a project directory,
