@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.25 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -139,10 +139,10 @@ module MrMurano
     # ---------------------------------------------------------------------
 
     # 2017-07-05: [lb] notes that the remaining methods are not called.
+    #   (Tilstra might be calling these via the _qb plugin.)
 
     def new_account(email, name, company='')
       # this is a kludge.  If we're gonna support this, do it better.
-      @@token = ''
       @token = ''
       post('key/', email: email, name: name, company: company, source: 'signup')
     end
@@ -153,7 +153,6 @@ module MrMurano
 
     def accept_account(token, password)
       # this is a kludge.  If we're gonna support this, do it better.
-      @@token = ''
       @token = ''
       post("key/#{token}", password: password)
     end

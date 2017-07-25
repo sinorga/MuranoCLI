@@ -61,9 +61,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
     def fmtr(item)
       if item.key? :local_path
         lp = item[:local_path].relative_path_from(Pathname.pwd).to_s
-        if item.key?(:line) && item[:line] > 0
-          return "#{lp}:#{item[:line]}"
-        end
+        return "#{lp}:#{item[:line]}" if item.key?(:line) && item[:line] > 0
         lp
       else
         id = item[:synckey]
@@ -139,7 +137,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       options.asdown = false
       options.asup = true
     elsif !options.asdown.nil? && !options.asup.nil?
-      if !(options.asdown ^ options.asup)
+      unless options.asdown ^ options.asup
         error('Please specify either --asdown or --asup, but not both!')
         exit 1
       end
@@ -148,7 +146,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
     elsif options.asup.nil?
       options.asup = !options.asdown
     else
-      raise("Unexpected code path.")
+      raise('Unexpected code path.')
     end
 
     MrMurano::SyncRoot.instance.each_filtered(options.__hash__) do |_name, type, klass, desc|

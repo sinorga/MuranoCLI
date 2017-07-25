@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.25 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -29,15 +29,15 @@ module MrMurano
     #attr_accessor :name
     attr_accessor :role
     attr_reader :meta
+    attr_writer :bid
+    attr_writer :name
 
     def initialize(data=nil)
       @bid = nil
       @name = nil
       @valid = false
       @user_bizes = {}
-      unless data.nil?
-        self.meta = data
-      end
+      self.meta = data unless data.nil?
     end
 
     def valid?
@@ -49,21 +49,13 @@ module MrMurano
       $cfg['business.id'].to_s
     end
 
-    def bid=(bid)
-      @bid = bid
-    end
-
     def name
       return @name unless @name.to_s.empty?
       $cfg['business.name'].to_s
     end
 
-    def name=(name)
-      @name = name
-    end
-
     def bizid
-      self.bid
+      bid
     end
 
     def ==(other)

@@ -34,13 +34,9 @@ module MrMurano
 
     def whirly_start(msg)
       if $cfg['tool.verbose']
-        if @whirly_users > 0
-          whirly_pause
-        end
+        whirly_pause if @whirly_users > 0
         say msg
-        if @whirly_users > 0
-          whirly_unpause
-        end
+        whirly_unpause if @whirly_users > 0
       end
       return if $cfg['tool.no-progress']
       # Count the number of calls to whirly_start, so that the
@@ -112,7 +108,7 @@ module MrMurano
     end
 
     def whirly_unpause
-      return if !@whirly_paused
+      return unless @whirly_paused
       @whirly_paused = false
       whirly_show
     end

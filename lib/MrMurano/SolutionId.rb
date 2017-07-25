@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.07.25 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -19,7 +19,7 @@ module MrMurano
         # see instead 'application.id' and 'product.id'. We just
         # use 'solution.id' to indicate that the caller specified
         # a solution ID explicitly (i.e., it's not from the $cfg).
-        raise "Missing sid or class @solntype!?" if sid.to_s.empty?
+        raise 'Missing sid or class @solntype!?' if sid.to_s.empty?
         @solntype = 'solution.id'
       end
       if sid

@@ -19,6 +19,11 @@ module MrMurano
     end
 
     ##
+    # Return the @syncset
+    # @return [Array<String>] array of Syncables
+    attr_reader :syncset
+
+    ##
     # Add a new entry to syncable things
     # @param name [String] The name to use for the long option
     # @param klass [Class] The class to instanciate from
@@ -41,7 +46,7 @@ module MrMurano
 
     ##
     # Remove all syncables.
-    def reset()
+    def reset
       @syncset = []
     end
 
@@ -50,13 +55,13 @@ module MrMurano
     # @return [Array<String>] array of names
     def bydefault
       @syncset = [] unless defined?(@syncset)
-      @syncset.select { |a| a.bydefault }.map { |a| a.name }
+      @syncset.select(&:bydefault).map(&:name)
     end
 
     ##
     # Iterate over all syncables
     # @param block code to run on each
-    def each(&block)
+    def each
       @syncset = [] unless defined?(@syncset)
       @syncset.each { |a| yield a.name, a.type, a.class, a.desc }
     end
@@ -64,7 +69,7 @@ module MrMurano
     ##
     # Iterate over all syncables with option arguments.
     # @param block code to run on each
-    def each_option(&block)
+    def each_option
       @syncset = [] unless defined?(@syncset)
       @syncset.each { |a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc }
     end
@@ -73,7 +78,7 @@ module MrMurano
     # Iterate over just the selected syncables.
     # @param opt [Hash{Symbol=>Boolean}] Options hash of which to select from
     # @param block code to run on each
-    def each_filtered(opt, &block)
+    def each_filtered(opt)
       @syncset = [] unless defined?(@syncset)
       check_same(opt)
       @syncset.each do |a|
@@ -102,13 +107,6 @@ module MrMurano
       end
 
       nil
-    end
-
-    ##
-    # Return the @syncset
-    # @return [Array<String>] array of Syncables
-    def syncset
-      @syncset
     end
   end
 end

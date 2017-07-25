@@ -64,6 +64,7 @@ module MrMurano
     attr_reader :projectDir
     attr_reader :project_exists
     attr_reader :curlfile_f
+    attr_writer :exclude_scopes
 
     CFG_ENV_NAME = %(MURANO_CONFIGFILE)
     CFG_FILE_NAME = %(.murano/config)
@@ -332,10 +333,6 @@ module MrMurano
     # For setting internal, this-run-only values.
     def []=(key, value)
       set(key, value, :internal)
-    end
-
-    def exclude_scopes=(skip_scopes)
-      @exclude_scopes = skip_scopes
     end
 
     ## Dump out a combined config

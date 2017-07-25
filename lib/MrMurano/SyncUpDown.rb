@@ -601,20 +601,20 @@ module MrMurano
 
       itemkey = @itemkey.to_sym
       todel.each do |item|
-        syncup_item(item, options, :delete, "Removing") do |item|
-          remove(item[itemkey])
+        syncup_item(item, options, :delete, 'Removing') do |aitem|
+          remove(aitem[itemkey])
         end
         num_synced += 1 if options[:delete] && !$cfg['tool.dry']
       end
       toadd.each do |item|
-        syncup_item(item, options, :create, "Adding") do |item|
-          upload(item[:local_path], item.reject { |k, _v| k == :local_path }, false)
+        syncup_item(item, options, :create, 'Adding') do |aitem|
+          upload(aitem[:local_path], aitem.reject { |k, _v| k == :local_path }, false)
         end
         num_synced += 1 if options[:create] && !$cfg['tool.dry']
       end
       tomod.each do |item|
-        syncup_item(item, options, :update, "Updating") do |item|
-          upload(item[:local_path], item.reject { |k, _v| k == :local_path }, false)
+        syncup_item(item, options, :update, 'Updating') do |aitem|
+          upload(aitem[:local_path], aitem.reject { |k, _v| k == :local_path }, false)
         end
         num_synced += 1 if options[:update] && !$cfg['tool.dry']
       end
@@ -661,20 +661,20 @@ module MrMurano
 
       into = location
       todel.each do |item|
-        syncdown_item(item, into, options, :delete, "Removing") do |dest, item|
-          removelocal(dest, item)
+        syncdown_item(item, into, options, :delete, 'Removing') do |dest, aitem|
+          removelocal(dest, aitem)
         end
         num_synced += 1 if options[:delete] && !$cfg['tool.dry']
       end
       toadd.each do |item|
-        syncdown_item(item, into, options, :create, "Adding") do |dest, item|
-          download(dest, item)
+        syncdown_item(item, into, options, :create, 'Adding') do |dest, aitem|
+          download(dest, aitem)
         end
         num_synced += 1 if options[:create] && !$cfg['tool.dry']
       end
       tomod.each do |item|
-        syncdown_item(item, into, options, :update, "Updating") do |dest, item|
-          download(dest, item)
+        syncdown_item(item, into, options, :update, 'Updating') do |dest, aitem|
+          download(dest, aitem)
         end
         num_synced += 1 if options[:update] && !$cfg['tool.dry']
       end
@@ -717,7 +717,7 @@ module MrMurano
           # For resources, it's a bit trickier.
           # NOTE: This class adds a :selected key to the local item that we need
           # to remove, since it's not part of the remote items that gets downloaded.
-          local = local.reject { |k, v| k == :selected }
+          local = local.reject { |k, _v| k == :selected }
           diff_item_write(io, merged, local, nil)
         end
       end

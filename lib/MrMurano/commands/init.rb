@@ -126,7 +126,11 @@ command :init do |c|
     validate_dir!(acc, args, options)
 
     puts('')
-    verbage = $cfg.project_exists ? 'Rebasing' : 'Creating'
+    if $cfg.project_exists
+      verbage = 'Rebasing'
+    else
+      verbage = 'Creating'
+    end
     say("#{verbage} project at #{Rainbow($cfg['location.base'].to_s).underline}")
 
     puts('')
@@ -310,10 +314,10 @@ command :init do |c|
     # it's a file (e.g., spec/resources.yaml).
     basedir = path
     basedir = basedir.dirname unless basedir.extname.empty?
-    raise "Unexpected: bad basedir" if basedir.to_s.empty? || basedir == File::SEPARATOR
+    raise 'Unexpected: bad basedir' if basedir.to_s.empty? || basedir == File::SEPARATOR
     found_basedir = false
-    basedir.ascend do |path|
-      if path == base
+    basedir.ascend do |ancestor|
+      if ancestor == base
         found_basedir = true
         break
       end
@@ -336,7 +340,7 @@ command :init do |c|
     MrMurano::Verbose.warning("--dry: Not creating default directory: #{basedir}") if dry
     FileUtils.mkdir_p(basedir, noop: dry)
     FileUtils.touch(path, noop: dry) if path != basedir
-    return 1, num_rmdir
+    [1, num_rmdir]
   end
 
   def syncdown_new_and_existing

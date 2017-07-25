@@ -132,6 +132,7 @@ module MrMurano
       if cache_file.file?
         cache_file.open('r+') do |io|
           # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
+          # rubocop:disable Security/YAMLLoad
           cache = YAML.load(io)
           cache = {} unless cache
           io.rewind

@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.14 /coding: utf-8
+# Last Modified: 2017.07.25 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -36,8 +36,9 @@ module MrMurano
         #  https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-load
         #  https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-safe_load
         # 2017-07-05: Oh, I don't think safe_load exists in Ruby 2 or 2.2...
-        @data = YAML.load(io)
         #@data = YAML.safe_load(io)
+        # rubocop:disable Security/YAMLLoad
+        @data = YAML.load(io)
       end
     end
 

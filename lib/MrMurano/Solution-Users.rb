@@ -56,6 +56,8 @@ module MrMurano
       here = []
       if local.exist?
         # FIXME/2017-07-18: Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
+        #   Disabling [rubo]cop for now.
+        # rubocop:disable Security/YAMLLoad
         local.open('rb') { |io| here = YAML.load(io) }
         here = [] if here == false
       end
