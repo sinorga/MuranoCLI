@@ -163,9 +163,18 @@ module MrMurano
 
       def syncup_after
         if !@there.empty?
-          upload_all(@there)
-        else
-          error 'Nothing to sync'
+          if !$cfg['tool.dry']
+            sync_update_progress('Updating product resources')
+            upload_all(@there)
+          else
+            MrMurano::Verbose.whirly_interject do
+              say("--dry: Not updating resources")
+            end
+          end
+        elsif $cfg['tool.verbose']
+          MrMurano::Verbose.whirly_interject do
+            say('No resources changed')
+          end
         end
         @there = nil
       end
