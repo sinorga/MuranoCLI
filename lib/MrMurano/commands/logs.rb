@@ -112,4 +112,13 @@ Get the logs for a solution.
 end
 alias_command 'product logs', 'logs', '--type', 'product'
 alias_command 'application logs', 'logs', '--type', 'application'
+# Should we follow suit and do what the murano domain command does?
+alias_command 'logs product', 'logs', '--type', 'product'
+alias_command 'logs products', 'logs', '--type', 'product'
+alias_command 'logs prod', 'logs', '--type', 'product'
+alias_command 'logs prods', 'logs', '--type', 'product'
+alias_command 'logs application', 'logs', '--type', 'application'
+alias_command 'logs applications', 'logs', '--type', 'application'
+alias_command 'logs app', 'logs', '--type', 'application'
+alias_command 'logs apps', 'logs', '--type', 'application'
 
