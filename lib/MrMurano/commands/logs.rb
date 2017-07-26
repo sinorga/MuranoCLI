@@ -34,7 +34,7 @@ Get the logs for a solution.
 
     options.default pretty: true, localtime: true, raw: false
 
-    unless options.type
+    unless options.type && options.type != :all
       MrMurano::Verbose.error 'Please specify the --type of solution'
       exit 1
     end
