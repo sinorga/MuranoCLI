@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.07.26 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -29,7 +29,11 @@ module MrMurano
         self.sid = $cfg[@solntype]
       end
       # Maybe raise 'No application!' or 'No product!'.
-      raise MrMurano::ConfigError.new("No #{/(.*).id/.match(@solntype)[1]} ID!") if @sid.to_s.empty?
+      if @sid.to_s.empty?
+        raise MrMurano::ConfigError.new(
+          "No #{/(.*).id/.match(@solntype)[1]} ID!"
+        )
+      end
     end
 
     def sid?
@@ -58,6 +62,14 @@ module MrMurano
     # rubocop:disable Style/MethodName
     def apiId
       @sid
+    end
+
+    def endpoint(path='')
+      # This is hopefully just a DEV error, and not something user will ever see!
+      if @uriparts[@uriparts_sidex] == INVALID_SID
+        error("Solution ID missing! Invalid ‘#{@solntype}’")
+        exit 2
+      end
     end
   end
 end
