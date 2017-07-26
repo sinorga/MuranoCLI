@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.07.26 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -102,7 +102,18 @@ module Commander
     def parse_global_options
       defopts = ($cfg["#{active_command.name}.options"] || '').split
       @args.push(*defopts)
-      old_parse_global_options
+      begin
+        old_parse_global_options
+      rescue OptionParser::MissingArgument => err
+        if err.message.start_with?('missing argument:')
+          puts err.message
+        else
+          MrMurano::Verbose.error(
+            "There was a problem interpreting the options: ‘#{err.message}’"
+          )
+        end
+        exit 2
+      end
     end
 
     # Weird. --help doesn't work if other flags also specified.
