@@ -192,7 +192,7 @@ module MrMurano
       set('eventhandler.ignoring', '*_test.lua *_spec.lua .*', :defaults)
       set('eventhandler.skiplist', 'websocket webservice device.service_call interface device2.event', :defaults)
 
-      set('modules.searchFor', '*.lua */*.lua', :defaults)
+      set('modules.searchFor', '*.lua **/*.lua', :defaults)
       set('modules.ignoring', '*_test.lua *_spec.lua .*', :defaults)
 
       if Gem.win_platform?

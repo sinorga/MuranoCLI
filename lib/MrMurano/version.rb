@@ -10,4 +10,3 @@ module MrMurano
   EXE_NAME = File.basename($PROGRAM_NAME)
   SIGN_UP_URL = 'https://exosite.com/signup/'
 end
-

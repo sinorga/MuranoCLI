@@ -35,7 +35,7 @@ ignoring = *_test.lua *_spec.lua .*
 skiplist = websocket webservice device.service_call interface device2.event
 
 [modules]
-searchFor = *.lua */*.lua
+searchFor = *.lua **/*.lua
 ignoring = *_test.lua *_spec.lua .*
 
 [diff]
