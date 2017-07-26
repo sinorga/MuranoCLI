@@ -199,7 +199,7 @@ NOTE: The ``--#EVENT`` header is mandatory. It tells Murano
 how to interpret the snippet of Lua code.
 
 If you run the ``status`` command, you should see that there's now one
-file modified locally (the event handler that we must edited) that is
+file modified locally (the event handler that we just edited) that is
 not synced with the corresponding event handler on Murano.
 
 .. code-block:: text
