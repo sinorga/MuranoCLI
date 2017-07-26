@@ -411,7 +411,7 @@ Verify that you see a new event in the log.
     EVENT: {
         "connection_id":"3DD9rAZ95bgro5O0kGGD",
         "identity":"1af384dd-57ba-4f13-9d89-45dbcbf207de",
-        "ip":"50.232.36.169",
+        "ip":"123.234.012.234",
         "payload":[{
             "timestamp":1.501096560116624e+15,
             "values":{
