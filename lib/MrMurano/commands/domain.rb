@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.07.26 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -25,6 +25,8 @@ Print the domain for this solution.
 
     c.verify_arg_count!(args)
 
+    # Get a list of solutions. Implicitly calls
+    # command_defaults_solution_picker to set options defaults.
     solz = must_fetch_solutions!(options)
 
     domain_s = MrMurano::Verbose.pluralize?('domain', solz.length)

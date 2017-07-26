@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.07.26 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -29,6 +29,9 @@ Get the logs for a solution.
 
   c.action do |args, options|
     c.verify_arg_count!(args)
+
+    command_defaults_solution_picker(options)
+
     options.default pretty: true, localtime: true, raw: false
 
     unless options.type

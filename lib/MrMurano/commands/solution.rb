@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.07.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -344,17 +344,45 @@ alias_command 'application list', 'solution list', '--type', 'application', '--n
 alias_command 'solutions list', 'solution list'
 
 def command_add_solution_pickers(c)
-  c.option '--type TYPE', MrMurano::Business::ALLOWED_TYPES, %(Find solution(s) by type)
-  c.option '--ids IDS', Array, %(Find solution(s) by ID (IDS can be 1 ID or comma-separated list))
-  c.option '--names NAME', Array, %(Find solution(s) by name (NAMES can be 1 name or comma-separated list))
-  c.option '--find WORD', Array, %(Find solution(s) by word(s) (fuzzy match))
-  c.option '--[no-]header', %(Output solution descriptions)
+  types = MrMurano::Business::ALLOWED_TYPES.join(', ')
+  # 2017-07-26: HA! The --type option can get masked by aliases.
+  # For instance, if the option is required ("--type TYPE"), then
+  #   murano domain --type product
+  # fails, because the "domain product" alias steals the --type argument,
+  # so the parser exits, complaining that --type is missing an argument!
+  # This, however, works:
+  #   murano domain --type=product
+  # as does
+  #   murano domain -t product
+  # To work around this, make the argument optional ("--type [TYPE]") and
+  # then do some extra processing later to check for this special case.
+  c.option(
+    '--type [TYPE]',
+    MrMurano::Business::ALLOWED_TYPES,
+    %(Find solution(s) by type (one of: #{types}))
+  )
+  c.option(
+    '--ids IDS',
+    Array,
+    %(Find solution(s) by ID (IDS can be 1 ID or comma-separated list))
+  )
+  c.option(
+    '--names NAME',
+    Array,
+    %(Find solution(s) by name (NAMES can be 1 name or comma-separated list))
+  )
+  c.option(
+    '--find WORD', Array, %(Find solution(s) by word(s) (fuzzy match))
+  )
+  c.option(
+    '--[no-]header', %(Output solution descriptions)
+  )
 end
 
 # To use must_fetch_solutions!, call command_add_solution_pickers(c) in
 # the command block, and then call fetch_solutions! from the action.
 def must_fetch_solutions!(options)
-  command_set_soln_picker_defaults(options)
+  command_defaults_solution_picker(options)
 
   biz = MrMurano::Business.new
   biz.must_business_id!
@@ -374,9 +402,67 @@ def must_fetch_solutions!(options)
   culled
 end
 
-def command_set_soln_picker_defaults(options)
+def command_defaults_solution_picker(options)
   options.default(header: true)
-  options.type = :all unless options.type
+  if options.type == true
+    # KLUDGE/2017-07-26: Work around rb-commander peculiarity.
+    # The alias_command stole the --type parameter, e.g.,
+    #   murano domain --type product
+    # is interpreted using the "domain product" alias,
+    # so the command that's parsed is actually
+    #   murano domain --type product --type
+    # and the latter --type wins [which is something that [lb]
+    # really dislikes about rb-commander, is that it does not
+    # support more than one of the same options, taking only the
+    # last one's argument].
+    next_posit = 1
+    ARGV.each do |arg|
+      if arg.downcase == '--type'
+        if ARGV.length == next_posit
+          MrMurano::Verbose.error('missing argument: --type')
+          exit 1
+        else
+          # NOTE: Commander treats arguments case sensitively, but not --options.
+          possible_type = ARGV[next_posit].to_sym
+          if MrMurano::Business::ALLOWED_TYPES.include?(possible_type)
+            options.type = possible_type
+            break
+          end
+        end
+      end
+      next_posit += 1
+    end
+    if options.type == true
+      MrMurano::Verbose.error('missing argument: --type')
+      exit 1
+    end
+  else
+    # --application and --product are abused options: when specified without
+    # an argument, they're aliases for --type application and --type product,
+    # respectively; but when specified with an argument, the argument is the
+    # name or ID of a solution.
+    num_ways = 0
+    num_ways += 1 if options.application == true
+    num_ways += 1 if options.product == true
+    num_ways += 1 if options.type
+    if num_ways.zero?
+      options.type = :all
+    elsif num_ways == 1
+      if options.application == true
+        options.type = :application
+        options.application = nil
+      elsif options.product == true
+        options.type = :product
+        options.product = nil
+      # else, options.type already set.
+      end
+    else
+      MrMurano::Verbose.error(
+        'ambiguous intention: please specify only one of --type, --application, or --product'
+      )
+      exit 1
+    end
+  end
   options.ids = [] if options.ids.nil?
   options.names = [] if options.names.nil?
   options.find = [] if options.find.nil?
