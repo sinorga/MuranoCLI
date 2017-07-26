@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.07.26 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -62,7 +62,7 @@ Show readable information about the current configuration.
         puts %(application: https://#{selected_application.domain})
       elsif selected_application_id
         #puts 'selected application not in business'
-        puts "application ID found in config is not in business (#{selected_application_id})"
+        puts "application ID from config is not in business (#{selected_application_id})"
       else
         #puts 'no application selected'
         puts 'application ID not found in config'
@@ -75,7 +75,7 @@ Show readable information about the current configuration.
         puts %(product: #{selected_product.name})
       elsif selected_product_id
         #puts 'selected product not in business'
-        puts "product ID found in config is not in business (#{selected_product_id})"
+        puts "product ID from config is not in business (#{selected_product_id})"
       else
         #puts 'no product selected'
         puts 'product ID not found in config'
