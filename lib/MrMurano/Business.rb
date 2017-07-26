@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.07.26 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -164,7 +164,9 @@ or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> 
     #ALLOWED_TYPES = [:domain, :onepApi, :dataApi, :application, :product,].freeze
     ALLOWED_TYPES = %i[application product].freeze
 
-    def solutions(type=:all, invalidate=false, match_sid=nil, match_name=nil, match_either=nil)
+    def solutions(
+      type=:all, invalidate=false, match_sid=nil, match_name=nil, match_either=nil
+    )
       debug "Getting all solutions of type #{type}"
       must_business_id!
 
