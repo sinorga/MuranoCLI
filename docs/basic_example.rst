@@ -314,6 +314,7 @@ processed how we indicated in the event handler (which is to log it).
         "timestamp":1.501087497424287e+15,
         "type":"provisioned"
         }
+
     DEBUG [n51cq3fea5zc40cs4_event] 2017-07-26T14:09:30.000-05:00:
     EVENT: {
         "connection_id":"QWJeZcpXej5h5f5hwdLY",
@@ -390,6 +391,7 @@ Verify that you see a new event in the log.
         "timestamp":1.501087497424287e+15,
         "type":"provisioned"
         }
+
     DEBUG [n51cq3fea5zc40cs4_event] 2017-07-26T14:09:30.000-05:00:
     EVENT: {
         "connection_id":"QWJeZcpXej5h5f5hwdLY",
@@ -404,6 +406,7 @@ Verify that you see a new event in the log.
         "timestamp":1.501096170487898e+15,
         "type":"data_in"
         }
+
     DEBUG [n51cq3fea5zc40cs4_event] 2017-07-26T14:16:00.000-05:00:
     EVENT: {
         "connection_id":"3DD9rAZ95bgro5O0kGGD",
