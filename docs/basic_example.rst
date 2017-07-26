@@ -176,7 +176,7 @@ Product ID, so grab that, and use the ID to make the name of the Lua script.
 
     services/n51cq3fea5zc40cs4_event.lua
 
-You'll notice that Murano already created a simple event handler.:
+You'll notice that Murano already created a simple event handler.
 
 .. code-block:: text
 
