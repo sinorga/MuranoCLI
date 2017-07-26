@@ -57,6 +57,8 @@ module MrMurano
         spinner: EXO_QUADRANTS,
         status: @whirly_msg,
         append_newline: false,
+        #remove_after_stop: false,
+        #stream: $stderr,
       )
       @whirly_time = Time.now
       @whirly_cols, _rows = HighLine::SystemExtensions.terminal_size
