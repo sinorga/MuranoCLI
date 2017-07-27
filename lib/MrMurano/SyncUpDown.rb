@@ -732,7 +732,7 @@ module MrMurano
           # For resources, it's a bit trickier.
           # NOTE: This class adds a :selected key to the local item that we need
           # to remove, since it's not part of the remote items that gets downloaded.
-          local = local.reject { |k, _v| k == :selected }
+          local = local.reject { |k, _v| k == :selected } unless local.nil?
           diff_item_write(io, merged, local, nil)
         end
       end
