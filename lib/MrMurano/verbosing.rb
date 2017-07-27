@@ -44,7 +44,7 @@ module MrMurano
     end
 
     def error(msg)
-      whirly_interject { MrMurano::Verbose.error(msg) }
+      MrMurano::Verbose.error(msg)
     end
 
     def self.error(msg)
