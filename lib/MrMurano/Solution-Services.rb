@@ -232,10 +232,6 @@ module MrMurano
     def synckey(item)
       item[:name]
     end
-
-    def self.description
-      %(Script Module)
-    end
   end
   SyncRoot.instance.add('modules', Module, 'M', true)
 
