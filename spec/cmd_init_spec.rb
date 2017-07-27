@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.14 /coding: utf-8
+# Last Modified: 2017.07.27 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -15,6 +15,7 @@ RSpec.describe 'murano init', :cmd do
 
   def expectedResponseWhenIdsFoundInConfig(
     t,
+    expect_rebasing: false,
     has_one_each_soln: false,
     has_no_solutions: false,
     expect_proj_file_write: true,
@@ -25,7 +26,17 @@ RSpec.describe 'murano init', :cmd do
     expecting = []
     expecting += [
       "\n", # 0
-      t.a_string_starting_with('Creating project at '), # 1
+    ]
+    if !expect_rebasing
+      expecting += [
+        t.a_string_starting_with('Creating project at '), # 1
+      ]
+    else
+      expecting += [
+        t.a_string_starting_with('Rebasing project at '), # 1
+      ]
+    end
+    expecting += [
       "\n", # 2
       t.a_string_starting_with('Found User '), # 3
       "\n", # 4
@@ -89,6 +100,14 @@ RSpec.describe 'murano init', :cmd do
         "\n",
       ]
     end
+    expecting += [
+      t.a_string_matching(%r{Adding item \w+_event\n}),
+      "Adding item tsdb_exportJob\n",
+      "Adding item timer_timer\n",
+      "Adding item user_account\n",
+      "Synced 8 items\n",
+      "\n",
+    ]
     expecting += [
       "Success!\n",
       "\n",
@@ -326,6 +345,7 @@ RSpec.describe 'murano init', :cmd do
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
       expected = expectedResponseWhenIdsFoundInConfig(
         self,
+        expect_rebasing: true,
         expect_proj_file_write: false,
         # Because the /tmp/murcli-test/services directory is empty,
         # murano init *will* download all the event handlers.
