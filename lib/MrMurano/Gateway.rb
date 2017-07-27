@@ -358,8 +358,9 @@ module MrMurano
           opts = {}
         end
         whirly_start('Enabling Device...')
-        put("/#{CGI.escape(id.to_s)}", opts)
+        putted = put("/#{CGI.escape(id.to_s)}", opts)
         whirly_stop
+        putted
       end
       alias whitelist enable
       alias create enable
