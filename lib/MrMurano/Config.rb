@@ -101,8 +101,9 @@ module MrMurano
       end
     end
 
-    def initialize(cmd_runner)
+    def initialize(cmd_runner=nil)
       @runner = cmd_runner
+      @curlfile_f = nil
 
       @paths = []
       @paths << ConfigFile.new(:internal, nil, IniFile.new)
@@ -118,7 +119,7 @@ module MrMurano
 
       @project_dir, @project_exists = find_project_dir
       # For murano init, do not use parent config file as project config.
-      if @runner.active_command.restrict_to_cur_dir
+      if !@runner.nil? && @runner.active_command.restrict_to_cur_dir
         pwd = Pathname.new(Dir.pwd).realpath
         if @project_dir != pwd
           @project_dir = pwd
@@ -213,21 +214,23 @@ module MrMurano
     end
     private :find_project_dir
 
-    def active_command
-      @runner.active_command
+    def prompt_if_logged_off
+      !@runner.nil? && @runner.active_command.prompt_if_logged_off
     end
 
     def validate_cmd
       # Most commands should be run from within a Murano project (sub-)directory.
       # If user is running a project command not within a project directory,
       # we'll print a message now and exit the app from run_active_command later.
-      the_cmd = @runner.active_command
-      unless the_cmd.name == 'help' || the_cmd.project_not_required || @project_exists
-        error %(The "#{the_cmd.name}" command only works in a Murano project.)
-        say %(Please change to a project directory, or run `murano init` to create a new project.)
-        # Note that commnander-rb uses an at_exit hook, which we hack around.
-        @runner.command_exit = 1
-        return
+      unless @runner.nil?
+        the_cmd = @runner.active_command
+        unless the_cmd.name == 'help' || the_cmd.project_not_required || @project_exists
+          error %(The "#{the_cmd.name}" command only works in a Murano project.)
+          say %(Please change to a project directory, or run `murano init` to create a new project.)
+          # Note that commnander-rb uses an at_exit hook, which we hack around.
+          @runner.command_exit = 1
+          return
+        end
       end
 
       migrate_old_config(@project_dir)

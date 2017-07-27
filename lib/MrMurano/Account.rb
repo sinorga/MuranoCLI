@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.07.27 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -56,7 +56,7 @@ Or set your password with `murano password set <username>`.
       warned_once = false
       if user.empty?
         prologue = 'No Murano user account found.'
-        unless $cfg.active_command.prompt_if_logged_off
+        unless $cfg.prompt_if_logged_off
           MrMurano::Verbose.whirly_stop
           error("#{prologue}\n#{LOGIN_ADVICE}")
           exit 2
@@ -75,7 +75,7 @@ Or set your password with `murano password set <username>`.
       user_pass = pwd_file.get(host, user)
       if user_pass.nil?
         prologue = "No Murano password found for #{user}."
-        unless $cfg.active_command.prompt_if_logged_off
+        unless $cfg.prompt_if_logged_off
           MrMurano::Verbose.whirly_stop
           error("#{prologue}\n#{LOGIN_ADVICE}")
           exit 2
