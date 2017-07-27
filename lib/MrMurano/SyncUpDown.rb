@@ -537,7 +537,11 @@ module MrMurano
       search_in = from.to_s
       sf = searchFor.map { |i| ::File.join(search_in, i) }
       debug "#{self.class}: Globs: #{sf}"
-      items = Dir[*sf].flatten.compact.reject do |p|
+      # 2017-07-27: Add uniq to cull duplicate entries that globbing
+      # all the ways might produce, otherwise status/sync/diff complain
+      # about duplicate resources. I [lb] think this problem has existed
+      # but was exacerbated by the change to support sub-directory scripts.
+      items = Dir[*sf].uniq.flatten.compact.reject do |p|
         ::File.directory?(p) || ignoring.any? do |i|
           ::File.fnmatch(i, p)
         end
