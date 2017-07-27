@@ -124,7 +124,6 @@ module MrMurano
       # @yieldparam key [Symbol] The name of the key
       # @yieldparam value [Object] The value for that key
       # @return [Item]
-#      def each_pair(&block)
       def each_pair
         instance_variables.each do |key|
           yield as_sym(key), instance_variable_get(key)
@@ -488,7 +487,13 @@ module MrMurano
           end
         end
       elsif !skip_warn
-        warning "Skipping missing location ‘#{location}’"
+        @missing_complaints = [] if !defined?(@missing_complaints)
+        unless @missing_complaints.include?(location)
+          msg = "Skipping missing location ‘#{location}’"
+          msg += " (#{self.class.description})" unless self.class.description.to_s.empty?
+          warning(msg)
+          @missing_complaints << location
+        end
       end
       items.values
     end
