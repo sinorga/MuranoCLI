@@ -63,8 +63,8 @@ module MrMurano
     attr_reader :paths
     attr_reader :projectDir
     attr_reader :project_exists
-    attr_reader :curlfile_f
     attr_writer :exclude_scopes
+    attr_accessor :curlfile_f
 
     CFG_ENV_NAME = %(MURANO_CONFIGFILE)
     CFG_FILE_NAME = %(.murano/config)
