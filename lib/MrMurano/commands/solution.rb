@@ -417,7 +417,7 @@ def command_defaults_solution_picker(options)
     # last one's argument].
     next_posit = 1
     ARGV.each do |arg|
-      if arg.downcase == '--type'
+      if arg.casecmp('--type').zero?
         if ARGV.length == next_posit
           MrMurano::Verbose.error('missing argument: --type')
           exit 1

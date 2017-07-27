@@ -29,11 +29,8 @@ module MrMurano
         self.sid = $cfg[@solntype]
       end
       # Maybe raise 'No application!' or 'No product!'.
-      if @sid.to_s.empty?
-        raise MrMurano::ConfigError.new(
-          "No #{/(.*).id/.match(@solntype)[1]} ID!"
-        )
-      end
+      return unless @sid.to_s.empty?
+      raise MrMurano::ConfigError.new("No #{/(.*).id/.match(@solntype)[1]} ID!")
     end
 
     def sid?
@@ -64,12 +61,11 @@ module MrMurano
       @sid
     end
 
-    def endpoint(path='')
+    def endpoint(_path='')
       # This is hopefully just a DEV error, and not something user will ever see!
-      if @uriparts[@uriparts_sidex] == INVALID_SID
-        error("Solution ID missing! Invalid ‘#{@solntype}’")
-        exit 2
-      end
+      return unless @uriparts[@uriparts_sidex] == INVALID_SID
+      error("Solution ID missing! Invalid ‘#{@solntype}’")
+      exit 2
     end
   end
 end
