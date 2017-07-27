@@ -745,8 +745,12 @@ module MrMurano
 
         # 2017-07-03: No worries, Ruby 3.0 frozen string literals, cmd is a list.
         cmd = $cfg['diff.cmd'].shellsplit
-        remote_path = trmt.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
-        local_path = tlcl.path.gsub(::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR)
+        remote_path = trmt.path.gsub(
+          ::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR
+        )
+        local_path = tlcl.path.gsub(
+          ::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR
+        )
         if asdown
           cmd << local_path
           cmd << remote_path
