@@ -426,8 +426,11 @@ def command_defaults_solution_picker(options)
           possible_type = ARGV[next_posit].to_sym
           if MrMurano::Business::ALLOWED_TYPES.include?(possible_type)
             options.type = possible_type
-            break
+          else
+            MrMurano::Verbose.error("unrecognized --type: #{possible_type}")
+            exit 1
           end
+          break
         end
       end
       next_posit += 1
