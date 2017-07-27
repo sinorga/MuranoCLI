@@ -623,7 +623,7 @@ module MrMurano
       end
       tomod.each do |item|
         syncup_item(item, options, :update, 'Updating') do |aitem|
-          upload(aitem[:local_path], aitem.reject { |k, _v| k == :local_path }, false)
+          upload(aitem[:local_path], aitem.reject { |k, _v| k == :local_path }, true)
           num_synced += 1
         end
       end
