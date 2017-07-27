@@ -636,11 +636,11 @@ module MrMurano
     end
 
     def syncup_item(item, options, action, verbage)
-      prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
-      prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
-      sync_update_progress(prog_msg)
       if options[action]
         if !$cfg['tool.dry']
+          prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
+          prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
+          sync_update_progress(prog_msg)
           yield item
         else
           MrMurano::Verbose.whirly_interject do
@@ -649,7 +649,7 @@ module MrMurano
         end
       elsif $cfg['tool.verbose']
         MrMurano::Verbose.whirly_interject do
-          say("--no-#{action}: Skipping item #{item[:synckey]}")
+          say("--no-#{action}: Not #{verbage.downcase} item #{item[:synckey]}")
         end
       end
     end
@@ -699,18 +699,18 @@ module MrMurano
     end
 
     def syncdown_item(item, into, options, action, verbage)
-      prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
-      prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
-      sync_update_progress(prog_msg)
       if options[action]
         if !$cfg['tool.dry']
+          prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
+          prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
+          sync_update_progress(prog_msg)
           dest = tolocalpath(into, item)
           yield dest, item
         else
           say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
         end
       elsif $cfg['tool.verbose']
-        say("--no-#{action}: Skipping item #{item[:synckey]}")
+        say("--no-#{action}: Not #{verbage.downcase} item #{item[:synckey]}")
       end
     end
 
