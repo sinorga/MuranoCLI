@@ -1,4 +1,5 @@
 require 'MrMurano/version'
+require 'MrMurano/ProjectFile'
 require 'MrMurano/Webservice-File'
 require '_workspace'
 
