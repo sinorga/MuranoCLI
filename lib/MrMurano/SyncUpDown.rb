@@ -799,7 +799,7 @@ module MrMurano
           item[:selected] = patterns.any? do |pattern|
             if pattern.to_s[0] == '#'
               match(item, pattern)
-            elsif item.local_path.nil?
+            elsif !defined?(item.local_path) || item.local_path.nil?
               false
             else
               item[:local_path].fnmatch(pattern)
