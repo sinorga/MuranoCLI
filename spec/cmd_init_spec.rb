@@ -19,6 +19,7 @@ RSpec.describe 'murano init', :cmd do
     has_one_each_soln: false,
     has_no_solutions: false,
     expect_proj_file_write: true,
+    creates_some_default_directories: false,
     local_files_found: false,
     local_files_found_application: false,
     local_files_found_product: false
@@ -84,8 +85,16 @@ RSpec.describe 'murano init', :cmd do
         "\n",
       ]
     end
+    if !creates_some_default_directories
+      expecting += [
+        "Created default directories\n",
+      ]
+    else
+      expecting += [
+        "Created some default directories\n",
+      ]
+    end
     expecting += [
-      "Created default directories\n",
       "\n",
     ]
     if local_files_found || local_files_found_application
@@ -102,10 +111,14 @@ RSpec.describe 'murano init', :cmd do
     end
     expecting += [
       t.a_string_matching(%r{Adding item \w+_event\n}),
-      "Adding item tsdb_exportJob\n",
-      "Adding item timer_timer\n",
-      "Adding item user_account\n",
-      "Synced 8 items\n",
+      # Order not consistent...
+      #"Adding item tsdb_exportJob\n",
+      #"Adding item timer_timer\n",
+      #"Adding item user_account\n",
+      t.a_string_starting_with('Adding item '),
+      t.a_string_starting_with('Adding item '),
+      t.a_string_starting_with('Adding item '),
+      "Synced 4 items\n",
       "\n",
     ]
     expecting += [
@@ -320,6 +333,8 @@ RSpec.describe 'murano init', :cmd do
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
       the_expected = expectedResponseWhenIdsFoundInConfig(
         self,
+        expect_rebasing: true,
+        creates_some_default_directories: true,
         # Because the /tmp/murcli-test/services directory is empty,
         # murano init *will* download all the event handlers.
         #local_files_found: true,
@@ -347,6 +362,7 @@ RSpec.describe 'murano init', :cmd do
         self,
         expect_rebasing: true,
         expect_proj_file_write: false,
+        creates_some_default_directories: true,
         # Because the /tmp/murcli-test/services directory is empty,
         # murano init *will* download all the event handlers.
         #local_files_found: true,
@@ -386,6 +402,8 @@ RSpec.describe 'murano init', :cmd do
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
       expected = expectedResponseWhenIdsFoundInConfig(
         self,
+        expect_rebasing: true,
+        creates_some_default_directories: true,
         # Because the /tmp/murcli-test/services directory is empty,
         # murano init *will* download all the event handlers.
         ##local_files_found_application: true,
@@ -427,6 +445,8 @@ RSpec.describe 'murano init', :cmd do
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
       expected = expectedResponseWhenIdsFoundInConfig(
         self,
+        expect_rebasing: true,
+        creates_some_default_directories: true,
         # Because the /tmp/murcli-test/services directory is empty,
         # murano init *will* download all the event handlers.
         ##local_files_found_application: true,
