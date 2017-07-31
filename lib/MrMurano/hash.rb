@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.07.19 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -42,19 +42,6 @@ class Hash
     end
     self
   end
-end
-
-def ordered_hash(dict)
-  ohash = OrderedHash.new
-  dict.keys.sort.each do |key|
-    value = dict[key]
-    if value.is_a? Hash
-      ohash[key] = ordered_hash(value)
-    else
-      ohash[key] = value
-    end
-  end
-  ohash
 end
 
 def ordered_hash(dict)
