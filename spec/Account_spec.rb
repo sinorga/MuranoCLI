@@ -70,6 +70,11 @@ RSpec.describe MrMurano::Account, "token" do
       expect(@acc).to receive(:error).once
       expect($terminal).to receive(:ask).once.and_return('dog')
       expect(@pswd).to receive(:set).once.with('bizapi.hosted.exosite.io','bob','dog')
+      # 2017-07-31: login_info may exit unless the command okays prompting for the password.
+      #   (If we don't set this, login_info exits, which we'd want to
+      #   catch with
+      #     expect {@acc.login_info }.to raise_error(SystemExit).and output('...')
+      expect($cfg).to receive(:prompt_if_logged_off).and_return(true)
 
       ret = @acc.login_info
       expect(ret).to eq(email: "bob", password: "dog")

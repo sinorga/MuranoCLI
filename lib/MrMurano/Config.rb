@@ -215,7 +215,13 @@ module MrMurano
     private :find_project_dir
 
     def prompt_if_logged_off
-      !@runner.nil? && @runner.active_command.prompt_if_logged_off
+      # MAYBE/2017-07-31: [lb] likes the idea of only prompting for the
+      # password for certain commands (e.g., `murano login` and `murano init`),
+      # but this might break a user's experience if they don't want to store
+      # their password in ~/.murano but instead always want to be prompted.
+      #!@runner.nil? && @runner.active_command.prompt_if_logged_off
+      # Disabling for now...
+      true
     end
 
     def validate_cmd
