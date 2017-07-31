@@ -487,7 +487,7 @@ module MrMurano
           end
         end
       elsif !skip_warn
-        @missing_complaints = [] if !defined?(@missing_complaints)
+        @missing_complaints = [] unless defined?(@missing_complaints)
         unless @missing_complaints.include?(location)
           # MEH/2017-07-31: This message is a little misleading on syncdown,
           #   e.g., in rspec ./spec/cmd_syncdown_spec.rb, one test blows away
