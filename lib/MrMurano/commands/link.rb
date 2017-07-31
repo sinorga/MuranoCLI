@@ -46,13 +46,20 @@ List the solutions that are linked.
     MrMurano::Verbose.whirly_stop
     pids = products.map(&:apiId)
 
+    # FIXME/2017-07-31: If the user has multiple solutions, won't
+    #   this method ask them to specify which application to use?
     appl = solution_find_or_create(biz: biz, type: :application)
 
-    MrMurano::Verbose.whirly_msg('Fetching application services...')
-    sercfg = MrMurano::ServiceConfig.new(appl.sid)
-    #scfgs = sercfg.list('?select=service,id,solution_id,script_key,alias')
-    scfgs = sercfg.list
-    MrMurano::Verbose.whirly_stop
+    if !appl.nil?
+      MrMurano::Verbose.whirly_msg('Fetching application services...')
+      sercfg = MrMurano::ServiceConfig.new(appl.sid)
+      #scfgs = sercfg.list('?select=service,id,solution_id,script_key,alias')
+      scfgs = sercfg.list
+      MrMurano::Verbose.whirly_stop
+    else
+      sercfg = MrMurano::ServiceConfig.new(MrMurano::SolutionId::INVALID_SID)
+      scfgs = []
+    end
 
     scfgs.select! { |s| pids.include? s[:service] }
 

@@ -306,7 +306,7 @@ List solution in the current business.
       headers = %i[apiId domain]
       solz = solz.map { |row| [row.apiId, row.domain] }
     else
-      headers = (solz.first.meta || {}).keys
+      headers = (solz.first && solz.first.meta || {}).keys
       headers.delete(:sid) if headers.include?(:apiId) && headers.include?(:sid)
       solz = solz.map { |row| headers.map { |hdr| row.meta[hdr] } }
     end
@@ -663,7 +663,7 @@ module MrMurano
         if @create_ok
           sol = solution_create_new_solution(sol)
         else
-          sol.error("No matching #{sol.type_name} found for ‘#{name_or_id}’")
+          sol.error("No #{Inflecto.pluralize(sol.type.to_s)} found")
           sol = nil
         end
       else
@@ -679,8 +679,10 @@ module MrMurano
       solname = @match_either if solname.nil?
       if solname.nil?
         #say "You do not have any #{type}s. Let's create one."
-        say "This business does not have any #{Inflecto.pluralize(sol.type.to_s)}. Let's create one" if @verbose
-        puts '' if @verbose
+        if @verbose
+          say("This business does not have any #{Inflecto.pluralize(sol.type.to_s)}. Let's create one")
+          puts ''
+        end
         solution_ask_for_name(sol)
       else
         sol.set_name!(solname)
