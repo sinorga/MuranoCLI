@@ -1,6 +1,7 @@
 require 'tempfile'
 require 'yaml'
 require 'MrMurano/version'
+require 'MrMurano/ProjectFile'
 require 'MrMurano/Solution'
 require 'MrMurano/SyncRoot'
 require '_workspace'

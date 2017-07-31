@@ -1,8 +1,8 @@
+require 'erb'
+require 'tempfile'
 require 'MrMurano/version'
 require 'MrMurano/Config'
 require '_workspace'
-require 'tempfile'
-require 'erb'
 
 RSpec.describe MrMurano::Config do
 

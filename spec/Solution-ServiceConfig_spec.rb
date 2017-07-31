@@ -1,7 +1,8 @@
+require 'tempfile'
 require 'MrMurano/version'
+require 'MrMurano/ProjectFile'
 require 'MrMurano/Solution-ServiceConfig'
 require 'MrMurano/SyncRoot'
-require 'tempfile'
 require '_workspace'
 
 RSpec.describe MrMurano::ServiceConfig do

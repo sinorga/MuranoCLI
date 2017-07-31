@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.31 /coding: utf-8
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -8,6 +8,7 @@ require 'highline/import'
 require 'MrMurano/version'
 require 'MrMurano/Account'
 require 'MrMurano/Config'
+require 'MrMurano/ProjectFile'
 require '_workspace'
 
 RSpec.describe MrMurano::Account, "token" do
@@ -20,6 +21,9 @@ RSpec.describe MrMurano::Account, "token" do
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
     $cfg['business.id'] = 'XYZxyz'
     $cfg['product.id'] = 'XYZ'
+
+    $project = MrMurano::ProjectFile.new
+    $project.load
 
     @acc = MrMurano::Account.instance
   end

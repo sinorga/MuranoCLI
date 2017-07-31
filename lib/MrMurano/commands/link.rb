@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -7,6 +7,7 @@
 
 require 'MrMurano/Account'
 require 'MrMurano/Solution-ServiceConfig'
+require 'MrMurano/SolutionId'
 
 command 'link' do |c|
   c.syntax = %(murano link)

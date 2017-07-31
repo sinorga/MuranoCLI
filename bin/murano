@@ -14,6 +14,8 @@ require 'pathname'
 require 'rainbow'
 require 'rubygems'
 require 'MrMurano'
+require 'MrMurano/Config'
+require 'MrMurano/ProjectFile'
 
 # DEVs: Store environs in an .env file that gets loaded here. Alternatively,
 #   run a Bash or similar script before you start developing.

@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'MrMurano/version'
 require 'MrMurano/Gateway'
+require 'MrMurano/ProjectFile'
 require 'MrMurano/SyncRoot'
 require '_workspace'
 
