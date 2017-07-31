@@ -489,6 +489,11 @@ module MrMurano
       elsif !skip_warn
         @missing_complaints = [] if !defined?(@missing_complaints)
         unless @missing_complaints.include?(location)
+          # MEH/2017-07-31: This message is a little misleading on syncdown,
+          #   e.g., in rspec ./spec/cmd_syncdown_spec.rb, one test blows away
+          #   local directories and does a syncdown, and on stderr you'll see
+          #     Skipping missing location ‘/tmp/d20170731-3150-1f50uj4/project/specs/resources.yaml’ (Resources)
+          #   but then later in the syncdown, that directory and file gets created.
           msg = "Skipping missing location ‘#{location}’"
           msg += " (#{self.class.description})" unless self.class.description.to_s.empty?
           warning(msg)

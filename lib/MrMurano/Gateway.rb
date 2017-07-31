@@ -228,6 +228,20 @@ module MrMurano
       end
 
       def resources_write(file_path)
+        # User can blow away specs/ directory if they want; we'll just make
+        # a new one. [This code somewhat copy-paste from make_directory.]
+        basedir = file_path
+        basedir = basedir.dirname unless basedir.extname.empty?
+        raise 'Unexpected: bad basedir' if basedir.to_s.empty? || basedir == File::SEPARATOR
+        unless basedir.exist?
+          if $cfg['tool.dry']
+            MrMurano::Verbose.warning(
+              "--dry: Not creating default directory: #{basedir}"
+            )
+          end
+          FileUtils.mkdir_p(basedir, noop: $cfg['tool.dry'])
+        end
+
         file_path.open('wb') do |io|
           # convert array to hash
           res = {}
