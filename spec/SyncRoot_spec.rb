@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.07.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -21,14 +21,24 @@ RSpec.describe MrMurano::SyncRoot do
 
   before(:example) do
     MrMurano::SyncRoot.instance.reset # also creates @@syncset
-    class User
-      def self.description
-        %(describe user)
+    # Weird/2017-07-31: I [lb] must[ve changed something, because this
+    # block being called twice, which is generating a warning:
+    #   /exo/clients/exosite/MuranoCLIs/MuranoCLI+landonb/spec/SyncRoot_spec.rb:30:
+    #       warning: method redefined; discarding old description
+    #   /exo/clients/exosite/MuranoCLIs/MuranoCLI+landonb/spec/SyncRoot_spec.rb:30:
+    #       warning: previous definition of description was here
+    if !defined?(User)
+      class User
+        def self.description
+          %(describe user)
+        end
       end
     end
-    class Role
-      def self.description
-        %(describe role)
+    if !defined?(Role)
+      class Role
+        def self.description
+          %(describe role)
+        end
       end
     end
     MrMurano::SyncRoot.instance.add('user', User, 'U', true)

@@ -122,14 +122,20 @@ RSpec.describe MrMurano::Gateway::Resources do
       resfile = Pathname.new('resources.yaml')
       src = File.join(@testdir, 'spec', 'fixtures', 'gateway_resource_files', 'resources.notyaml')
       FileUtils.copy(src, resfile.to_path)
-      expect{ @gw.localitems(resfile) }.to raise_error(JSON::Schema::ValidationError)
+      #expect{ @gw.localitems(resfile) }.to raise_error(JSON::Schema::ValidationError)
+      expect {
+        @gw.localitems(resfile)
+      }.to raise_error(SystemExit).and output("\e[31mThere is an error in the config file, resources.yaml\e[0m\n\e[31m\"The property '#/' of type Array did not match the following type: object\"\e[0m\n").to_stderr
     end
 
     it "isn't valid" do
       resfile = Pathname.new('resources.yaml')
       src = File.join(@testdir, 'spec', 'fixtures', 'gateway_resource_files', 'resources.notyaml')
       FileUtils.copy(src, resfile.to_path)
-      expect{ @gw.localitems(resfile) }.to raise_error(JSON::Schema::ValidationError)
+      #expect{ @gw.localitems(resfile) }.to raise_error(JSON::Schema::ValidationError)
+      expect {
+        @gw.localitems(resfile)
+      }.to raise_error(SystemExit).and output("\e[31mThere is an error in the config file, resources.yaml\e[0m\n\e[31m\"The property '#/' of type Array did not match the following type: object\"\e[0m\n").to_stderr
     end
   end
 
@@ -206,6 +212,8 @@ RSpec.describe MrMurano::Gateway::Resources do
 
       @io = instance_double("IO")
       @p = instance_double('Pathname')
+      expect(@p).to receive(:dirname).and_return(resfile.dirname)
+      expect(@p).to receive(:extname).and_return(resfile.extname)
       expect(@p).to receive(:open).and_yield(@io)
     end
     it "removes keys" do
