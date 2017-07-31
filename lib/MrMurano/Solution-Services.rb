@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.27 /coding: utf-8
+# Last Modified: 2017.07.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -198,6 +198,7 @@ module MrMurano
     end
 
     def self.description
+      # MAYBE/2017-07-31: Rename to "Script Modules", per Renaud's suggestion? [lb]
       %(Modules)
     end
 
