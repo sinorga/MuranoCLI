@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.07.31 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -161,8 +161,6 @@ Style/TrailingCommaInLiteral:
 Style/SafeNavigation:
   Enabled: false
 
-# FIXME/2017-07-25: Finishing linting all the files!
-#   These files have not been linted since Rubocop was adopted.
 AllCops:
   Include:
     - 'bin/mr'
@@ -171,17 +169,22 @@ AllCops:
     #- '**/Gemfile'
     #- '**/Rakefile'
     #- 'MuranoCLI.gemspec'
+  # FIXME/2017-07-25: Finishing linting all the files!
+  #   These files have not been linted since Rubocop was adopted.
   Exclude:
     # HINT: You can use regexp in this list.
     #- !ruby/regexp /old_and_unused\.rb$/
     #
     # 2017-07-25: It's probably not worth our time to lint the spec tests.
+    # 2017-07-31: 7735 offenses in the Spec tests -- not worth it to fix!!
     - 'spec/**/*'
     #
     # FIXME/2017-07-25: Enable Rakefile check! [Currently: 106 offenses]
+    # 2017-07-31: 122 offenses in the Rakefile.
     - '**/Rakefile'
     #
     # FIXME/2017-07-25: Finish linting these files, and delete from this list.
+    # 2017-07-31: 943 offenses herein these 26 files.
     - 'lib/MrMurano/Config-Migrate.rb'
     - 'lib/MrMurano/Content.rb'
     - 'lib/MrMurano/Gateway.rb'
