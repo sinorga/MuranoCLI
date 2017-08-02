@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.26 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -33,7 +33,11 @@ module MrMurano
     ].freeze
 
     def whirly_start(msg)
-      say msg if $cfg['tool.verbose']
+      if $cfg['tool.verbose']
+        whirly_pause if @whirly_users > 0
+        say msg
+        whirly_unpause if @whirly_users > 0
+      end
       return if $cfg['tool.no-progress']
       # Count the number of calls to whirly_start, so that the
       # first call to whirly_start is the message that gets
@@ -53,6 +57,8 @@ module MrMurano
         spinner: EXO_QUADRANTS,
         status: @whirly_msg,
         append_newline: false,
+        #remove_after_stop: false,
+        #stream: $stderr,
       )
       @whirly_time = Time.now
       @whirly_cols, _rows = HighLine::SystemExtensions.terminal_size
@@ -104,9 +110,15 @@ module MrMurano
     end
 
     def whirly_unpause
-      return if !@whirly_paused
+      return unless @whirly_paused
       @whirly_paused = false
       whirly_show
+    end
+
+    def whirly_interject
+      whirly_pause
+      yield
+      whirly_unpause
     end
   end
 end

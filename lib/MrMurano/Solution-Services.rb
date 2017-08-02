@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.13 /coding: utf-8
+# Last Modified: 2017.07.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,6 +13,7 @@ require 'net/http'
 require 'uri'
 require 'yaml'
 require 'MrMurano/Solution'
+require 'MrMurano/SyncRoot'
 
 module MrMurano
   ##
@@ -131,6 +132,7 @@ module MrMurano
       if cache_file.file?
         cache_file.open('r+') do |io|
           # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
+          # rubocop:disable Security/YAMLLoad
           cache = YAML.load(io)
           cache = {} unless cache
           io.rewind
@@ -190,13 +192,18 @@ module MrMurano
       # FIXME/VERIFY/2017-07-02: Check that products do not have Modules.
       @solntype = 'application.id'
       super
-      @uriparts << 'library'
+      @uriparts << 'module'
       @itemkey = :alias
       @project_section = :modules
     end
 
+    def self.description
+      # MAYBE/2017-07-31: Rename to "Script Modules", per Renaud's suggestion? [lb]
+      %(Modules)
+    end
+
     def tolocalname(item, _key)
-      name = item[:name]
+      name = item[:name].tr('.', '/')
       "#{name}.lua"
     end
 
@@ -218,8 +225,8 @@ module MrMurano
       ret[:items].map { |i| ModuleItem.new(i) }
     end
 
-    def to_remote_item(_from, path)
-      name = path.basename.to_s.sub(/\..*/, '')
+    def to_remote_item(root, path)
+      name = path.relative_path_from(root).to_s.sub(/\.lua$/i, '').tr('/', '.')
       ModuleItem.new(name: name)
     end
 
@@ -227,7 +234,7 @@ module MrMurano
       item[:name]
     end
   end
-  SyncRoot.add('modules', Module, 'M', %(Modules), true)
+  SyncRoot.instance.add('modules', Module, 'M', true)
 
   # Services aka EventHandlers
   class EventHandler < ServiceBase
@@ -430,7 +437,7 @@ module MrMurano
       # identifies Product services as 'device2' || 'interface'.
       # If this weren't always the case, we'd have two obvious options:
       #   1) Store Product and Application eventhandlers in separate
-      #      directories (and update the SyncRoot.add()s, below); or,
+      #      directories (and update the SyncRoot.instance.add()s, below); or,
       #   2) Put the solution type in the Lua script,
       #      e.g., change this:
       #        --#EVENT device2 data_in
@@ -467,11 +474,11 @@ module MrMurano
   end
 
   # Order here matters, because spec/cmd_init_spec.rb
-  SyncRoot.add('eventhandlers', EventHandlerSolnApp, 'E', EventHandlerSolnApp.description, true)
-  SyncRoot.add('eventhandlers', EventHandlerSolnPrd, 'E', EventHandlerSolnPrd.description, true)
+  SyncRoot.instance.add('eventhandlers', EventHandlerSolnApp, 'E', true)
+  SyncRoot.instance.add('eventhandlers', EventHandlerSolnPrd, 'E', true)
   # FIXME/2017-06-20: Should we use separate directories for prod vs app?
   #   [lb] thinks so if the locallist/PRODUCT_SERVICES kludge fails in the future.
-  #SyncRoot.add('services', EventHandlerSolnApp, 'E', %(Application Event Handlers), true)
-  #SyncRoot.add('interfaces', EventHandlerSolnPrd, 'E', %(Product Event Handlers), true)
+  #SyncRoot.instance.add('services', EventHandlerSolnApp, 'E', true)
+  #SyncRoot.instance.add('interfaces', EventHandlerSolnPrd, 'E', true)
 end
 
