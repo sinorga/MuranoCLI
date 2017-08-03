@@ -40,3 +40,7 @@ ignoring = *_test.lua *_spec.lua .*
 
 [diff]
 cmd = <%= Gem.win_platform? ? 'fc' : 'diff -u' %>
+
+[postgresql]
+migration_dir = sql-migrations
+
