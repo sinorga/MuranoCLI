@@ -83,7 +83,7 @@ function lock_kill_or_die() {
           echo "build locked, but not the kill! time for mischiefs" >> ${OUT_FILE}
           # Yeah! We get to kill a process!
           annoucement "Killing it!"
-          kill -s SIGINT ${build_pid} 2>1 >> ${OUT_FILE}
+          kill -s SIGINT ${build_pid} &>> ${OUT_FILE}
           if [[ $? -ne 0 ]]; then
             echo "Kill failed! on pid ‘${build_pid}’" >> ${OUT_FILE}
             # So, what happened? Did the build complete?
@@ -129,10 +129,10 @@ echo "cwd: $(pwd)" >> ${OUT_FILE}
 
 function build_it() {
   annoucement "BUILD IT"
-  rake build 2>1 >> ${OUT_FILE} && \
+  rake build &>> ${OUT_FILE} && \
       gem install -i $(ruby -rubygems -e 'puts Gem.dir') \
           pkg/MuranoCLI-$(ruby -e 'require "/exo/clients/exosite/MuranoCLI/lib/MrMurano/version.rb"; puts MrMurano::VERSION').gem \
-      2>1 >> ${OUT_FILE}
+      &>> ${OUT_FILE}
 }
 build_it
 
@@ -145,13 +145,13 @@ function test_concurrency() {
 
 function lint_it() {
   annoucement "LINT IT"
-  rubocop -D -c .rubocop.yml 2>1 >> ${OUT_FILE}
+  rubocop -D -c .rubocop.yml &>> ${OUT_FILE}
 }
 lint_it
 
 function rspec_it() {
   annoucement "RSPEC IT"
-  rake rspec 2>1 >> ${OUT_FILE}
+  rake rspec &>> ${OUT_FILE}
 }
 # This is probably not the best idea,
 # especially if your tests use the same
