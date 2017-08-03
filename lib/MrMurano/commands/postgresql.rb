@@ -63,6 +63,7 @@ Queries can include $# escapes that are filled from the --param option.
       ret = pg.query(args.join(' '), options.param)
     end
 
+    exit 1 if ret.nil?
     unless ret[:error].nil?
       pg.error "Returned error: #{ret[:error]}"
       exit 1
@@ -120,7 +121,7 @@ extra table in your database. (__murano_cli__.migrate_version)
   c.example %(murano postgresql migrate down 0), %(Run migrations down to version 0.)
 
   c.action do |args, options|
-    options.default dir: File.join($cfg['location.base'], $cfg['postgresql.migrations_dir'])
+    options.default dir: File.join($cfg['location.base'], ($cfg['postgresql.migrations_dir'] or ''))
 
     direction = args.shift
     if direction =~ /down/i
