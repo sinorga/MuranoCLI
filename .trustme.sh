@@ -141,7 +141,7 @@ function test_concurrency() {
 }
 # DEVs: Wanna test CTRL-C more easily by keeping the script alive longer?
 #       Then uncomment this.
-test_concurrency
+#test_concurrency
 
 function lint_it() {
   annoucement "LINT IT"
@@ -159,13 +159,11 @@ function rspec_it() {
 #rspec_it
 
 time_n=$(date +%s.%N)
-echo "Build finished at $(date '+%Y-%m-%d_%H-%M-%S')" >> ${OUT_FILE}
-#touch ${DONE_FILE}
-
-echo "Install started at: $time_0" >> ${OUT_FILE}
-echo "Install finishd at: $time_n" >> ${OUT_FILE}
 time_elapsed=$(echo "$time_n - $time_0" | bc -l)
-echo "Elapsed: $time_elapsed secs." >> ${OUT_FILE}
+annoucement "DONE!"
+echo "Build finished at $(date '+%H:%M:%S') on $(date '+%Y-%m-%d') in $time_elapsed secs." >> ${OUT_FILE}
+
+#touch ${DONE_FILE}
 
 trap - SIGINT
 
