@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -113,6 +113,7 @@ Call `#{MrMurano::EXE_NAME} business list` to get a list of business IDs.
 Set the ID temporarily using --config business.id=<ID>
 or add to the project config using \`#{MrMurano::EXE_NAME} config business.id <ID>\`
 or add to the user config using \`#{MrMurano::EXE_NAME} config business.id <ID> --user\`
+or set it interactively using \`#{MrMurano::EXE_NAME} init\`
       ).strip
     end
 

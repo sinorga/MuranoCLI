@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.03 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -233,13 +233,22 @@ module MrMurano
         basedir = file_path
         basedir = basedir.dirname unless basedir.extname.empty?
         raise 'Unexpected: bad basedir' if basedir.to_s.empty? || basedir == File::SEPARATOR
+
         unless basedir.exist?
           if $cfg['tool.dry']
             MrMurano::Verbose.warning(
               "--dry: Not creating default directory: #{basedir}"
             )
+          else
+            FileUtils.mkdir_p(basedir, noop: $cfg['tool.dry'])
           end
-          FileUtils.mkdir_p(basedir, noop: $cfg['tool.dry'])
+        end
+
+        if $cfg['tool.dry']
+          MrMurano::Verbose.warning(
+            "--dry: Not writing resources file: #{file_path}"
+          )
+          return
         end
 
         file_path.open('wb') do |io|

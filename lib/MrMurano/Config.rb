@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -390,6 +390,12 @@ module MrMurano
           skip_content = false
           if scope == :env
             locats += "Use the environment variable, MURANO_CONFIGFILE, to specify this config file.\n"
+            locats += "\n"
+            if ENV['MURANO_PASSWORD'].to_s.empty?
+              locats += "The MURANO_PASSWORD environ is not set.\n"
+            else
+              locats += "The MURANO_PASSWORD environ is set and will be used.\n"
+            end
             skip_content = !cfg.path.exist?
           end
           next if skip_content

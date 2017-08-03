@@ -70,12 +70,20 @@ Next, remove all solutions (Applications and Products) from that project.
 
     Deleted 2 solutions
 
-Finally, logout of Murano. This removes your username and password so
+Logout of Murano. This removes your username and password so
 that MurCLI will ask you to reenter your username and password.
 
 .. code-block:: text
 
     $ murano logout
+
+You might also have environment variables set. Clear those for
+the sake of this walk-through.
+
+.. code-block:: text
+
+    $ export MURANO_CONFIGFILE=
+    $ export MURANO_PASSWORD=
 
 Create a New Project
 ====================

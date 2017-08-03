@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.02 /coding: utf-8
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -10,7 +10,7 @@ require 'MrMurano/Config'
 require 'MrMurano/Account'
 require '_workspace'
 
-MISSING_BIZ_ID_MSG = MrMurano::Business::missing_business_id_msg
+MISSING_BIZ_ID_MSG = MrMurano::Business.missing_business_id_msg
 
 RSpec.describe MrMurano::Business do
   include_context "WORKSPACE"
