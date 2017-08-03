@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -244,7 +244,9 @@ command :init do |c|
       # Get a list of files, ignoring the dot meta entries.
       files = Dir.entries(target_dir.to_path)
       files -= %w[. ..]
-      unless files.empty?
+      # If there are files (and it's not just .byebug_history which
+      # gets created when you develop with byebug), then ask to proceed.
+      unless files.empty? || (files.length == 1 && files[0] == '.byebug_history')
         # Check for a .murano/ directory. It might be empty, which
         # is why $cfg.project_exists might have been false.
         unless files.include?(MrMurano::Config::CFG_DIR_NAME)
