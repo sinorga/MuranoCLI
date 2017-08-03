@@ -38,15 +38,6 @@ program :description, %(
 
 default_command :help
 
-# Look for .murano/config files.
-$cfg = MrMurano::Config.new(::Commander::Runner.instance)
-$cfg.load
-$cfg.validate_cmd
-
-# Look for a (legacy) Solutionfile.json.
-$project = MrMurano::ProjectFile.new
-$project.load
-
 # Look for plug-ins.
 pgds = [
   Pathname.new(Dir.home) + '.mrmurano' + 'plugins',
@@ -72,4 +63,13 @@ unless ARGV.include? '--skip-plugins'
     end
   end
 end
+
+# Look for .murano/config files.
+$cfg = MrMurano::Config.new(::Commander::Runner.instance)
+$cfg.load
+$cfg.validate_cmd
+
+# Look for a (legacy) Solutionfile.json.
+$project = MrMurano::ProjectFile.new
+$project.load
 
