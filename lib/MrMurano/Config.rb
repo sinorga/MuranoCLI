@@ -180,6 +180,8 @@ module MrMurano
       else
         set('diff.cmd', 'diff -u', :defaults)
       end
+
+      set('postgresql.migrations_dir', 'sql-migrations', :defaults)
     end
 
     ## Find the root of this project Directory.
