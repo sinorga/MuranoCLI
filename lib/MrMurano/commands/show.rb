@@ -62,7 +62,7 @@ Show readable information about the current configuration.
         puts %(business: #{selected_business.name})
       else
         #puts 'no business selected'
-        MrMurano::Verbose.error MrMurano::Business::missing_business_id_msg
+        MrMurano::Verbose.error MrMurano::Business.missing_business_id_msg
       end
 
       # E.g., {:bizid=>"AAAAAAAAAAAAAAAA", :type=>"application",
@@ -73,7 +73,7 @@ Show readable information about the current configuration.
       elsif selected_application_id
         #puts 'selected application not in business'
         puts "application ID from config is not in business (#{selected_application_id})"
-      elsif not selected_business
+      elsif !selected_business
         puts 'application ID depends on business ID'
       else
         #puts 'no application selected'
@@ -88,7 +88,7 @@ Show readable information about the current configuration.
       elsif selected_product_id
         #puts 'selected product not in business'
         puts "product ID from config is not in business (#{selected_product_id})"
-      elsif not selected_business
+      elsif !selected_business
         puts 'product ID depends on business ID'
       else
         #puts 'no product selected'

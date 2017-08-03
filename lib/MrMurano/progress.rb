@@ -67,6 +67,8 @@ module MrMurano
       # message, rather than the terminal column width.
       #@whirly_cols, _rows = HighLine::SystemExtensions.terminal_size
       # Note that Whirly adds '...', so add its length, too.
+      # rubocop:disable Performance/FixedSize
+      #   Do not compute the size of statically sized objects.
       @whirly_cols = @whirly_msg.length + '...'.length
     end
 
