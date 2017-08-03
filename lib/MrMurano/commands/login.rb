@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.08.02 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -115,9 +115,9 @@ Essentially, this command is the same as:
       # Only clear user name from the user config if the net.host
       # or user.name did not come from a different config, like the
       # --project config.
-      $cfg.set(
-        'user.name', nil, :user
-      )
+      $cfg.set('user.name', nil, :user)
+      $cfg.set('business.id', nil, :user)
+      $cfg.set('business.name', nil, :user)
     end
   end
 
