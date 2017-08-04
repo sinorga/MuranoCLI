@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.03 /coding: utf-8
+# Last Modified: 2017.08.04 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -22,6 +22,18 @@ end
 desc 'Uninstall from user dir'
 task :unbob do
   sh %(gem uninstall --user-install #{built_gem})
+end
+
+desc 'Install gem to chruby directory'
+task :chinstall do
+  sh %(gem install -i #{Bundler::GemHelper.gemspec.base_dir} #{built_gem})
+end
+
+desc 'Uninstall gem from chruby directory'
+task :chuninstall do
+  # HINT: Replace #{built_gem} with any version to uninstall a specific version.
+  # MAYBE/2017-08-04: A task to uninstall all installed versions?
+  sh %(gem uninstall --version #{built_gem})
 end
 
 task :echo do
