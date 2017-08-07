@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.04 /coding: utf-8
+# Last Modified: 2017.08.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -25,7 +25,8 @@ task :unbob do
 end
 
 desc 'Install gem to chruby directory'
-task :chinstall do
+task :rebuild do
+  sh %(rake build)
   sh %(gem install -i #{Bundler::GemHelper.gemspec.base_dir} #{built_gem})
 end
 
