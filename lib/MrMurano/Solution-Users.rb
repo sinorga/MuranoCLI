@@ -148,7 +148,7 @@ module MrMurano
     # @param modify Bool: True if item exists already and this is changing it
     def upload(_local, _remote, _modify)
       # TODO: figure out APIs for updating users.
-      warning %(Updating Users isn't working currently.)
+      warning %(Updating Users is not yet implemented.)
       # post does work if the :password field is set.
     end
 
