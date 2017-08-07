@@ -64,7 +64,7 @@ module MrMurano
           end
         end
         if $cfg.curlfile_f.nil?
-          MrMurano::Progress.whirly_interject { puts a.join(' ') }
+          MrMurano::Progress.instance.whirly_interject { puts a.join(' ') }
         else
           $cfg.curlfile_f << a.join(' ') + "\n\n"
           $cfg.curlfile_f.flush
