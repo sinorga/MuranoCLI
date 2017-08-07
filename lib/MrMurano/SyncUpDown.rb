@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -338,9 +338,8 @@ module MrMurano
         # Check the platform, e.g., "linux-gnu", or other.
         is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
         unless is_windows
-          $stderr.puts(
-            "Unexpected: touch failed on non-Windows machine / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}"
-          )
+          msg = "Unexpected: touch failed on non-Windows machine"
+          $stderr.puts("#{msg} / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}")
         end
 
         # 2017-07-13: Nor does ctime work.
