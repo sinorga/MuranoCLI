@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -31,7 +31,7 @@ module MrMurano
 
       def initialize
         super
-        @uriparts << 'endpoint'
+        @uriparts << :endpoint
         @project_section = :routes
         @match_header = /--#ENDPOINT (?<method>\S+) (?<path>\S+)( (?<ctype>.*))?/
       end

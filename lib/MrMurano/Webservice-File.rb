@@ -22,7 +22,7 @@ module MrMurano
 
       def initialize
         super
-        @uriparts << 'file'
+        @uriparts << :file
         @itemkey = :path
         @project_section = :assets
       end

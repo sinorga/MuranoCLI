@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.08.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -12,7 +12,7 @@ module MrMurano
   class ServiceConfig < SolutionBase
     def initialize(sid=nil)
       super
-      @uriparts << 'serviceconfig'
+      @uriparts << :serviceconfig
       @scid = nil
     end
 
@@ -111,7 +111,7 @@ module MrMurano
   class Services < SolutionBase
     def initialize(sid=nil)
       super
-      @uriparts << 'service'
+      @uriparts << :service
     end
 
     def sid_for_name(name)

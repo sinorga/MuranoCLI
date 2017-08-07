@@ -7,7 +7,7 @@ module MrMurano
     class Settings < WebserviceBase
       def initialize
         super
-        @uriparts << 'cors'
+        @uriparts << :cors
       end
       def cors
         ret = get('')
@@ -24,7 +24,7 @@ module MrMurano
     class Cors < WebserviceBase
       def initialize
         super
-        @uriparts << 'cors'
+        @uriparts << :cors
         #@project_section = :cors
       end
 
