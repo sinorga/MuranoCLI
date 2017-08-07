@@ -12,6 +12,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 require 'yaml'
+require 'MrMurano/progress'
 require 'MrMurano/Solution'
 require 'MrMurano/SyncRoot'
 
@@ -74,18 +75,25 @@ module MrMurano
       updated_at = nil
       put('/' + mkalias(remote), pst) do |request, http|
         response = http.request(request)
-        case response
-        when Net::HTTPSuccess
+        _isj, jsn = isJSON(response.body)
+        if response == Net::HTTPSuccess
           # A first upload will see a 200 response and a JSON body.
           # A subsequent upload of the same item sees 204 and no body.
           #return JSON.parse(response.body)
-          _isj, jsn = isJSON(response.body)
+          # MAYBE/EXPLAIN: Spit out error if no JSON, or explain why it's okay.
           updated_at = jsn[:updated_at] unless jsn.nil?
-        when Net::HTTPNotFound
+        elsif response == Net::HTTPNotFound
           verbose "Doesn't exist, creating"
           post('/', pst)
         else
-          showHttpError(request, response)
+          relpath = local.sub(File.join(Dir.pwd, ''), '')
+          if Net::HTTPBadRequest && _isj && jsn[:message] == "Validation errors"
+            warning "Validation errors detected in #{relpath}:"
+            puts MrMurano::Pretties::makeJsonPretty(jsn[:errors], Struct.new(:pretty).new(true))
+          else
+            showHttpError(request, response)
+          end
+          warning "Failed to upload: #{relpath}"
         end
       end
       cache_update_time_for(local, updated_at)
