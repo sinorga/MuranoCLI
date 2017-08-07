@@ -443,13 +443,13 @@ RSpec.describe MrMurano::Module do
 
     it "raises on alias without name" do
       expect {
-        @srv.mkname( MrMurano::Module::EventHandlerItem.new() )
+        @srv.mkname(MrMurano::Module::EventHandlerItem.new())
       }.to raise_error(NameError)
     end
 
     it "raises on name without name" do
       expect {
-        @srv.mkalias( MrMurano::Module::EventHandlerItem.new() )
+        @srv.mkalias(MrMurano::Module::EventHandlerItem.new())
       }.to raise_error(NameError)
     end
   end
