@@ -820,6 +820,28 @@ module MrMurano
     def status(options={}, selected=[])
       options = elevate_hash(options)
 
+      syncables_prepare(options)
+
+      therebox, localbox = items_lists(options, selected)
+
+      toadd, todel = items_new_old(options, therebox, localbox)
+
+      tomod, unchg = items_updates(options, therebox, localbox)
+
+      if options[:unselected]
+        { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
+      else
+        {
+          toadd: toadd.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          todel: todel.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          tomod: tomod.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          unchg: unchg.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          skipd: [],
+        }
+      end
+    end
+
+    def syncables_prepare(options)
       # 2017-07-02: Now that there are multiple solution types, and because
       # SyncRoot.add is called on different classes that go with either or
       # both products and applications, if a user only created one solution,
@@ -832,9 +854,9 @@ module MrMurano
       else
         syncup_before
       end
+    end
 
-      itemkey = @itemkey.to_sym
-
+    def items_lists(options, selected)
       # Fetch arrays of items there, and items here/local.
       there = list
       there = _matcher(there, selected)
@@ -847,6 +869,7 @@ module MrMurano
         item[:synctype] = self.class.description
         therebox[item[:synckey]] = item
       end
+
       localbox = {}
       local.each do |item|
         skey = synckey(item)
@@ -856,10 +879,11 @@ module MrMurano
         item[:synctype] = self.class.description
         localbox[item[:synckey]] = item
       end
-      toadd = []
-      todel = []
-      tomod = []
-      unchg = []
+
+      [therebox, localbox]
+    end
+
+    def items_new_old(options, therebox, localbox)
       if options[:asdown]
         todel = (localbox.keys - therebox.keys).map { |key| localbox[key] }
         toadd = (therebox.keys - localbox.keys).map { |key| therebox[key] }
@@ -867,15 +891,23 @@ module MrMurano
         toadd = (localbox.keys - therebox.keys).map { |key| localbox[key] }
         todel = (therebox.keys - localbox.keys).map { |key| therebox[key] }
       end
+      [toadd, todel]
+    end
+
+    def items_updates(options, therebox, localbox)
+      tomod = []
+      unchg = []
+
       (localbox.keys & therebox.keys).each do |key|
         # Want 'local' to override 'there' except for itemkey.
         if options[:asdown]
-          mrg = therebox[key].reject { |k, _v| k == itemkey }
+          mrg = therebox[key].reject { |k, _v| k == @itemkey.to_sym }
           mrg = localbox[key].merge(mrg)
         else
-          mrg = localbox[key].reject { |k, _v| k == itemkey }
+          mrg = localbox[key].reject { |k, _v| k == @itemkey.to_sym }
           mrg = therebox[key].merge(mrg)
         end
+
         if docmp(localbox[key], therebox[key])
           if options[:diff] && mrg[:selected]
             mrg[:diff] = dodiff(mrg.to_h, localbox[key], options[:asdown])
@@ -886,17 +918,7 @@ module MrMurano
           unchg << mrg
         end
       end
-      if options[:unselected]
-        { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
-      else
-        {
-          toadd: toadd.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          todel: todel.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          tomod: tomod.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          unchg: unchg.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          skipd: [],
-        }
-      end
+      [tomod, unchg]
     end
   end
 end
