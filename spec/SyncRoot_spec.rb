@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -51,7 +51,7 @@ RSpec.describe MrMurano::SyncRoot do
     $project.load
 
     @options = {}
-    @options.define_singleton_method(:method_missing) do |mid,*args|
+    @options.define_singleton_method(:method_missing) do |mid, *args|
       if mid.to_s.match(/^(.+)=$/) then
         self[$1.to_sym] = args.first
       else
@@ -92,15 +92,18 @@ RSpec.describe MrMurano::SyncRoot do
   it "selects custom defaults when none" do
     $cfg['sync.bydefault'] = 'role'
     MrMurano::SyncRoot.instance.check_same(@options)
-    expect(@options).to eq({:role=>true})
+    expect(@options).to eq({role: true})
   end
 
   it "builds option params" do
-    ret=[]
+    ret = []
     MrMurano::SyncRoot.instance.each_option do |s, l, d|
       ret << [s, l, d]
     end
-    expect(ret).to eq([["-u", "--[no-]user", "describe user"], ["-r", "--[no-]role", "describe role"]])
+    expect(ret).to eq([
+      ["-u", "--[no-]user", "describe user"],
+      ["-r", "--[no-]role", "describe role"],
+    ])
   end
 end
 
