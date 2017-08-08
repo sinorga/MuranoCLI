@@ -722,7 +722,7 @@ module MrMurano
     # @param merged [merged] The merged item to get a diff of
     # @local local, unadulterated (non-merged) item
     # @return [String] The diff output
-    def dodiff(merged, local, asdown=false)
+    def dodiff(merged, local, _there, asdown=false)
       trmt = Tempfile.new([tolocalname(merged, @itemkey) + '_remote_', '.lua'])
       tlcl = Tempfile.new([tolocalname(merged, @itemkey) + '_local_', '.lua'])
       Pathname.new(tlcl.path).open('wb') do |io|
@@ -910,8 +910,7 @@ module MrMurano
 
         if docmp(localbox[key], therebox[key])
           if options[:diff] && mrg[:selected]
-            mrg[:diff] = dodiff(mrg.to_h, localbox[key], options[:asdown])
-            mrg[:diff] = '<Nothing changed (may be timestamp difference?)>' if mrg[:diff].empty?
+            mrg[:diff] = dodiff(mrg.to_h, localbox[key], therebox[key], options[:asdown])
           end
           tomod << mrg
         else

@@ -117,6 +117,16 @@ module MrMurano
       item_a[:updated_at].to_time.round != item_b[:updated_at].to_time.round
     end
 
+    def dodiff(merged, local, there, asdown=false)
+      mrg_diff = super
+      if mrg_diff.empty?
+        mrg_diff = '<Nothing changed (was timestamp difference)>'
+        # FIXME/2017-08-08: This isn't exactly working: setting mtime...
+        cache_update_time_for(local.local_path, there.updated_at)
+      end
+      mrg_diff
+    end
+
     def cache_file_name
       [
         'cache',
