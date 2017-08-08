@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -11,11 +11,12 @@ module MrMurano
     include Singleton
 
     # A thing that is syncable.
-    Syncable = Struct.new(:name, :class, :type, :desc, :bydefault) do
+    Syncable = Struct.new(:name, :class, :type, :desc, :bydefault, :aliases) do
     end
 
     def initialize
       @syncset = []
+      @synctypes = {}
     end
 
     ##
@@ -30,9 +31,10 @@ module MrMurano
     # @param type [String] Single letter for short option and status listing
     # @param desc [String] Summary of what this syncs.
     # @param bydefault [Boolean] Is this part of the default sync group
+    # @param aliases [Array] List of alternative CLI option names.
     #
     # @return [nil]
-    def add(name, klass, type, bydefault)
+    def add(name, klass, type, bydefault, aliases=[])
       # 2017-06-20: Maybe possibly enforce unique name policy for --syncset options.
       #@syncset.each do |a|
       #  if a.name == name.to_s
@@ -40,7 +42,11 @@ module MrMurano
       #    $stderr.puts HighLine.color(msg, :yellow)
       #  end
       #end
-      @syncset << Syncable.new(name.to_s, klass, type, klass.description, bydefault)
+      # We should at least enforce a unique type policy,
+      # since the type is used to define the CLI option.
+      raise "Duplicate SyncRoot type specified: '#{type}'" if @synctypes[type]
+      @synctypes[type] = true
+      @syncset << Syncable.new(name.to_s, klass, type, klass.description, bydefault, aliases)
       nil
     end
 
@@ -75,6 +81,27 @@ module MrMurano
     end
 
     ##
+    # Iterate over all syncables with option argument aliases.
+    # @param block code to run on each
+    def each_alias
+      @syncset = [] unless defined?(@syncset)
+      @syncset.each do |syncable|
+        syncable.aliases.each do |syn|
+          yield "--[no-]#{syn}", syncable.desc
+        end
+      end
+    end
+
+    def each_default
+      @syncset = [] unless defined?(@syncset)
+      @syncset.each do |syncable|
+        syncable.aliases.each do |syn|
+          yield syn, syncable.name
+        end
+      end
+    end
+
+    ##
     # Iterate over just the selected syncables.
     # @param opt [Hash{Symbol=>Boolean}] Options hash of which to select from
     # @param block code to run on each
@@ -82,7 +109,7 @@ module MrMurano
       @syncset = [] unless defined?(@syncset)
       check_same(opt)
       @syncset.each do |a|
-        if opt[a.name.to_sym] || opt[a.type.to_sym]
+        if opt[a.name.tr('-', '_').to_sym] || opt[a.type.to_sym]
           yield a.name, a.type, a.class, a.desc
         end
       end
@@ -105,7 +132,6 @@ module MrMurano
           @syncset.select { |a| bydef.include? a.name }.each { |a| opt[a.name.to_sym] = true }
         end
       end
-
       nil
     end
   end
