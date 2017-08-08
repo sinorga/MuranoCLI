@@ -37,7 +37,7 @@ module MrMurano
       def list
         ret = get()
         return [] if ret.is_a?(Hash) and ret.has_key?(:error)
-        ret.map{|i| FileItem.new(i)}
+        ret.map { |i| FileItem.new(i) }
       end
 
       ##
@@ -104,11 +104,11 @@ module MrMurano
         # Most of these pull into ram.  So maybe just go with that. Would guess that
         # truely large static content is rare, and we can optimize/fix that later.
 
-        file = HTTP::FormData::File.new(local.to_s, {:content_type=>remote[:mime_type]})
-        form = HTTP::FormData.create(:file=>file)
+        file = HTTP::FormData::File.new(local.to_s, { content_type: remote[:mime_type] })
+        form = HTTP::FormData.create(file: file)
         req = Net::HTTP::Put.new(uri)
         set_def_headers(req)
-        workit(req) do |request,http|
+        workit(req) do |request, http|
           request.content_type = form.content_type
           request.content_length = form.content_length
           request.body = form.to_s
@@ -129,11 +129,7 @@ module MrMurano
           end
 
           response = http.request(request)
-          case response
-          when Net::HTTPSuccess
-          else
-            showHttpError(request, response)
-          end
+          showHttpError(request, response) unless response == Net::HTTPSuccess
         end
       end
 
