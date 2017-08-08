@@ -24,10 +24,12 @@ task :unbob do
   sh %(gem uninstall --user-install #{built_gem})
 end
 
-desc 'Install gem to chruby directory'
-task :rebuild do
+desc 'Build and install into user gems directory (useful for rvm and chruby)'
+task :'install:user' do
   sh %(rake build)
-  sh %(gem install -i #{Bundler::GemHelper.gemspec.base_dir} #{built_gem})
+  # Bundler::GemHelper.gemspec.base_dir is the base of the project,
+  # and not the base of the gem directory.
+  sh %(gem install -i #{Gem.dir} #{built_gem})
 end
 
 desc 'Uninstall gem from chruby directory'
