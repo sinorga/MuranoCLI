@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -7,6 +7,7 @@
 
 require 'MrMurano/verbosing'
 require 'MrMurano/SyncRoot'
+require 'MrMurano/commands/status'
 
 def sync_add_options(c, locale)
   c.option '--[no-]delete', %(Don't delete things from #{locale})
@@ -32,13 +33,9 @@ command :syncdown do |c|
   c.description = %(
 Sync project down from Murano.
   ).strip
+
   c.option '--all', 'Sync everything'
-
-  # Load options to control which things to sync
-  MrMurano::SyncRoot.instance.each_option do |s, l, d|
-    c.option s, l, d
-  end
-
+  command_add_syncable_options(c)
   sync_add_options(c, 'local machine')
 
   c.example %(Make local be like what is on the server), %(murano syncdown --all)
@@ -47,6 +44,7 @@ Sync project down from Murano.
 
   c.action do |args, options|
     options.default delete: true, create: true, update: true
+    command_set_syncable_defaults(options)
 
     syncdown_files(options.__hash__, args)
   end
@@ -59,13 +57,9 @@ command :syncup do |c|
   c.description = %(
 Sync project up into Murano.
   ).strip
+
   c.option '--all', 'Sync everything'
-
-  # Load options to control which things to sync
-  MrMurano::SyncRoot.instance.each_option do |s, l, d|
-    c.option s, l, d
-  end
-
+  command_add_syncable_options(c)
   sync_add_options(c, 'server')
 
   c.example %(Deploy project to server), %(murano syncup --all)
@@ -74,6 +68,7 @@ Sync project up into Murano.
 
   c.action do |args, options|
     options.default delete: true, create: true, update: true
+    command_set_syncable_defaults(options)
 
     #MrMurano::Verbose.whirly_start "Syncing solutions..."
     MrMurano::SyncRoot.instance.each_filtered(options.__hash__) do |_name, _type, klass, desc|
