@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.27 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -126,6 +126,10 @@ Or set your password with `murano password set <username>`.
       else
         showHttpError(request, response)
         error 'Check to see if username and password are correct.'
+        unless ENV['MURANO_PASSWORD'].to_s.empty?
+          pwd_path = $cfg.file_at('passwords', :user)
+          warning "BEWARE: The password used was from MURANO_PASSWORD, not from #{pwd_path}"
+        end
         @token = nil
       end
     end
