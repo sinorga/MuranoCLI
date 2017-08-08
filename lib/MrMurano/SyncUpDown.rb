@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.07 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -14,7 +14,7 @@ require 'pathname'
 require 'tempfile'
 require 'MrMurano/progress'
 require 'MrMurano/verbosing'
-#require 'MrMurano/hash'
+require 'MrMurano/hash'
 #require 'MrMurano/Config'
 #require 'MrMurano/ProjectFile'
 ##require 'MrMurano/SyncRoot'
@@ -563,27 +563,8 @@ module MrMurano
       items.flatten.compact
     end
 
-    #######################################################################
-    # Methods that provide the core status/syncup/syncdown
-
-    ##
-    # Take a hash or something (a Commander::Command::Options) and return a hash
-    #
-    # @param hsh [Hash, Commander::Command::Options] Thing we want to be a Hash
-    # @return [Hash] an actual Hash with default value of false
-    def elevate_hash(hsh)
-      # Commander::Command::Options stripped all of the methods from parent
-      # objects. I have not nice thoughts about that.
-      begin
-        hsh = hsh.__hash__
-      # rubocop:disable Lint/HandleExceptions: Do not suppress exceptions.
-      rescue NoMethodError
-        # swallow this.
       end
-      # build a hash where the default is 'false' instead of 'nil'
-      Hash.new(false).merge(Hash.transform_keys_to_symbols(hsh))
     end
-    private :elevate_hash
 
     def sync_update_progress(msg)
       if $cfg['tool.no-progress']
