@@ -160,7 +160,7 @@ module MrMurano
         #   MAYBE/2017-07-18: Permanently disable Style/RedundantSelf?
         self.to_h <=> other.to_h
       end
-    end
+    end # MrMurano::SyncUpDown::Item
 
     #######################################################################
     # Methods that must be overridden
@@ -537,34 +537,50 @@ module MrMurano
     # @return [Array<Item>] Items found
     def localitems(from)
       # TODO: Profile this.
-      debug "#{self.class}: Getting local items from: #{from}"
+      debug "#{self.class}: Getting local items from:\n  #{from}"
       search_in = from.to_s
       sf = searchFor.map { |i| ::File.join(search_in, i) }
-      debug "#{self.class}: Globs: #{sf}"
+      debug "#{self.class}: Globs:\n  #{sf.join("\n  ")}"
       # 2017-07-27: Add uniq to cull duplicate entries that globbing
       # all the ways might produce, otherwise status/sync/diff complain
       # about duplicate resources. I [lb] think this problem has existed
       # but was exacerbated by the change to support sub-directory scripts.
-      items = Dir[*sf].uniq.flatten.compact.reject do |p|
-        ::File.directory?(p) || ignoring.any? do |i|
-          ::File.fnmatch(i, p)
+      items = Dir[*sf].uniq.flatten.compact.reject do |path|
+        if ::File.directory?(path)
+          true
+        else
+          ignoring.any? { |pattern| self.ignore?(path, pattern) }
         end
       end
       items = items.map do |path|
-        path = Pathname.new(path).realpath
-        item = to_remote_item(from, path)
+        rpath = Pathname.new(path).realpath
+        item = to_remote_item(from, rpath, path)
         if item.is_a?(Array)
-          item.compact.map { |i| i[:local_path] = path; i }
+          item.compact.map { |i| i[:local_path] = rpath; i }
         elsif !item.nil?
-          item[:local_path] = path
+          item[:local_path] = rpath
           item
         end
       end
-      items.flatten.compact
+      items = items.flatten.compact.sort_by!(&:local_path)
+      debug "#{self.class}: items:\n  #{items.map(&:local_path).join("\n  ")}"
+      items
     end
 
+    def ignore?(path, pattern)
+      if pattern.start_with?('**/')
+        # E.g., '**/.*' or '**/*'
+        dirname = File.dirname(path)
+        return true if dirname == '.' || dirname == '/'
+        # There's at least one ancestor directory.
+        # Remove the '**', which ::File.fnmatch doesn't recognize.
+        pattern = pattern.gsub(/^\*\*\//, '')
       end
+      ::File.fnmatch(pattern, path)
     end
+
+    #######################################################################
+    # Methods that provide the core status/syncup/syncdown
 
     def sync_update_progress(msg)
       if $cfg['tool.no-progress']
