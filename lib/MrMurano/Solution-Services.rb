@@ -247,7 +247,10 @@ module MrMurano
     end
 
     def tolocalname(item, _key)
-      name = item[:name].tr('.', '/')
+      # Nested Lua support: the platform dot-delimits modules in a require.
+      name = File.join(item[:name].split('.'))
+      # NOTE: On syncup, user can specify file extension (or use * glob),
+      # but on syncdown, the ".lua" extension is hardcoded (here).
       "#{name}.lua"
     end
 
@@ -270,7 +273,26 @@ module MrMurano
     end
 
     def to_remote_item(root, path)
-      name = path.relative_path_from(root).to_s.sub(/\.lua$/i, '').tr('/', '.')
+      root = root.expand_path
+      # MAYBE/2017-08-08: Let user disable nested Lua module feature?
+      if path.basename.sub(/\.lua$/i, '').to_s.include?('.')
+        warning(
+          "WARNING: Do not use periods in filenames. Rename: ‘#{path.basename}’"
+        )
+      end
+      path.dirname.ascend do |ancestor|
+        break if ancestor == root
+        if ancestor.basename.to_s.include?('.')
+          warning(
+            "WARNING: Do not use periods in directory names. Rename: ‘#{ancestor.basename}’"
+          )
+        end
+      end
+      relpath = path.relative_path_from(root).to_s
+      # MAYBE: Use ALT_SEPARATOR to support Windows?
+      #   ::File::ALT_SEPARATOR || ::File::SEPARATOR
+      #name = relpath.sub(/\..*$/, '').tr(::File::SEPARATOR, '.')
+      name = relpath.sub(/\.lua$/i, '').tr(::File::SEPARATOR, '.')
       ModuleItem.new(name: name)
     end
 

@@ -298,17 +298,17 @@ RSpec.describe MrMurano::SyncUpDown do
           :unchg=>[
             have_attributes(
               {
-                :name=>'three.lua',
-                :synckey=>'three.lua',
-                :synctype=>TSUD.description,
-                :local_path=>pathname_globs('**/three.lua'),
-              }),
-            have_attributes(
-              {
                 :name=>'four.lua',
                 :synckey=>'four.lua',
                 :synctype=>TSUD.description,
                 :local_path=>pathname_globs('**/four.lua'),
+              }),
+            have_attributes(
+              {
+                :name=>'three.lua',
+                :synckey=>'three.lua',
+                :synctype=>TSUD.description,
+                :local_path=>pathname_globs('**/three.lua'),
               }),
           ],
           :toadd=>[
@@ -344,17 +344,17 @@ RSpec.describe MrMurano::SyncUpDown do
           :tomod=>[
             have_attributes(
               {
-                :name=>'one.lua',
-                :synckey=>'one.lua',
-                :synctype=>TSUD.description,
-                :local_path=>pathname_globs('**/one.lua'),
-              }),
-            have_attributes(
-              {
                 :name=>'two.lua',
                 :synckey=>'two.lua',
                 :synctype=>TSUD.description,
                 :local_path=>pathname_globs('**/two.lua'),
+              }),
+            have_attributes(
+              {
+                :name=>'one.lua',
+                :synckey=>'one.lua',
+                :synctype=>TSUD.description,
+                :local_path=>pathname_globs('**/one.lua'),
               }),
           ],
           :skipd=>[],
@@ -402,19 +402,19 @@ RSpec.describe MrMurano::SyncUpDown do
         expect(ret).to match({
           :unchg=>[
             have_attributes(
-              :name=>'three.lua',
-              :synckey=>'three.lua',
-              :synctype=>TSUD.description,
-              :selected=>true,
-              :local_path=>pathname_globs('**/three.lua')
-            ),
-            have_attributes(
               :name=>'four.lua',
               :synckey=>'four.lua',
               :synctype=>TSUD.description,
               :selected=>true,
               :local_path=>pathname_globs('**/four.lua')
               ),
+            have_attributes(
+              :name=>'three.lua',
+              :synckey=>'three.lua',
+              :synctype=>TSUD.description,
+              :selected=>true,
+              :local_path=>pathname_globs('**/three.lua')
+            ),
           ],
           :toadd=>[
             have_attributes(
@@ -448,18 +448,18 @@ RSpec.describe MrMurano::SyncUpDown do
           ],
           :tomod=>[
             have_attributes(
-              :name=>'one.lua',
-              :synckey=>'one.lua',
-              :synctype=>TSUD.description,
-              :selected=>true,
-              :local_path=>pathname_globs('**/one.lua')
-            ),
-            have_attributes(
               :name=>'two.lua',
               :synckey=>'two.lua',
               :synctype=>TSUD.description,
               :selected=>true,
               :local_path=>pathname_globs('**/two.lua')
+            ),
+            have_attributes(
+              :name=>'one.lua',
+              :synckey=>'one.lua',
+              :synctype=>TSUD.description,
+              :selected=>true,
+              :local_path=>pathname_globs('**/one.lua')
             ),
           ],
           :skipd=>[],
@@ -530,7 +530,11 @@ RSpec.describe MrMurano::SyncUpDown do
     it "nothing when same." do
       expect(@t).to receive(:fetch).and_yield(%{-- fake lua\nreturn 0\n})
       ret = @t.dodiff(
-        { name: 'one.lua', local_path: @scpt, updated_at: ITEM_UPDATED_AT},
+        {
+          name: 'one.lua',
+          local_path: @scpt,
+          updated_at: ITEM_UPDATED_AT,
+        },
         nil
       )
       if Gem.win_platform? then
@@ -543,7 +547,11 @@ RSpec.describe MrMurano::SyncUpDown do
     it "something when different." do
       expect(@t).to receive(:fetch).and_yield(%{-- fake lua\nreturn 2\n})
       ret = @t.dodiff(
-        {name: 'one.lua', local_path: @scpt, updated_at: ITEM_UPDATED_AT},
+        {
+          name: 'one.lua',
+          local_path: @scpt,
+          updated_at: ITEM_UPDATED_AT,
+        },
         nil
       )
       expect(ret).not_to eq('')
@@ -553,7 +561,12 @@ RSpec.describe MrMurano::SyncUpDown do
       script = %{-- fake lua\nreturn 2\n}
       expect(@t).to receive(:fetch).and_yield(script)
       ret = @t.dodiff(
-        {name: 'one.lua', local_path: @scpt, script: script, updated_at: ITEM_UPDATED_AT},
+        {
+          name: 'one.lua',
+          local_path: @scpt,
+          script: script,
+          updated_at: ITEM_UPDATED_AT,
+        },
         nil
       )
       if Gem.win_platform? then

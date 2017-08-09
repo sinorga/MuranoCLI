@@ -561,8 +561,13 @@ module MrMurano
         end
       end
       items = items.map do |path|
-        rpath = Pathname.new(path).realpath
-        item = to_remote_item(from, rpath, path)
+        # Do not resolve symlinks, just relative paths (. and ..),
+        # otherwise it makes nested Lua support tricky, because
+        # symlinks might be outside the root item path, and then
+        # the nested Lua path looks like ".......some_dir/some_item".
+        #rpath = Pathname.new(path).realpath
+        rpath = Pathname.new(path).expand_path
+        item = to_remote_item(from, rpath)
         if item.is_a?(Array)
           item.compact.map { |i| i[:local_path] = rpath; i }
         elsif !item.nil?
@@ -581,7 +586,7 @@ module MrMurano
       if pattern.start_with?('**/')
         # E.g., '**/.*' or '**/*'
         dirname = File.dirname(path)
-        return true if dirname == '.' || dirname == '/'
+        return true if ['.', ::File::ALT_SEPARATOR, ::File::SEPARATOR].include?(dirname)
         # There's at least one ancestor directory.
         # Remove the '**', which ::File.fnmatch doesn't recognize.
         # 2017-08-08: Why does Rubocop not follow Style/RegexpLiteral here?
@@ -758,6 +763,8 @@ module MrMurano
 
         # 2017-07-03: No worries, Ruby 3.0 frozen string literals, cmd is a list.
         cmd = $cfg['diff.cmd'].shellsplit
+        # ALT_SEPARATOR is the platform specific alternative separator,
+        # for Windows support.
         remote_path = trmt.path.gsub(
           ::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR
         )
