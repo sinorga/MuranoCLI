@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.07 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -24,10 +24,9 @@ module MrMurano
 
     def search(svc_name)
       #path = nil
-      #path = '?select=id,service,script_key'
-      # 2017-07-02: This is what yeti-ui adds.
-      # FIXME/EXPLAIN/2017-07-02: What's "UUID" that web UI uses?
-      path = '?select=service,id,solution_id,script_key,alias'
+      path = '?select=id,service,script_key'
+      # 2017-07-02: This is what yeti-ui queries on:
+      #path = '?select=service,id,solution_id,script_key,alias'
       super(svc_name, path)
     end
 
