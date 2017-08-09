@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.07 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -32,8 +32,8 @@ task :'install:user' do
   sh %(gem install -i #{Gem.dir} #{built_gem})
 end
 
-desc 'Uninstall gem from chruby directory'
-task :chuninstall do
+desc 'Uninstall gem from user gems directory'
+task :'uninstall:user' do
   # HINT: Replace #{built_gem} with any version to uninstall a specific version.
   # MAYBE/2017-08-04: A task to uninstall all installed versions?
   sh %(gem uninstall --version #{built_gem})
@@ -74,6 +74,11 @@ task :rspec do
 end
 task test: %i[test_clean_up rspec]
 
+desc 'Run Rubocop linter'
+task :rubocop do
+  sh %(rubocop -D -c .rubocop.yml)
+end
+
 desc 'Clean out junk from prior hot tests'
 task :test_clean_up do
   unless ENV['MURANO_CONFIGFILE'].nil?
@@ -84,6 +89,10 @@ task :test_clean_up do
     #    sh %(ruby -Ilib bin/murano solution delete #{id})
     #  end
     #end
+    # rubocop:disable Style/BlockDelimiters
+    #   "Prefer {...} over do...end for single-line blocks."
+    # Substituting braces for the do/end causes another problem:
+    #   "syntax error, unexpected '{', expecting keyword_end"
     sh %(ruby -Ilib bin/murano solutions expunge -y) do |_ok, _res| end
   end
 end
