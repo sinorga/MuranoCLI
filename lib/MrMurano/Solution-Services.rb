@@ -444,11 +444,21 @@ module MrMurano
         # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
         md = @match_header.match(line)
         if !md.nil?
-          # [lb] asks: Is this too hacky?
+          # FIXME/2017-08-09: device2.event is now in the skiplist,
+          #   but some tests have a "device2 data_in" script, which
+          #   gets changed to "device2.event" here and then uploaded
+          #   (note that skiplist does not apply to local items).
+          #   You can test this code via:
+          #     rspec ./spec/cmd_syncdown_spec.rb
+          #   which has a fixture with device2.data_in specified.
+          #   QUESTION: Does writing device2.event do anything?
+          #     You cannot edit that handler from the web UI...
+          #     - Should we change the test?
+          #     - Should we get rid of this device2 hack?
           if md[:service] == 'device2'
             event_event = 'event'
             event_type = md[:event]
-            # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's not 'event'.
+            # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's now 'event'?
             #   Want this?:
             #     event_type = 'event' if event_type == 'data_in'
           else

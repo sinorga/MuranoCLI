@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.09 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -76,7 +76,10 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
         a_string_starting_with('Updating item '),
         "Updating item tsdb_exportJob\n",
         "Updating item user_account\n",
-        #"Adding item device2_event\n",
+        # FIXME/2017-08-09: This test includes a fixture with "device2 data_in",
+        # which is deprecated, AFAIK [lb]. We convert it to "device2.event",
+        # but I think what we really want is to edit "<solution_id>.event".
+        "Adding item device2_event\n",
         "Adding item POST_/api/fire\n",
         "Adding item PUT_/api/fire/{code}\n",
         "Adding item DELETE_/api/fire/{code}\n",

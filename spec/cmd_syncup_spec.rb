@@ -61,8 +61,9 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     def verify_err_missing_location(err)
       elines = err.lines
       # E.g.,
-      #   Skipping missing location ‘/tmp/d20170809-7670-z315jn/project/services’ (Application Events)
-      expect(elines).to satisfy { |v| elines.length == 1 }
+      #   Skipping missing location ‘/tmp/d20170809-7670-z315jn/project/services’ (Services)
+      #   Skipping missing location ‘/tmp/d20170809-7670-z315jn/project/services’ (Interfaces)
+      expect(elines).to satisfy { |v| elines.length == 2 }
       elines.each do |line|
         expect(line.encode!('UTF-8', 'UTF-8')).to start_with("\e[33mSkipping missing location ‘")
       end
