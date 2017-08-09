@@ -505,6 +505,11 @@ module MrMurano
       items.values
     end
 
+    def resurrect_undeletables(localbox, _therebox)
+      # It's up to the Syncables to implement this, if they care.
+      localbox
+    end
+
     ##
     # Get the full path for the local versions
     # @return [Pathname] Location for local items
@@ -565,8 +570,10 @@ module MrMurano
           item
         end
       end
-      items = items.flatten.compact.sort_by!(&:local_path)
-      debug "#{self.class}: items:\n  #{items.map(&:local_path).join("\n  ")}"
+      #items = items.flatten.compact.sort_by!(&:local_path)
+      #debug "#{self.class}: items:\n  #{items.map(&:local_path).join("\n  ")}"
+      items = items.flatten.compact.sort_by { |it| it[:local_path] }
+      debug "#{self.class}: items:\n  #{items.map { |it| it[:local_path] }.join("\n  ")}"
       items
     end
 
@@ -727,7 +734,7 @@ module MrMurano
     # @param merged [merged] The merged item to get a diff of
     # @local local, unadulterated (non-merged) item
     # @return [String] The diff output
-    def dodiff(merged, local, _there, asdown=false)
+    def dodiff(merged, local, _there=nil, asdown=false)
       trmt = Tempfile.new([tolocalname(merged, @itemkey) + '_remote_', '.lua'])
       tlcl = Tempfile.new([tolocalname(merged, @itemkey) + '_local_', '.lua'])
       Pathname.new(tlcl.path).open('wb') do |io|
@@ -884,6 +891,11 @@ module MrMurano
         item[:synctype] = self.class.description
         localbox[item[:synckey]] = item
       end
+
+      # Some items are considered "undeletable", meaning if a
+      # corresponding file does not exist locally, we assume
+      # it does but is just set to the empty string.
+      localbox = resurrect_undeletables(localbox, therebox)
 
       [therebox, localbox]
     end

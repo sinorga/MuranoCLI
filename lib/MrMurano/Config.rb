@@ -200,6 +200,13 @@ module MrMurano
         webservice
         websocket
       ].join(' '), :defaults)
+      # Do not delete boilerplate event handlers.
+      set('eventhandler.undeletable', %w[
+        *.event
+        timer.timer
+        tsdb.exportJob
+        user.account
+      ].join(' '), :defaults)
 
       set('modules.searchFor', %w[
         *.lua

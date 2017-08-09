@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.09 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -86,14 +86,8 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
 
     def fmtr(item, options)
       if item.key?(:local_path)
-        if !item[:local_path].to_s.start_with?('/dev/null/')
-          desc = item[:local_path].relative_path_from(Pathname.pwd).to_s
-          desc = "#{desc}:#{item[:line]}" if item.key?(:line) && item[:line] > 0
-        else
-          # MAYBE: Indicate that the item doesn't really exist locally?
-          #desc = "#{item[:synckey]} [empty]"
-          desc = item[:synckey]
-        end
+        desc = item[:local_path].relative_path_from(Pathname.pwd).to_s
+        desc = "#{desc}:#{item[:line]}" if item.key?(:line) && item[:line] > 0
       else
         desc = item[:synckey]
       end
