@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.03 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -141,13 +141,23 @@ Style/NumericPredicate:
 Style/RaiseArgs:
   EnforcedStyle: compact
 
+# "Don't use parentheses around a literal."
+# How else do you split long lines, eh? E.g.,
+#   unbelievably_long_variable_name = (
+#     "Some very long sentence about being a very long sentence."
+#   )
+Style/RedundantParentheses:
+  Enabled: false
+
 # "Use // around regular expression."
+# "Use %r around regular expression."
 #Style/RegexpLiteral:
 #  # If "slashes" or "mixed":
 #  #   snake_case = /^[\dA-Z_]+$/
 #  # If "percent_r":
 #  #   snake_case = %r{^[\dA-Z_]+$}
-#  EnforcedStyle: percent_r
+#  #EnforcedStyle: percent_r
+#  EnforcedStyle: slashes
 
 # "Avoid comma after the last parameter of a method call."
 # FIXME/2017-06-30: Is this okay?
