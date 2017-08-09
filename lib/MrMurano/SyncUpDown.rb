@@ -51,9 +51,9 @@ module MrMurano
       attr_accessor :synctype
       # @return [String] For device2, the event type.
       attr_accessor :type
-      # @return [String] For testing, the updated_at time the server would otherwise indicate.
+      # @return [String] The updated_at time from the server is used to detect changes.
       attr_accessor :updated_at
-      # @return [Integer] Non-nil if multiple conflicting files found for same item.
+      # @return [Integer] Positive if multiple conflicting files found for same item.
       attr_accessor :dup_count
 
       # Initialize a new Item with a few, or all, attributes.
@@ -339,7 +339,7 @@ module MrMurano
         # Check the platform, e.g., "linux-gnu", or other.
         is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
         unless is_windows
-          msg = "Unexpected: touch failed on non-Windows machine"
+          msg = 'Unexpected: touch failed on non-Windows machine'
           $stderr.puts("#{msg} / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}")
         end
 
@@ -577,7 +577,9 @@ module MrMurano
         return true if dirname == '.' || dirname == '/'
         # There's at least one ancestor directory.
         # Remove the '**', which ::File.fnmatch doesn't recognize.
-        pattern = pattern.gsub(/^\*\*\//, '')
+        # 2017-08-08: Why does Rubocop not follow Style/RegexpLiteral here?
+        #pattern = pattern.gsub(/^\*\*\//, '')
+        pattern = pattern.gsub(%r{^\*\*\/}, '')
       end
       ::File.fnmatch(pattern, path)
     end
@@ -827,9 +829,9 @@ module MrMurano
 
       therebox, localbox = items_lists(options, selected)
 
-      toadd, todel = items_new_old(options, therebox, localbox)
+      toadd, todel = items_new_and_old(options, therebox, localbox)
 
-      tomod, unchg = items_updates(options, therebox, localbox)
+      tomod, unchg = items_mods_and_chgs(options, therebox, localbox)
 
       if options[:unselected]
         { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
@@ -886,7 +888,7 @@ module MrMurano
       [therebox, localbox]
     end
 
-    def items_new_old(options, therebox, localbox)
+    def items_new_and_old(options, therebox, localbox)
       if options[:asdown]
         todel = (localbox.keys - therebox.keys).map { |key| localbox[key] }
         toadd = (therebox.keys - localbox.keys).map { |key| therebox[key] }
@@ -897,7 +899,7 @@ module MrMurano
       [toadd, todel]
     end
 
-    def items_updates(options, therebox, localbox)
+    def items_mods_and_chgs(options, therebox, localbox)
       tomod = []
       unchg = []
 
