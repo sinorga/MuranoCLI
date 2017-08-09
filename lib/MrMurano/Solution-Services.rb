@@ -1,10 +1,11 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.09 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'abbrev'
 require 'cgi'
 require 'date'
 require 'digest/sha1'
@@ -12,6 +13,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 require 'yaml'
+require 'MrMurano/progress'
 require 'MrMurano/Solution'
 require 'MrMurano/SyncRoot'
 
@@ -54,59 +56,104 @@ module MrMurano
     end
 
     # @param modify Bool: True if item exists already and this is changing it
-    def upload(local, remote, _modify=false)
-      local = Pathname.new(local) unless local.is_a?(Pathname)
-      raise 'no file' unless local.exist?
-
-      # we assume these are small enough to slurp.
-      script = local.read
-
-      pst = remote.to_h.merge(
+    def upload(localpath, thereitem, _modify=false)
+      localpath = Pathname.new(localpath) unless localpath.is_a?(Pathname)
+      if localpath.exist?
+        # we assume these are small enough to slurp.
+        script = localpath.read
+      else
+        # I.e., thereitem.phantom, an "undeletable" file that does not
+        # exist locally but should not be deleted from server.
+        raise 'no file' unless thereitem.script
+        script = thereitem.script
+      end
+      localpath = Pathname.new(localpath) unless localpath.is_a?(Pathname)
+      name = mkname(thereitem)
+      pst = thereitem.to_h.merge(
         #solution_id: $cfg[@solntype],
         solution_id: @sid,
         script: script,
-        alias: mkalias(remote),
-        name: mkname(remote),
+        alias: mkalias(thereitem),
+        name: name,
       )
-      debug "f: #{local} >> #{pst.reject { |k, _| k == :script }.to_json}"
+      debug "f: #{localpath} >> #{pst.reject { |k, _| k == :script }.to_json}"
       # Try PUT. If 404, then POST.
       # I.e., PUT if not exists, else POST to create.
       updated_at = nil
-      put('/' + mkalias(remote), pst) do |request, http|
+      put('/' + mkalias(thereitem), pst) do |request, http|
         response = http.request(request)
-        case response
-        when Net::HTTPSuccess
+        isj, jsn = isJSON(response.body)
+        # ORDER: An HTTPNoContent is also a HTTPSuccess, so the latter comes first.
+        # EXPLAIN: How come `case response ... when Net:HTTPNoContent` works?
+        #   It seems magical, since response is a class and here we use is_a?.
+        if response.is_a?(Net::HTTPNoContent)
+          # 2017-08-07: When did Murano start returning 204?
+          #   This seems to happen when updating an existing service.
+          #   Unfortunately, we don't get the latest updated_at, so
+          #   a subsequent status will show this module as dirty.
+          ret = get('/' + CGI.escape(name))
+          if !ret.nil? && ret.is_a?(Hash) && ret.key?(:updated_at)
+            updated_at = ret[:updated_at]
+          else
+            warning "Failed to verify updated_at: #{ret}"
+          end
+        elsif response.is_a?(Net::HTTPSuccess)
           # A first upload will see a 200 response and a JSON body.
           # A subsequent upload of the same item sees 204 and no body.
           #return JSON.parse(response.body)
-          _isj, jsn = isJSON(response.body)
+          # MAYBE/EXPLAIN: Spit out error if no JSON, or explain why it's okay.
           updated_at = jsn[:updated_at] unless jsn.nil?
-        when Net::HTTPNotFound
+        elsif response == Net::HTTPNotFound
           verbose "Doesn't exist, creating"
           post('/', pst)
         else
-          showHttpError(request, response)
+          relpath = localpath.sub(File.join(Dir.pwd, ''), '')
+          if response.is_a?(Net::HTTPBadRequest) && isj && jsn[:message] == 'Validation errors'
+            warning "Validation errors detected in #{relpath}:"
+            puts MrMurano::Pretties.makeJsonPretty(jsn[:errors], Struct.new(:pretty).new(true))
+          else
+            showHttpError(request, response)
+          end
+          warning "Failed to upload: #{relpath}"
         end
       end
-      cache_update_time_for(local, updated_at)
+      cache_update_time_for(localpath, updated_at)
     end
 
     def docmp(item_a, item_b)
       if item_a[:updated_at].nil? && item_a[:local_path]
         ct = cached_update_time_for(item_a[:local_path])
         item_a[:updated_at] = ct unless ct.nil?
-        item_a[:updated_at] = item_a[:local_path].mtime.getutc if ct.nil?
+        # The item might not exist if it was resurrected (item.phantom).
+        if ct.nil? && item_a[:local_path].exist?
+          item_a[:updated_at] = item_a[:local_path].mtime.getutc
+        end
       elsif item_a[:updated_at].is_a?(String)
         item_a[:updated_at] = DateTime.parse(item_a[:updated_at]).to_time.getutc
       end
       if item_b[:updated_at].nil? && item_b[:local_path]
         ct = cached_update_time_for(item_b[:local_path])
         item_b[:updated_at] = ct unless ct.nil?
-        item_b[:updated_at] = item_b[:local_path].mtime.getutc if ct.nil?
+        if ct.nil? && item_b[:local_path].exist?
+          item_b[:updated_at] = item_b[:local_path].mtime.getutc
+        end
       elsif item_b[:updated_at].is_a?(String)
         item_b[:updated_at] = DateTime.parse(item_b[:updated_at]).to_time.getutc
       end
+      return false if item_a[:updated_at].nil? && item_b[:updated_at].nil?
+      return true if item_a[:updated_at].nil? && !item_b[:updated_at].nil?
+      return true if !item_a[:updated_at].nil? && item_b[:updated_at].nil?
       item_a[:updated_at].to_time.round != item_b[:updated_at].to_time.round
+    end
+
+    def dodiff(merged, local, there, asdown=false)
+      mrg_diff = super
+      if mrg_diff.empty?
+        mrg_diff = '<Nothing changed (was timestamp difference)>'
+        # FIXME/2017-08-08: This isn't exactly working: setting mtime...
+        cache_update_time_for(local.local_path, there.updated_at)
+      end
+      mrg_diff
     end
 
     def cache_file_name
@@ -124,8 +171,9 @@ module MrMurano
       elsif time.is_a?(String)
         time = DateTime.parse(time)
       end
+      file_hash = local_path_file_hash(local_path)
       entry = {
-        sha1: Digest::SHA1.file(local_path.to_s).hexdigest,
+        sha1: file_hash,
         updated_at: time.to_datetime.iso8601(3),
       }
       cache_file = $cfg.file_at(cache_file_name)
@@ -150,7 +198,7 @@ module MrMurano
     end
 
     def cached_update_time_for(local_path)
-      cksm = Digest::SHA1.file(local_path.to_s).hexdigest
+      cksm = local_path_file_hash(local_path)
       cache_file = $cfg.file_at(cache_file_name)
       return nil unless cache_file.file?
       ret = nil
@@ -172,6 +220,17 @@ module MrMurano
       end
       ret
     end
+
+    def local_path_file_hash(local_path)
+      if local_path.exist?
+        Digest::SHA1.file(local_path.to_s).hexdigest
+      else
+        # For item.phantom. Return the empty string, hashed:
+        #   da39a3ee5e6b4b0d3255bfef95601890afd80709
+        Digest::SHA1.hexdigest('')
+        # MAYBE: Pass in the item and check for item.script?
+      end
+    end
   end
 
   # What Murano calls "Modules". Snippets of Lua code.
@@ -192,18 +251,21 @@ module MrMurano
       # FIXME/VERIFY/2017-07-02: Check that products do not have Modules.
       @solntype = 'application.id'
       super
-      @uriparts << 'module'
+      @uriparts << :module
       @itemkey = :alias
       @project_section = :modules
     end
 
     def self.description
       # MAYBE/2017-07-31: Rename to "Script Modules", per Renaud's suggestion? [lb]
-      %(Modules)
+      %(Module)
     end
 
     def tolocalname(item, _key)
-      name = item[:name].tr('.', '/')
+      # Nested Lua support: the platform dot-delimits modules in a require.
+      name = File.join(item[:name].split('.'))
+      # NOTE: On syncup, user can specify file extension (or use * glob),
+      # but on syncdown, the ".lua" extension is hardcoded (here).
       "#{name}.lua"
     end
 
@@ -226,7 +288,26 @@ module MrMurano
     end
 
     def to_remote_item(root, path)
-      name = path.relative_path_from(root).to_s.sub(/\.lua$/i, '').tr('/', '.')
+      root = root.expand_path
+      # MAYBE/2017-08-08: Let user disable nested Lua module feature?
+      if path.basename.sub(/\.lua$/i, '').to_s.include?('.')
+        warning(
+          "WARNING: Do not use periods in filenames. Rename: ‘#{path.basename}’"
+        )
+      end
+      path.dirname.ascend do |ancestor|
+        break if ancestor == root
+        if ancestor.basename.to_s.include?('.')
+          warning(
+            "WARNING: Do not use periods in directory names. Rename: ‘#{ancestor.basename}’"
+          )
+        end
+      end
+      relpath = path.relative_path_from(root).to_s
+      # MAYBE: Use ALT_SEPARATOR to support Windows?
+      #   ::File::ALT_SEPARATOR || ::File::SEPARATOR
+      #name = relpath.sub(/\..*$/, '').tr(::File::SEPARATOR, '.')
+      name = relpath.sub(/\.lua$/i, '').tr(::File::SEPARATOR, '.')
       ModuleItem.new(name: name)
     end
 
@@ -248,17 +329,19 @@ module MrMurano
       attr_accessor :created_at
       # @return [String] The soln's product.id or application.id (Murano's apiId).
       attr_accessor :solution_id
-      # @return [String] Which service triggers this script
+      # @return [String] Which service triggers this script.
       attr_accessor :service
-      # @return [String] Which event triggers this script
+      # @return [String] Which event triggers this script.
       attr_accessor :event
-      # @return [String] For device2 events, the type of event
+      # @return [String] For device2 events, the type of event.
       attr_accessor :type
+      # @return [Boolean] True if local phantom item via eventhandler.undeletable.
+      attr_accessor :phantom
     end
 
     def initialize(sid=nil)
       super
-      @uriparts << 'eventhandler'
+      @uriparts << :eventhandler
       @itemkey = :alias
       #@project_section = :services
       raise 'Subclass missing @project_section' unless @project_section
@@ -283,16 +366,33 @@ module MrMurano
       # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] || '').split
       items = ret[:items].reject do |item|
-        toss = (
-          item.key?(:service) &&
-          item.key?(:event) && (
-            skiplist.include?(item[:service]) ||
-            skiplist.include?("#{item[:service]}.#{item[:event]}")
-          )
-        )
+        toss = skip?(item, skiplist)
+        debug "skiplist excludes: #{item[:service]}.#{item[:event]}" if toss
         toss
       end
       items.map { |item| EventHandlerItem.new(item) }
+    end
+
+    def skip?(item, skiplist)
+      return false unless item.key?(:service) && item.key?(:event)
+      skiplist.any? do |svc_evt|
+        cmp_svc_evt(item, svc_evt)
+      end
+    end
+
+    def cmp_svc_evt(item, svc_evt)
+      service, event = svc_evt.split('.', 2)
+      if event.nil? || item[:event] == '*'
+        service == item[:service]
+      else
+        # rubocop:disable Style/IfInsideElse
+        #svc_evt == "#{item[:service]}.#{item[:event]}"
+        if service == '*'
+          event == item[:event]
+        else
+          service == item[:service] && event == item[:event]
+        end
+      end
     end
 
     def fetch(name)
@@ -409,6 +509,41 @@ module MrMurano
     def synckey(item)
       "#{item[:service]}_#{item[:event]}"
     end
+
+    def resurrect_undeletables(localbox, therebox)
+      undeletables = ($cfg['eventhandler.undeletable'] || '').split
+      (therebox.keys - localbox.keys).each do |key|
+        # key exists in therebox but not localbox.
+        thereitem = therebox[key]
+        next unless undeletable?(thereitem, undeletables)
+        debug "Undeletable: #{key}"
+        undeletable = EventHandlerItem.new(thereitem)
+        undeletable.id = nil
+        undeletable.created_at = nil
+        undeletable.updated_at = nil
+        #undeletable.local_path
+        #undeletable.line
+        # Even if the user deletes the contents of a script,
+        # the platform still sends the magic header.
+        #undeletable.script = ''
+        undeletable.script = (
+          "--#EVENT #{therebox[key].service} #{therebox[key].event}\n"
+        )
+        undeletable.local_path = Pathname.new(
+          File.join(location, tolocalname(thereitem, key))
+        )
+        undeletable.phantom = true
+        localbox[key] = undeletable
+      end
+      localbox
+    end
+
+    def undeletable?(item, undeletables)
+      return false if item.service.to_s.empty? || item.event.to_s.empty?
+      undeletables.any? do |svc_evt|
+        cmp_svc_evt(item, svc_evt)
+      end
+    end
   end
 
   PRODUCT_SERVICES = %w[device2 interface].freeze
@@ -424,7 +559,7 @@ module MrMurano
     end
 
     def self.description
-      %(Product Event Handlers)
+      %(Interface)
     end
 
     ##
@@ -458,7 +593,7 @@ module MrMurano
     end
 
     def self.description
-      %(Application Event Handlers)
+      %(Service)
     end
 
     ##
@@ -474,11 +609,16 @@ module MrMurano
   end
 
   # Order here matters, because spec/cmd_init_spec.rb
-  SyncRoot.instance.add('eventhandlers', EventHandlerSolnApp, 'E', true)
-  SyncRoot.instance.add('eventhandlers', EventHandlerSolnPrd, 'E', true)
-  # FIXME/2017-06-20: Should we use separate directories for prod vs app?
-  #   [lb] thinks so if the locallist/PRODUCT_SERVICES kludge fails in the future.
-  #SyncRoot.instance.add('services', EventHandlerSolnApp, 'E', true)
-  #SyncRoot.instance.add('interfaces', EventHandlerSolnPrd, 'E', true)
+  # NOTE/2017-08-07: There was one syncable in 2.x for events, but in ADC,
+  #   there are different events for Applications and Products.
+  #   Except there aren't any product events the user should care about (yet?).
+  SyncRoot.instance.add(
+    'eventhandlers', EventHandlerSolnApp, 'E', true, %w[services]
+  )
+  # 2017-08-08: device2 and interface are now part of the skiplist, so no
+  # product event handlers will be found, unless the user modifies the skiplist.
+  SyncRoot.instance.add(
+    'interfaces', EventHandlerSolnPrd, 'I', true, %w[]
+  )
 end
 

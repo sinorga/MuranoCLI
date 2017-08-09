@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.02 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -135,6 +135,10 @@ module MrMurano
       # The user can exclude certain scopes.
       @exclude_scopes = []
 
+      set_defaults
+    end
+
+    def set_defaults
       # All these set()'s are against the :defaults config.
       # So no disk writing ensues. And these serve as defaults
       # unless, say, a SolutionFile says otherwise.
@@ -161,19 +165,58 @@ module MrMurano
       set('files.searchFor', '**/*', :defaults)
       set('files.ignoring', '', :defaults)
 
-      set('endpoints.searchFor', '{,../endpoints}/*.lua {,../endpoints}s/*/*.lua', :defaults)
-      set('endpoints.ignoring', '*_test.lua *_spec.lua .*', :defaults)
+      set('endpoints.searchFor', %w[
+        {,../endpoints}/*.lua
+        {,../endpoints}s/*/*.lua
+      ].join(' '), :defaults)
+      set('endpoints.ignoring', %w[
+        *_test.lua
+        *_spec.lua
+        .*
+      ].join(' '), :defaults)
 
-      set(
-        'eventhandler.searchFor',
-        '*.lua */*.lua {../eventhandlers,../event_handler}/*.lua {../eventhandlers,../event_handler}/*/*.lua',
-        :defaults,
-      )
-      set('eventhandler.ignoring', '*_test.lua *_spec.lua .*', :defaults)
-      set('eventhandler.skiplist', 'websocket webservice device.service_call interface device2.event', :defaults)
+      set('eventhandler.searchFor', %w[
+        *.lua
+        */*.lua
+        {../eventhandlers,../event_handler}/*.lua
+        {../eventhandlers,../event_handler}/*/*.lua
+      ].join(' '), :defaults)
+      set('eventhandler.ignoring', %w[
+        *_test.lua
+        *_spec.lua
+        .*
+      ].join(' '), :defaults)
+      # 2017-08-07: device.datapoint is the v1 device event handler.
+      #   It is deprecated and will be removed in 12 months.
+      #   So it technically still works, but eventually will not.
+      # device2.event is the event handler that is created when two solutions
+      #   are linked (say, an application and a product). Do not delete this.
+      # The interface service contains lots of simple device event handlers
+      #   that we don't want to touch.
+      set('eventhandler.skiplist', %w[
+        device.service_call
+        device2.event
+        interface
+        webservice
+        websocket
+      ].join(' '), :defaults)
+      # Do not delete boilerplate event handlers.
+      set('eventhandler.undeletable', %w[
+        *.event
+        timer.timer
+        tsdb.exportJob
+        user.account
+      ].join(' '), :defaults)
 
-      set('modules.searchFor', '*.lua **/*.lua', :defaults)
-      set('modules.ignoring', '*_test.lua *_spec.lua .*', :defaults)
+      set('modules.searchFor', %w[
+        *.lua
+        **/*.lua
+      ].join(' '), :defaults)
+      set('modules.ignoring', %w[
+        *_test.lua
+        *_spec.lua
+        .*
+      ].join(' '), :defaults)
 
       if Gem.win_platform?
         set('diff.cmd', 'fc', :defaults)

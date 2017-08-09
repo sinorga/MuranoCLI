@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -8,13 +8,14 @@
 # FIXME/MAYBE: Fix semicolon usage.
 # rubocop:disable Style/Semicolon
 
+require 'inflecto'
 require 'open3'
 require 'pathname'
 #require 'shellwords'
 require 'tempfile'
 require 'MrMurano/progress'
 require 'MrMurano/verbosing'
-#require 'MrMurano/hash'
+require 'MrMurano/hash'
 #require 'MrMurano/Config'
 #require 'MrMurano/ProjectFile'
 ##require 'MrMurano/SyncRoot'
@@ -50,9 +51,9 @@ module MrMurano
       attr_accessor :synctype
       # @return [String] For device2, the event type.
       attr_accessor :type
-      # @return [String] For testing, the updated_at time the server would otherwise indicate.
+      # @return [String] The updated_at time from the server is used to detect changes.
       attr_accessor :updated_at
-      # @return [Integer] Non-nil if multiple conflicting files found for same item.
+      # @return [Integer] Positive if multiple conflicting files found for same item.
       attr_accessor :dup_count
 
       # Initialize a new Item with a few, or all, attributes.
@@ -160,7 +161,7 @@ module MrMurano
         #   MAYBE/2017-07-18: Permanently disable Style/RedundantSelf?
         self.to_h <=> other.to_h
       end
-    end
+    end # MrMurano::SyncUpDown::Item
 
     #######################################################################
     # Methods that must be overridden
@@ -329,7 +330,8 @@ module MrMurano
       #   (See more comments, below.)
       return unless item[:updated_at]
 
-      mod_time = DateTime.parse(item[:updated_at]).to_time
+      mod_time = item[:updated_at]
+      mod_time = DateTime.parse(mod_time).to_time unless mod_time.is_a?(Time)
       begin
         FileUtils.touch([local.to_path], mtime: mod_time)
       rescue Errno::EACCES => err
@@ -338,9 +340,8 @@ module MrMurano
         # Check the platform, e.g., "linux-gnu", or other.
         is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
         unless is_windows
-          $stderr.puts(
-            "Unexpected: touch failed on non-Windows machine / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}"
-          )
+          msg = 'Unexpected: touch failed on non-Windows machine'
+          $stderr.puts("#{msg} / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}")
         end
 
         # 2017-07-13: Nor does ctime work.
@@ -495,12 +496,19 @@ module MrMurano
           #     Skipping missing location ‘/tmp/d20170731-3150-1f50uj4/project/specs/resources.yaml’ (Resources)
           #   but then later in the syncdown, that directory and file gets created.
           msg = "Skipping missing location ‘#{location}’"
-          msg += " (#{self.class.description})" unless self.class.description.to_s.empty?
+          unless self.class.description.to_s.empty?
+            msg += " (#{Inflecto.pluralize(self.class.description)})"
+          end
           warning(msg)
           @missing_complaints << location
         end
       end
       items.values
+    end
+
+    def resurrect_undeletables(localbox, _therebox)
+      # It's up to the Syncables to implement this, if they care.
+      localbox
     end
 
     ##
@@ -538,53 +546,59 @@ module MrMurano
     # @return [Array<Item>] Items found
     def localitems(from)
       # TODO: Profile this.
-      debug "#{self.class}: Getting local items from: #{from}"
+      debug "#{self.class}: Getting local items from:\n  #{from}"
       search_in = from.to_s
       sf = searchFor.map { |i| ::File.join(search_in, i) }
-      debug "#{self.class}: Globs: #{sf}"
+      debug "#{self.class}: Globs:\n  #{sf.join("\n  ")}"
       # 2017-07-27: Add uniq to cull duplicate entries that globbing
       # all the ways might produce, otherwise status/sync/diff complain
       # about duplicate resources. I [lb] think this problem has existed
       # but was exacerbated by the change to support sub-directory scripts.
-      items = Dir[*sf].uniq.flatten.compact.reject do |p|
-        ::File.directory?(p) || ignoring.any? do |i|
-          ::File.fnmatch(i, p)
+      items = Dir[*sf].uniq.flatten.compact.reject do |path|
+        if ::File.directory?(path)
+          true
+        else
+          ignoring.any? { |pattern| self.ignore?(path, pattern) }
         end
       end
       items = items.map do |path|
-        path = Pathname.new(path).realpath
-        item = to_remote_item(from, path)
+        # Do not resolve symlinks, just relative paths (. and ..),
+        # otherwise it makes nested Lua support tricky, because
+        # symlinks might be outside the root item path, and then
+        # the nested Lua path looks like ".......some_dir/some_item".
+        #rpath = Pathname.new(path).realpath
+        rpath = Pathname.new(path).expand_path
+        item = to_remote_item(from, rpath)
         if item.is_a?(Array)
-          item.compact.map { |i| i[:local_path] = path; i }
+          item.compact.map { |i| i[:local_path] = rpath; i }
         elsif !item.nil?
-          item[:local_path] = path
+          item[:local_path] = rpath
           item
         end
       end
-      items.flatten.compact
+      #items = items.flatten.compact.sort_by!(&:local_path)
+      #debug "#{self.class}: items:\n  #{items.map(&:local_path).join("\n  ")}"
+      items = items.flatten.compact.sort_by { |it| it[:local_path] }
+      debug "#{self.class}: items:\n  #{items.map { |it| it[:local_path] }.join("\n  ")}"
+      items
+    end
+
+    def ignore?(path, pattern)
+      if pattern.start_with?('**/')
+        # E.g., '**/.*' or '**/*'
+        dirname = File.dirname(path)
+        return true if ['.', ::File::ALT_SEPARATOR, ::File::SEPARATOR].include?(dirname)
+        # There's at least one ancestor directory.
+        # Remove the '**', which ::File.fnmatch doesn't recognize.
+        # 2017-08-08: Why does Rubocop not follow Style/RegexpLiteral here?
+        #pattern = pattern.gsub(/^\*\*\//, '')
+        pattern = pattern.gsub(%r{^\*\*\/}, '')
+      end
+      ::File.fnmatch(pattern, path)
     end
 
     #######################################################################
     # Methods that provide the core status/syncup/syncdown
-
-    ##
-    # Take a hash or something (a Commander::Command::Options) and return a hash
-    #
-    # @param hsh [Hash, Commander::Command::Options] Thing we want to be a Hash
-    # @return [Hash] an actual Hash with default value of false
-    def elevate_hash(hsh)
-      # Commander::Command::Options stripped all of the methods from parent
-      # objects. I have not nice thoughts about that.
-      begin
-        hsh = hsh.__hash__
-      # rubocop:disable Lint/HandleExceptions: Do not suppress exceptions.
-      rescue NoMethodError
-        # swallow this.
-      end
-      # build a hash where the default is 'false' instead of 'nil'
-      Hash.new(false).merge(Hash.transform_keys_to_symbols(hsh))
-    end
-    private :elevate_hash
 
     def sync_update_progress(msg)
       if $cfg['tool.no-progress']
@@ -726,7 +740,7 @@ module MrMurano
     # @param merged [merged] The merged item to get a diff of
     # @local local, unadulterated (non-merged) item
     # @return [String] The diff output
-    def dodiff(merged, local, asdown=false)
+    def dodiff(merged, local, _there=nil, asdown=false)
       trmt = Tempfile.new([tolocalname(merged, @itemkey) + '_remote_', '.lua'])
       tlcl = Tempfile.new([tolocalname(merged, @itemkey) + '_local_', '.lua'])
       Pathname.new(tlcl.path).open('wb') do |io|
@@ -750,6 +764,8 @@ module MrMurano
 
         # 2017-07-03: No worries, Ruby 3.0 frozen string literals, cmd is a list.
         cmd = $cfg['diff.cmd'].shellsplit
+        # ALT_SEPARATOR is the platform specific alternative separator,
+        # for Windows support.
         remote_path = trmt.path.gsub(
           ::File::SEPARATOR, ::File::ALT_SEPARATOR || ::File::SEPARATOR
         )
@@ -824,6 +840,28 @@ module MrMurano
     def status(options={}, selected=[])
       options = elevate_hash(options)
 
+      syncables_prepare(options)
+
+      therebox, localbox = items_lists(options, selected)
+
+      toadd, todel = items_new_and_old(options, therebox, localbox)
+
+      tomod, unchg = items_mods_and_chgs(options, therebox, localbox)
+
+      if options[:unselected]
+        { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
+      else
+        {
+          toadd: toadd.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          todel: todel.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          tomod: tomod.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          unchg: unchg.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          skipd: [],
+        }
+      end
+    end
+
+    def syncables_prepare(options)
       # 2017-07-02: Now that there are multiple solution types, and because
       # SyncRoot.add is called on different classes that go with either or
       # both products and applications, if a user only created one solution,
@@ -836,9 +874,9 @@ module MrMurano
       else
         syncup_before
       end
+    end
 
-      itemkey = @itemkey.to_sym
-
+    def items_lists(options, selected)
       # Fetch arrays of items there, and items here/local.
       there = list
       there = _matcher(there, selected)
@@ -851,6 +889,7 @@ module MrMurano
         item[:synctype] = self.class.description
         therebox[item[:synckey]] = item
       end
+
       localbox = {}
       local.each do |item|
         skey = synckey(item)
@@ -860,10 +899,16 @@ module MrMurano
         item[:synctype] = self.class.description
         localbox[item[:synckey]] = item
       end
-      toadd = []
-      todel = []
-      tomod = []
-      unchg = []
+
+      # Some items are considered "undeletable", meaning if a
+      # corresponding file does not exist locally, we assume
+      # it does but is just set to the empty string.
+      localbox = resurrect_undeletables(localbox, therebox)
+
+      [therebox, localbox]
+    end
+
+    def items_new_and_old(options, therebox, localbox)
       if options[:asdown]
         todel = (localbox.keys - therebox.keys).map { |key| localbox[key] }
         toadd = (therebox.keys - localbox.keys).map { |key| therebox[key] }
@@ -871,36 +916,33 @@ module MrMurano
         toadd = (localbox.keys - therebox.keys).map { |key| localbox[key] }
         todel = (therebox.keys - localbox.keys).map { |key| therebox[key] }
       end
+      [toadd, todel]
+    end
+
+    def items_mods_and_chgs(options, therebox, localbox)
+      tomod = []
+      unchg = []
+
       (localbox.keys & therebox.keys).each do |key|
         # Want 'local' to override 'there' except for itemkey.
         if options[:asdown]
-          mrg = therebox[key].reject { |k, _v| k == itemkey }
+          mrg = therebox[key].reject { |k, _v| k == @itemkey.to_sym }
           mrg = localbox[key].merge(mrg)
         else
-          mrg = localbox[key].reject { |k, _v| k == itemkey }
+          mrg = localbox[key].reject { |k, _v| k == @itemkey.to_sym }
           mrg = therebox[key].merge(mrg)
         end
+
         if docmp(localbox[key], therebox[key])
           if options[:diff] && mrg[:selected]
-            mrg[:diff] = dodiff(mrg.to_h, localbox[key], options[:asdown])
-            mrg[:diff] = '<Nothing changed (may be timestamp difference?)>' if mrg[:diff].empty?
+            mrg[:diff] = dodiff(mrg.to_h, localbox[key], therebox[key], options[:asdown])
           end
           tomod << mrg
         else
           unchg << mrg
         end
       end
-      if options[:unselected]
-        { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
-      else
-        {
-          toadd: toadd.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          todel: todel.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          tomod: tomod.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          unchg: unchg.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          skipd: [],
-        }
-      end
+      [tomod, unchg]
     end
   end
 end

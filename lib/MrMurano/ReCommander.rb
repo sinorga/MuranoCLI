@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -80,17 +80,21 @@ module Commander
 
       begin
         old_run_active_command
-      rescue MrMurano::ConfigError => err
-        # Clear whirly if it was running.
-        MrMurano::Verbose.whirly_stop
-        MrMurano::Verbose.error err.message
-        exit 1
       rescue LocalJumpError => _err
         # This happens when you `return` from a command, since
         # commands are blocks, and returning from a block would
         # really mean returning from the thing running the block,
         # which would be bad. So Ruby barfs instead.
         return
+      rescue OptionParser::InvalidOption => err
+        MrMurano::Verbose.whirly_stop
+        MrMurano::Verbose.error err.message
+        exit 1
+      rescue MrMurano::ConfigError => err
+        # Clear whirly if it was running.
+        MrMurano::Verbose.whirly_stop
+        MrMurano::Verbose.error err.message
+        exit 1
       rescue StandardError => _err
         raise
       end

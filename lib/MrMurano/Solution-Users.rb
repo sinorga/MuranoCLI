@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -119,12 +119,12 @@ module MrMurano
       @solntype = 'application.id'
       #@solntype = 'product.id'
       super
-      @uriparts << 'role'
+      @uriparts << :role
       @itemkey = :role_id
     end
 
     def self.description
-      %(Roles)
+      %(Role)
     end
   end
   #SyncRoot.instance.add('roles', Role, 'R', false)
@@ -138,17 +138,17 @@ module MrMurano
       @solntype = 'application.id'
       #@solntype = 'product.id'
       super
-      @uriparts << 'user'
+      @uriparts << :user
     end
 
     def self.description
-      %(Users)
+      %(User)
     end
 
     # @param modify Bool: True if item exists already and this is changing it
     def upload(_local, _remote, _modify)
       # TODO: figure out APIs for updating users.
-      warning %(Updating Users isn't working currently.)
+      warning %(Updating Users is not yet implemented.)
       # post does work if the :password field is set.
     end
 

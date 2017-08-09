@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.27 /coding: utf-8
+# Last Modified: 2017.08.09 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -109,16 +109,20 @@ RSpec.describe 'murano init', :cmd do
         "\n",
       ]
     end
+    #expecting += [
+    #  t.a_string_matching(%r{Adding item \w+_event\n}),
+    #  # Order not consistent...
+    #  #"Adding item tsdb_exportJob\n",
+    #  #"Adding item timer_timer\n",
+    #  #"Adding item user_account\n",
+    #  t.a_string_starting_with('Adding item '),
+    #  t.a_string_starting_with('Adding item '),
+    #  t.a_string_starting_with('Adding item '),
+    #  "Synced 4 items\n",
+    #  "\n",
+    #]
     expecting += [
-      t.a_string_matching(%r{Adding item \w+_event\n}),
-      # Order not consistent...
-      #"Adding item tsdb_exportJob\n",
-      #"Adding item timer_timer\n",
-      #"Adding item user_account\n",
-      t.a_string_starting_with('Adding item '),
-      t.a_string_starting_with('Adding item '),
-      t.a_string_starting_with('Adding item '),
-      "Synced 4 items\n",
+      "Items already synced\n",
       "\n",
     ]
     expecting += [
@@ -315,15 +319,19 @@ RSpec.describe 'murano init', :cmd do
     end
     after(:example) do
       Dir.chdir(ENV['HOME']) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
-        expect(out).to eq('')
-        expect(err).to eq('')
-        expect(status.exitstatus).to eq(0)
+        if defined?(@product_name)
+          out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
+          expect(out).to eq('')
+          expect(err).to eq('')
+          expect(status.exitstatus).to eq(0)
+        end
 
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
-        expect(out).to eq('')
-        expect(err).to eq('')
-        expect(status.exitstatus).to eq(0)
+        if defined?(@applctn_name)
+          out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+          expect(out).to eq('')
+          expect(err).to eq('')
+          expect(status.exitstatus).to eq(0)
+        end
       end
     end
 

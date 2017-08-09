@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -59,6 +59,12 @@ module MrMurano
         ret = super
         if ret.nil? && !@suppress_error
           warning "No solution with ID: #{@sid}"
+          whirly_interject { say 'Run `murano show` to see the business and list of solutions.' }
+          if $cfg.get('business.id', :env).to_s.empty? &&
+             $cfg.get('business.id', :project).to_s.empty? &&
+             $cfg.get('business.id', :env) != $cfg.get('business.id', :project)
+            warning 'NOTE: MURANO_CONFIGFILE specifies a different business.id than the local project file'
+          end
           exit 1
         end
         return nil if ret.nil?

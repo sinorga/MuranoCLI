@@ -1,12 +1,39 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.09 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'inflecto'
 require 'MrMurano/verbosing'
 require 'MrMurano/SyncRoot'
+
+# Load options to control which things to sync
+def command_add_syncable_options(cmd)
+  MrMurano::SyncRoot.instance.each_option do |short, long, desc|
+    cmd.option short, long, Inflecto.pluralize(desc)
+  end
+  MrMurano::SyncRoot.instance.each_alias_opt do |long, desc|
+    cmd.option long, Inflecto.pluralize(desc)
+  end
+end
+
+def command_set_syncable_defaults(options)
+  # Weird. The options is a Commander::Command::Options object, but
+  # options.class says nil! Also, you cannot index properties or
+  # even options.send('opt'). But we can just twiddle the raw table.
+  table = options.__hash__
+  MrMurano::SyncRoot.instance.each_alias_sym do |pseudo, pseudo_sym, name, name_sym|
+    unless table[pseudo_sym].nil?
+      if table[name_sym].nil?
+        table[name_sym] = table[pseudo_sym]
+      elsif table[name_sym] != table[pseudo_sym]
+        MrMurano::Verbose.warning("Ignoring --#{pseudo} because --#{name} also specified")
+      end
+    end
+  end
+end
 
 command :status do |c|
   c.syntax = %(murano status [options] [filters])
@@ -30,18 +57,15 @@ with the full file path.
 Each item type also supports specific filters. These always start with #.
 Endpoints can be selected with a "#<method>#<path glob>" pattern.
   ).gsub(/^ +/, '').strip
+
   c.option '--all', 'Check everything'
-
-  # Load options to control which things to status
-  MrMurano::SyncRoot.instance.each_option do |s, l, d|
-    c.option s, l, d
-  end
-
   c.option '--[no-]asdown', %(Report as if syncdown instead of syncup)
   c.option '--[no-]asup', %(Report as if syncup instead of syncdown (default: true))
   c.option '--[no-]diff', %(For modified items, show a diff)
   c.option '--[no-]grouped', %(Group all adds, deletes, and mods together)
-  c.option '--[no-]showall', %(List unchanged as well)
+  c.option '--[no-]show-all', %(List unchanged as well)
+  c.option '--[no-]show-type', %(Include type of item)
+  command_add_syncable_options(c)
 
   c.action do |args, options|
     options.default(
@@ -49,7 +73,8 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       asup: nil,
       diff: false,
       grouped: true,
-      showall: false,
+      show_all: false,
+      show_type: false,
       # delete/create/update are not options the user can specify
       # for status or diff commands; but the SyncUpDown class expects
       # them.
@@ -57,48 +82,70 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       create: true,
       update: true,
     )
+    command_set_syncable_defaults(options)
 
-    def fmtr(item)
-      if item.key? :local_path
-        lp = item[:local_path].relative_path_from(Pathname.pwd).to_s
-        return "#{lp}:#{item[:line]}" if item.key?(:line) && item[:line] > 0
-        lp
+    def fmtr(item, options)
+      if item.key?(:local_path)
+        desc = item[:local_path].relative_path_from(Pathname.pwd).to_s
+        desc = "#{desc}:#{item[:line]}" if item.key?(:line) && item[:line] > 0
       else
-        id = item[:synckey]
-        id += " (#{item[:pp_desc]})" unless item[:pp_desc].to_s.empty? || item[:pp_desc] == item[:synckey]
-        id
+        desc = item[:synckey]
       end
+      return desc unless options.show_type
+      unless item[:pp_desc].to_s.empty? || item[:pp_desc] == item[:synckey]
+        desc += " (#{item[:pp_desc]})"
+      end
+      desc += " [#{item[:method]} #{item[:path]}]" if item[:method] && item[:path]
+      desc
+    end
+
+    def interject(msg)
+      MrMurano::Verbose.whirly_interject { say msg }
     end
 
     def pretty(ret, options)
-      pretty_group_header(ret[:toadd], 'Only on local machine', 'new locally', options.grouped)
-      ret[:toadd].each { |item| say " + #{item[:pp_type]}  #{highlight_chg(fmtr(item))}" }
+      pretty_group_header(
+        ret[:toadd], 'Only on local machine', 'new locally', options.grouped
+      )
+      ret[:toadd].each do |item|
+        interject " + #{item[:pp_type]}  #{highlight_chg(fmtr(item, options))}"
+      end
 
-      pretty_group_header(ret[:todel], 'Only on remote server', 'new remotely', options.grouped)
-      ret[:todel].each { |item| say " - #{item[:pp_type]}  #{highlight_del(fmtr(item))}" }
+      pretty_group_header(
+        ret[:todel], 'Only on remote server', 'new remotely', options.grouped
+      )
+      ret[:todel].each do |item|
+        interject " - #{item[:pp_type]}  #{highlight_del(fmtr(item, options))}"
+      end
 
-      pretty_group_header(ret[:tomod], 'Items that differ', 'that differs', options.grouped)
+      pretty_group_header(
+        ret[:tomod], 'Items that differ', 'that differs', options.grouped
+      )
       ret[:tomod].each do |item|
-        say " M #{item[:pp_type]}  #{highlight_chg(fmtr(item))}"
-        say item[:diff] if options.diff
+        interject " M #{item[:pp_type]}  #{highlight_chg(fmtr(item, options))}"
+        interject item[:diff] if options.diff
       end
 
       unless ret[:skipd].empty?
-        pretty_group_header(ret[:skipd], 'Items without a solution', 'without a solution', options.grouped)
-        ret[:skipd].each { |item| say " - #{item[:pp_type]}  #{highlight_del(fmtr(item))}" }
+        pretty_group_header(
+          ret[:skipd], 'Items without a solution', 'without a solution', options.grouped
+        )
+        ret[:skipd].each do |item|
+          interject " - #{item[:pp_type]}  #{highlight_del(fmtr(item, options))}"
+        end
       end
 
-      return unless options.showall
-      say 'Unchanged:' if options.grouped
-      ret[:unchg].each { |item| say "   #{item[:pp_type]}  #{fmtr(item)}" }
+      return unless options.show_all
+      interject 'Unchanged:' if options.grouped
+      ret[:unchg].each { |item| interject "   #{item[:pp_type]}  #{fmtr(item, options)}" }
     end
 
     def pretty_group_header(group, header_any, header_empty, grouped)
       return unless grouped
       if !group.empty?
-        say "#{header_any}:"
+        interject "#{header_any}:"
       else
-        say "Nothing #{header_empty}"
+        interject "Nothing #{header_empty}"
       end
     end
 
@@ -150,7 +197,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
     end
 
     MrMurano::SyncRoot.instance.each_filtered(options.__hash__) do |_name, type, klass, desc|
-      MrMurano::Verbose.whirly_msg "Fetching #{desc}..."
+      MrMurano::Verbose.whirly_msg "Fetching #{Inflecto.pluralize(desc)}..."
       begin
         syncable = klass.new
       rescue MrMurano::ConfigError => err

@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.20 /coding: utf-8
+# Last Modified: 2017.08.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,6 +13,7 @@ require 'uri'
 # 2017-06-07: [lb] getting "execution expired (Net::OpenTimeout)" on http.start.
 # Suggestions online say to load the pure-Ruby DNS implementation, resolv.rb.
 require 'resolv-replace'
+require 'MrMurano/progress'
 
 module MrMurano
   module Http
@@ -63,7 +64,7 @@ module MrMurano
           end
         end
         if $cfg.curlfile_f.nil?
-          puts a.join(' ')
+          MrMurano::Progress.instance.whirly_interject { puts a.join(' ') }
         else
           $cfg.curlfile_f << a.join(' ') + "\n\n"
           $cfg.curlfile_f.flush

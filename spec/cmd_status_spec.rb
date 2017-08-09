@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.27 /coding: utf-8
+# Last Modified: 2017.08.09 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -37,14 +37,20 @@ RSpec.describe 'murano status', :cmd, :needs_password do
     #expect(status.exitstatus).to eq(0)
 
     out, err, status = Open3.capture3(
-      capcmd('murano', 'syncdown', '--eventhandlers', '--no-delete', '--no-update')
+      #capcmd('murano', 'syncdown', '--eventhandlers', '--no-delete', '--no-update')
+      capcmd('murano', 'syncdown', '--eventhandlers', '--no-delete', '--no-create')
     )
     # E.g.,
     #  "Adding item timer_timer\nAdding item tsdb_exportJob\nAdding item user_account\n"
     olines = out.lines
-    expect(olines[0]).to a_string_starting_with("Adding item ")
-    expect(olines[1]).to a_string_starting_with("Adding item ")
-    expect(olines[2]).to a_string_starting_with("Adding item ")
+    # 2017-08-08: Because of eventhandler.undeletable, the boilerplate items
+    #   pre-exist, in a sense, and are therefore described as being updated,
+    #   not added.
+    (0..2).each do |ln|
+      #expect(olines[ln].to_s).to a_string_starting_with("Adding item ")
+      expect(olines[ln].to_s).to a_string_starting_with("Updating item ")
+    end
+
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
@@ -77,10 +83,10 @@ RSpec.describe 'murano status', :cmd, :needs_password do
 
   def match_syncable_contents_resources(slice)
       expect(slice).to include(
-        a_string_matching(/ \+ T  state \(Resources\)/),
-        a_string_matching(/ \+ T  temperature \(Resources\)/),
-        a_string_matching(/ \+ T  uptime \(Resources\)/),
-        a_string_matching(/ \+ T  humidity \(Resources\)/),
+        a_string_matching(/ \+ T  state/),
+        a_string_matching(/ \+ T  temperature/),
+        a_string_matching(/ \+ T  uptime/),
+        a_string_matching(/ \+ T  humidity/),
       )
   end
 
@@ -122,9 +128,15 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       #" - E  interface_updateGatewaySettings\n",
       #" - E  interface_updateIdentity\n",
       #" - E  interface_uploadContent\n",
-      " - E  timer_timer (Application Event Handlers)\n",
-      " - E  tsdb_exportJob (Application Event Handlers)\n",
-      " - E  user_account (Application Event Handlers)\n",
+      #" - E  timer_timer (Application Event Handlers)\n",
+      #" - E  tsdb_exportJob (Application Event Handlers)\n",
+      #" - E  user_account (Application Event Handlers)\n",
+      #" - E  timer_timer\n",
+      #" - E  tsdb_exportJob\n",
+      #" - E  user_account\n",
+      " M E  timer_timer\.lua\n",
+      " M E  tsdb_exportJob\.lua\n",
+      " M E  user_account\.lua\n",
     )
   end
 
@@ -274,13 +286,16 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(olines[0]).to eq("Only on local machine:\n")
       match_syncable_contents_except_singleRoute(olines[1..7])
       match_syncable_contents_resources(olines[8..11])
-      expect(olines[12]).to eq("Only on remote server:\n")
-      match_remote_boilerplate_v1_0_0_service(olines[13..15])
-      expect(olines[16]).to eq("Nothing that differs\n")
-      #expect(olines[11]).to eq("Items that differ:\n")
-      #expect(olines[12..12]).to contain_exactly(
-      #  a_string_matching(/ M E  .*services\/devdata\.lua/),
-      #)
+      #expect(olines[12]).to eq("Only on remote server:\n")
+      #match_remote_boilerplate_v1_0_0_service(olines[13..15])
+      expect(olines[12]).to eq("Nothing new remotely\n")
+      #expect(olines[16]).to eq("Nothing that differs\n")
+      ##expect(olines[11]).to eq("Items that differ:\n")
+      ##expect(olines[12..12]).to contain_exactly(
+      ##  a_string_matching(/ M E  .*services\/devdata\.lua/),
+      ##)
+      expect(olines[13]).to eq("Items that differ:\n")
+      match_remote_boilerplate_v1_0_0_service(olines[14..16])
       expect(status.exitstatus).to eq(0)
     end
   end
@@ -289,7 +304,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
   context "with Solutionfile 0.3.0" do
     before(:example) do
       FileUtils.cp_r(File.join(@testdir, 'spec/fixtures/syncable_content/.'), '.')
-      FileUtils.move('assets','files')
+      FileUtils.move('assets', 'files')
       FileUtils.mkpath('specs')
       FileUtils.copy(
         File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'),
@@ -297,19 +312,19 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       )
       File.open('Solutionfile.json', 'wb') do |io|
         io << {
-          :default_page => 'index.html',
-          :assets => 'files',
-          :routes => 'routes/manyRoutes.lua',
+          default_page: 'index.html',
+          assets: 'files',
+          routes: 'routes/manyRoutes.lua',
           # Note that singleRoute.lua is not included, so it won't be seen by status command.
-          :modules => {
-            :table_util => 'modules/table_util.lua'
+          modules: {
+            table_util: 'modules/table_util.lua'
           },
-          :services => {
-            :device => {
-              :datapoint => 'services/devdata.lua'
+          services: {
+            device: {
+              datapoint: 'services/devdata.lua'
             }
           },
-          :version => '0.3.0',
+          version: '0.3.0',
         }.to_json
       end
     end
@@ -322,13 +337,12 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(olines[0]).to eq("Only on local machine:\n")
       match_syncable_contents_except_singleRoute(olines[1..7])
       match_syncable_contents_resources(olines[8..11])
-      expect(olines[12]).to eq("Only on remote server:\n")
-      match_remote_boilerplate_v1_0_0_service(olines[13..15])
-      expect(olines[16]).to eq("Nothing that differs\n")
-      #expect(olines[15]).to eq("Items that differ:\n")
-      #expect(olines[16..16]).to contain_exactly(
-      #  a_string_matching(/ M E  .*services\/devdata\.lua/),
-      #)
+      #expect(olines[12]).to eq("Only on remote server:\n")
+      #match_remote_boilerplate_v1_0_0_service(olines[13..15])
+      expect(olines[12]).to eq("Nothing new remotely\n")
+      #expect(olines[16]).to eq("Nothing that differs\n")
+      expect(olines[13]).to eq("Items that differ:\n")
+      match_remote_boilerplate_v1_0_0_service(olines[14..16])
       expect(status.exitstatus).to eq(0)
     end
   end

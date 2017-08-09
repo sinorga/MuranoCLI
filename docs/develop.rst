@@ -204,6 +204,8 @@ Run these commands once from any directory:
 
     gem install byebug
 
+    gem install rubocop
+
 Prepare MuranoCLI
 -----------------
 
