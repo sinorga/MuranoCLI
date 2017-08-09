@@ -60,12 +60,11 @@ module MrMurano
         if ret.nil? && !@suppress_error
           warning "No solution with ID: #{@sid}"
           whirly_interject { say 'Run `murano show` to see the business and list of solutions.' }
-          if true \
-            && !$cfg.get('business.id', :env).to_s.empty? \
-            && !$cfg.get('business.id', :project).to_s.empty? \
-            && $cfg.get('business.id', :env) != $cfg.get('business.id', :project)
+          if $cfg.get('business.id', :env).to_s.empty? &&
+             $cfg.get('business.id', :project).to_s.empty? &&
+             $cfg.get('business.id', :env) != $cfg.get('business.id', :project)
+            warning 'NOTE: MURANO_CONFIGFILE specifies a different business.id than the local project file'
           end
-          warning "NOTE: MURANO_CONFIGFILE specifies a different business.id than the local project file"
           exit 1
         end
         return nil if ret.nil?
