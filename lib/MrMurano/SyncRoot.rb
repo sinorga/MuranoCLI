@@ -78,7 +78,8 @@ module MrMurano
     # Iterate over all syncables with option arguments.
     # @param block code to run on each
     def each_option
-      @syncset.each { |a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc }
+      #@syncset.each { |a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc }
+      @syncset.each { |a| yield "-#{a.type}", "--[no-]#{a.name}", a.desc }
     end
 
     ##
