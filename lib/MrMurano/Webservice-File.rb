@@ -132,7 +132,7 @@ module MrMurano
           end
 
           response = http.request(request)
-          showHttpError(request, response) unless response == Net::HTTPSuccess
+          showHttpError(request, response) unless response.is_a?(Net::HTTPSuccess)
         end
       end
 
