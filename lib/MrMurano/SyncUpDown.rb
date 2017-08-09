@@ -330,7 +330,8 @@ module MrMurano
       #   (See more comments, below.)
       return unless item[:updated_at]
 
-      mod_time = DateTime.parse(item[:updated_at]).to_time
+      mod_time = item[:updated_at]
+      mod_time = DateTime.parse(mod_time).to_time unless mod_time.is_a?(Time)
       begin
         FileUtils.touch([local.to_path], mtime: mod_time)
       rescue Errno::EACCES => err

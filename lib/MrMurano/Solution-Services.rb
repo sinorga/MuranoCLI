@@ -82,7 +82,22 @@ module MrMurano
       updated_at = nil
       put('/' + mkalias(thereitem), pst) do |request, http|
         response = http.request(request)
-        if response.is_a?(Net::HTTPSuccess)
+        isj, jsn = isJSON(response.body)
+        # ORDER: An HTTPNoContent is also a HTTPSuccess, so the latter comes first.
+        # EXPLAIN: How come `case response ... when Net:HTTPNoContent` works?
+        #   It seems magical, since response is a class and here we use is_a?.
+        if response.is_a?(Net::HTTPNoContent)
+          # 2017-08-07: When did Murano start returning 204?
+          #   This seems to happen when updating an existing service.
+          #   Unfortunately, we don't get the latest updated_at, so
+          #   a subsequent status will show this module as dirty.
+          ret = get('/' + CGI.escape(name))
+          if !ret.nil? && ret.is_a?(Hash) && ret.key?(:updated_at)
+            updated_at = ret[:updated_at]
+          else
+            warning "Failed to verify updated_at: #{ret}"
+          end
+        elsif response.is_a?(Net::HTTPSuccess)
           # A first upload will see a 200 response and a JSON body.
           # A subsequent upload of the same item sees 204 and no body.
           #return JSON.parse(response.body)
