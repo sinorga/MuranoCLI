@@ -8,6 +8,7 @@
 # FIXME/MAYBE: Fix semicolon usage.
 # rubocop:disable Style/Semicolon
 
+require 'inflecto'
 require 'open3'
 require 'pathname'
 #require 'shellwords'
@@ -494,7 +495,9 @@ module MrMurano
           #     Skipping missing location ‘/tmp/d20170731-3150-1f50uj4/project/specs/resources.yaml’ (Resources)
           #   but then later in the syncdown, that directory and file gets created.
           msg = "Skipping missing location ‘#{location}’"
-          msg += " (#{self.class.description})" unless self.class.description.to_s.empty?
+          unless self.class.description.to_s.empty?
+            msg += " (#{Inflecto.pluralize(self.class.description)})"
+          end
           warning(msg)
           @missing_complaints << location
         end

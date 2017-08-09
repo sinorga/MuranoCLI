@@ -12,6 +12,9 @@ module MrMurano
 
     # A thing that is syncable.
     Syncable = Struct.new(:name, :class, :type, :desc, :bydefault, :aliases) do
+      def opt_sym
+        self.name.tr('-', '_').to_sym
+      end
     end
 
     def initialize
@@ -54,13 +57,13 @@ module MrMurano
     # Remove all syncables.
     def reset
       @syncset = []
+      @synctypes = {}
     end
 
     ##
     # Get the list of default syncables.
     # @return [Array<String>] array of names
     def bydefault
-      @syncset = [] unless defined?(@syncset)
       @syncset.select(&:bydefault).map(&:name)
     end
 
@@ -68,7 +71,6 @@ module MrMurano
     # Iterate over all syncables
     # @param block code to run on each
     def each
-      @syncset = [] unless defined?(@syncset)
       @syncset.each { |a| yield a.name, a.type, a.class, a.desc }
     end
 
@@ -76,15 +78,13 @@ module MrMurano
     # Iterate over all syncables with option arguments.
     # @param block code to run on each
     def each_option
-      @syncset = [] unless defined?(@syncset)
       @syncset.each { |a| yield "-#{a.type.downcase}", "--[no-]#{a.name}", a.desc }
     end
 
     ##
     # Iterate over all syncables with option argument aliases.
     # @param block code to run on each
-    def each_alias
-      @syncset = [] unless defined?(@syncset)
+    def each_alias_opt
       @syncset.each do |syncable|
         syncable.aliases.each do |syn|
           yield "--[no-]#{syn}", syncable.desc
@@ -92,11 +92,10 @@ module MrMurano
       end
     end
 
-    def each_default
-      @syncset = [] unless defined?(@syncset)
+    def each_alias_sym
       @syncset.each do |syncable|
-        syncable.aliases.each do |syn|
-          yield syn, syncable.name
+        syncable.aliases.each do |pseudonym|
+          yield pseudonym, pseudonym.tr('-', '_').to_sym, syncable.name, syncable.opt_sym
         end
       end
     end
@@ -106,10 +105,9 @@ module MrMurano
     # @param opt [Hash{Symbol=>Boolean}] Options hash of which to select from
     # @param block code to run on each
     def each_filtered(opt)
-      @syncset = [] unless defined?(@syncset)
       check_same(opt)
       @syncset.each do |a|
-        if opt[a.name.tr('-', '_').to_sym] || opt[a.type.to_sym]
+        if opt[a.opt_sym] || opt[a.type.to_sym]
           yield a.name, a.type, a.class, a.desc
         end
       end
@@ -122,11 +120,10 @@ module MrMurano
     #
     # @return [nil]
     def check_same(opt)
-      @syncset = [] unless defined?(@syncset)
       if opt[:all]
         @syncset.each { |a| opt[a.name.to_sym] = true }
       else
-        any = @syncset.select { |a| opt[a.name.to_sym] || opt[a.type.to_sym] }
+        any = @syncset.select { |a| opt[a.opt_sym] || opt[a.type.to_sym] }
         if any.empty?
           bydef = $cfg['sync.bydefault'].split
           @syncset.select { |a| bydef.include? a.name }.each { |a| opt[a.name.to_sym] = true }

@@ -28,7 +28,10 @@ module MrMurano
       end
 
       def self.description
-        %(Static Files)
+        # 2017-08-07: The UI calls these ASSETS in the tab
+        # (and refers to "Static file hosting").
+        #%(Static File)
+        %(Asset)
       end
 
       ##
@@ -181,7 +184,7 @@ module MrMurano
       end
     end
 
-    SyncRoot.instance.add('files', File, 'S', true)
+    SyncRoot.instance.add('files', File, 'S', true, %w[assets])
   end
 end
 #  vim: set ai et sw=2 ts=2 :

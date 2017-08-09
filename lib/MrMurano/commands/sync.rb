@@ -19,7 +19,7 @@ def syncdown_files(options, args=nil)
   args = [] if args.nil?
   num_synced = 0
   MrMurano::SyncRoot.instance.each_filtered(options) do |_name, _type, klass, desc|
-    MrMurano::Verbose.whirly_msg "Syncing #{desc}..."
+    MrMurano::Verbose.whirly_msg "Syncing #{Inflecto.pluralize(desc)}..."
     sol = klass.new
     num_synced += sol.syncdown(options, args)
   end
@@ -72,7 +72,7 @@ Sync project up into Murano.
 
     #MrMurano::Verbose.whirly_start "Syncing solutions..."
     MrMurano::SyncRoot.instance.each_filtered(options.__hash__) do |_name, _type, klass, desc|
-      MrMurano::Verbose.whirly_msg "Syncing #{desc}..."
+      MrMurano::Verbose.whirly_msg "Syncing #{Inflecto.pluralize(desc)}..."
       sol = klass.new
       sol.syncup(options, args)
     end

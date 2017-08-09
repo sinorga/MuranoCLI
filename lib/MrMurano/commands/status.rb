@@ -12,10 +12,10 @@ require 'MrMurano/SyncRoot'
 # Load options to control which things to sync
 def command_add_syncable_options(cmd)
   MrMurano::SyncRoot.instance.each_option do |short, long, desc|
-    cmd.option short, long, desc
+    cmd.option short, long, Inflecto.pluralize(desc)
   end
-  MrMurano::SyncRoot.instance.each_alias do |long, desc|
-    cmd.option long, desc
+  MrMurano::SyncRoot.instance.each_alias_opt do |long, desc|
+    cmd.option long, Inflecto.pluralize(desc)
   end
 end
 
@@ -24,14 +24,12 @@ def command_set_syncable_defaults(options)
   # options.class says nil! Also, you cannot index properties or
   # even options.send('opt'). But we can just twiddle the raw table.
   table = options.__hash__
-  MrMurano::SyncRoot.instance.each_default do |osyn, oname|
-    syn = osyn.tr('-', '_').to_sym
-    name = oname.tr('-', '_').to_sym
-    unless table[syn].nil?
-      if table[name].nil?
-        table[name] = table[syn]
-      elsif table[name] != table[syn]
-        MrMurano::Verbose.warning("Ignoring --#{osyn} because --#{oname} also specified")
+  MrMurano::SyncRoot.instance.each_alias_sym do |pseudo, pseudo_sym, name, name_sym|
+    unless table[pseudo_sym].nil?
+      if table[name_sym].nil?
+        table[name_sym] = table[pseudo_sym]
+      elsif table[name_sym] != table[pseudo_sym]
+        MrMurano::Verbose.warning("Ignoring --#{pseudo} because --#{name} also specified")
       end
     end
   end
@@ -101,7 +99,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       end
       return desc unless options.show_type
       unless item[:pp_desc].to_s.empty? || item[:pp_desc] == item[:synckey]
-        desc += " (#{Inflecto.singularize(item[:pp_desc])})"
+        desc += " (#{item[:pp_desc]})"
       end
       desc += " [#{item[:method]} #{item[:path]}]" if item[:method] && item[:path]
       desc
@@ -205,7 +203,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
     end
 
     MrMurano::SyncRoot.instance.each_filtered(options.__hash__) do |_name, type, klass, desc|
-      MrMurano::Verbose.whirly_msg "Fetching #{desc}..."
+      MrMurano::Verbose.whirly_msg "Fetching #{Inflecto.pluralize(desc)}..."
       begin
         syncable = klass.new
       rescue MrMurano::ConfigError => err

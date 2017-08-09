@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.07 /coding: utf-8
+# Last Modified: 2017.08.09 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -217,7 +217,7 @@ module MrMurano
 
     def self.description
       # MAYBE/2017-07-31: Rename to "Script Modules", per Renaud's suggestion? [lb]
-      %(Modules)
+      %(Module)
     end
 
     def tolocalname(item, _key)
@@ -442,7 +442,7 @@ module MrMurano
     end
 
     def self.description
-      %(Product Event Handlers)
+      %(Interface)
     end
 
     ##
@@ -476,7 +476,7 @@ module MrMurano
     end
 
     def self.description
-      %(Application Event Handlers)
+      %(Service)
     end
 
     ##
@@ -492,11 +492,16 @@ module MrMurano
   end
 
   # Order here matters, because spec/cmd_init_spec.rb
-  SyncRoot.instance.add('eventhandlers', EventHandlerSolnApp, 'E', true)
-  SyncRoot.instance.add('eventhandlers', EventHandlerSolnPrd, 'E', true)
-  # FIXME/2017-06-20: Should we use separate directories for prod vs app?
-  #   [lb] thinks so if the locallist/PRODUCT_SERVICES kludge fails in the future.
-  #SyncRoot.instance.add('services', EventHandlerSolnApp, 'E', true)
-  #SyncRoot.instance.add('interfaces', EventHandlerSolnPrd, 'E', true)
+  # NOTE/2017-08-07: There was one syncable in 2.x for events, but in ADC,
+  #   there are different events for Applications and Products.
+  #   Except there aren't any product events the user should care about (yet?).
+  SyncRoot.instance.add(
+    'eventhandlers', EventHandlerSolnApp, 'E', true, %w[services]
+  )
+  # 2017-08-08: device2 and interface are now part of the skiplist, so no
+  # product event handlers will be found, unless the user modifies the skiplist.
+  SyncRoot.instance.add(
+    'interfaces', EventHandlerSolnPrd, 'I', true, %w[]
+  )
 end
 

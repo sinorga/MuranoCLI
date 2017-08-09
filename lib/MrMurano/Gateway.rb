@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.03 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -121,7 +121,7 @@ module MrMurano
       end
 
       def self.description
-        %(Resources)
+        %(Resource)
       end
 
       def list
@@ -321,10 +321,10 @@ module MrMurano
       end
     end
     # 2017-07-18: Against OneP, fetching --resources is expensive, so this
-    # call was ignored bydefault (you'd have to add --resources to syncup,
-    # syncdown, diff, and status commands). Against Murano, this call seems
-    # normal speed, so including by default.
-    SyncRoot.instance.add('resources', Resources, 'T', true)
+    #   call was ignored bydefault (you'd have to add --resources to syncup,
+    #   syncdown, diff, and status commands). Against Murano, this call seems
+    #   normal speed, so including by default.
+    SyncRoot.instance.add('resources', Resources, 'T', true, %w[specs])
 
     ##############################################################################
     ##

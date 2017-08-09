@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.07 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -124,7 +124,7 @@ module MrMurano
     end
 
     def self.description
-      %(Roles)
+      %(Role)
     end
   end
   #SyncRoot.instance.add('roles', Role, 'R', false)
@@ -142,7 +142,7 @@ module MrMurano
     end
 
     def self.description
-      %(Users)
+      %(User)
     end
 
     # @param modify Bool: True if item exists already and this is changing it
