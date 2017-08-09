@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.03 /coding: utf-8
+# Last Modified: 2017.08.09 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -60,10 +60,9 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
 
     def verify_err_missing_location(err)
       elines = err.lines
-      # FIXME/2017-07-13: Why is MurCLI spitting out two skipping-missing
-      # messages that indicate the same path being skipped? Shouldn't it
-      # just complain about it once?
-      expect(elines).to satisfy { |v| elines.length == 2 }
+      # E.g.,
+      #   Skipping missing location ‘/tmp/d20170809-7670-z315jn/project/services’ (Application Events)
+      expect(elines).to satisfy { |v| elines.length == 1 }
       elines.each do |line|
         expect(line.encode!('UTF-8', 'UTF-8')).to start_with("\e[33mSkipping missing location ‘")
       end
@@ -74,12 +73,12 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       outl = out.lines
       # The spec tests set --no-progress, so each sync action gets reported.
       expect(outl[0]).to eq("Adding item table_util\n")
-      expect(outl[1]).to start_with("Removing item ")
-      # 2017-07-27: Why is the order of these not consistent? File globbing?
-      #expect(outl[2]).to eq("Removing item tsdb_exportJob\n")
-      #expect(outl[3]).to eq("Removing item timer_timer\n")
-      #expect(outl[4]).to eq("Removing item user_account\n")
-      (2..4).each { |ln| expect(outl[ln]).to start_with("Removing item ") }
+      #expect(outl[1]).to eq("Updating item c3juj9vnmec000000_event\n")
+      # The order isn't always consistent, so just do start_with.
+      #expect(outl[2]).to eq("Updating item tsdb_exportJob\n")
+      #expect(outl[3]).to eq("Updating item timer_timer\n")
+      #expect(outl[4]).to eq("Updating item user_account\n")
+      (1..4).each { |ln| expect(outl[ln]).to start_with("Updating item ") }
       #expect(outl[5]).to eq("Adding item POST_/api/fire\n")
       #expect(outl[6]).to eq("Adding item PUT_/api/fire/{code}\n")
       #expect(outl[7]).to eq("Adding item DELETE_/api/fire/{code}\n")
@@ -93,8 +92,6 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       #expect(outl[15]).to eq("Adding item humidity\n")
       (5..15).each { |ln| expect(outl[ln]).to start_with("Adding item ") }
       expect(outl[16]).to eq("Updating product resources\n")
-      # err is, e.g.,
-      # "\e[33mSkipping missing location ‘/tmp/d20170727-17706-1v7jjmf/project/services’ (Application Event Handlers)\e[0m\n\e[33mSkipping missing location ‘/tmp/d20170727-17706-1v7jjmf/project/services’ (Product Event Handlers)\e[0m\n"
       verify_err_missing_location(err)
       expect(status.exitstatus).to eq(0)
 

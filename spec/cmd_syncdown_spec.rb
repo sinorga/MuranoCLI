@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.08 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -71,18 +71,19 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
       out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
       expect(out_lines).to match_array([
         "Adding item table_util\n",
-        a_string_starting_with('Removing item '),
-        "Removing item tsdb_exportJob\n",
-        "Removing item user_account\n",
         "Updating item timer_timer\n",
-        "Adding item device2_event\n",
+        # E.g., "Updating item i4kl64nn86xk00000_event\n":
+        a_string_starting_with('Updating item '),
+        "Updating item tsdb_exportJob\n",
+        "Updating item user_account\n",
+        #"Adding item device2_event\n",
         "Adding item POST_/api/fire\n",
         "Adding item PUT_/api/fire/{code}\n",
         "Adding item DELETE_/api/fire/{code}\n",
         "Adding item GET_/api/onfire\n",
-        "Adding item /js/script.js\n",
         "Adding item /icon.png\n",
         "Adding item /\n",
+        "Adding item /js/script.js\n",
       ])
 
       #expect(err).to eq('')
@@ -97,7 +98,9 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
       out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
       expect(out_lines).to match_array([
         "Adding item table_util\n",
-        "Adding item timer_timer\n",
+        # 2017-08-08: This says updating now because timer.timer is undeletable.
+        #"Adding item timer_timer\n",
+        "Updating item timer_timer\n",
         "Adding item POST_/api/fire\n",
         "Adding item DELETE_/api/fire/{code}\n",
         "Adding item PUT_/api/fire/{code}\n",

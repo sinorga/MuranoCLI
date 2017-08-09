@@ -32,7 +32,8 @@ ignoring = *_test.lua *_spec.lua .*
 [eventhandler]
 searchFor = *.lua */*.lua {../eventhandlers,../event_handler}/*.lua {../eventhandlers,../event_handler}/*/*.lua
 ignoring = *_test.lua *_spec.lua .*
-skiplist = websocket webservice device.service_call interface device2.event
+skiplist = device.service_call device2.event interface webservice websocket
+undeletable = *.event timer.timer tsdb.exportJob user.account
 
 [modules]
 searchFor = *.lua **/*.lua
