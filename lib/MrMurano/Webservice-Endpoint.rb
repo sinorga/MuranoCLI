@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -38,8 +38,9 @@ module MrMurano
 
       def self.description
         # 2017-08-07: UI and ProjectFile call these "Routes". Let's be consistent.
-        #%(Endpoint)
-        %(Route)
+        # 2017-08-14: UI team says "Route" changing to "Endpoint" in new UI.
+        #%(Route)
+        %(Endpoint)
       end
 
       ##
