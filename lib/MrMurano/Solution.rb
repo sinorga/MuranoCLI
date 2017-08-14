@@ -55,21 +55,19 @@ module MrMurano
       aggregate = nil
       total = nil
       remaining = -1
+      orig_query = (query || []).dup
       while remaining != 0
         ret = super
         if ret.nil? && !@suppress_error
           warning "No solution with ID: #{@sid}"
           whirly_interject { say 'Run `murano show` to see the business and list of solutions.' }
-          if $cfg.get('business.id', :env).to_s.empty? &&
-             $cfg.get('business.id', :project).to_s.empty? &&
-             $cfg.get('business.id', :env) != $cfg.get('business.id', :project)
-            warning 'NOTE: MURANO_CONFIGFILE specifies a different business.id than the local project file'
-          end
+          MrMurano::SolutionBase.warn_configfile_env_maybe
           exit 1
         end
         return nil if ret.nil?
         # Pagination: Check if more data.
         if ret.is_a?(Hash) && ret.key?(:total) && ret.key?(:items)
+          query = orig_query.dup
           if total.nil?
             total = ret[:total]
             remaining = total - ret[:items].length
@@ -78,27 +76,18 @@ module MrMurano
             #     \"solution_id\":\"XXXXXXXXXXXXXXXX\"}&limit=20&offset=20"
             # But note that the URL we use is a little different
             #   https://bizapi.hosted.exosite.io/api:1/solution/XXXXXXXXXXXXXXXXX/eventhandler
-            if query.nil?
-              query = []
-            else
-              query = query.dup
-            end
           else
             if total != ret[:total]
               warning "Unexpected: subsequence :total not total: #{ret[:total]} != #{total}"
             end
             remaining -= ret[:items].length
-            if remaining <= 0
-              if remaining != 0
-                warning "Unexpected: remaining count not zero but ‘#{total}’"
-                remaining = 0
-              end
-            end
           end
           if remaining > 0
-            query = query.dup
             #query.push ['limit', 20]
             query.push ['offset', total - remaining]
+          elsif remaining != 0
+            warning "Unexpected: negative remaining: ‘#{total}’"
+            remaining = 0
           end
           if aggregate.nil?
             aggregate = ret
