@@ -225,13 +225,19 @@ Build and install the Gem locally to your local gem directory.
 
     cd /exo/clients/exosite/MuranoCLI
 
-    rake build
+    rake install:user
 
-    gem install \
-        -i $(ruby -rubygems -e 'puts Gem.dir') \
-        pkg/MuranoCLI-$( \
-            ruby -e 'require "/exo/clients/exosite/MuranoCLI/lib/MrMurano/version.rb"; \
-            puts MrMurano::VERSION').gem
+Verify that it installed.
+
+.. code-block:: bash
+
+    murano -v
+
+Troubleshooting: check that ``murano`` doesn't reference something else.
+
+.. code-block:: bash
+
+    command -v murano
 
 Prepare to Test
 ---------------
@@ -310,7 +316,7 @@ Run All Rspec Tests
 
 .. code-block:: bash
 
-    rspce
+    rspec
 
 Run Single Rspec Test
 ^^^^^^^^^^^^^^^^^^^^^
