@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.02 /coding: utf-8
+# Last Modified: 2017.08.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'MrMurano/Business'
+require 'MrMurano/Solution'
 require 'MrMurano/verbosing'
 
 command 'show' do |c|
@@ -65,6 +66,8 @@ Show readable information about the current configuration.
         MrMurano::Verbose.error MrMurano::Business.missing_business_id_msg
       end
 
+      id_not_in_biz = false
+
       # E.g., {:bizid=>"AAAAAAAAAAAAAAAA", :type=>"application",
       #   :apiId=>"CCCCCCCCCCCCCCCCC", :sid=>"CCCCCCCCCCCCCCCCC",
       #   :domain=>"AAAAAAAAAAAAAAAA.apps.exosite.io", :name=>"AAAAAAAAAAAAAAAA"}
@@ -73,6 +76,7 @@ Show readable information about the current configuration.
       elsif selected_application_id
         #puts 'selected application not in business'
         puts "application ID from config is not in business (#{selected_application_id})"
+        id_not_in_biz = true
       elsif !selected_business
         puts 'application ID depends on business ID'
       else
@@ -88,11 +92,16 @@ Show readable information about the current configuration.
       elsif selected_product_id
         #puts 'selected product not in business'
         puts "product ID from config is not in business (#{selected_product_id})"
+        id_not_in_biz = true
       elsif !selected_business
         puts 'product ID depends on business ID'
       else
         #puts 'no product selected'
         puts 'product ID not found in config'
+      end
+
+      if id_not_in_biz
+        MrMurano::SolutionBase.warn_configfile_env_maybe
       end
     end
   end
