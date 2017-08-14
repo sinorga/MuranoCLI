@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -168,6 +168,10 @@ alias_command 'product rm', 'solution delete', '--type', 'product'
 alias_command 'app rm', 'solution delete', '--type', 'application'
 alias_command 'application rm', 'solution delete', '--type', 'application'
 
+# The `murano solutions expunge -y` command simplifies what be done
+# craftily other ways, e.g.,:
+#
+#   $ for pid in $(murano product list --idonly) ; do murano product delete $pid ; done
 command 'solutions expunge' do |c|
   c.syntax = %(murano solution expunge)
   c.summary = %(Delete all solutions)

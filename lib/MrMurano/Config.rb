@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -189,6 +189,7 @@ module MrMurano
       # 2017-08-07: device.datapoint is the v1 device event handler.
       #   It is deprecated and will be removed in 12 months.
       #   So it technically still works, but eventually will not.
+      #   CAVEAT: One must manually enable the Device V1 service for a Murano 1.1 business.
       # device2.event is the event handler that is created when two solutions
       #   are linked (say, an application and a product). Do not delete this.
       # The interface service contains lots of simple device event handlers
