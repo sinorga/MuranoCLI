@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.02 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -6,7 +6,8 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 # DEVs: If you want to generate a completion file, uncomment this.
-#   Then run, e.g.,
+#   Then run, from the base of the project, e.g.,
+#     rake install:user
 #     murano completion > docs/completions/murano_completion-bash
 #require 'MrMurano/commands/completion'
 
