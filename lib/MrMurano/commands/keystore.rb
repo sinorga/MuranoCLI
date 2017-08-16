@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.14 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -18,7 +18,7 @@ set data. As well as calling any of the other supported REDIS commands.
   ).strip
   c.project_not_required = true
 
-  c.action do |args, options|
+  c.action do |_args, _options|
     ::Commander::UI.enable_paging
     say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
@@ -31,7 +31,7 @@ command 'keystore clearAll' do |c|
 Delete all keys in the keystore.
   ).strip
 
-  c.action do |args, options|
+  c.action do |args, _options|
     sol = MrMurano::Keystore.new
     sol.clearall
   end
@@ -44,7 +44,7 @@ command 'keystore info' do |c|
 Show info about the Keystore.
   ).strip
 
-  c.action do |args, options|
+  c.action do |args, _options|
     sol = MrMurano::Keystore.new
     sol.outf sol.keyinfo
   end
@@ -57,7 +57,7 @@ command 'keystore list' do |c|
 List all of the keys in the Keystore.
   ).strip
 
-  c.action do |args, options|
+  c.action do |args, _options|
     sol = MrMurano::Keystore.new
     # FIXME/2017-06-14: This outputs nothing if not list, unlike other
     #   list commands that say, e.g., "No solutions found"
@@ -72,7 +72,7 @@ command 'keystore get' do |c|
 Get the value of a key in the Keystore.
   ).strip
 
-  c.action do |args, options|
+  c.action do |args, _options|
     sol = MrMurano::Keystore.new
     ret = sol.getkey(args[0])
     sol.outf ret
@@ -82,11 +82,11 @@ end
 command 'keystore set' do |c|
   c.syntax = %(murano keystore set <key> <value...>)
   c.summary = %(Set the value of a key in the Keystore)
-  c.description = %{
+  c.description = %(
 Set the value of a key in the Keystore.
-  }.strip
+  ).strip
 
-  c.action do |args,options|
+  c.action do |args, _options|
     sol = MrMurano::Keystore.new
     sol.setkey(args[0], args[1..-1].join(' '))
   end
@@ -95,11 +95,11 @@ end
 command 'keystore delete' do |c|
   c.syntax = %(murano keystore delete <key>)
   c.summary = %(Delete a key from the Keystore)
-  c.description = %{
+  c.description = %(
 Delete a key from the Keystore.
-  }.strip
+  ).strip
 
-  c.action do |args,options|
+  c.action do |args, _options|
     sol = MrMurano::Keystore.new
     sol.delkey(args[0])
   end
@@ -110,7 +110,7 @@ alias_command 'keystore del', 'keystore delete'
 command 'keystore command' do |c|
   c.syntax = %(murano keystore command <command> <key> <args...>)
   c.summary = %(Call some Redis commands in the Keystore)
-  c.description = %{
+  c.description = %(
 Call some Redis commands in the Keystore.
 
 Only a subset of all Redis commands is supported.
@@ -118,12 +118,12 @@ Only a subset of all Redis commands is supported.
 For current list, see:
 
   http://docs.exosite.com/murano/services/keystore/#command
-  }.strip
+  ).strip
   c.example %(murano keystore command lpush mykey myvalue), %(Push a value onto list)
   c.example %(murano keystore command lpush mykey A B C), %(Push three values onto list)
   c.example %(murano keystore command lrem mykey 0 B), %(Remove all B values from list)
 
-  c.action do |args,options|
+  c.action do |args, _options|
     sol = MrMurano::Keystore.new
     if args.count < 2 then
       sol.error "Not enough params"

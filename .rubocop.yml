@@ -109,6 +109,7 @@ Style/FileName:
     - 'lib/MrMurano/Config.rb'
     - 'lib/MrMurano/Content.rb'
     - 'lib/MrMurano/Gateway.rb'
+    - 'lib/MrMurano/Keystore.rb'
     - 'lib/MrMurano/Mock.rb'
     - 'lib/MrMurano/Passwords.rb'
     - 'lib/MrMurano/ProjectFile.rb'
@@ -198,6 +199,10 @@ AllCops:
     # 2017-07-31: 7735 offenses in the Spec tests -- not worth it to fix!!
     - 'spec/**/*'
     #
+    # Not sure if the templates are included by default or not, but ignore.
+    - 'lib/MrMurano/commands/completion-bash.erb'
+    - 'lib/MrMurano/commands/completion-zsh.erb'
+    #
     # FIXME/2017-07-25: Finish linting these files, and delete from this list.
     # 2017-07-31: 943 offenses herein these 26 files.
     - 'lib/MrMurano/Config-Migrate.rb'
@@ -215,13 +220,10 @@ AllCops:
     - 'lib/MrMurano/http.rb'
     - 'lib/MrMurano/makePretty.rb'
     - 'lib/MrMurano/commands/business.rb'
-    - 'lib/MrMurano/commands/completion-bash.erb'
-    - 'lib/MrMurano/commands/completion-zsh.erb'
     - 'lib/MrMurano/commands/completion.rb'
     - 'lib/MrMurano/commands/content.rb'
     - 'lib/MrMurano/commands/cors.rb'
     - 'lib/MrMurano/commands/gb.rb'
-    - 'lib/MrMurano/commands/keystore.rb'
     - 'lib/MrMurano/commands/mock.rb'
     - 'lib/MrMurano/commands/settings.rb'
     - 'lib/MrMurano/commands/tsdb.rb'
