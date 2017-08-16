@@ -1,5 +1,5 @@
 #!/bin/bash
-# Last Modified: 2017.08.02
+# Last Modified: 2017.08.16
 # vim:tw=0:ts=2:sw=2:et:norl:spell
 
 # WHAT: A Continuous Integration (CI) script for kicking the build
@@ -51,6 +51,14 @@ OUT_FILE=".rake_build.out"
 LOCK_DIR=".trustme.lock"
 PID_FILE="${LOCK_DIR}/.build.pid"
 LOCK_KILL=".trustme.kill"
+
+if [[ -f ${HOME}/.fries/lib/ruby_util.sh ]]; then
+  source ${HOME}/.fries/lib/ruby_util.sh
+else
+  echo 'Missing ruby_util.sh and chruby' >> ${OUT_FILE}
+  exit 1
+fi
+chruby 2.3.3
 
 trap death SIGINT
 
@@ -119,13 +127,18 @@ function prepare_to_build() {
   #/bin/rm ${DONE_FILE}
   #/bin/rm ${OUT_FILE}
   touch ${OUT_FILE}
-#  truncate -s 0 ${OUT_FILE}
+  truncate -s 0 ${OUT_FILE}
 }
 prepare_to_build
 
 time_0=$(date +%s.%N)
+#echo >> ${OUT_FILE} # Put newline after "tail: .rake_build.out: file truncated"
+annoucement "WARMING UP"
 echo "Build started at $(date '+%Y-%m-%d_%H-%M-%S')" >> ${OUT_FILE}
 echo "cwd: $(pwd)" >> ${OUT_FILE}
+echo "- ruby -v: $(ruby -v)" >> ${OUT_FILE}
+echo "- rubocop -v: $(rubocop -v)" >> ${OUT_FILE}
+#echo "- cmd rubocop: $(command -v rubocop)" >> ${OUT_FILE}
 
 function build_it() {
   annoucement "BUILD IT"
