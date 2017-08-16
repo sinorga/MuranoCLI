@@ -1,5 +1,5 @@
-require 'yaml'
 require 'json'
+require 'yaml'
 require 'MrMurano/Webservice'
 
 module MrMurano

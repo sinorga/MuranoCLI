@@ -204,26 +204,21 @@ AllCops:
     - 'lib/MrMurano/commands/completion-zsh.erb'
     #
     # FIXME/2017-07-25: Finish linting these files, and delete from this list.
-    # 2017-07-31: 943 offenses herein these 26 files.
-    - 'lib/MrMurano/Config-Migrate.rb'
+    # ✗ 2017-07-31: 943 offenses herein these 26 files.
+    # ✓ 2017-08-16: 420 offenses herein these 15 files.
     - 'lib/MrMurano/Content.rb'
-    - 'lib/MrMurano/Gateway.rb'
     - 'lib/MrMurano/Mock.rb'
     - 'lib/MrMurano/Setting.rb'
     - 'lib/MrMurano/SubCmdGroupContext.rb'
     - 'lib/MrMurano/Webservice-Cors.rb'
     - 'lib/MrMurano/Webservice-Endpoint.rb'
     - 'lib/MrMurano/Webservice-File.rb'
-    - 'lib/MrMurano/Webservice.rb'
-    - 'lib/MrMurano/commands.rb'
     - 'lib/MrMurano/hash.rb'
     - 'lib/MrMurano/http.rb'
     - 'lib/MrMurano/makePretty.rb'
     - 'lib/MrMurano/commands/business.rb'
-    - 'lib/MrMurano/commands/content.rb'
     - 'lib/MrMurano/commands/cors.rb'
     - 'lib/MrMurano/commands/gb.rb'
     - 'lib/MrMurano/commands/mock.rb'
     - 'lib/MrMurano/commands/settings.rb'
-    - 'lib/MrMurano/commands/tsdb.rb'
 

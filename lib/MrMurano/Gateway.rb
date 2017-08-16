@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -169,7 +169,7 @@ module MrMurano
             upload_all(@there)
           else
             MrMurano::Verbose.whirly_interject do
-              say("--dry: Not updating resources")
+              say('--dry: Not updating resources')
             end
           end
         elsif $cfg['tool.verbose']
@@ -199,7 +199,7 @@ module MrMurano
 
       def diff_download(tmp_path, merged)
         @there = list if @there.nil?
-        items = @there.reject { |item| item[:alias] != merged[:alias] }
+        items = @there.select { |item| item[:alias] == merged[:alias] }
         if items.length > 1
           error(
             "Unexpected: more than 1 resource with the same alias: #{merged[:alias]} / #{items}"
@@ -293,7 +293,8 @@ module MrMurano
         end
 
         here = {}
-        # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
+        # rubocop:disable Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
+        # MAYBE/2017-07-02: Convert to safe_load.
         from.open { |io| here = YAML.load(io) }
         here = {} if here == false
 

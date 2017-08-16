@@ -5,9 +5,9 @@
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'MrMurano/verbosing'
 require 'MrMurano/Business'
 require 'MrMurano/Solution'
-require 'MrMurano/verbosing'
 
 command 'show' do |c|
   c.syntax = %(murano show)
@@ -68,9 +68,8 @@ Show readable information about the current configuration.
 
       id_not_in_biz = false
 
-      # E.g., {:bizid=>"AAAAAAAAAAAAAAAA", :type=>"application",
-      #   :apiId=>"CCCCCCCCCCCCCCCCC", :sid=>"CCCCCCCCCCCCCCCCC",
-      #   :domain=>"AAAAAAAAAAAAAAAA.apps.exosite.io", :name=>"AAAAAAAAAAAAAAAA"}
+      # E.g., {:bizid=>"ABC", :type=>"application", :apiId=>"XXX", :sid=>"XXX",
+      #        :name=>"ABC", :domain=>"ABC.apps.exosite.io" }
       if selected_application
         puts %(application: https://#{selected_application.domain})
       elsif selected_application_id
@@ -84,9 +83,8 @@ Show readable information about the current configuration.
         puts 'application ID not found in config'
       end
 
-      # E.g., {:bizid=>"AAAAAAAAAAAAAAAA", :type=>"product",
-      #   :apiId=>"BBBBBBBBBBBBBBBBB", :sid=>"BBBBBBBBBBBBBBBBB",
-      #   :domain=>"BBBBBBBBBBBBBBBBB.m2.exosite.io", :name=>"AAAAAAAAAAAAAAAA"}
+      # E.g., {:bizid=>"ABC", :type=>"product", :apiId=>"XXX", :sid=>"XXX",
+      #        :name=>"ABC", :domain=>"ABC.m2.exosite.io" }
       if selected_product
         puts %(product: #{selected_product.name})
       elsif selected_product_id
