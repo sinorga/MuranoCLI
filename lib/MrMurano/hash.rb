@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.15 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -73,5 +73,20 @@ def elevate_hash(hsh)
   end
   # build a hash where the default is 'false' instead of 'nil'
   Hash.new(false).merge(Hash.transform_keys_to_symbols(hsh))
+end
+
+##
+# Array-ify the given item, if not already an array.
+#
+# NOTE/2017-08-15: This fcn. is not hash-related, but this file is the
+#   closest we've got to a generic utility method dumping ground.
+def ensure_array(item)
+  if item.nil?
+    []
+  elsif !item.is_a?(Array)
+    [item]
+  else
+    item
+  end
 end
 
