@@ -238,14 +238,15 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
     ## Given a type (:application or :product), return a Solution instance.
     def solution_from_type!(type)
       type = type.to_s.to_sym
-      raise "Unknown type(#{type})" unless ALLOWED_TYPES.include? type
+      raise "Unknown type(#{type})" unless type.to_s.empty? || ALLOWED_TYPES.include?(type)
       sid = MrMurano::Solution::INVALID_SID
       if type == :application
         sol = MrMurano::Application.new(sid)
       elsif type == :product
         sol = MrMurano::Product.new(sid)
       else
-        raise "Unexpected path: Unrecognized type ‘#{type}’"
+        #raise "Unexpected path: Unrecognized type ‘#{type}’"
+        sol = MrMurano::Solution.new(sid)
       end
       sol.biz = self
       sol

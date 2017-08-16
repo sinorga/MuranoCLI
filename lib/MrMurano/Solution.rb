@@ -19,9 +19,19 @@ module MrMurano
     include Verbose
     include SolutionId
 
-    def initialize(sid=nil)
+    def initialize(from=nil)
       @uriparts_sidex = 1
-      init_sid!(sid)
+      # Introspection. Feels hacky.
+      if from.is_a? MrMurano::Solution
+        init_sid!(from.sid)
+        @valid_sid = from.valid_sid
+        # We shouldn't need to worry about other things...
+        #@token = from.token
+        #@http = from.http
+        #@json_opts = from.json_opts
+      else
+        init_sid!(from)
+      end
       @uriparts = [:solution, @sid]
       @itemkey = :id
       @project_section = nil unless defined?(@project_section)
@@ -316,6 +326,14 @@ module MrMurano
     def valid_name?
       @valid_name
     end
+
+    def name_validate_regex
+      /^$/
+    end
+
+    def name_validate_help
+      ''
+    end
   end
 
   class Application < Solution
@@ -371,5 +389,23 @@ no more than 63.
       ).strip
     end
   end
+end
+
+def solution_factory_reset(sol)
+  new_sol = nil
+  if sol.is_a? MrMurano::Solution
+    if !sol.meta[:template].to_s.empty?
+      begin
+        clazz = Object.const_get("MrMurano::#{sol.meta[:template].capitalize}")
+        new_sol = clazz.new(sol)
+        new_sol.meta = sol.meta
+      rescue NameError => _err
+        MrMurano::Verbose.warning(
+          "Unrecognized solution :template value: #{sol.meta[:template]}"
+        )
+      end
+    end
+  end
+  new_sol || sol
 end
 
