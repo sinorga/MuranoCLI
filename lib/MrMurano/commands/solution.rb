@@ -125,7 +125,7 @@ Delete a solution from the business.
     nmorids.each do |name_or_id|
       unless options.yes
         confirmed = MrMurano::Verbose.ask_yes_no(
-          "Really delete #{name_or_id[0]}? [Y/n] ", true
+          "Really delete #{name_or_id[0]}? [y/N] ", false
         )
         unless confirmed
           MrMurano::Verbose.warning("Skipping #{name_or_id[0]}!")
@@ -203,7 +203,7 @@ def solution_delete(name_or_id, use_sol: nil, type: :all, yes: false)
 
   if name_or_id == '*'
     unless yes
-      confirmed = MrMurano::Verbose.ask_yes_no('Really delete all solutions? [Y/n] ', true)
+      confirmed = MrMurano::Verbose.ask_yes_no('Really delete all solutions? [y/N] ', false)
       unless confirmed
         MrMurano::Verbose.warning('abort!')
         return

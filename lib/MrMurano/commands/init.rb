@@ -265,7 +265,7 @@ command :init do |c|
         # is why $cfg.project_exists might have been false.
         unless files.include?(MrMurano::Config::CFG_DIR_NAME)
           acc.warning 'The project directory contains unknown files.'
-          confirmed = acc.ask_yes_no('Really init project? [Y/n] ', true)
+          confirmed = acc.ask_yes_no('Really init project? [y/N] ', false)
           unless confirmed
             # FIXME/2017-07-02: Add test for this
             acc.warning('abort!')
