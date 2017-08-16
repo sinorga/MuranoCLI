@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -6,7 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 command :config do |c|
-  c.syntax = %(murano config [options] <key> [<new value>])
+  c.syntax = %(murano config [--options] [<key> [<new value>]])
   c.summary = %(Get and set options)
   c.description = %(
 Get, set, or query config options.
@@ -31,12 +31,16 @@ If section is left out, then key is assumed to be in the 'tool' section.
   ).strip, 'murano config application.id'
 
   c.example %(
+    Show all ID values
+  ).strip, %(murano config '*.id')
+
+  c.example %(
     Set a new value, which writes to the project config file
   ).strip, 'murano config application.id XXXXXXXX'
 
   c.example %(
-    Set a new valuem, and write it to the user config file
-  ).strip, 'murano config --user user.name my@email.address'
+    Set a new value, and write it to the user config file
+  ).strip, 'murano config user.name my@email.address --user'
 
   c.example %(
     Unset a value. If the value is set in multiple config files,
@@ -81,7 +85,14 @@ If section is left out, then key is assumed to be in the 'tool' section.
         scopes = []
         scopes << scope unless scope.nil?
         scopes = MrMurano::Config::CFG_SCOPES if scopes.empty?
-        say $cfg.get(args[0], scopes)
+        is_wild = $cfg.wild?(args[0])
+        if !is_wild
+          puts $cfg.get(args[0], scopes)
+        else
+          kvals = $cfg.get_wild(args[0], scopes)
+          # LATER/2017-08-16: Honor --json option.
+          kvals.each { |kv| puts %(#{kv[0]} => "#{kv[1]}" (#{kv[2]})) }
+        end
       else
         # For write, if scope is specified, only write to that scope.
         scope = :project if scope.nil?
