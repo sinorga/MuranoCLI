@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -220,11 +220,9 @@ AllCops:
     - 'lib/MrMurano/commands/completion.rb'
     - 'lib/MrMurano/commands/content.rb'
     - 'lib/MrMurano/commands/cors.rb'
-    - 'lib/MrMurano/commands/devices.rb'
     - 'lib/MrMurano/commands/gb.rb'
     - 'lib/MrMurano/commands/keystore.rb'
     - 'lib/MrMurano/commands/mock.rb'
     - 'lib/MrMurano/commands/settings.rb'
-    - 'lib/MrMurano/commands/timeseries.rb'
     - 'lib/MrMurano/commands/tsdb.rb'
 
