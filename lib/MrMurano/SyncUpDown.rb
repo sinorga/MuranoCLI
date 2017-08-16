@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -394,12 +394,14 @@ module MrMurano
     end
 
     def syncup_before
+      syncable_validate_sid
     end
 
     def syncup_after
     end
 
     def syncdown_before
+      syncable_validate_sid
     end
 
     def syncdown_after(_local)
@@ -621,6 +623,8 @@ module MrMurano
 
       num_synced = 0
 
+      syncup_before
+
       dt = status(options, selected)
 
       toadd = dt[:toadd]
@@ -686,6 +690,8 @@ module MrMurano
       options[:skip_missing_warning] = true
 
       num_synced = 0
+
+      syncdown_before
 
       dt = status(options, selected)
 
@@ -840,7 +846,8 @@ module MrMurano
     def status(options={}, selected=[])
       options = elevate_hash(options)
 
-      syncables_prepare(options)
+      ret = filter_solution(options)
+      return ret unless ret.nil?
 
       therebox, localbox = items_lists(options, selected)
 
@@ -861,19 +868,67 @@ module MrMurano
       end
     end
 
-    def syncables_prepare(options)
+    def filter_solution(options)
+      # Get the solution name from the config.
+      # Convert, e.g., application.id => application.name
+      soln_name = $cfg[@solntype.gsub(/(.*)\.id/, '\1.name')]
+      # Skip this syncable if the sid is not set, or if user wants to skip by solution.
+      skip_sol = false
+      if !sid? ||
+         (options[:type] == :application && @solntype != 'application.id') ||
+         (options[:type] == :product && @solntype != 'product.id')
+        skip_sol = true
+      else
+        tested = false
+        passed = false
+        if @solntype == 'application.id'
+          # elevate_hash magically makes the hash return false rather than nil
+          # on unknown keys, so preface with a key? guard.
+          if options.key?(:application) && !options[:application].to_s.empty?
+            if soln_name =~ /#{options[:application]}/i || sid =~ /#{options[:application]}/i
+              passed = true
+            end
+            tested = true
+          end
+          if options.key?(:application_id) && !options[:application_id].to_s.empty?
+            passed = true if options[:application_id] == sid
+            tested = true
+          end
+          if options.key?(:application_name) && !options[:application_name].to_s.empty?
+            passed = true if options[:application_name] == soln_name
+            tested = true
+          end
+        elsif @solntype == 'product.id'
+          if options.key?(:product) && !options[:product].to_s.empty?
+            if soln_name =~ /#{options[:product]}/i || sid =~ /#{options[:product]}/i
+              passed = true
+            end
+            tested = true
+          end
+          if options.key?(:product_id) && !options[:product_id].to_s.empty?
+            passed = true if options[:product_id] == sid
+            tested = true
+          end
+          if options.key?(:product_name) && !options[:product_name].to_s.empty?
+            passed = true if options[:product_name] == soln_name
+            tested = true
+          end
+        end
+        skip_sol = true if tested && !passed
+      end
+      return nil unless skip_sol
+      ret = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
+      ret[:skipd] << { synckey: self.class.description }
+      ret
+    end
+
+    def syncable_validate_sid
       # 2017-07-02: Now that there are multiple solution types, and because
       # SyncRoot.add is called on different classes that go with either or
       # both products and applications, if a user only created one solution,
       # then some syncables will have their sid set to -1, because there's
       # not a corresponding solution in Murano.
       raise 'Syncable missing sid or not valid_sid??!' unless sid?
-
-      if options[:asdown]
-        syncdown_before
-      else
-        syncup_before
-      end
     end
 
     def items_lists(options, selected)

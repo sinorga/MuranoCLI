@@ -1,33 +1,21 @@
-# Last Modified: 2017.08.14 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
-MSG_SOLUTIONS_NONE_FOUND = 'No solutions found'
+require 'MrMurano/verbosing'
+require 'MrMurano/Business'
+require 'MrMurano/Config'
+require 'MrMurano/Solution'
 
-def command_add_biz_and_solz_pickers(c)
-  command_add_business_pickers(c)
-  command_add_solution_pickers(c)
-  command_add_application_pickers(c)
-  command_add_product_pickers(c)
-end
+MSG_SOLUTIONS_NONE_FOUND = 'No solutions found' unless defined? MSG_SOLUTIONS_NONE_FOUND
 
-def command_add_biz_and_application_pickers(c)
-  command_add_business_pickers(c)
-  command_add_solution_pickers(c)
-  command_add_application_pickers(c)
-end
+# *** For some commands: let user restrict to specific solution --type.
+# ---------------------------------------------------------------------
 
-def command_add_biz_and_product_pickers(c)
-  command_add_business_pickers(c)
-  command_add_solution_pickers(c)
-  command_add_product_pickers(c)
-end
-
-def command_add_solution_pickers(c)
-  types = MrMurano::Business::ALLOWED_TYPES.join(', ')
+def cmd_add_solntype_pickers(c, exclude_all: false)
   # 2017-07-26: HA! The --type option can get masked by aliases.
   # For instance, if the option is required ("--type TYPE"), then
   #   murano domain --type product
@@ -39,201 +27,226 @@ def command_add_solution_pickers(c)
   #   murano domain -t product
   # To work around this, make the argument optional ("--type [TYPE]") and
   # then do some extra processing later to check for this special case.
+  allowed_types = MrMurano::Business::ALLOWED_TYPES.dup
+  allowed_types += [:all] unless exclude_all
+  allowed_types.sort!
+  defval = exclude_all && 'application' || 'all'
   c.option(
     '--type [TYPE]',
-    MrMurano::Business::ALLOWED_TYPES,
-    %(Find solution(s) by type (one of: #{types}))
-  )
-  c.option(
-    '--id ID[,ID,...]',
-    Array,
-    %(Find solution(s) by ID (specify one or more comma-separated IDs))
-  )
-  c.option(
-    '--name NAME[,NAME,...]',
-    Array,
-    %(Find solution(s) by name (specify one or more comma-separated NAMES))
-  )
-  c.option(
-    '--find WORD', Array, %(Find solution(s) by word(s) (fuzzy match))
-  )
-  c.option(
-    '--[no-]header', %(Output solution descriptions)
+    allowed_types,
+    %(Restrict to solution(s) of type [#{allowed_types.join('|')}] (default: #{defval}))
   )
 end
 
-def command_add_application_pickers(c)
-  c.option('--application[=APPLICATION]', String, %(Name or ID of Application to use)) do |application_mark|
-    # NOTE: If user does not specify an argument,
-    #         e.g., `murano domain --application`,
-    #       then this block *is not* called.
-    $cfg['application.id'] = nil
-    $cfg['application.name'] = nil
-    $cfg['application.mark'] = application_mark
-  end
-  c.option('--application-name NAME', String, %(Name of Application to use)) do |application_name|
-    $cfg['application.id'] = nil
-    $cfg['application.name'] = application_name
-    $cfg['application.mark'] = nil
-  end
-  c.option('--application-id ID', String, %(ID of Application to use)) do |application_id|
-    $cfg['application.id'] = application_id
-    $cfg['application.name'] = nil
-    $cfg['application.mark'] = nil
+def cmd_defaults_solntype_pickers(options, default=:all)
+  cmd_defaults_type_kludge(options)
+
+  if options.type.to_s.empty?
+    options.type = default.to_sym
+  else
+    options.type = options.type.to_sym
   end
 end
 
-def command_add_product_pickers(c)
-  c.option('--product[=PRODUCT]', String, %(Name or ID of Product to use)) do |product_mark|
-    $cfg['product.id'] = nil
-    $cfg['product.name'] = nil
-    $cfg['product.mark'] = product_mark
+def cmd_defaults_type_kludge(options)
+  # KLUDGE/2017-07-26: Work around rb-commander peculiarity.
+  # The alias_command steals the --type parameter, e.g.,
+  #   murano domain --type product
+  # is interpreted using the "domain product" alias,
+  # so the command that's parsed is actually
+  #   murano domain --type product --type
+  # and the latter --type wins [which is something that [lb]
+  # really dislikes about rb-commander, is that it does not
+  # support more than one of the same options, taking only the
+  # last one's argument].
+  next_posit = 1
+  ARGV.each do |arg|
+    if arg.casecmp('--type').zero?
+      if ARGV.length == next_posit
+        MrMurano::Verbose.error('missing argument: --type')
+        exit 1
+      else
+        # NOTE: Commander treats arguments case sensitively, but not --options.
+        possible_type = ARGV[next_posit].to_sym
+        if MrMurano::Business::ALLOWED_TYPES.include?(possible_type)
+          options.type = possible_type
+        else
+          MrMurano::Verbose.error("unrecognized --type: #{possible_type}")
+          exit 1
+        end
+        break
+      end
+    end
+    next_posit += 1
   end
-  c.option('--product-name NAME', String, %(Name of Product to use)) do |product_name|
-    $cfg['product.id'] = nil
-    $cfg['product.name'] = product_name
-    $cfg['product.mark'] = nil
-  end
-  c.option('--product-id ID', String, %(ID of Product to use)) do |product_id|
-    $cfg['product.id'] = product_id
-    $cfg['product.name'] = nil
-    $cfg['product.mark'] = nil
-  end
+  return unless options.type == true
+  MrMurano::Verbose.error('missing argument: --type')
+  exit 1
 end
 
-# To use must_fetch_solutions!, call command_add_solution_pickers(c) in
-# the command block, and then call fetch_solutions! from the action.
-def must_fetch_solutions!(options)
-  command_defaults_solution_picker(options)
+# Get a list of solutions under the business.
+# - Optionally filter by --type: in the command block, call
+#   cmd_add_solntype_pickers, and then in the action block, call
+#   cmd_defaults_solntype_pickers, and then call this method.
+# - Optional restrict to just solutions in the current project.
+def must_fetch_solutions!(options, args=[], biz=nil)
+  solz = []
 
-  biz = MrMurano::Business.new
-  biz.must_business_id!
+  if biz.nil?
+    biz = MrMurano::Business.new
+    biz.must_business_id!
+  end
+  if args.any?
+    raise 'Cannot use options.project and solution pickers' unless options.project.nil?
+    sid = []
+    name = []
+    fuzzy = []
+    if options.id
+      sid = args
+    elsif options.name
+      name = args
+    else
+      fuzzy = args
+    end
+    solz += solution_get_solutions(
+      biz, options.type, sid: sid, name: name, fuzzy: fuzzy
+    )
+  end
 
-  MrMurano::Verbose.whirly_start('Fetching solutions...')
-  solz = biz.solutions(options.type)
-  MrMurano::Verbose.whirly_stop
+  if any_solution_pickers!(options)
+    raise 'Cannot use options.project and solution pickers' unless options.project.nil?
+    #
+    # MAYBE: DRY this code. Rather than copy-paste-find-replace block of code.
+    #   See also: any_business_pickers?
+    #
+    sid = []
+    name = []
+    fuzzy = []
+    if options.application_id
+      sid = [options.application_id]
+    elsif options.application_name
+      name = [options.application_name]
+    elsif options.application
+      fuzzy = [options.application]
+    end
+    if !sid.empty? || !name.empty? || !fuzzy.empty?
+      solz += solution_get_solutions(
+        biz, :application, sid: sid, name: name, fuzzy: fuzzy
+      )
+    end
+    #
+    sid = []
+    name = []
+    fuzzy = []
+    if options.product_id
+      sid = [options.product_id]
+    elsif options.product_name
+      name = [options.product_name]
+    elsif options.product
+      fuzzy = [options.product]
+    end
+    if !sid.empty? || !name.empty? || !fuzzy.empty?
+      solz += solution_get_solutions(
+        biz, :product, sid: sid, name: name, fuzzy: fuzzy
+      )
+    end
+    #
+  end
 
-  # Cull solutions if user specifies name(s) or ID(s).
-  culled = select_solutions(solz, options)
+  if args.none? && !any_solution_pickers!(options)
+    if options.project
+      if $cfg['application.id']
+        solz += solution_get_solutions(
+          biz, :application, sid: $cfg['application.id']
+        )
+      end
+      if $cfg['product.id']
+        solz += solution_get_solutions(
+          biz, :product, sid: $cfg['product.id']
+        )
+      end
+    else
+      solz += solution_get_solutions(biz, options.type)
+    end
+  end
 
-  if culled.empty?
+  culled = {}
+  solz.select! do |sol|
+    if culled[sol.sid]
+      false
+    else
+      culled[sol.sid] = true
+      true
+    end
+  end
+
+  if solz.empty?
     MrMurano::Verbose.error(MSG_SOLUTIONS_NONE_FOUND)
     exit 0
   end
 
-  culled
-end
+  biz.sort_solutions!(solz)
 
-def command_defaults_solution_picker(options)
-  options.default(header: true)
-  if options.type == true
-    # KLUDGE/2017-07-26: Work around rb-commander peculiarity.
-    # The alias_command stole the --type parameter, e.g.,
-    #   murano domain --type product
-    # is interpreted using the "domain product" alias,
-    # so the command that's parsed is actually
-    #   murano domain --type product --type
-    # and the latter --type wins [which is something that [lb]
-    # really dislikes about rb-commander, is that it does not
-    # support more than one of the same options, taking only the
-    # last one's argument].
-    next_posit = 1
-    ARGV.each do |arg|
-      if arg.casecmp('--type').zero?
-        if ARGV.length == next_posit
-          MrMurano::Verbose.error('missing argument: --type')
-          exit 1
-        else
-          # NOTE: Commander treats arguments case sensitively, but not --options.
-          possible_type = ARGV[next_posit].to_sym
-          if MrMurano::Business::ALLOWED_TYPES.include?(possible_type)
-            options.type = possible_type
-          else
-            MrMurano::Verbose.error("unrecognized --type: #{possible_type}")
-            exit 1
-          end
-          break
-        end
-      end
-      next_posit += 1
-    end
-    if options.type == true
-      MrMurano::Verbose.error('missing argument: --type')
-      exit 1
-    end
-  else
-    # --application and --product are abused options: when specified without
-    # an argument, they're aliases for --type application and --type product,
-    # respectively; but when specified with an argument, the argument is the
-    # name or ID of a solution.
-    num_ways = 0
-    num_ways += 1 if options.application == true
-    num_ways += 1 if options.product == true
-    num_ways += 1 if options.type
-    if num_ways.zero?
-      options.type = :all
-    elsif num_ways == 1
-      if options.application == true
-        options.type = :application
-        options.application = nil
-      elsif options.product == true
-        options.type = :product
-        options.product = nil
-      # else, options.type already set.
-      end
-    else
-      MrMurano::Verbose.error(
-        'ambiguous intention: please specify only one of --type, --application, or --product'
-      )
-      exit 1
-    end
-  end
-  options.ids = [] if options.ids.nil?
-  options.names = [] if options.names.nil?
-  options.find = [] if options.find.nil?
-  options
-end
-
-# select_solutions filters the list of solutions in sol
-def select_solutions(solz, options)
-  if options.names.any? ||
-      options.ids.any? ||
-      options.find.any? ||
-      options.application_id
-    solz = solz.select do |sol|
-      keep = false
-      # Check exact name match of name or domain.
-      keep = true if options.names.include?(sol.name)
-      options.names.each do |name|
-        keep = true if sol.domain =~ /\b#{name}\./i
-      end
-      # Check exact ID match.
-      keep = true if options.ids.include?(sol.sid)
-      # Check fuzzy name or domain match (or sid, for that matter).
-      options.find.each do |name|
-        keep = true if sol.sid =~ /#{name}/i
-        keep = true if sol.name =~ /#{name}/i
-        keep = true if sol.domain =~ /#{name}/i
-      end
-      # The type filter is applied in solutions() function,
-      # but we should honor it here for completeness.
-      keep = false if options.type && options.type != :all && sol.type != options.type.to_s
-      # Keep the solution if at least one thing matched above.
-      keep
-    end
-  end
   solz
 end
 
-def solution_get_solutions(biz, type, match_sid=nil, match_name=nil, match_either=nil)
+# *** For murano init: specify --business, --application, and/or --product.
+# -------------------------------------------------------------------------
+
+def cmd_option_application_pickers(c)
+  c.option('--application-id ID', String, %(ID of Application to use))
+  c.option('--application-name NAME', String, %(Name of Application to use))
+  c.option('--application APPLICATION', String, %(Name or ID of Application to use))
+end
+
+def cmd_option_product_pickers(c)
+  c.option('--product-id ID', String, %(ID of Product to use))
+  c.option('--product-name NAME', String, %(Name of Product to use))
+  c.option('--product PRODUCT', String, %(Name or ID of Product to use))
+end
+
+def any_solution_pickers!(options)
+  any_application_pickers!(options) || any_product_pickers!(options)
+end
+
+def any_application_pickers!(options)
+  num_ways = 0
+  num_ways += 1 unless options.application_id.to_s.empty?
+  num_ways += 1 unless options.application_name.to_s.empty?
+  num_ways += 1 unless options.application.to_s.empty?
+  #if num_ways > 1
+  #  MrMurano::Verbose.error(
+  #    'Please specify only one of: --application, --application-id, or --application-name'
+  #  )
+  #  exit 1
+  #end
+  num_ways > 0
+end
+
+def any_product_pickers!(options)
+  num_ways = 0
+  num_ways += 1 unless options.product_id.to_s.empty?
+  num_ways += 1 unless options.product_name.to_s.empty?
+  num_ways += 1 unless options.product.to_s.empty?
+  #if num_ways > 1
+  #  MrMurano::Verbose.error(
+  #    'Please specify only one of: --product, --product-id, or --product-name'
+  #  )
+  #  exit 1
+  #end
+  num_ways > 0
+end
+
+def solution_get_solutions(biz, type, sid: nil, name: nil, fuzzy: nil)
   if type == :all
     inflection = 'solutions'
   else
     inflection = MrMurano::Verbose.pluralize?(type.to_s, 0)
   end
   MrMurano::Verbose.whirly_start("Fetching #{inflection}...")
-  invalidate = false
-  solz = biz.solutions(type, invalidate, match_sid, match_name, match_either)
+  solz = biz.solutions(
+    type: type, sid: sid, name: name, fuzzy: fuzzy, invalidate: false
+  )
   MrMurano::Verbose.whirly_stop
   solz
 end
@@ -263,26 +276,88 @@ def solution_ask_for_name(sol)
   sol.name
 end
 
-# *** Code for interacting with user to identify the solution.
+# *** Interact with the user to identify the solution.
+# ----------------------------------------------------
 
 # For more on the ** doublesplat, and the **_ starsnake, see:
 #  https://flushentitypacket.github.io/ruby/2015/03/31/ruby-keyword-arguments-the-double-splat-and-starsnake.html
 # "Basically, _ is Ruby’s variable name for storing values you don’t need."
 # Ruby 2.0 and above. I don't think we support 1.x...
 
-def get_product_and_application!(**options)
+def get_two_solutions!(sol_a_id=nil, sol_b_id=nil, **options)
+  app_srchs = []
+  prd_srchs = []
+
+  #app_srchs += [[:application, :sid, sol_a_id]] unless sol_a_id.to_s.empty?
+  #prd_srchs += [[:product, :sid, sol_b_id]] unless sol_b_id.to_s.empty?
+  app_srchs += [[nil, :sid, sol_a_id]] unless sol_a_id.to_s.empty?
+  prd_srchs += [[nil, :sid, sol_b_id]] unless sol_b_id.to_s.empty?
+
+  app_srchs += get_soln_searches(:application, options)
+  prd_srchs += get_soln_searches(:product, options)
+
+  if app_srchs.length.zero? && prd_srchs.length < 2
+    # TEST/2017-08-16: Clear application.id and test.
+    app_srchs = [[:application, :sid, $cfg['application.id']]]
+  end
+  if prd_srchs.length.zero? && app_srchs.length < 2
+    # TEST/2017-08-16: Clear product.id and test.
+    prd_srchs = [[:product, :sid, $cfg['product.id']]]
+  end
+
+  sol_srchs = app_srchs + prd_srchs
+
+  if sol_srchs.length > 2
+    MrMurano::Verbose.error('too many solutions specified: specify 2 solutions')
+    exit 1
+  end
+
   biz = MrMurano::Business.new
-  appl = solution_find_or_create(biz: biz, type: :application, **options)
-  prod = solution_find_or_create(biz: biz, type: :product, **options)
-  [appl, prod]
+  solz = []
+  sol_srchs.each do |type, desc, value|
+    sol_opts = {}
+    case desc
+    when :sid
+      sol_opts[:match_sid] = value
+    when :name
+      sol_opts[:match_name] = value
+    when :term
+      sol_opts[:match_fuzzy] = value
+    else
+      raise false
+    end
+    sol = solution_find_or_create(**sol_opts, biz: biz, type: type)
+    solz += [sol]
+  end
+
+  solz
+end
+
+def get_soln_searches(sol_type, options)
+  sol_type = sol_type.to_sym
+  sol_srchs = []
+  # E.g., :application_id
+  if options["#{sol_type}_id".to_sym]
+    app_ids = options["#{sol_type}_id".to_sym].split(',')
+    app_ids.each { |sid| sol_srchs += [[sol_type, :sid, sid]] }
+  end
+  # E.g., :application_name
+  if options["#{sol_type}_name".to_sym]
+    app_names = options["#{sol_type}_name".to_sym].split(',')
+    app_names.each { |name| sol_srchs += [[sol_type, :name, name]] }
+  end
+  # E.g., :application
+  if options[sol_type]
+    app_finds = options[sol_type].split(',')
+    app_finds.each { |term| sol_srchs += [[sol_type, :term, term]] }
+  end
+  sol_srchs
 end
 
 def solution_find_or_create(biz: nil, type: nil, **options)
+  type = options[:type] if type.nil?
+  raise 'You mush specify the :type of solution' if type.nil? && options[:create_ok]
   options[:match_enable] = true if options[:match_enable].nil?
-  # Add any search terms the user specified, e.g., --application XXX.
-  options[:match_sid] = $cfg.get("#{type}.id", :internal)
-  options[:match_name] = $cfg.get("#{type}.name", :internal)
-  options[:match_either] = $cfg.get("#{type}.mark", :internal)
   finder = MrMurano::InteractiveSolutionFinder.new(options)
   model = biz.solution_from_type!(type)
   finder.find_or_create(model)
@@ -300,7 +375,7 @@ module MrMurano
       match_enable: false,
       match_sid: nil,
       match_name: nil,
-      match_either: nil
+      match_fuzzy: nil
     )
       @skip_verify = skip_verify
       @create_ok = create_ok
@@ -310,11 +385,11 @@ module MrMurano
       @match_enable = match_enable
       @match_sid = match_sid
       @match_name = match_name
-      @match_either = match_either
+      @match_fuzzy = match_fuzzy
       @match_sid = nil if @match_sid.to_s.empty?
       @match_name = nil if @match_name.to_s.empty?
-      @match_either = nil if @match_either.to_s.empty?
-      @searching = @match_enable && (@match_sid || @match_name || @match_either)
+      @match_fuzzy = nil if @match_fuzzy.to_s.empty?
+      @searching = @match_enable && (@match_sid || @match_name || @match_fuzzy)
     end
 
     def find_or_create(model)
@@ -325,8 +400,9 @@ module MrMurano
         if @searching
           sol = solution_search_by_term(model)
           sol = solution_create_new_solution(model) if sol.nil? && @create_ok && @match_sid.nil?
+        else
+          sol = solution_lookup_or_ask(model)
         end
-        sol = solution_lookup_or_ask(model) unless @searching
       end
       # Finally, if asked, update the config.
       if @update_cfg && !sol.nil?
@@ -340,7 +416,7 @@ module MrMurano
     def solution_find_by_sid(sol)
       exists = false
       if @searching || @ignore_cfg
-        sol.sid = @match_sid || @match_either
+        sol.sid = @match_sid || @match_fuzzy
       else
         # Note that we verify the solution ID we find in the config,
         # since the user could've, e.g., deleted it via the web UI.
@@ -359,6 +435,8 @@ module MrMurano
         sol.info_safe
         if sol.valid_sid
           exists = true
+          # Convert from Solution to proper subclass, perhaps.
+          sol = solution_factory_reset(sol)
         else
           sol.sid = nil
         end
@@ -401,7 +479,7 @@ module MrMurano
       # See if user specified name using a switch option.
       solname = nil
       solname = @match_name if solname.nil?
-      solname = @match_either if solname.nil?
+      solname = @match_fuzzy if solname.nil?
       if solname.nil?
         #say "You do not have any #{type}s. Let's create one."
         if @verbose
@@ -438,7 +516,7 @@ module MrMurano
 
     def solution_search_by_term(sol)
       solz = solution_get_solutions(
-        sol.biz, sol.type, @match_sid, @match_name, @match_either
+        sol.biz, sol.type, sid: @match_sid, name: @match_name, fuzzy: @match_fuzzy
       )
       if solz.length > 1
         sol.error("More than one matching #{sol.type_name} found. Please be more specific")

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.02 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -106,6 +106,11 @@ command :init do |c|
   c.summary = %(The easy way to start a project)
   c.description = init_cmd_description
 
+  # Let user specify existing business and/or solution IDs and/or names.
+  cmd_option_business_pickers(c)
+  cmd_option_application_pickers(c)
+  cmd_option_product_pickers(c)
+
   c.option('--refresh', %(Ignore Business and Solution IDs found in the config))
   c.option('--purge', %(Remove Project directories and files, and recreate anew))
   c.option('--[no-]sync', %(Pull down existing remote files (generally a good thing) (default: true)))
@@ -159,7 +164,10 @@ command :init do |c|
     # Find and verify Business by ID (from $cfg) or by name (from --business),
     # or ask user which business to use. If user has not logged on, they will
     # be asked for their username and/or password first.
-    biz = business_find_or_ask(acc, ask_user: options.refresh)
+    biz = business_find_or_ask!(acc, options)
+    # Save the 'business.id' and 'business.name' to the project config.
+    # ([lb] guessing biz guaranteed to be not nil, but checking anyway.)
+    biz.write unless biz.nil?
 
     # Verify or ask user to create Solutions.
     sol_opts = {
@@ -169,8 +177,14 @@ command :init do |c|
       verbose: true,
     }
     # Get/Create Application ID
+    sol_opts[:match_sid] = options.application_id
+    sol_opts[:match_name] = options.application_name
+    sol_opts[:match_fuzzy] = options.application
     appl = solution_find_or_create(biz: biz, type: :application, **sol_opts)
     # Get/Create Product ID
+    sol_opts[:match_sid] = options.product_id
+    sol_opts[:match_name] = options.product_name
+    sol_opts[:match_fuzzy] = options.product
     prod = solution_find_or_create(biz: biz, type: :product, **sol_opts)
 
     # Automatically link solutions.

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,7 +13,7 @@ module MrMurano
     # A thing that is syncable.
     Syncable = Struct.new(:name, :class, :type, :desc, :bydefault, :aliases) do
       def opt_sym
-        self.name.tr('-', '_').to_sym
+        name.tr('-', '_').to_sym
       end
     end
 

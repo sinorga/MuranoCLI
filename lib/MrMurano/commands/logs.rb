@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -9,11 +9,15 @@ require 'MrMurano/makePretty'
 require 'MrMurano/Solution'
 
 command :logs do |c|
-  c.syntax = %(murano logs [options])
+  c.syntax = %(murano logs [--options])
   c.summary = %(Get the logs for a solution)
   c.description = %(
 Get the logs for a solution.
   ).strip
+
+  # Add flag: --type [application|product].
+  cmd_add_solntype_pickers(c, exclude_all: true)
+
   c.option '-f', '--follow', %(Follow logs from server)
   c.option '--[no-]pretty', %(Reformat JSON blobs in logs.)
   c.option '--[no-]localtime', %(Adjust Timestamps to be in local time)
@@ -21,23 +25,11 @@ Get the logs for a solution.
   # FIXME/2017-06-23: It'd be nice to allow :all
   #   But then we'd have to interleave output somehow with --follow,
   #   maybe using separate threads?
-  # For now, command_add_solution_pickers adds --type and user must
-  # specify either "application" or "product".
-
-  # Add the flags: --type, --ids, --names, --[no]-header.
-  command_add_solution_pickers c
 
   c.action do |args, options|
     c.verify_arg_count!(args)
-
-    command_defaults_solution_picker(options)
-
-    options.default pretty: true, localtime: true, raw: false
-
-    unless options.type && options.type != :all
-      MrMurano::Verbose.error 'Please specify the --type of solution'
-      exit 1
-    end
+    options.default(pretty: true, localtime: true, raw: false, type: :application)
+    cmd_defaults_solntype_pickers(options, :application)
 
     if options.type == :application
       sol = MrMurano::Application.new
@@ -106,19 +98,11 @@ Get the logs for a solution.
         # 2017-06-23: Shouldn't this be exit? What're we breaking out of?
         break
       end
-
     end
   end
 end
-alias_command 'product logs', 'logs', '--type', 'product'
-alias_command 'application logs', 'logs', '--type', 'application'
-# Should we follow suit and do what the murano domain command does?
-alias_command 'logs product', 'logs', '--type', 'product'
-alias_command 'logs products', 'logs', '--type', 'product'
-alias_command 'logs prod', 'logs', '--type', 'product'
-alias_command 'logs prods', 'logs', '--type', 'product'
 alias_command 'logs application', 'logs', '--type', 'application'
-alias_command 'logs applications', 'logs', '--type', 'application'
-alias_command 'logs app', 'logs', '--type', 'application'
-alias_command 'logs apps', 'logs', '--type', 'application'
+alias_command 'logs product', 'logs', '--type', 'product'
+alias_command 'application logs', 'logs', '--type', 'application'
+alias_command 'product logs', 'logs', '--type', 'product'
 

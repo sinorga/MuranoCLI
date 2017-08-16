@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.15 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -209,7 +209,7 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
           (
             match_sid.include?(sol[:apiId]) ||
             match_name.include?(sol[:name]) ||
-            match_fuzzy.any? { |fuzz| sol[:name] =~ /#{fuzz}/i || sol[:apiId] =~ /#{fuzz}/i }
+            match_fuzzy.any? { |term| sol[:name] =~ /#{term}/i || sol[:apiId] =~ /#{term}/i }
           )
         end
       end

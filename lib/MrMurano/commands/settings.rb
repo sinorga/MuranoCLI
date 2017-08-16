@@ -13,9 +13,12 @@ List which services and settings are avalible.
 
   c.action do |args, options|
     setting = MrMurano::Setting.new
+
     ret = setting.list
-    dd=[]
-    ret.each_pair{|k,v| v.each{|s| dd << "#{k}.#{s}"}}
+
+    dd = []
+    ret.each_pair { |k,v| v.each { |s| dd << "#{k}.#{s}" } }
+
     setting.outf dd
   end
 end
@@ -27,6 +30,7 @@ command 'setting read' do |c|
   c.description = %{
 Read a setting on a Service.
   }.strip
+
   c.option '-o', '--output FILE', String, %{File to save output to}
 
   c.action do |args, options|
@@ -84,8 +88,17 @@ If a sub-key doesn't exist, that entire path will be created as dicts.
   c.example %{murano setting write Webservice.cors --type=json - < }, %{}
 
   c.action do |args, options|
-    options.default :bool => false, :num => false, :string => true, :json => false,
-      :array => false, :dict => false, :append => false, :merge => false
+    c.verify_arg_count!(args, nil, ['Missing <service>.<setting>', 'Missing <sub-key>'])
+    options.default(
+      bool: false,
+      num: false,
+      string: true,
+      json: false,
+      array: false,
+      dict: false,
+      append: false,
+      merge: false,
+    )
 
     service, pref = args.shift.split('.')
     subkey = args.shift

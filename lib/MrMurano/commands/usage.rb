@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,14 +13,15 @@ command :usage do |c|
   c.description = %(
 Get usage info for solution(s).
   ).strip
-  # Add the flags: --type, --ids, --names, --[no]-header.
-  command_add_solution_pickers(c)
+
+  # Add flag: --type [application|product|all].
+  cmd_add_solntype_pickers(c)
+
 
   c.action do |args, options|
     c.verify_arg_count!(args)
+    cmd_defaults_solntype_pickers(options)
 
-    # Get a list of solutions. Implicitly calls
-    # command_defaults_solution_picker to set options defaults.
     solz = must_fetch_solutions!(options)
 
     solsages = []
@@ -51,12 +52,8 @@ Get usage info for solution(s).
     end
   end
 end
-alias_command 'usage product', 'usage', '--type', 'product'
-alias_command 'usage products', 'usage', '--type', 'product'
-alias_command 'usage prod', 'usage', '--type', 'product'
-alias_command 'usage prods', 'usage', '--type', 'product'
 alias_command 'usage application', 'usage', '--type', 'application'
-alias_command 'usage applications', 'usage', '--type', 'application'
-alias_command 'usage app', 'usage', '--type', 'application'
-alias_command 'usage apps', 'usage', '--type', 'application'
+alias_command 'usage product', 'usage', '--type', 'product'
+alias_command 'application usage', 'usage', '--type', 'application'
+alias_command 'product usage', 'usage', '--type', 'product'
 

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.14 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -7,14 +7,16 @@
 
 require 'MrMurano/verbosing'
 require 'MrMurano/Account'
+require 'MrMurano/ReCommander'
 require 'MrMurano/SubCmdGroupContext'
+require 'MrMurano/commands/business'
 require 'MrMurano/commands/solution-picker'
 
 command :solution do |c|
   c.syntax = %(murano solution)
   c.summary = %(About solution)
   c.description = %(
-Commands for working with solutions, including Applications and Products.
+Commands for working with Application and Product solutions.
   ).strip
   c.project_not_required = true
 
@@ -24,27 +26,25 @@ Commands for working with solutions, including Applications and Products.
   end
 end
 
+# *** Create solution.
+# --------------------
+
 command 'solution create' do |c|
-  c.syntax = %(murano solution create <name>)
+  c.syntax = %(murano solution create [--options] <solution-name>)
   c.summary = %(Create a new solution)
   c.description = %(
-Create a new solution.
+Create a new solution in the current business.
   ).strip
-  c.option(
-    '--type TYPE',
-    MrMurano::Business::ALLOWED_TYPES,
-    %(What type of solution to create (default: product))
-  )
-  c.option('--save', %(Save new solution id to config))
-  # FIXME/2017-06-01: Rebase conflict introduced --section:
-  #   [lb] thinks options.type is sufficient,
-  #   and that we do not need options.section,
-  #   since we can always deduce the type of solution.
-  #c.option('--section SECTION', String, %(Which section in config to save id to))
   c.project_not_required = true
 
+  # Add flag: --type [application|product].
+  cmd_add_solntype_pickers(c, exclude_all: true)
+
+  c.option('--save', %(Save new solution ID to config))
+
   c.action do |args, options|
-    options.default(type: :product)
+    c.verify_arg_count!(args, 1)
+    cmd_defaults_solntype_pickers(options, :application)
 
     biz = MrMurano::Business.new
     biz.must_business_id!
@@ -67,7 +67,6 @@ Create a new solution.
 
     if options.save
       section = options.type.to_s
-      #section = options.section.to_s unless options.section.nil?
       $cfg.set("#{section}.id", sol.sid)
       $cfg.set("#{section}.name", sol.name)
     end
@@ -75,21 +74,32 @@ Create a new solution.
     biz.outf(sol.sid)
   end
 end
-alias_command 'product create', 'solution create', '--type', 'product'
-alias_command 'app create', 'solution create', '--type', 'application'
+alias_command 'create application', 'solution create', '--type', 'application'
+alias_command 'create product', 'solution create', '--type', 'product'
 alias_command 'application create', 'solution create', '--type', 'application'
+alias_command 'product create', 'solution create', '--type', 'product'
+
+# *** Delete solution(s).
+# -----------------------
 
 command 'solution delete' do |c|
-  c.syntax = %(murano solution delete <NAME_OR_ID>)
+  c.syntax = %(murano solution delete [--options] [<name-or-ID,...>])
   c.summary = %(Delete a solution)
   c.description = %(
-Delete a solution.
+Delete a solution from the business.
   ).strip
-  c.option(
-    '--type TYPE',
-    MrMurano::Business::ALLOWED_TYPES + [:all],
-    %(Only delete solution(s) of the specified type (default: all))
-  )
+  c.project_not_required = true
+
+  # Add flag: --type [application|product|all].
+  cmd_add_solntype_pickers(c)
+
+  # Add --id and --name options.
+  cmd_options_add_id_and_name(c)
+
+  # Add soln pickers: --application* and --product*
+  cmd_option_application_pickers(c)
+  cmd_option_product_pickers(c)
+
   c.option('--recursive', %(If a solution is not specified, find all solutions and prompt before deleting.))
   # 2017-07-01: [lb] has /bin/rm aliased to /bin/rm -i so that I don't make
   # mistakes. So I added --prompt to behave similarly. Though maybe it should
@@ -98,47 +108,22 @@ Delete a solution.
   #c.option('--[no-]prompt', %(Prompt before removing))
   #c.option('--yes', %(Answer "yes" to all prompts and run non-interactively))
   c.option('--[no-]yes', %(Answer "yes" to all prompts and run non-interactively; if false, always prompt))
-  c.project_not_required = true
 
   c.action do |args, options|
-    options.default(type: :all, recursive: false, prompt: nil)
+    c.verify_arg_count!(args, nil, ['Missing name or ID'])
+    cmd_defaults_solntype_pickers(options)
+    cmd_defaults_id_and_name(options)
 
     biz = MrMurano::Business.new
     biz.must_business_id!
 
-    nmorids = []
-    #do_confirm = options.prompt unless options.prompt.nil?
-    do_confirm = !options.yes unless options.yes.nil?
-    if args.count.zero?
-      if options.recursive
-        #do_confirm = true if do_confirm.nil? && !options.yes
-        do_confirm = true if do_confirm.nil?
-        solz = solution_get_solutions(biz, options.type)
-        if solz.empty?
-          MrMurano::Verbose.warning(MSG_SOLUTIONS_NONE_FOUND)
-          exit 1
-        else
-          solz.each do |sol|
-            nmorids += [[sol.sid, "‘#{sol.name}’ <#{sol.sid}>", sol]]
-          end
-        end
-      else
-        MrMurano::Verbose.error(
-          'Please specify the name or ID of the solution to delete, or use --recursive.'
-        )
-        exit 1
-      end
-    else
-      args.each do |arg|
-        nmorids += [[arg, "‘#{arg}’", nil]]
-      end
-    end
+    nmorids = cmd_solution_del_get_names_and_ids!(biz, args, options)
 
     n_deleted = 0
     n_faulted = 0
 
     nmorids.each do |name_or_id|
-      if do_confirm
+      unless options.yes
         confirmed = MrMurano::Verbose.ask_yes_no(
           "Really delete #{name_or_id[0]}? [Y/n] ", true
         )
@@ -158,14 +143,38 @@ Delete a solution.
     solution_delete_report(n_deleted, n_faulted) if options.recursive
   end
 end
-alias_command 'product delete', 'solution delete', '--type', 'product'
-alias_command 'app delete', 'solution delete', '--type', 'application'
+alias_command 'delete application', 'solution delete', '--type', 'application'
+alias_command 'delete product', 'solution delete', '--type', 'product'
 alias_command 'application delete', 'solution delete', '--type', 'application'
-# 2017-06-19: [lb] wondering if 'rm' aliases would be useful...
-alias_command 'solution rm', 'solution delete'
-alias_command 'product rm', 'solution delete', '--type', 'product'
-alias_command 'app rm', 'solution delete', '--type', 'application'
-alias_command 'application rm', 'solution delete', '--type', 'application'
+alias_command 'product delete', 'solution delete', '--type', 'product'
+
+def cmd_solution_del_get_names_and_ids!(biz, args, options)
+  nmorids = []
+  if args.count.zero?
+    if any_solution_pickers!(options)
+      exit_cmd_not_recursive!
+    elsif !options.recursive
+      MrMurano::Verbose.error(
+        'Please specify the name or ID of the solution to delete, or use --recursive.'
+      )
+      exit 1
+    end
+  else
+    exit_cmd_not_recursive!
+  end
+  solz = must_fetch_solutions!(options, args, biz)
+  solz.each do |sol|
+    nmorids += [[sol.sid, "‘#{sol.name}’ <#{sol.sid}>", sol]]
+  end
+  nmorids
+end
+
+def exit_cmd_not_recursive!
+  MrMurano::Verbose.error(
+    'The --recursive option does not apply when specifing solution IDs or names.'
+  )
+  exit 1
+end
 
 # The `murano solutions expunge -y` command simplifies what be done
 # craftily other ways, e.g.,:
@@ -175,7 +184,7 @@ command 'solutions expunge' do |c|
   c.syntax = %(murano solution expunge)
   c.summary = %(Delete all solutions)
   c.description = %(
-Delete all solutions.
+Delete all solutions in business.
   ).strip
   c.option('--yes', %(Answer "yes" to all prompts and run non-interactively))
   c.project_not_required = true
@@ -187,8 +196,6 @@ Delete all solutions.
     solution_delete_report(n_deleted, n_faulted)
   end
 end
-alias_command 'solutions delete', 'solutions expunge'
-alias_command 'solutions rm', 'solutions expunge'
 
 def solution_delete(name_or_id, use_sol: nil, type: :all, yes: false)
   biz = MrMurano::Business.new
@@ -209,7 +216,7 @@ def solution_delete(name_or_id, use_sol: nil, type: :all, yes: false)
     solz = [use_sol]
   else
     MrMurano::Verbose.whirly_start('Looking for solutions...')
-    solz = biz.solutions(type)
+    solz = biz.solutions(type: type)
     # This used to use Hash.value? to see if the name exactly matches
     # any key's value. But we should be able to stick to using name.
     #  (E.g., it used to call sol.meta.value?(name_or_id), but this
@@ -274,75 +281,143 @@ def solution_delete_report(n_deleted, n_faulted)
   MrMurano::Verbose.error("Failed to delete #{n_faulted} #{inflection}")
 end
 
-command 'solution list' do |c|
-  c.syntax = %(murano solution list [options])
-  c.summary = %(List solution)
-  c.description = %(
-List solution in the current business.
-  ).strip
-  c.option(
-    '--type TYPE',
-    MrMurano::Business::ALLOWED_TYPES + [:all],
-    %(What type of solutions to list (default: all)),
-  )
+# *** List and Find solutions.
+# ----------------------------
+
+def cmd_solution_find_add_options(c)
   c.option '--idonly', 'Only return the ids'
-  c.option '--[no-]all', 'Show all fields'
+  c.option '--[no-]brief', 'Show fewer fields: only Solution ID and Domain'
+  c.option '--[no-]project', 'Show only solutions in project'
   c.option '-o', '--output FILE', %(Download to file instead of STDOUT)
+end
+
+command 'solution list' do |c|
+  c.syntax = %(murano solution list [--options])
+  c.summary = %(List solutions)
+  c.description = %(
+List solutions in the current business.
+  ).strip
   c.project_not_required = true
 
-  c.action do |_args, options|
-    options.default(type: :all, all: true)
+  cmd_solution_find_add_options(c)
 
-    biz = MrMurano::Business.new
-    biz.must_business_id!
+  # Add flag: --type [application|product|all].
+  cmd_add_solntype_pickers(c)
 
-    MrMurano::Verbose.whirly_start('Looking for solutions...')
-    solz = biz.solutions(options.type)
-    MrMurano::Verbose.whirly_stop
-
-    io = File.open(options.output, 'w') if options.output
-
-    if options.idonly
-      headers = %i[apiId]
-      solz = solz.map { |row| [row.apiId] }
-    elsif !options.all
-      headers = %i[apiId domain]
-      solz = solz.map { |row| [row.apiId, row.domain] }
-    else
-      headers = (solz.first && solz.first.meta || {}).keys
-      headers.delete(:sid) if headers.include?(:apiId) && headers.include?(:sid)
-      solz = solz.map { |row| headers.map { |hdr| row.meta[hdr] } }
-    end
-
-    if !solz.empty? || options.idonly
-      biz.outf(solz, io) do |dd, ios|
-        if options.idonly
-          ios.puts(dd.join(' '))
-        else
-          biz.tabularize(
-            {
-              # Use Symbol.to_proc trickery. & calls to_proc on the object.
-              #  http://www.brianstorti.com/understanding-ruby-idiom-map-with-symbol/
-              #headers: headers.map { |h| h.to_s },
-              headers: headers.map(&:to_s),
-              rows: dd,
-            },
-            ios,
-          )
-        end
-      end
-    else
-      MrMurano::Verbose.warning('Did not find any solutions')
-    end
-    # "The Safe Navigation Operator (&.) in Ruby"
-    #  http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/
-    # The safe nav op was only added in Ruby 2.3.0, and we support 2.0.
-    #io&.close
-    io.close unless io.nil?
+  c.action do |args, options|
+    c.verify_arg_count!(args)
+    cmd_defaults_solntype_pickers(options)
+    cmd_solution_find_and_output(args, options)
   end
 end
-alias_command 'product list', 'solution list', '--type', 'product', '--no-all'
-alias_command 'app list', 'solution list', '--type', 'application', '--no-all'
-alias_command 'application list', 'solution list', '--type', 'application', '--no-all'
+alias_command 'list application', 'solution list', '--type', 'application', '--brief'
+alias_command 'list product', 'solution list', '--type', 'product', '--brief'
+alias_command 'application list', 'solution list', '--type', 'application', '--brief'
+alias_command 'product list', 'solution list', '--type', 'product', '--brief'
+#
+alias_command 'list solutions', 'solution list'
+alias_command 'list applications', 'application list'
+alias_command 'list products', 'product list'
 alias_command 'solutions list', 'solution list'
+alias_command 'applications list', 'application list'
+alias_command 'products list', 'product list'
+
+command 'solution find' do |c|
+  c.syntax = %(murano solution find [--options] [<name-or-ID,...>])
+  c.summary = %(Find solution by name or ID)
+  c.description = %(
+Find solution by name or ID.
+  ).strip
+  c.project_not_required = true
+
+  cmd_solution_find_add_options(c)
+
+  cmd_add_solntype_pickers(c)
+
+  # Add --id and --name options.
+  cmd_options_add_id_and_name(c)
+
+  # Add soln pickers: --application* and --product*
+  cmd_option_application_pickers(c)
+  cmd_option_product_pickers(c)
+
+  c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
+    cmd_defaults_solntype_pickers(options)
+    cmd_defaults_id_and_name(options)
+    if args.none? && !any_solution_pickers!(options)
+      MrMurano::Verbose.error('What would you like to find?')
+      exit 1
+    end
+    cmd_solution_find_and_output(args, options)
+  end
+end
+alias_command 'find application', 'solution find', '--type', 'application', '--brief'
+alias_command 'find product', 'solution find', '--type', 'product', '--brief'
+alias_command 'application find', 'solution find', '--type', 'application', '--brief'
+alias_command 'product find', 'solution find', '--type', 'product', '--brief'
+
+def cmd_solution_find_and_output(args, options)
+  cmd_verify_args_and_id_or_name!(args, options)
+  biz = MrMurano::Business.new
+  biz.must_business_id!
+  solz = cmd_solution_find_solutions(biz, args, options)
+  if solz.empty? && !options.idonly
+    MrMurano::Verbose.error(MSG_SOLUTIONS_NONE_FOUND)
+    exit 0
+  end
+  cmd_solution_output_solutions(biz, solz, options)
+end
+
+def cmd_solution_find_solutions(biz, args, options)
+  must_fetch_solutions!(options, args, biz)
+end
+
+def cmd_solution_output_solutions(biz, solz, options)
+  if options.idonly
+    headers = %i[apiId]
+    solz = solz.map { |row| [row.apiId] }
+  elsif options.brief
+    #headers = %i[apiId domain]
+    #solz = solz.map { |row| [row.apiId, row.domain] }
+    headers = %i[apiId domain name]
+    solz = solz.map { |row| [row.apiId, row.domain, row.name] }
+  else
+    headers = (solz.first && solz.first.meta || {}).keys
+    headers.delete(:sid) if headers.include?(:apiId) && headers.include?(:sid)
+    headers.sort_by! do |hdr|
+      case hdr
+      when :bizid
+        0
+      when :type
+        1
+      when :apiId
+        2
+      when :domain
+        3
+      when :name
+        4
+      else
+        5
+      end
+    end
+    solz = solz.map { |row| headers.map { |hdr| row.meta[hdr] } }
+  end
+
+  io = File.open(options.output, 'w') if options.output
+  biz.outf(solz, io) do |dd, ios|
+    if options.idonly
+      ios.puts(dd.join(' '))
+    else
+      biz.tabularize(
+        {
+          headers: headers.map(&:to_s),
+          rows: dd,
+        },
+        ios,
+      )
+    end
+  end
+  io.close unless io.nil?
+end
 

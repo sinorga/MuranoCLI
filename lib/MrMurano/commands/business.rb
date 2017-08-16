@@ -1,98 +1,165 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'MrMurano/verbosing'
 require 'MrMurano/Account'
 require 'MrMurano/Business'
 require 'MrMurano/ReCommander'
 
+MSG_BUSINESSES_NONE_FOUND = 'No businesses found' if !defined? MSG_BUSINESSES_NONE_FOUND
+
+# *** Base business command help.
+# -------------------------------
+
 command :business do |c|
-  c.syntax = %{murano business}
-  c.summary = %{About business}
-  c.description = %{
+  c.syntax = %(murano business)
+  c.summary = %(About business)
+  c.description = %(
 Commands for working with businesses.
-  }.strip
+  ).strip
   c.project_not_required = true
 
-  c.action do |args, options|
+  c.action do |_args, _options|
     ::Commander::UI.enable_paging
     say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end
+alias_command 'businesses', 'business'
+
+# *** Common business command options.
+# ------------------------------------
+
+def cmd_business_add_options(c)
+# MAYBE/2017-08-15: Rename to --id-only.
+  c.option '--idonly', 'Only return the IDs'
+
+  # 2017-08-15: BizAPI only returns these three headers, so no need for --brief.
+  #c.option '--[no-]brief', 'Show fewer fields'
+
+  # FIXME: Move -o to a file with --json, etc.; smells like a universal output format.
+  c.option '-o', '--output FILE', 'Download to file instead of STDOUT'
+end
+
+def cmd_options_add_id_and_name(c)
+  c.option '--id', 'Specified argument is an ID'
+  c.option '--name', 'Specified argument is a name'
+end
+
+def cmd_defaults_id_and_name(options)
+  if !options.id.nil? && !options.name.nil?
+    MrMurano::Verbose.error('Please only --id or --name but not both')
+    exit 1
+  end
+end
+
+def cmd_verify_args_and_id_or_name!(args, options)
+  if !args.any? && (options.id || options.name)
+    MrMurano::Verbose.warning(
+      'The --id and --name options only apply when specifying a business name or ID.'
+    )
+    exit 1
+  end
+end
+
+def cmd_option_business_pickers(c)
+  c.option('--business-id ID', String, %(ID of Murano Business to use))
+  c.option('--business-name NAME', String, %(Name of Murano Business to use))
+  c.option('--business BUSINESS', String, %(Name or ID of Murano Business to use))
+end
+
+def any_business_pickers?(options)
+  num_ways = 0
+  num_ways += 1 unless options.business_id.to_s.empty?
+  num_ways += 1 unless options.business_name.to_s.empty?
+  num_ways += 1 unless options.business.to_s.empty?
+  #if num_ways > 1
+  #  MrMurano::Verbose.error(
+  #    'Please specify only one of: --business, --business-id, or --business-name'
+  #  )
+  #  exit 1
+  #end
+  num_ways.length > 0
+end
+
+# *** Business commands: list and find.
+# -------------------------------------
 
 command 'business list' do |c|
-  c.syntax = %{murano business list [options]}
-  c.summary = %{List businesses}
-  c.description = %{
+  c.syntax = %(murano business list [--options])
+  c.summary = %(List businesses)
+  c.description = %(
 List businesses.
-  }.strip
-  c.option '--idonly', 'Only return the IDs'
-  c.option '--[no-]all', 'Show all fields'
-  c.option '-o', '--output FILE', %{Download to file instead of STDOUT}
+  ).strip
   c.project_not_required = true
 
+  cmd_business_add_options(c)
+
   c.action do |args, options|
-    acc = MrMurano::Account.instance
-
-    MrMurano::Verbose.whirly_start 'Looking for businesses...'
-    bizz = acc.businesses
-    MrMurano::Verbose.whirly_stop
-
-    io = nil
-    if options.output then
-      io = File.open(options.output, 'w')
-    end
-
-    if options.idonly then
-      headers = [:bizid]
-      bizz = bizz.map(&:bizid)
-    elsif not options.all then
-      headers = [:bizid, :role, :name]
-      bizz = bizz.map { |biz| [biz.bizid, biz.role, biz.name] }
-    else
-      headers = bizz[0].meta.keys
-      bizz = bizz.map { |biz| headers.map { |key| biz.meta[key] } }
-    end
-
-    acc.outf(bizz, io) do |dd, ios|
-      if options.idonly then
-        ios.puts dd.join(' ')
-      else
-        acc.tabularize(
-          {
-            headers: headers.map{|h| h.to_s},
-            rows: dd,
-          },
-          ios,
-        )
-      end
-    end
-    io.close unless io.nil?
-
+    c.verify_arg_count!(args)
+    cmd_business_find_and_output(args, options)
   end
 end
 alias_command 'businesses list', 'business list'
 
-def business_find_or_ask(acc, ask_user: false)
-  match_bid = $cfg.get('business.id', :internal)
-  match_name = $cfg.get('business.name', :internal)
-  match_either = $cfg.get('business.mark', :internal)
-  unless match_bid.to_s.empty? && match_name.to_s.empty? && match_either.to_s.empty?
-    biz = business_locate!(acc, match_bid, match_name, match_either)
-  else
+command 'business find' do |c|
+  c.syntax = %(murano business find [--options] [<name-or-ID,...>])
+  c.summary = %(Find business by name or ID)
+  c.description = %(
+Find business by name or ID.
+  ).strip
+  c.project_not_required = true
+
+  cmd_business_add_options(c)
+
+  # Add --business/-id/-name options.
+  cmd_option_business_pickers(c)
+
+  # Add --id and --name options.
+  cmd_options_add_id_and_name(c)
+
+  c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
+    cmd_defaults_id_and_name(options)
+    if !args.any? && !any_business_pickers?(options)
+      MrMurano::Verbose.error('What would you like to find?')
+      exit 1
+    end
+    cmd_business_find_and_output(args, options)
+  end
+end
+
+# *** Business actions helpers.
+# -----------------------------
+
+def business_find_or_ask!(acc, options)
+  #any_business_pickers?(options)
+
+  match_bid = options.business_id
+  match_name = options.business_name
+  match_fuzzy = options.business
+
+  if !match_bid.to_s.empty? || !match_name.to_s.empty? || !match_fuzzy.to_s.empty?
+    biz = business_locate!(acc, match_bid, match_name, match_fuzzy)
+  elsif !options.find_only
+    ask_user = options.refresh
     biz = business_from_config unless ask_user
     biz = businesses_ask_which(acc) if biz.nil?
   end
-  # Save the 'business.id' and 'business.name' to the project config.
-  biz.write
+
+  match_bid = $cfg.set('business.id', nil, :internal)
+  match_name = $cfg.set('business.name', nil, :internal)
+  match_fuzzy = $cfg.set('business.fuzzy', nil, :internal)
+
+  biz
 end
 
-def business_locate!(acc, match_bid, match_name, match_either)
+def business_locate!(acc, match_bid, match_name, match_fuzzy)
   biz = nil
-  bizes = acc.businesses(match_bid, match_name, match_either)
+  bizes = acc.businesses(bid: match_bid, name: match_name, fuzzy: match_fuzzy)
   if bizes.count == 1
     biz = bizes.first
     say("Found business #{biz.pretty_name_and_id}")
@@ -142,7 +209,7 @@ def businesses_ask_which(acc)
     choose do |menu|
       menu.prompt = 'Please select the Business to use:'
       menu.flow = :columns_across
-      bizes.sort_by { |a| a.name }.each do |choice|
+      bizes.sort_by(&:name).each do |choice|
         menu.choice(choice.name) do
           biz = choice
         end
@@ -151,5 +218,90 @@ def businesses_ask_which(acc)
   end
   puts('')
   biz
+end
+
+def cmd_business_find_and_output(args, options)
+  cmd_verify_args_and_id_or_name!(args, options)
+  acc = MrMurano::Account.instance
+  bizz = cmd_business_find_businesses(acc, args, options)
+  if bizz.empty? && !options.idonly
+    MrMurano::Verbose.error(MSG_BUSINESSES_NONE_FOUND)
+    exit 0
+  end
+  cmd_business_output_businesses(acc, bizz, options)
+end
+
+def cmd_business_find_businesses(acc, args, options)
+  bid = []
+  name = []
+  fuzzy = []
+
+  if args.any?
+    flattened = args.map { |cell| cell.split(',') }.flatten
+    if options.id
+      bid += flattened
+    elsif options.name
+      name += flattened
+    else
+      fuzzy += flattened
+    end
+  end
+
+  if any_business_pickers?(options)
+    if options.business_id
+      bid += [options.business_id]
+    elsif options.business_name
+      name += [options.business_name]
+    elsif options.business
+      fuzzy += [options.business]
+    end
+  end
+
+  MrMurano::Verbose.whirly_start 'Looking for businesses...'
+  bizz = acc.businesses(bid: bid, name: name, fuzzy: fuzzy)
+  MrMurano::Verbose.whirly_stop
+
+  bizz
+end
+
+def cmd_business_output_businesses(acc, bizz, options)
+  if options.idonly
+    headers = [:bizid]
+    bizz = bizz.map(&:bizid)
+  elsif options.brief
+    headers = %i[bizid role name]
+    bizz = bizz.map { |biz| [biz.bizid, biz.role, biz.name] }
+  else
+    headers = bizz[0].meta.keys
+    headers.sort_by! do |hdr|
+      case hdr
+      when :bizid
+        0
+      when :role
+        1
+      when :name
+        2
+      else
+        3
+      end
+    end
+    bizz = bizz.map { |biz| headers.map { |key| biz.meta[key] } }
+  end
+
+  io = File.open(options.output, 'w') if options.output
+  acc.outf(bizz, io) do |dd, ios|
+    if options.idonly
+      ios.puts dd.join(' ')
+    else
+      acc.tabularize(
+        {
+          headers: headers.map(&:to_s),
+          rows: dd,
+        },
+        ios,
+      )
+    end
+  end
+  io.close unless io.nil?
 end
 

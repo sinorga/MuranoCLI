@@ -150,6 +150,7 @@ module MrMurano
       ###################################################
 
       def syncup_before
+        super
         @there = list
       end
 
@@ -163,6 +164,7 @@ module MrMurano
       end
 
       def syncup_after
+        super
         if !@there.empty?
           if !$cfg['tool.dry']
             sync_update_progress('Updating product resources')
@@ -183,8 +185,9 @@ module MrMurano
       ###################################################
 
       def syncdown_before
-        # FIXME/2017-07-02: Could there be duplicate gateway items?
-        #   [lb] just added code to SyncUpDown.locallist and am curious.
+        super
+        # TEST/2017-07-02: Could there be duplicate gateway items?
+        #   [lb] just added code to SyncUpDown.locallist and is curious.
         @here = locallist
       end
 
@@ -223,6 +226,7 @@ module MrMurano
       end
 
       def syncdown_after(local)
+        super
         resources_write(local)
         @here = nil
       end

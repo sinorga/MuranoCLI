@@ -13,7 +13,13 @@ Call internal class methods directly.
   }.strip
   c.project_not_required = true
 
+  # Will a plugin need to let user restrict the solution type?
+  # Add flag: --type [application|product|all].
+  cmd_add_solntype_pickers(c)
+
   c.action do |args, options|
+    cmd_defaults_solntype_pickers(options)
+
     cls = args[0]
     meth = args[1].to_sym
     args.shift(2)
