@@ -220,7 +220,6 @@ AllCops:
     - 'lib/MrMurano/http.rb'
     - 'lib/MrMurano/makePretty.rb'
     - 'lib/MrMurano/commands/business.rb'
-    - 'lib/MrMurano/commands/completion.rb'
     - 'lib/MrMurano/commands/content.rb'
     - 'lib/MrMurano/commands/cors.rb'
     - 'lib/MrMurano/commands/gb.rb'
