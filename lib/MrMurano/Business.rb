@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.02 /coding: utf-8
+# Last Modified: 2017.08.15 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,6 +13,7 @@ require 'pathname'
 require 'rainbow'
 require 'uri'
 require 'yaml'
+require 'MrMurano/hash'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
 require 'MrMurano/Config'
@@ -165,45 +166,51 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
     #ALLOWED_TYPES = [:domain, :onepApi, :dataApi, :application, :product,].freeze
     ALLOWED_TYPES = %i[application product].freeze
 
-    def solutions(
-      type=:all, invalidate=false, match_sid=nil, match_name=nil, match_either=nil
-    )
+    def solutions(type: :all, sid: nil, name: nil, fuzzy: nil, invalidate: false)
       debug "Getting all solutions of type #{type}"
       must_business_id!
 
       type = type.to_sym
       raise "Unknown type(#{type})" unless type == :all || ALLOWED_TYPES.include?(type)
+
       # Cache the result since sometimes both products() and applications() are called.
       if invalidate || @user_bizes[type].nil?
-        #got = get('business/' + bid + '/solution/')
-        got = get('business/' + bid + '/solution/') do |request, http|
-          response = http.request(request)
-          case response
-          when Net::HTTPSuccess
-            workit_response(response)
-          when Net::HTTPForbidden # 403
-            # FIXME/CONFIRM/2017-07-13: Is this really what platform
-            # says when business has no solutions? I do not remember
-            # seeing this before... [lb]
-            nil
-          else
-            showHttpError(request, response)
+        if invalidate || @user_bizes[:all].nil?
+          got = get('business/' + bid + '/solution/') do |request, http|
+            response = http.request(request)
+            case response
+            when Net::HTTPSuccess
+              workit_response(response)
+            when Net::HTTPForbidden # 403
+              # FIXME/CONFIRM/2017-07-13: Is this really what platform
+              # says when business has no solutions? I do not remember
+              # seeing this before... [lb]
+              nil
+            else
+              showHttpError(request, response)
+            end
           end
-        end
-        @user_bizes[type] = got unless got.nil?
-      end
-      if @user_bizes[type].nil?
-        solz = []
-      else
-        solz = @user_bizes[type].dup
-      end
-      solz.select! { |i| i[:type] == type.to_s } unless type == :all
 
-      solz.select! { |sol| sol[:apiId] == match_sid } unless match_sid.to_s.empty?
-      solz.select! { |sol| sol[:name] == match_name } unless match_name.to_s.empty?
-      unless match_either.to_s.empty?
+          @user_bizes[:all] = got || []
+        end
+
+        if invalidate || @user_bizes[type].nil?
+          @user_bizes[type] = @user_bizes[:all].select { |i| i[:type] == type.to_s }
+        end
+      end
+
+      solz = @user_bizes[type].dup
+
+      match_sid = ensure_array(sid)
+      match_name = ensure_array(name)
+      match_fuzzy = ensure_array(fuzzy)
+      if match_sid.any? || match_name.any? || match_fuzzy.any?
         solz.select! do |sol|
-          sol[:name] == match_either || sol[:apiId] == match_either
+          (
+            match_sid.include?(sol[:apiId]) ||
+            match_name.include?(sol[:name]) ||
+            match_fuzzy.any? { |fuzz| sol[:name] =~ /#{fuzz}/i || sol[:apiId] =~ /#{fuzz}/i }
+          )
         end
       end
 
@@ -219,7 +226,10 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
         end
       end
 
-      # Sort results.
+      sort_solutions!(solz)
+    end
+
+    def sort_solutions!(solz)
       solz.sort_by!(&:name)
       solz.sort_by! { |sol| ALLOWED_TYPES.index(sol.type) }
     end
@@ -335,8 +345,8 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
 
     # ---------------------------------------------------------------------
 
-    def products
-      solutions(:product)
+    def products(**options)
+      solutions(type: :product, **options)
     end
 
     ## Create a new product in the current business
@@ -350,8 +360,8 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
 
     # ---------------------------------------------------------------------
 
-    def applications
-      solutions(:application)
+    def applications(**options)
+      solutions(type: :application, **options)
     end
 
     ## Create a new application in the current business
