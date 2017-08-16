@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.15 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,6 +13,9 @@ task default: %i[test]
 tag_name = "v#{Bundler::GemHelper.gemspec.version}"
 gem_name = "MuranoCLI-#{Bundler::GemHelper.gemspec.version}.gem"
 built_gem = "pkg/#{gem_name}"
+
+# NOTE: If you're looking for the :build task, look in the bundler code, e.g.,
+#   /usr/lib/ruby/vendor_ruby/bundler/gem_helper.rb::build_gem
 
 desc 'Install gem in user dir'
 task :bob do
