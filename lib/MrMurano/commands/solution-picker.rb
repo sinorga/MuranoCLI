@@ -426,6 +426,7 @@ module MrMurano
         return sol if @skip_verify
       end
       if sol.sid?
+        tried_sid = sol.sid
         if @searching
           whirly_msg = "Searching #{sol.type_name} by ID..."
         else
@@ -447,7 +448,7 @@ module MrMurano
             say "Found #{sol.type_name} #{sol.pretty_desc}"
           elsif !@searching
             # The solution ID in the config was not found for this business.
-            say "The #{sol.type_name} ‘#{sol.sid}’ found in the config does not exist"
+            say "The #{sol.type_name} ID ‘#{tried_sid}’ from the config was not found"
           end
           puts ''
         end
