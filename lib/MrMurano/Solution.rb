@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.14 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -230,9 +230,17 @@ module MrMurano
       unless @name.to_s.empty? || @meta[:name].to_s == @name.to_s
         warning "Name mismatch. Server says ‘#{@meta[:name]}’, but config says ‘#{@name}’."
       end
-      set_name(@meta[:name])
-      # What did server send that we think is invalid?
-      warning "Server returned invalid name ‘#{@meta[:name]}’, how weird is that." unless @valid_name
+      if !@meta[:name].to_s.empty?
+        set_name(@meta[:name])
+        unless @valid_name || type == :solution
+          warning "Unexpected: Server returned invalid name: ‘#{@meta[:name]}’"
+        end
+      elsif @meta[:domain]
+        # This could be a pre-ADC/pre-Murano business.
+        warning "Unexpected: Server returned no name for domain: ‘#{@meta[:domain]}’"
+      else
+        warning "Unexpected: Server returned no name for solution: ‘#{@meta}’"
+      end
     end
 
     def domain

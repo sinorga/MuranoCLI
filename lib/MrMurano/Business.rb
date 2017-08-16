@@ -222,6 +222,7 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
           MrMurano::Product.new(meta)
         else
           warning("Unexpected solution type: #{meta[:type]}")
+          warning('* Please enable Murano for this business') if meta[:type].to_sym == :dataApi
           MrMurano::Solution.new(meta)
         end
       end
