@@ -5,6 +5,8 @@
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'MrMurano/ReCommander'
+
 command :config do |c|
   c.syntax = %(murano config [--options] [<key> [<new value>]])
   c.summary = %(Get and set options)

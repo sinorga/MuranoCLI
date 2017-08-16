@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'MrMurano/makePretty'
+require 'MrMurano/ReCommander'
 require 'MrMurano/Solution'
 
 command :logs do |c|

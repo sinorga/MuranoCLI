@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'date'
+require 'MrMurano/ReCommander'
 require 'MrMurano/Solution-ServiceConfig'
 require 'MrMurano/SubCmdGroupContext'
 

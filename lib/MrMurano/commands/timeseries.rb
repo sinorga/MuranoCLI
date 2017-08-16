@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'csv'
+require 'MrMurano/ReCommander'
 require 'MrMurano/Solution-ServiceConfig'
 
 module MrMurano
@@ -61,6 +62,7 @@ Query the timeseries database.
   c.option '--[no-]csv', %(Display results as CSV)
 
   c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
     options.defalts json: false, csv: false
     sol = MrMurano::Timeseries.new
     ret = sol.query args.join(' ')
@@ -98,7 +100,8 @@ Write data into the timeseries database.
   ).strip
   c.option '--[no-]json', %(Display results as raw json)
   c.action do |args, options|
-    options.defalts json: false
+    c.verify_arg_count!(args)
+    options.defalts(json: false)
     $cfg['tool.outformat'] = 'json' if options.json
     sol = MrMurano::Timeseries.new
     ret = sol.write args.join(' ')
@@ -117,7 +120,8 @@ Execute a non-query command in the database.
   ).strip
   c.option '--[no-]json', %(Display results as raw json)
   c.action do |args, options|
-    options.defalts json: false
+    # SKIP: c.verify_arg_count!(args)
+    options.defalts(json: false)
     $cfg['tool.outformat'] = 'json' if options.json
     sol = MrMurano::Timeseries.new
     ret = sol.command args.join(' ')

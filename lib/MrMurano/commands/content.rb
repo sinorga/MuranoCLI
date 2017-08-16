@@ -37,6 +37,8 @@ the HTTP Device API.
   c.option '-l', '--long', %(Include more info for each file)
 
   c.action do |args, options|
+    c.verify_arg_count!(args)
+
     prd = MrMurano::Content::Base.new
 
     MrMurano::Verbose.whirly_start 'Looking for content...'
@@ -71,14 +73,11 @@ the HTTP Device API.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args, 1, ['Missing <content name>'])
     prd = MrMurano::Content::Base.new
-    if args[0].nil? then
-      prd.error "Missing <content name>"
-    else
-      info = prd.info(args[0])
-      prd.outf(info) do |dd, ios|
-        ios.puts Hash.transform_keys_to_strings(dd).to_yaml
-      end
+    info = prd.info(args[0])
+    prd.outf(info) do |dd, ios|
+      ios.puts Hash.transform_keys_to_strings(dd).to_yaml
     end
   end
 end
@@ -94,13 +93,10 @@ the HTTP Device API.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args, 1, ['Missing <content name>'])
     prd = MrMurano::Content::Base.new
-    if args[0].nil? then
-      prd.error "Missing <content name>"
-    else
-      ret = prd.remove(args[0])
-      prd.outf(ret) if not ret.nil? and ret.count > 1
-    end
+    ret = prd.remove(args[0])
+    prd.outf(ret) if !ret.nil? && ret.count > 1
   end
 end
 
@@ -127,23 +123,20 @@ the HTTP Device API.
   end
 
   c.action do |args, options|
-    prd = MrMurano::Content::Base.new
+    c.verify_arg_count!(args, 1, ['Missing <file>'])
     options.default meta: ' '
 
-    if args[0].nil? then
-      prd.error "Missing <file>"
-    else
-      name = ::File.basename(args[0])
-      name = tags['name'] if tags.has_key? 'name'
-      if name.to_s.empty?
-        prd.error "Bad file name."
-        exit 2
-      end
+    prd = MrMurano::Content::Base.new
 
-      tags = nil if tags.empty?
-      prd.upload(name, args[0], tags)
-
+    name = ::File.basename(args[0])
+    name = tags['name'] if tags.key? 'name'
+    if name.to_s.empty?
+      prd.error 'Bad file name'
+      exit 2
     end
+
+    tags = nil if tags.empty?
+    prd.upload(name, args[0], tags)
   end
 end
 
@@ -162,18 +155,13 @@ the HTTP Device API.
   c.action do |args, options|
     c.verify_arg_count!(args, 1, ['Missing <content name>'])
     prd = MrMurano::Content::Base.new
-    if args[0].nil? then
-      prd.error "Missing <content name>"
+    if options.output.nil?
+      prd.download(args[0]) # to stdout
     else
-
-      if options.output.nil? then
-        prd.download(args[0]) # to stdout
-      else
-        outFile = Pathname.new(options.output)
-        outFile.open('w') do |io|
-          prd.download(args[0]) do |chunk|
-            io << chunk
-          end
+      out_file = Pathname.new(options.output)
+      out_file.open('w') do |io|
+        prd.download(args[0]) do |chunk|
+          io << chunk
         end
       end
     end

@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'yaml'
+require 'MrMurano/ReCommander'
 require 'MrMurano/Webservice-Cors'
 
 command :cors do |c|
@@ -19,6 +20,7 @@ Set the CORS with `murano cors set`.
   c.project_not_required = true
 
   c.action do |args, _options|
+    c.verify_arg_count!(args)
     sol = MrMurano::Webservice::Cors.new
     ret = sol.fetch
     sol.outf ret
@@ -34,6 +36,7 @@ Set the CORS for the project.
   c.project_not_required = true
 
   c.action do |args, _options|
+    c.verify_arg_count!(args, 1, ['Missing <file>'])
     crs = MrMurano::Webservice::Cors.new
     file = args.shift
     crs.upload(file)

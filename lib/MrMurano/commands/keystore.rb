@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'MrMurano/Keystore'
+require 'MrMurano/ReCommander'
 require 'MrMurano/Solution-ServiceConfig'
 
 command :keystore do |c|
@@ -32,6 +33,7 @@ Delete all keys in the keystore.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args)
     sol = MrMurano::Keystore.new
     sol.clearall
   end
@@ -45,6 +47,7 @@ Show info about the Keystore.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args)
     sol = MrMurano::Keystore.new
     sol.outf sol.keyinfo
   end
@@ -58,6 +61,7 @@ List all of the keys in the Keystore.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args)
     sol = MrMurano::Keystore.new
     # FIXME/2017-06-14: This outputs nothing if not list, unlike other
     #   list commands that say, e.g., "No solutions found"
@@ -73,6 +77,7 @@ Get the value of a key in the Keystore.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args, 1, ['Missing key'])
     sol = MrMurano::Keystore.new
     ret = sol.getkey(args[0])
     sol.outf ret
@@ -87,6 +92,7 @@ Set the value of a key in the Keystore.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args, nil, ['Missing key', 'Missing value(s)'])
     sol = MrMurano::Keystore.new
     sol.setkey(args[0], args[1..-1].join(' '))
   end
@@ -100,6 +106,7 @@ Delete a key from the Keystore.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args, 1, ['Missing key'])
     sol = MrMurano::Keystore.new
     sol.delkey(args[0])
   end
@@ -108,7 +115,7 @@ alias_command 'keystore rm', 'keystore delete'
 alias_command 'keystore del', 'keystore delete'
 
 command 'keystore command' do |c|
-  c.syntax = %(murano keystore command <command> <key> <args...>)
+  c.syntax = %(murano keystore command <command> <key> [<args...>])
   c.summary = %(Call some Redis commands in the Keystore)
   c.description = %(
 Call some Redis commands in the Keystore.
@@ -124,17 +131,15 @@ For current list, see:
   c.example %(murano keystore command lrem mykey 0 B), %(Remove all B values from list)
 
   c.action do |args, _options|
+    #c.verify_arg_count!(args, nil, ['Missing command', 'Missing key', 'Missing value(s)'])
+    c.verify_arg_count!(args, nil, ['Missing command', 'Missing key'])
     sol = MrMurano::Keystore.new
-    if args.count < 2 then
-      sol.error "Not enough params"
+    ret = sol.command(args[1], args[0], args[2..-1])
+    if ret.key?(:value)
+      sol.outf ret[:value]
     else
-      ret = sol.command(args[1], args[0], args[2..-1])
-      if ret.has_key?(:value) then
-        sol.outf ret[:value]
-      else
-        sol.error "#{ret[:code]}: #{ret.message}"
-        sol.outf ret[:error] if ($cfg['tool.debug'] and ret.has_key?(:error))
-      end
+      sol.error "#{ret[:code]}: #{ret.message}"
+      sol.outf ret[:error] if $cfg['tool.debug'] && ret.key?(:error)
     end
   end
 end

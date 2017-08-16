@@ -1,10 +1,11 @@
-# Last Modified: 2017.07.05 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'MrMurano/ReCommander'
 require 'MrMurano/Solution-ServiceConfig'
 
 module MrMurano
@@ -55,6 +56,8 @@ Queries can include $# escapes that are filled from the --param option.
   c.example %(murano postgresql -f cmds.sql), %(Run multiple commands from a file)
 
   c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
+
     pg = MrMurano::Postgresql.new
     if options.file
       sqls = File.read(options.file)
@@ -101,7 +104,7 @@ Queries can include $# escapes that are filled from the --param option.
 end
 
 command 'postgresql migrate' do |c|
-  c.syntax = %(murano postgresql migrate (up|down) <level>)
+  c.syntax = %(murano postgresql migrate (up|down) [<level>])
   c.summary = %(Run database migration scripts.)
   c.description = %(
 Run database migration scripts.
@@ -121,18 +124,22 @@ extra table in your database. (__murano_cli__.migrate_version)
   c.example %(murano postgresql migrate down 0), %(Run migrations down to version 0.)
 
   c.action do |args, options|
-    options.default dir: File.join($cfg['location.base'], ($cfg['postgresql.migrations_dir'] or ''))
+    c.verify_arg_count!(args, 2, ['Missing direction'])
+    options.default(dir: File.join($cfg['location.base'], ($cfg['postgresql.migrations_dir'] || '')))
+
+    pg = MrMurano::Postgresql.new
 
     direction = args.shift
     if direction =~ /down/i
       direction = 'down'
-    else
+    elsif direction =~ /up/i
       direction = 'up'
+    else
+      pg.error "Unrecogized direction: ‘#{direction}’"
+      exit 1
     end
 
     want_version = args.first
-
-    pg = MrMurano::Postgresql.new
 
     # get current version of DB.
     ret = pg.queries %(

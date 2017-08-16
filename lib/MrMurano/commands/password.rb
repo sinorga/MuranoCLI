@@ -1,9 +1,11 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
+
+require 'MrMurano/ReCommander'
 
 command :password do |c|
   c.syntax = %(murano password)
@@ -88,13 +90,10 @@ Delete password for username.
   c.project_not_required = true
 
   c.action do |args, _options|
+    c.verify_arg_count!(args, 2, ['Missing username'])
+
     psd = MrMurano::Passwords.new
     psd.load
-
-    if args.count < 1
-      psd.error 'Missing username'
-      exit 1
-    end
 
     username = args.shift
     host = args.shift

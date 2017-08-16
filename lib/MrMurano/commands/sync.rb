@@ -46,10 +46,10 @@ Sync project down from Murano.
   c.example %(Only Pull new static files), %(murano syncdown --files --no-delete --no-update)
 
   c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
     options.default(delete: true, create: true, update: true)
     cmd_defaults_solntype_pickers(options)
     cmd_defaults_syncable_pickers(options)
-
     syncdown_files(options.__hash__, args)
   end
 end
@@ -78,10 +78,10 @@ Sync project up into Murano.
   c.example %(Only add or modify static files), %(murano syncup --files --no-delete)
 
   c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
     options.default(delete: true, create: true, update: true)
     cmd_defaults_solntype_pickers(options)
     cmd_defaults_syncable_pickers(options)
-
     #MrMurano::Verbose.whirly_start "Syncing solutions..."
     MrMurano::SyncRoot.instance.each_filtered(options.__hash__) do |_name, _type, klass, desc|
       MrMurano::Verbose.whirly_msg "Syncing #{Inflecto.pluralize(desc)}..."

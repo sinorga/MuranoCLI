@@ -7,6 +7,7 @@
 
 require 'MrMurano/verbosing'
 require 'MrMurano/Business'
+require 'MrMurano/ReCommander'
 require 'MrMurano/Solution'
 
 command 'show' do |c|
@@ -111,7 +112,8 @@ Show readable information about the current configuration.
   ).strip
   c.project_not_required = true
 
-  c.action do |_args, _options|
+  c.action do |args, _options|
+    c.verify_arg_count!(args)
     puts %(base: #{$cfg['location.base']})
     $cfg['location'].each { |key, value| puts %(#{key}: #{$cfg['location.base']}/#{value}) }
   end

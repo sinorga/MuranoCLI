@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'MrMurano/Gateway'
+require 'MrMurano/ReCommander'
 
 command 'device' do |c|
   c.syntax = %(murano device)
@@ -34,7 +35,8 @@ List identifiers for a product.
   c.option '-o', '--output FILE', %(Download to file instead of STDOUT)
 
   c.action do |args, options|
-    #options.default :limit=>1000
+    c.verify_arg_count!(args)
+    #options.default limit: 1000
 
     prd = MrMurano::Gateway::Device.new
     MrMurano::Verbose.whirly_start 'Looking for devices...'
@@ -99,11 +101,10 @@ This reads the latest state values for the resources in a device.
   c.option '-o', '--output FILE', %(Download to file instead of STDOUT)
 
   c.action do |args, options|
+    c.verify_arg_count!(args, nil, ['Identifier missing'])
+
     prd = MrMurano::Gateway::Device.new
-    if args.count < 1 then
-      prd.error "Identifier missing"
-      exit 1
-    end
+
     snid = args.shift
 
     # FIXME/2017-06-14: Confirm that whirly is helpful here.
@@ -140,14 +141,13 @@ Write to 'set' of aliases on devices.
 If an alias is not settable, this will fail.
   ).strip
 
+  c.action do |args, _options|
+    c.verify_arg_count!(args, nil, ['Identifier missing'])
 
-  c.action do |args, options|
-    resources = (MrMurano::Gateway::GweBase.new.info or {})[:resources]
+    resources = (MrMurano::Gateway::GweBase.new.info || {})[:resources]
+
     prd = MrMurano::Gateway::Device.new
-    if args.count < 1 then
-      prd.error "Identifier missing"
-      exit 1
-    end
+
     snid = args.shift
 
     set = Hash[args.map { |i| i.split('=') }]

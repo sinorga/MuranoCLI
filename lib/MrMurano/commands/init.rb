@@ -12,6 +12,7 @@ require 'MrMurano/Account'
 require 'MrMurano/Business'
 require 'MrMurano/Config'
 require 'MrMurano/Config-Migrate'
+require 'MrMurano/ReCommander'
 require 'MrMurano/Solution-Services'
 require 'MrMurano/SyncRoot'
 require 'MrMurano/commands/business'
@@ -125,11 +126,10 @@ command :init do |c|
   c.prompt_if_logged_off = true
 
   c.action do |args, options|
+    c.verify_arg_count!(args, 1)
     options.default(refresh: false, purge: false, sync: true, mkdirs: true)
 
     acc = MrMurano::Account.instance
-
-    c.verify_arg_count!(args, 1)
     validate_dir!(acc, args, options)
 
     puts('')

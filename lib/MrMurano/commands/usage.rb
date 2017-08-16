@@ -5,6 +5,7 @@
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'MrMurano/ReCommander'
 require 'MrMurano/Solution'
 
 command :usage do |c|

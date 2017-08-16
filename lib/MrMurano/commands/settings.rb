@@ -1,6 +1,7 @@
 require 'vine'
 require 'yaml'
 require 'MrMurano/hash'
+require 'MrMurano/ReCommander'
 require 'MrMurano/Setting'
 
 command 'setting list' do |c|
@@ -12,6 +13,8 @@ List which services and settings are avalible.
   c.project_not_required = true
 
   c.action do |args, options|
+    c.verify_arg_count!(args)
+
     setting = MrMurano::Setting.new
 
     ret = setting.list
@@ -34,12 +37,10 @@ Read a setting on a Service.
   c.option '-o', '--output FILE', String, %{File to save output to}
 
   c.action do |args, options|
+    c.verify_arg_count!(args, 2, ['Missing <service>.<setting>'])
+
     setting = MrMurano::Setting.new
 
-    if args.count < 1
-      setting.error "Missing <service>.<setting>"
-      exit 1
-    end
     service, pref = args[0].split('.')
     subkey = args[1]
 
@@ -105,11 +106,6 @@ If a sub-key doesn't exist, that entire path will be created as dicts.
     value = args.first
 
     setting = MrMurano::Setting.new
-
-    if subkey.nil? and value.nil? then
-      setting.error "Missing value and subkey"
-      exit 1
-    end
 
     # If value is '-', pull from $stdin
     if value.nil? and args.count == 0 then

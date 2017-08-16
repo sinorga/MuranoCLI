@@ -218,7 +218,5 @@ AllCops:
     - 'lib/MrMurano/makePretty.rb'
     - 'lib/MrMurano/commands/business.rb'
     - 'lib/MrMurano/commands/cors.rb'
-    - 'lib/MrMurano/commands/gb.rb'
-    - 'lib/MrMurano/commands/mock.rb'
     - 'lib/MrMurano/commands/settings.rb'
 
