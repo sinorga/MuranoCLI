@@ -10,7 +10,7 @@ require 'MrMurano/Account'
 require 'MrMurano/ReCommander'
 require 'MrMurano/SubCmdGroupContext'
 require 'MrMurano/commands/business'
-require 'MrMurano/commands/solution-picker'
+require 'MrMurano/commands/solution_picker'
 
 command :solution do |c|
   c.syntax = %(murano solution)
