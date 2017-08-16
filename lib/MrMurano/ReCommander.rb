@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.07 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -49,12 +49,12 @@ module Commander
     attr_accessor :prompt_if_logged_off
 
     def verify_arg_count!(args, max_args=0, mandatory=[])
-      if max_args.zero?
+      if !max_args.nil? && max_args.zero?
         if args.count > 0
           MrMurano::Verbose.error('Not expecting any arguments')
           exit 2
         end
-      elsif args.count > max_args
+      elsif !max_args.nil? && args.count > max_args
         MrMurano::Verbose.error("Not expecting more than #{max_args} arguments")
         exit 2
       elsif args.count < mandatory.length
@@ -90,6 +90,20 @@ module Commander
         MrMurano::Verbose.whirly_stop
         MrMurano::Verbose.error err.message
         exit 1
+      rescue OptionParser::MissingArgument => err
+        MrMurano::Verbose.whirly_stop
+        MrMurano::Verbose.error err.message
+        exit 1
+      rescue OptionParser::NeedlessArgument => err
+        MrMurano::Verbose.whirly_stop
+        MrMurano::Verbose.error err.message
+        pattern = /^needless argument: --(?<arg>[_a-zA-Z0-9]+)=(?<val>.*)/
+        md = pattern.match(err.message)
+        unless md.nil?
+          puts %(Try the option without the equals sign, e.g.,)
+          puts %(  --#{md[:arg]} "#{md[:val]}")
+        end
+        exit 1
       rescue MrMurano::ConfigError => err
         # Clear whirly if it was running.
         MrMurano::Verbose.whirly_stop
@@ -124,16 +138,16 @@ module Commander
     # E.g., this shows the help for usage:
     #   $ murano --help usage
     # but if a flag is added, the command gets run, e.g.,
-    #   $ murano usage --ids 1234 --help
-    # ignore the --help and runs the usage command.
+    #   $ murano usage --id 1234 --help
+    # ignores the --help and runs the usage command.
     # ([lb] walked the code and it looks like when Commander tries to
-    # validate the args, it doesn't like the --ids flag (maybe because
+    # validate the args, it doesn't like the --id flag (maybe because
     # the "help" command is being used to validate?). Then it removes
-    # the --ids flags (after --help was previously removed) and tries
+    # the --id flags (after --help was previously removed) and tries
     # the command *again* (in gems/commander-4.4.3/lib/commander/runner.rb,
     # look for the comment, "Remove the offending args and retry").
     #
-    # 2017-06-14: [lb] tried override run! here to show help correctly
+    # 2017-06-14: [lb] tried to override run! here to show help correctly
     # in this use case, but I could not get it to work. Oh, well... a
     # minor annoyance; just live with it, I guess.
   end
