@@ -44,7 +44,7 @@ RSpec.describe MrMurano::EventHandler do
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
 
-    ret = @srv.list()
+    ret = @srv.list
     expect(ret).to eq(body[:items])
   end
 

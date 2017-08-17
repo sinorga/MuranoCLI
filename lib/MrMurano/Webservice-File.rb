@@ -39,7 +39,7 @@ module MrMurano
       # @return [Array<FileItem>] List of items on server
       def list
         ret = get
-        return [] unless ret.is_a?(Hash) && !ret.key?(:error)
+        return [] unless ret.is_a?(Array)
         ret.map { |i| FileItem.new(i) }
         # MAYBE/2017-08-17:
         #   ret.map! { |i| FileItem.new(i) }

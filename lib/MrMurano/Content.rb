@@ -44,6 +44,7 @@ module MrMurano
         get('?full=true')
         # MAYBE/2017-08-17:
         #   ret = get('?full=true')
+        #   return [] unless ret.is_a?(Array)
         #   sort_by_name(ret)
       end
 

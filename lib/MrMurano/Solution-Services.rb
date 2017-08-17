@@ -42,7 +42,7 @@ module MrMurano
       raise 'Empty name!' if name.empty?
       ret = get('/' + CGI.escape(name))
       unless ret.is_a?(Hash) && !ret.key?(:error)
-        error "Unexpected result type or error: assuming empty instead: #{ret}"
+        error "#{UNEXPECTED_TYPE_OR_ERROR_MSG}: #{ret}"
         ret = {}
       end
       if block_given?
@@ -367,6 +367,7 @@ module MrMurano
     def list(call=nil, data=nil, &block)
       ret = get(call, data, &block)
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
+      return [] unless ret.key?(:items)
       # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] || '').split

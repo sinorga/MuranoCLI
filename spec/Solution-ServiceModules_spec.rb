@@ -36,7 +36,7 @@ RSpec.describe MrMurano::Module do
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
 
-    ret = @srv.list()
+    ret = @srv.list
     expect(ret).to eq(body[:items])
   end
 
@@ -113,7 +113,9 @@ RSpec.describe MrMurano::Module do
       $stderr = StringIO.new
       ret = @srv.fetch('9K0')
       expect(ret).to eq('')
-      expect($stderr.string).to eq(%{\e[31mUnexpected result type, assuming empty instead: this isn't what we expected\e[0m\n})
+      expect($stderr.string).to start_with(
+        %{\e[31m#{MrMurano::SolutionId::UNEXPECTED_TYPE_OR_ERROR_MSG}}
+      )
       $stderr = saved
     end
   end

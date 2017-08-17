@@ -44,7 +44,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
 
-      ret = @srv.list()
+      ret = @srv.list
       expect(ret).to eq(body)
     end
 
@@ -66,7 +66,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
 
-      ret = @srv.list()
+      ret = @srv.list
       expect(ret).to eq(body)
     end
 
@@ -88,7 +88,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
 
-      ret = @srv.list()
+      ret = @srv.list
       expect(ret).to eq(body)
     end
 
@@ -110,7 +110,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
 
-      ret = @srv.list()
+      ret = @srv.list
       expect(ret).to eq(body)
     end
 
@@ -131,8 +131,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
-
-      ret = @srv.list()
+      ret = @srv.list
       body.first.merge!({:content_type=>'application/json'})
       expect(ret).to eq(body)
     end
@@ -154,7 +153,7 @@ RSpec.describe MrMurano::Webservice::Endpoint do
                         'Content-Type'=>'application/json'}).
                         to_return(body: body.to_json)
 
-      ret = @srv.list()
+      ret = @srv.list
       body.first.merge!({:content_type=>'application/json'})
       expect(ret).to eq(body)
     end

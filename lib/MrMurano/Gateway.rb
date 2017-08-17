@@ -352,6 +352,7 @@ module MrMurano
         get('/', pr)
         # MAYBE/2017-08-17:
         #   ret = get('/', pr)
+        #   return [] unless ret.is_a?(Array)
         #   sort_by_name(ret)
       end
 

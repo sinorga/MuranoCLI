@@ -19,6 +19,7 @@ module MrMurano
     def list(call=nil, data=nil, &block)
       ret = get(call, data, &block)
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
+      return [] unless ret.key?(:items)
       ret[:items]
       # MAYBE/2017-08-17:
       #   sort_by_name(ret[:items])
@@ -129,6 +130,7 @@ module MrMurano
     def list
       ret = get
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
+      return [] unless ret.key?(:items)
       ret[:items]
       # MAYBE/2017-08-17:
       #   sort_by_name(ret[:items])
