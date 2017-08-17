@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -34,12 +34,12 @@ alias_command 'businesses', 'business'
 # ------------------------------------
 
 def cmd_business_add_options(c)
-# MAYBE/2017-08-15: Rename to --id-only.
+  # MAYBE/2017-08-15: Rename to --id-only.
   c.option '--idonly', 'Only return the IDs'
-
   c.option '--[no-]brief', 'Show fewer fields: only Business ID and name'
-
-  # FIXME: Move -o to a file with --json, etc.; smells like a universal output format.
+  # LATER/2017-08-17: Move -o to a file with --json, etc. (make
+  #   easier to use --json/--yaml/--output any file, without
+  #   having to use obscure `-c tool.outformat=json`).
   c.option '-o', '--output FILE', 'Download to file instead of STDOUT'
 end
 
@@ -269,8 +269,9 @@ def cmd_business_output_businesses(acc, bizz, options)
     bizz = bizz.map(&:bizid)
   elsif options.brief
     #headers = %i[bizid role name]
+    #bizz = bizz.map { |biz| [biz.bizid, biz.role, biz.name] }
     headers = %i[bizid name]
-    bizz = bizz.map { |biz| [biz.bizid, biz.role, biz.name] }
+    bizz = bizz.map { |biz| [biz.bizid, biz.name] }
   else
     # 2017-08-16: There are only 3 keys: bizid, role, and name.
     headers = bizz[0].meta.keys
