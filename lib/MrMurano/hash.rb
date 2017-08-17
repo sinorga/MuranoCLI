@@ -77,17 +77,17 @@ def elevate_hash(hsh)
   #   after feeding through this function. Unknown keys would
   #   return nil before, but after, return false.
   #
-  #   (byebug) options
+  #   (byeebug) options
   #   {:delete=>false, :create=>true, :update=>false}
-  #   (byebug) options[:fff]
+  #   (byeebug) options[:fff]
   #   false
-  #   (byebug) options[:fff] = nil
+  #   (byeebug) options[:fff] = nil
   #   nil
-  #   (byebug) options[:fff]
+  #   (byeebug) options[:fff]
   #   nil
-  #   (byebug) options[:fffd]
+  #   (byeebug) options[:fffd]
   #   false
-  #   (byebug) options
+  #   (byeebug) options
   #   {:delete=>false, :create=>true, :update=>false, :fff=>nil}
   #
   #   Work around is to test with hash.key?
