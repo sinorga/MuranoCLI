@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -185,9 +185,12 @@ module MrMurano
     def info_safe
       @suppress_error = true
       resp = get
-      unless resp.nil?
+      if resp.is_a?(Hash) && !resp.key?(:error)
         self.meta = resp
         @valid_sid = true
+      else
+        self.meta = {}
+        @valid_sid = false
       end
       @suppress_error = false
     end

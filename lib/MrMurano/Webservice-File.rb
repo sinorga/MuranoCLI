@@ -38,8 +38,8 @@ module MrMurano
       # Get a list of all of the static content
       # @return [Array<FileItem>] List of items on server
       def list
-        ret = get()
-        return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+        ret = get
+        return [] unless ret.is_a?(Hash) && !ret.key?(:error)
         ret.map { |i| FileItem.new(i) }
       end
 

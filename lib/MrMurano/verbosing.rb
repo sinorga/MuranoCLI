@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -145,9 +145,7 @@ module MrMurano
 
     def self.cmd_confirm_delete!(name, auto_yes, exit_msg)
       if auto_yes
-        if block_given?
-          yield true
-        end
+        yield true if block_given?
         return true
       end
       confirmed = MrMurano::Verbose.ask_yes_no(

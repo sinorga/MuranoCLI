@@ -18,9 +18,8 @@ module MrMurano
       end
 
       def cors
-        return {} if ret.nil?
-        return {} unless ret.kind_of? Hash
         ret = get
+        return {} unless ret.is_a?(Hash) && !ret.key?(:error)
         ret
       end
 
@@ -37,10 +36,10 @@ module MrMurano
         #@project_section = :cors
       end
 
-        return [] if ret.is_a?(Hash) and ret.has_key?(:error)
       def fetch(_id=nil)
         ret = get
-        if ret.is_a?(Hash) && ret.key?(:cors)
+        return [] unless ret.is_a?(Hash) && !ret.key?(:error)
+        if ret.key?(:cors)
           # XXX cors is a JSON encoded string. That seems weird. keep an eye on this.
           data = JSON.parse(ret[:cors], @json_opts)
         else

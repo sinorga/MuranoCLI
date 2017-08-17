@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -145,6 +145,7 @@ Or set your password with `murano password set <username>`.
       MrMurano::Verbose.whirly_start 'Fetching Businesses...'
       bizes = get('user/' + user + '/membership/')
       MrMurano::Verbose.whirly_stop
+      return [] unless bizes.is_a?(Array) && bizes.any?
 
       # 2017-06-30: The data for each message contains a :bizid, :role, and :name.
       #   :role is probably generally "owner".

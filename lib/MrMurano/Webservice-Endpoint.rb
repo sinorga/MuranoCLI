@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -46,8 +46,8 @@ module MrMurano
       ##
       # This gets all data about all endpoints
       def list
-        ret = get()
-        return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+        ret = get
+        return [] unless ret.is_a?(Hash) && !ret.key?(:error)
         ret.map do |item|
           if item[:content_type].to_s.empty? then
             item[:content_type] = 'application/json'
@@ -59,6 +59,11 @@ module MrMurano
 
       def fetch(id)
         ret = get('/' + id.to_s)
+        unless ret.is_a?(Hash) && !ret.key?(:error)
+          error "Unexpected result type or error: assuming empty instead: #{ret}"
+          ret = {}
+        end
+
         ret[:content_type] = 'application/json' if ret[:content_type].empty?
 
         script = ret[:script].lines.map{|l|l.chomp}

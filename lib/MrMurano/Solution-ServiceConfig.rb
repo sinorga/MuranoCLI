@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -18,7 +18,7 @@ module MrMurano
 
     def list(call=nil, data=nil, &block)
       ret = get(call, data, &block)
-      return [] if ret.is_a?(Hash) && ret.key?(:error)
+      return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       ret[:items]
     end
 
@@ -126,7 +126,7 @@ module MrMurano
 
     def list
       ret = get
-      return [] if ret.is_a?(Hash) && ret.key?(:error)
+      return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       ret[:items]
     end
 

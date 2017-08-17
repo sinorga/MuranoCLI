@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -41,8 +41,10 @@ module MrMurano
       raise 'Missing name!' if name.nil?
       raise 'Empty name!' if name.empty?
       ret = get('/' + CGI.escape(name))
-      error "Unexpected result type, assuming empty instead: #{ret}" unless ret.is_a?(Hash)
-      ret = {} unless ret.is_a?(Hash)
+      unless ret.is_a?(Hash) && !ret.key?(:error)
+        error "Unexpected result type or error: assuming empty instead: #{ret}"
+        ret = {}
+      end
       if block_given?
         yield (ret[:script] || '')
       else
@@ -92,7 +94,7 @@ module MrMurano
           #   Unfortunately, we don't get the latest updated_at, so
           #   a subsequent status will show this module as dirty.
           ret = get('/' + CGI.escape(name))
-          if !ret.nil? && ret.is_a?(Hash) && ret.key?(:updated_at)
+          if ret.is_a?(Hash) && ret.key?(:updated_at)
             updated_at = ret[:updated_at]
           else
             warning "Failed to verify updated_at: #{ret}"
@@ -361,7 +363,7 @@ module MrMurano
 
     def list(call=nil, data=nil, &block)
       ret = get(call, data, &block)
-      return [] if ret.is_a?(Hash) && ret.key?(:error)
+      return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] || '').split
@@ -397,8 +399,8 @@ module MrMurano
 
     def fetch(name)
       ret = get('/' + CGI.escape(name))
-      if ret.nil?
-        error "Fetch for #{name} returned nil; skipping"
+      unless ret.is_a?(Hash) && !ret.key?(:error)
+        error "Fetch for #{name} returned nil or error; skipping"
         return ''
       end
       aheader = (ret[:script].lines.first || '').chomp

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -58,7 +58,6 @@ module MrMurano
       # Get the protocol settings
       def protocol
         ret = get
-        return {} if ret.nil?
         return {} unless ret.is_a?(Hash)
         return {} unless ret.key?(:protocol)
         return {} unless ret[:protocol].is_a?(Hash)
@@ -74,7 +73,6 @@ module MrMurano
 
       def identity_format
         ret = get
-        return {} if ret.nil?
         return {} unless ret.is_a?(Hash)
         return {} unless ret.key?(:identity_format)
         return {} unless ret[:identity_format].is_a?(Hash)
@@ -91,7 +89,6 @@ module MrMurano
 
       def provisioning
         ret = get
-        return {} if ret.nil?
         return {} unless ret.is_a?(Hash)
         return {} unless ret.key?(:provisioning)
         return {} unless ret[:provisioning].is_a?(Hash)
@@ -125,8 +122,9 @@ module MrMurano
       end
 
       def list
-        ret = get('')
-        return [] unless ret.key? :resources
+        ret = get
+        return [] unless ret.is_a?(Hash)
+        return [] unless ret.key?(:resources)
 
         # convert hash to array.
         res = []
