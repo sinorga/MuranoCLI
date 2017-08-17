@@ -16,8 +16,8 @@
 augroup trustme
   " Remove! all trustme autocommands.
   autocmd! trustme
-"  autocmd! trustme <buffer>
   "autocmd BufWrite *.rb silent !touch TOUCH
+  "autocmd BufWrite <buffer> echom "trustme is hooked!"
   " MEH/2017-08-02: This won't hook bin/murano.
   autocmd BufWrite <buffer> silent !./.trustme.sh &
 augroup END
