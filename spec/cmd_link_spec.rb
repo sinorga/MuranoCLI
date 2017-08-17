@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.14 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -15,7 +15,7 @@ RSpec.describe 'murano link', :cmd, :needs_password do
 
   before(:example) do
     @solz_name = rname('linktest')
-    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @solz_name, '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'application', 'create', @solz_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
@@ -26,12 +26,12 @@ RSpec.describe 'murano link', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'app', 'delete', @solz_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'application', 'delete', @solz_name, '-y'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @solz_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @solz_name, '-y'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)

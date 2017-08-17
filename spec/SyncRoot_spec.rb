@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -42,7 +42,7 @@ RSpec.describe MrMurano::SyncRoot do
         end
       end
     end
-    MrMurano::SyncRoot.instance.add('role', Role, 'R', false)
+    MrMurano::SyncRoot.instance.add('role', Role, 'G', false)
 
     # This must happen after all syncables have been added.
     $cfg = MrMurano::Config.new
@@ -102,7 +102,7 @@ RSpec.describe MrMurano::SyncRoot do
     end
     expect(ret).to eq([
       ["-U", "--[no-]user", "describe user"],
-      ["-R", "--[no-]role", "describe role"],
+      ["-G", "--[no-]role", "describe role"],
     ])
   end
 end

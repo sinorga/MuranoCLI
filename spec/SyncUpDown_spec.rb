@@ -132,14 +132,14 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(ret).to match({
         toadd: [
           {
-            name: 'two.lua',
-            synckey: 'two.lua',
+            name: 'one.lua',
+            synckey: 'one.lua',
             synctype: TSUD.description,
             local_path: an_instance_of(Pathname),
           },
           {
-            name: 'one.lua',
-            synckey: 'one.lua',
+            name: 'two.lua',
+            synckey: 'two.lua',
             synctype: TSUD.description,
             local_path: an_instance_of(Pathname),
           },
@@ -166,14 +166,14 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(ret).to match({
         tomod: [
           {
-            name: 'two.lua',
-            synckey: 'two.lua',
+            name: 'one.lua',
+            synckey: 'one.lua',
             synctype: TSUD.description,
             local_path: an_instance_of(Pathname),
           },
           {
-            name: 'one.lua',
-            synckey: 'one.lua',
+            name: 'two.lua',
+            synckey: 'two.lua',
             synctype: TSUD.description,
             local_path: an_instance_of(Pathname),
           },
@@ -200,14 +200,14 @@ RSpec.describe MrMurano::SyncUpDown do
       expect(ret).to match({
         unchg: [
           {
-            name: 'two.lua',
-            synckey: 'two.lua',
+            name: 'one.lua',
+            synckey: 'one.lua',
             synctype: TSUD.description,
             local_path: an_instance_of(Pathname),
           },
           {
-            name: 'one.lua',
-            synckey: 'one.lua',
+            name: 'two.lua',
+            synckey: 'two.lua',
             synctype: TSUD.description,
             local_path: an_instance_of(Pathname),
           },
@@ -481,10 +481,10 @@ RSpec.describe MrMurano::SyncUpDown do
       )
       ret = @t.localitems(Pathname.new(@project_dir + '/tsud').realpath)
       expect(ret).to match([
-        {:name=>'two.lua',
-          :local_path=>an_instance_of(Pathname)},
         {:name=>'one.lua',
          :local_path=>an_instance_of(Pathname)},
+        {:name=>'two.lua',
+          :local_path=>an_instance_of(Pathname)},
         ])
     end
 
@@ -495,13 +495,13 @@ RSpec.describe MrMurano::SyncUpDown do
         )
       ret = @t.localitems(Pathname.new(@project_dir + '/tsud').realpath)
       expect(ret).to match([
-        {:name=>'two:1',
-         :local_path=>an_instance_of(Pathname)},
-        {:name=>'two:2',
-         :local_path=>an_instance_of(Pathname)},
         {:name=>'one:1',
          :local_path=>an_instance_of(Pathname)},
         {:name=>'one:2',
+         :local_path=>an_instance_of(Pathname)},
+        {:name=>'two:1',
+         :local_path=>an_instance_of(Pathname)},
+        {:name=>'two:2',
          :local_path=>an_instance_of(Pathname)},
       ])
     end

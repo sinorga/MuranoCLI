@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -22,7 +22,7 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     @applctn_name = rname('syncdownTestApp')
-    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @applctn_name, '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'application', 'create', @applctn_name, '--save'))
     expect(err).to eq('')
     soln_id = out
     expect(soln_id.chomp).to match(/^[a-zA-Z0-9]+$/)
@@ -40,12 +40,12 @@ RSpec.describe 'murano syncdown', :cmd, :needs_password do
   after(:example) do
     # VERIFY/2017-07-03: Skipping assign unset. Murano will clean up, right?
 
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', '-y', @applctn_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', '--yes', @product_name))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)

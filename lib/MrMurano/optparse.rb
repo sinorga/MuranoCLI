@@ -440,7 +440,6 @@ class OptionParser
         # where the short's letter is the first letter of the global_option long.)
         # To see this in action, set a breakpoint here and run something like
         #   murano status -e
-require 'byebug' ; byebug if true
         key.length > 1 || typ != :long || next
 
         v << k if v.empty?
