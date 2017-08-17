@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -213,7 +213,6 @@ AllCops:
     - 'lib/MrMurano/Mock.rb'
     - 'lib/MrMurano/Setting.rb'
     - 'lib/MrMurano/SubCmdGroupContext.rb'
-    - 'lib/MrMurano/Webservice-Cors.rb'
     - 'lib/MrMurano/Webservice-Endpoint.rb'
     - 'lib/MrMurano/Webservice-File.rb'
     - 'lib/MrMurano/hash.rb'
