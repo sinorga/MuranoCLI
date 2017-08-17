@@ -329,7 +329,7 @@ module MrMurano
     #   call was ignored bydefault (you'd have to add --resources to syncup,
     #   syncdown, diff, and status commands). Against Murano, this call seems
     #   normal speed, so including by default.
-    SyncRoot.instance.add('resources', Resources, 'T', true, %w[specs])
+    SyncRoot.instance.add('resources', Resources, 'R', true, %w[specs])
 
     ##############################################################################
     ##

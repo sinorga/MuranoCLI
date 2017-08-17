@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -623,7 +623,7 @@ module MrMurano
   #   there are different events for Applications and Products.
   #   Except there aren't any product events the user should care about (yet?).
   SyncRoot.instance.add(
-    'eventhandlers', EventHandlerSolnApp, 'E', true, %w[services]
+    'services', EventHandlerSolnApp, 'S', true, %w[eventhandlers]
   )
   # 2017-08-08: device2 and interface are now part of the skiplist, so no
   # product event handlers will be found, unless the user modifies the skiplist.

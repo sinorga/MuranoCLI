@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -127,7 +127,7 @@ module MrMurano
       %(Role)
     end
   end
-  #SyncRoot.instance.add('roles', Role, 'R', false)
+  #SyncRoot.instance.add('roles', Role, 'G', false)
 
   # …/user
   # :nocov:
