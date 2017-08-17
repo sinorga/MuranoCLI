@@ -27,7 +27,6 @@ Layout/TrailingBlankLines:
 # "Script file murano doesn't have execute permission."
 Lint/ScriptPermission:
   Exclude:
-    - 'bin/mr'
     - 'bin/murano'
 
 # "Assignment Branch Condition size for XXX is too high."
@@ -183,7 +182,6 @@ Style/SafeNavigation:
 
 AllCops:
   Include:
-    - 'bin/mr'
     - 'bin/murano'
     # These are included by default:
     #- '**/Gemfile'
