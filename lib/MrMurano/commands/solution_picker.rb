@@ -29,12 +29,12 @@ def cmd_add_solntype_pickers(c, exclude_all: false)
   # then do some extra processing later to check for this special case.
   allowed_types = MrMurano::Business::ALLOWED_TYPES.dup
   allowed_types += [:all] unless exclude_all
-  allowed_types.sort!
-  defval = exclude_all && 'application' || 'all'
+  allowed_types.map!(&:to_s).sort!
+  default = exclude_all && 'application' || 'all'
   c.option(
     '--type [TYPE]',
     allowed_types,
-    %(Restrict to solution(s) of type [#{allowed_types.join('|')}] (default: #{defval}))
+    %(Apply to solution(s) of type [#{allowed_types.join('|')}] (default: #{default}))
   )
 end
 
@@ -98,15 +98,16 @@ def must_fetch_solutions!(options, args=[], biz=nil)
   end
   if args.any?
     raise 'Cannot use options.all and solution pickers' unless options.all.nil?
+    flattened = args.map { |cell| cell.split(',') }.flatten
     sid = []
     name = []
     fuzzy = []
     if options.id
-      sid = args
+      sid = flattened
     elsif options.name
-      name = args
+      name = flattened
     else
-      fuzzy = args
+      fuzzy = flattened
     end
     solz += solution_get_solutions(
       biz, options.type, sid: sid, name: name, fuzzy: fuzzy
