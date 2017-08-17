@@ -81,7 +81,7 @@ def any_business_pickers?(options)
   #  )
   #  exit 1
   #end
-  num_ways.length > 0
+  num_ways > 0
 end
 
 # *** Business commands: list and find.
