@@ -89,9 +89,14 @@ module Commander
         # really mean returning from the thing running the block,
         # which would be bad. So Ruby barfs instead.
         return
+      rescue OptionParser::InvalidArgument => err
+        MrMurano::Verbose.whirly_stop
+        MrMurano::Verbose.error err.message
+        exit 1
       rescue OptionParser::InvalidOption => err
         MrMurano::Verbose.whirly_stop
         MrMurano::Verbose.error err.message
+        MrMurano::Verbose.error 'invalid command' if section == 'help'
         exit 1
       rescue OptionParser::MissingArgument => err
         MrMurano::Verbose.whirly_stop
