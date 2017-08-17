@@ -89,7 +89,9 @@ Delete password for username.
   ).strip
   c.project_not_required = true
 
-  c.action do |args, _options|
+  c.option('-y', '--[no-]yes', %(Answer "yes" to all prompts and run non-interactively))
+
+  c.action do |args, options|
     c.verify_arg_count!(args, 2, ['Missing username'])
 
     psd = MrMurano::Passwords.new
@@ -99,6 +101,7 @@ Delete password for username.
     host = args.shift
     host = $cfg['net.host'] if host.nil?
 
+    psd.cmd_confirm_delete!(username, options.yes, 'abort!')
     psd.remove(host, username)
     psd.save
   end

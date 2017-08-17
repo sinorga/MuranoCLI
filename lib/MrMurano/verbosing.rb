@@ -143,6 +143,23 @@ module MrMurano
       MrMurano::Verbose.ask_yes_no(question, default)
     end
 
+    def cmd_confirm_delete!(name, auto_yes, exit_msg)
+      return if auto_yes
+      confirmed = MrMurano::Verbose.ask_yes_no(
+        "Really delete ‘#{name}’? [y/N] ", false
+      )
+      MrMurano::Verbose.warning(exit_msg) if exit_msg
+      if block_given?
+        yield confirmed
+      elsif !confirmed
+        exit 1
+      end
+    end
+
+    def cmd_confirm_delete(name, auto_yes, exit_msg)
+      MrMurano::Verbose.cmd_confirm_delete(name, auto_yes, exit_msg)
+    end
+
     def self.pluralize?(word, count)
       count == 1 && word || Inflecto.pluralize(word)
     end

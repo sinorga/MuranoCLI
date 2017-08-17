@@ -267,7 +267,6 @@ command :init do |c|
           acc.warning 'The project directory contains unknown files.'
           confirmed = acc.ask_yes_no('Really init project? [y/N] ', false)
           unless confirmed
-            # FIXME/2017-07-02: Add test for this
             acc.warning('abort!')
             exit 1
           end

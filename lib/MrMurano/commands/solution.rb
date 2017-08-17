@@ -101,16 +101,10 @@ Delete a solution from the business.
   cmd_option_product_pickers(c)
 
   c.option('--recursive', %(If a solution is not specified, find all solutions and prompt before deleting.))
-  # 2017-07-01: [lb] has /bin/rm aliased to /bin/rm -i so that I don't make
-  # mistakes. So I added --prompt to behave similarly. Though maybe it should
-  # be a config option? The alternative is --yes, though maybe there should
-  # be a --no-yes?
-  #c.option('--[no-]prompt', %(Prompt before removing))
-  #c.option('--yes', %(Answer "yes" to all prompts and run non-interactively))
-  c.option('--[no-]yes', %(Answer "yes" to all prompts and run non-interactively; if false, always prompt))
+  c.option('-y', '--[no-]yes', %(Answer "yes" to all prompts and run non-interactively))
 
   c.action do |args, options|
-    c.verify_arg_count!(args, nil, ['Missing name or ID'])
+    # SKIP: c.verify_arg_count!(args)
     cmd_defaults_solntype_pickers(options)
     cmd_defaults_id_and_name(options)
 
@@ -123,14 +117,10 @@ Delete a solution from the business.
     n_faulted = 0
 
     nmorids.each do |name_or_id|
-      unless options.yes
-        confirmed = MrMurano::Verbose.ask_yes_no(
-          "Really delete #{name_or_id[0]}? [y/N] ", false
-        )
-        unless confirmed
-          MrMurano::Verbose.warning("Skipping #{name_or_id[0]}!")
-          next
-        end
+      next unless biz.cmd_confirm_delete!(
+        name_or_id[0], options.yes, "Skipping #{name_or_id[0]}!"
+      ) do |confirmed|
+        confirmed
       end
       m_deleted, m_faulted = solution_delete(
         name_or_id[0], use_sol: name_or_id[2], type: options.type, yes: options.yes
@@ -152,7 +142,7 @@ def cmd_solution_del_get_names_and_ids!(biz, args, options)
   nmorids = []
   if args.count.zero?
     if any_solution_pickers!(options)
-      exit_cmd_not_recursive!
+      exit_cmd_not_recursive!(options)
     elsif !options.recursive
       MrMurano::Verbose.error(
         'Please specify the name or ID of the solution to delete, or use --recursive.'
@@ -160,7 +150,7 @@ def cmd_solution_del_get_names_and_ids!(biz, args, options)
       exit 1
     end
   else
-    exit_cmd_not_recursive!
+    exit_cmd_not_recursive!(options)
   end
   solz = must_fetch_solutions!(options, args, biz)
   solz.each do |sol|
@@ -169,7 +159,8 @@ def cmd_solution_del_get_names_and_ids!(biz, args, options)
   nmorids
 end
 
-def exit_cmd_not_recursive!
+def exit_cmd_not_recursive!(options)
+  return unless options.recursive
   MrMurano::Verbose.error(
     'The --recursive option does not apply when specifing solution IDs or names.'
   )
@@ -186,8 +177,9 @@ command 'solutions expunge' do |c|
   c.description = %(
 Delete all solutions in business.
   ).strip
-  c.option('-y', '--yes', %(Answer "yes" to all prompts and run non-interactively))
   c.project_not_required = true
+
+  c.option('-y', '--[no-]yes', %(Answer "yes" to all prompts and run non-interactively))
 
   c.action do |args, options|
     c.verify_arg_count!(args)
@@ -202,12 +194,10 @@ def solution_delete(name_or_id, use_sol: nil, type: :all, yes: false)
   biz.must_business_id!
 
   if name_or_id == '*'
-    unless yes
-      confirmed = MrMurano::Verbose.ask_yes_no('Really delete all solutions? [y/N] ', false)
-      unless confirmed
-        MrMurano::Verbose.warning('abort!')
-        return
-      end
+    return unless biz.cmd_confirm_delete!(
+      'all solutions', yes, 'abort!'
+    ) do |confirmed|
+      confirmed
     end
     name_or_id = ''
   end

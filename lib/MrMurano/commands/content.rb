@@ -92,9 +92,12 @@ Data uploaded to a product's content area can be downloaded by devices using
 the HTTP Device API.
   ).strip
 
-  c.action do |args, _options|
+  c.option('-y', '--[no-]yes', %(Answer "yes" to all prompts and run non-interactively))
+
+  c.action do |args, options|
     c.verify_arg_count!(args, 1, ['Missing <content name>'])
     prd = MrMurano::Content::Base.new
+    prd.cmd_confirm_delete!(args[0], options.yes, 'abort!')
     ret = prd.remove(args[0])
     prd.outf(ret) if !ret.nil? && ret.count > 1
   end

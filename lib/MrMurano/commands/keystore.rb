@@ -105,6 +105,9 @@ command 'keystore delete' do |c|
 Delete a key from the Keystore.
   ).strip
 
+  # MAYBE?/2017-08-16: Verify on delete.
+  #c.option('-y', '--[no-]yes', %(Answer "yes" to all prompts and run non-interactively))
+
   c.action do |args, _options|
     c.verify_arg_count!(args, 1, ['Missing key'])
     sol = MrMurano::Keystore.new
