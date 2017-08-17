@@ -186,7 +186,7 @@ command 'solutions expunge' do |c|
   c.description = %(
 Delete all solutions in business.
   ).strip
-  c.option('--yes', %(Answer "yes" to all prompts and run non-interactively))
+  c.option('-y', '--yes', %(Answer "yes" to all prompts and run non-interactively))
   c.project_not_required = true
 
   c.action do |args, options|
