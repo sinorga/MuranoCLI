@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.15 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -157,7 +157,9 @@ Or set your password with `murano password set <username>`.
           (
             match_bid.include?(biz[:bizid]) ||
             match_name.include?(biz[:name]) ||
-            match_fuzzy.any? { |fuzz| biz[:name] =~ /#{fuzz}/i || biz[:bizid] =~ /#{fuzz}/i }
+            match_termy.any? do |term|
+              biz[:name] =~ /#{Regexp.escape(term)}/i || biz[:bizid] =~ /#{Regexp.escape(term)}/i
+            end
           )
         end
       end

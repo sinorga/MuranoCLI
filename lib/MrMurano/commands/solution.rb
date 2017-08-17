@@ -223,7 +223,7 @@ def solution_delete(name_or_id, use_sol: nil, type: :all, yes: false)
     #   would return true if, say, sol.meta[:any_key] equaled name_or_id.)
     unless name_or_id.empty?
       solz.select! do |sol|
-        sol.sid == name_or_id || sol.name == name_or_id || sol.domain =~ /#{name_or_id}\./i
+        sol.sid == name_or_id || sol.name == name_or_id || sol.domain =~ /#{Regexp.escape(name_or_id)}\./i
       end
     end
     MrMurano::Verbose.whirly_stop

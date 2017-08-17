@@ -209,7 +209,9 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
           (
             match_sid.include?(sol[:apiId]) ||
             match_name.include?(sol[:name]) ||
-            match_fuzzy.any? { |term| sol[:name] =~ /#{term}/i || sol[:apiId] =~ /#{term}/i }
+            match_fuzzy.any? do |term|
+              sol[:name] =~ /#{Regexp.escape(term)}/i || sol[:apiId] =~ /#{Regexp.escape(term)}/i
+            end
           )
         end
       end

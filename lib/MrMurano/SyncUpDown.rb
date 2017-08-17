@@ -885,7 +885,8 @@ module MrMurano
           # elevate_hash magically makes the hash return false rather than nil
           # on unknown keys, so preface with a key? guard.
           if options.key?(:application) && !options[:application].to_s.empty?
-            if soln_name =~ /#{options[:application]}/i || sid =~ /#{options[:application]}/i
+            if soln_name =~ /#{Regexp.escape(options[:application])}/i ||
+               sid =~ /#{Regexp.escape(options[:application])}/i
               passed = true
             end
             tested = true
@@ -900,7 +901,8 @@ module MrMurano
           end
         elsif @solntype == 'product.id'
           if options.key?(:product) && !options[:product].to_s.empty?
-            if soln_name =~ /#{options[:product]}/i || sid =~ /#{options[:product]}/i
+            if soln_name =~ /#{Regexp.escape(options[:product])}/i ||
+               sid =~ /#{Regexp.escape(options[:product])}/i
               passed = true
             end
             tested = true
