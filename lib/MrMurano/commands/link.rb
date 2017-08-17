@@ -11,7 +11,7 @@ require 'MrMurano/Solution'
 require 'MrMurano/Solution-ServiceConfig'
 require 'MrMurano/SolutionId'
 
-MSG_SERVICE_LINKS_NONE_FOUND = 'No service links found' if !defined? MSG_SERVICE_LINKS_NONE_FOUND
+MSG_SERVICE_LINKS_NONE_FOUND = 'No service links found' unless defined? MSG_SERVICE_LINKS_NONE_FOUND
 
 command 'link' do |c|
   c.syntax = %(murano link)
@@ -49,7 +49,7 @@ List the solutions that are linked.
     pids = products.map(&:apiId)
 
     sol_opts = { biz: biz, type: :application }
-    sol_opts[:match_sid] = $cfg['application.id'] if !options.all
+    sol_opts[:match_sid] = $cfg['application.id'] unless options.all
     appl = solution_find_or_create(**sol_opts)
 
     if !appl.nil?

@@ -394,7 +394,7 @@ end
 def solution_factory_reset(sol)
   new_sol = nil
   if sol.is_a? MrMurano::Solution
-    if !sol.meta[:template].to_s.empty?
+    unless sol.meta[:template].to_s.empty?
       begin
         clazz = Object.const_get("MrMurano::#{sol.meta[:template].capitalize}")
         new_sol = clazz.new(sol)

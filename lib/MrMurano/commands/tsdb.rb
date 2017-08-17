@@ -50,6 +50,22 @@ module MrMurano
   end
 end
 
+command :tsdb do |c|
+  c.syntax = %(murano tsdb)
+  c.summary = %(Show list of TSDB commands)
+  c.description = %(
+The tsdb sub-commands let you interact directly with the TSDB instance in a
+solution. This allows for easier debugging, being able to quickly try out
+different queries or write test data.
+  ).strip
+  c.project_not_required = true
+
+  c.action do |_args, _options|
+    ::Commander::UI.enable_paging
+    say MrMurano::SubCmdGroupHelp.new(c).get_help
+  end
+end
+
 command 'tsdb write' do |c|
   c.syntax = %(murano tsdb write [--options] <metric=value>|@<tag=value> … )
   c.summary = %(Write data to the TSDB)
@@ -68,6 +84,8 @@ Also, many date-time formats can be parsed and will be converted to microseconds
   c.example 'murano tsdb write hum=45 lux=12765 @sn=44', %(Write two metrics (hum and lux) with a tag (sn))
 
   c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
+
     sol = MrMurano::ServiceConfigs::Tsdb.new
 
     # we have hash of tags, hash of metrics, optional timestamp.
@@ -138,6 +156,8 @@ Also, many date-time formats can be parsed and will be converted to microseconds
   c.example 'murano tsdb query hum --sampling_size 30m --aggregate avg', 'Get average hum entry from each 30 minute chunk of time'
 
   c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
+
     sol = MrMurano::ServiceConfigs::Tsdb.new
 
     query = {}
@@ -236,6 +256,7 @@ List tags.
   c.option '--values', %(Include the known tag values)
 
   c.action do |args, options|
+    c.verify_arg_count!(args)
     options.default(values: false)
 
     sol = MrMurano::ServiceConfigs::Tsdb.new
@@ -266,26 +287,11 @@ List metrics.
   ).strip
 
   c.action do |args, _options|
+    c.verify_arg_count!(args)
     sol = MrMurano::ServiceConfigs::Tsdb.new
     ret = sol.listMetrics
     # TODO: handle looping if :next != nil
     sol.outf ret[:metrics]
-  end
-end
-
-command :tsdb do |c|
-  c.syntax = %(murano tsdb)
-  c.summary = %(Show list of TSDB commands)
-  c.description = %(
-The tsdb sub-commands let you interact directly with the TSDB instance in a
-solution. This allows for easier debugging, being able to quickly try out
-different queries or write test data.
-  ).strip
-  c.project_not_required = true
-
-  c.action do |args, _options|
-    ::Commander::UI.enable_paging
-    say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end
 

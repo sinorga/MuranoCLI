@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.15 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -73,6 +73,24 @@ def elevate_hash(hsh)
   end
   # build a hash where the default is 'false' instead of 'nil'
   Hash.new(false).merge(Hash.transform_keys_to_symbols(hsh))
+  # 2017-08-16: Weird: [lb] seeing the Hash behave differently
+  #   after feeding through this function. Unknown keys would
+  #   return nil before, but after, return false.
+  #
+  #   (byebug) options
+  #   {:delete=>false, :create=>true, :update=>false}
+  #   (byebug) options[:fff]
+  #   false
+  #   (byebug) options[:fff] = nil
+  #   nil
+  #   (byebug) options[:fff]
+  #   nil
+  #   (byebug) options[:fffd]
+  #   false
+  #   (byebug) options
+  #   {:delete=>false, :create=>true, :update=>false, :fff=>nil}
+  #
+  #   Work around is to test with hash.key?
 end
 
 ##
