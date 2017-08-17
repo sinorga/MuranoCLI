@@ -15,8 +15,8 @@
 # to fix a problem with single character option abbreviations.
 # Search herein for [lb] to see changes.
 
-Object.send(:remove_const, :OptionParser)
-Object.send(:remove_const, :OptParse)
+Object.send(:remove_const, :OptionParser) if defined?(OptionParser)
+Object.send(:remove_const, :OptParse) if defined?(OptParse)
 
 #--
 # == Developer Documentation (not for RDoc output)

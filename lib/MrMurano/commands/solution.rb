@@ -334,7 +334,7 @@ Find solution by name or ID.
   ).strip, 'murano product find abcdef123456 --id'
 
   c.example %(
-    Find application with name of ID matching "1234"
+    Find application with name or ID matching "1234"
   ).strip, 'murano application find 1234'
 
   cmd_solution_find_add_options(c)
