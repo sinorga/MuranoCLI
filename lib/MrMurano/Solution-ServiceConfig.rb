@@ -20,6 +20,8 @@ module MrMurano
       ret = get(call, data, &block)
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       ret[:items]
+      # MAYBE/2017-08-17:
+      #   sort_by_name(ret[:items])
     end
 
     def search(svc_name)
@@ -128,6 +130,8 @@ module MrMurano
       ret = get
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       ret[:items]
+      # MAYBE/2017-08-17:
+      #   sort_by_name(ret[:items])
     end
 
     def schema(id=sid)

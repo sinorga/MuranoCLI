@@ -55,6 +55,9 @@ module MrMurano
           # XXX should this update the script header?
           RouteItem.new(item)
         end
+        # MAYBE/2017-08-17:
+        #   ret.map! ...
+        #   sort_by_name(ret)
       end
 
       def fetch(id)

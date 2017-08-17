@@ -287,6 +287,9 @@ module MrMurano
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       return [] unless ret.key?(:items)
       ret[:items].map { |i| ModuleItem.new(i) }
+      # MAYBE/2017-08-17:
+      #   ret[:items].map!
+      #   sort_by_name(ret[:items])
     end
 
     def to_remote_item(root, path)
@@ -373,6 +376,9 @@ module MrMurano
         toss
       end
       items.map { |item| EventHandlerItem.new(item) }
+        # MAYBE/2017-08-17:
+        #   items.map! ...
+        #   sort_by_name(items)
     end
 
     def skip?(item, skiplist)

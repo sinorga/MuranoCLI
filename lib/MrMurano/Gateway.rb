@@ -132,6 +132,8 @@ module MrMurano
           res << value.merge(alias: key.to_s)
         end
         res
+        # MAYBE/2017-08-17:
+        #   sort_by_name(res)
       end
 
       def upload_all(data)
@@ -316,7 +318,8 @@ module MrMurano
         here.each_pair do |key, value|
           res << Hash.transform_keys_to_symbols(value).merge(alias: key.to_s)
         end
-        res
+
+        sort_by_name(res)
       end
 
       def docmp(item_a, item_b)
@@ -347,6 +350,9 @@ module MrMurano
         pr[:before] = before unless before.nil?
         pr = nil if pr.empty?
         get('/', pr)
+        # MAYBE/2017-08-17:
+        #   ret = get('/', pr)
+        #   sort_by_name(ret)
       end
 
       def query(args)

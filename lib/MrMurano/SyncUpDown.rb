@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -582,7 +582,7 @@ module MrMurano
       #debug "#{self.class}: items:\n  #{items.map(&:local_path).join("\n  ")}"
       items = items.flatten.compact.sort_by { |it| it[:local_path] }
       debug "#{self.class}: items:\n  #{items.map { |it| it[:local_path] }.join("\n  ")}"
-      items
+      sort_by_name(items)
     end
 
     def ignore?(path, pattern)
@@ -973,7 +973,7 @@ module MrMurano
         toadd = (localbox.keys - therebox.keys).map { |key| localbox[key] }
         todel = (therebox.keys - localbox.keys).map { |key| therebox[key] }
       end
-      [toadd, todel]
+      [sort_by_name(toadd), sort_by_name(todel)]
     end
 
     def items_mods_and_chgs(options, therebox, localbox)
@@ -999,7 +999,18 @@ module MrMurano
           unchg << mrg
         end
       end
-      [tomod, unchg]
+      [sort_by_name(tomod), sort_by_name(unchg)]
+    end
+
+    def sort_by_name(list)
+      if list.any? && list.first.is_a?(Hash)
+        # AFAIK, only SyncUpDown_spec.rb comes through here, because
+        # it does not use SyncUpDown::Item but mocks its own items
+        # using hashes (see calls to and_return). [lb]
+        list.sort_by { |hsh| hsh[:name] }
+      else
+        list.sort_by(&:name)
+      end
     end
   end
 end

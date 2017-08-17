@@ -41,6 +41,9 @@ module MrMurano
         ret = get
         return [] unless ret.is_a?(Hash) && !ret.key?(:error)
         ret.map { |i| FileItem.new(i) }
+        # MAYBE/2017-08-17:
+        #   ret.map! { |i| FileItem.new(i) }
+        #   sort_by_name(ret)
       end
 
       ##

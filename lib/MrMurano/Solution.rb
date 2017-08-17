@@ -197,6 +197,9 @@ module MrMurano
 
     def list
       get('/')
+      # MAYBE/2017-08-17:
+      #   ret = get('/')
+      #   sort_by_name(ret)
     end
 
     def usage

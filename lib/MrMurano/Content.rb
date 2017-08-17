@@ -42,6 +42,9 @@ module MrMurano
       # List of what is in the content area?
       def list
         get('?full=true')
+        # MAYBE/2017-08-17:
+        #   ret = get('?full=true')
+        #   sort_by_name(ret)
       end
 
       # Delete Everything in you content area
