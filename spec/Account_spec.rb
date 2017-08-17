@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -153,13 +153,13 @@ RSpec.describe MrMurano::Account do
     it "for user.name" do
       # http.rb::json_opts() sets :symbolize_names=>true, so use symbols, not strings.
       bizlist = [
-        {:bizid=>"XXX",
-         :role=>"admin",
-         :name=>"MPS",
-        },
         {:bizid=>"YYY",
          :role=>"admin",
          :name=>"MAE",
+        },
+        {:bizid=>"XXX",
+         :role=>"admin",
+         :name=>"MPS",
         },
       ]
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
@@ -176,12 +176,12 @@ RSpec.describe MrMurano::Account do
 
     it "asks for account when missing" do
       bizlist = [
-        {:bizid=>"XXX",
-         :role=>"admin",
-         :name=>"MPS"},
         {:bizid=>"YYY",
          :role=>"admin",
          :name=>"MAE"},
+        {:bizid=>"XXX",
+         :role=>"admin",
+         :name=>"MPS"},
       ]
       stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/user/BoB@place.net/membership/").
         to_return(body: bizlist)

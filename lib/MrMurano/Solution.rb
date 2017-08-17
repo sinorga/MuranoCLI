@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -19,9 +19,19 @@ module MrMurano
     include Verbose
     include SolutionId
 
-    def initialize(sid=nil)
+    def initialize(from=nil)
       @uriparts_sidex = 1
-      init_sid!(sid)
+      # Introspection. Feels hacky.
+      if from.is_a? MrMurano::Solution
+        init_sid!(from.sid)
+        @valid_sid = from.valid_sid
+        # We shouldn't need to worry about other things...
+        #@token = from.token
+        #@http = from.http
+        #@json_opts = from.json_opts
+      else
+        init_sid!(from)
+      end
       @uriparts = [:solution, @sid]
       @itemkey = :id
       @project_section = nil unless defined?(@project_section)
@@ -55,21 +65,19 @@ module MrMurano
       aggregate = nil
       total = nil
       remaining = -1
+      orig_query = (query || []).dup
       while remaining != 0
         ret = super
         if ret.nil? && !@suppress_error
           warning "No solution with ID: #{@sid}"
           whirly_interject { say 'Run `murano show` to see the business and list of solutions.' }
-          if $cfg.get('business.id', :env).to_s.empty? &&
-             $cfg.get('business.id', :project).to_s.empty? &&
-             $cfg.get('business.id', :env) != $cfg.get('business.id', :project)
-            warning 'NOTE: MURANO_CONFIGFILE specifies a different business.id than the local project file'
-          end
+          MrMurano::SolutionBase.warn_configfile_env_maybe
           exit 1
         end
         return nil if ret.nil?
         # Pagination: Check if more data.
         if ret.is_a?(Hash) && ret.key?(:total) && ret.key?(:items)
+          query = orig_query.dup
           if total.nil?
             total = ret[:total]
             remaining = total - ret[:items].length
@@ -78,27 +86,18 @@ module MrMurano
             #     \"solution_id\":\"XXXXXXXXXXXXXXXX\"}&limit=20&offset=20"
             # But note that the URL we use is a little different
             #   https://bizapi.hosted.exosite.io/api:1/solution/XXXXXXXXXXXXXXXXX/eventhandler
-            if query.nil?
-              query = []
-            else
-              query = query.dup
-            end
           else
             if total != ret[:total]
               warning "Unexpected: subsequence :total not total: #{ret[:total]} != #{total}"
             end
             remaining -= ret[:items].length
-            if remaining <= 0
-              if remaining != 0
-                warning "Unexpected: remaining count not zero but ‘#{total}’"
-                remaining = 0
-              end
-            end
           end
           if remaining > 0
-            query = query.dup
             #query.push ['limit', 20]
             query.push ['offset', total - remaining]
+          elsif remaining != 0
+            warning "Unexpected: negative remaining: ‘#{total}’"
+            remaining = 0
           end
           if aggregate.nil?
             aggregate = ret
@@ -129,6 +128,16 @@ module MrMurano
       #path = path || '?select=id,service'
       matches = list(path)
       matches.select { |match| match[:service] == svc_name }
+    end
+
+    def self.warn_configfile_env_maybe
+      if !$cfg.get('business.id', :env).to_s.empty? &&
+         !$cfg.get('business.id', :project).to_s.empty? &&
+         $cfg.get('business.id', :env) != $cfg.get('business.id', :project)
+        MrMurano::Verbose.warning(
+          'NOTE: MURANO_CONFIGFILE specifies a different business.id than the local project file'
+        )
+      end
     end
 
     include SyncUpDown
@@ -176,15 +185,22 @@ module MrMurano
     def info_safe
       @suppress_error = true
       resp = get
-      unless resp.nil?
+      if resp.is_a?(Hash) && !resp.key?(:error)
         self.meta = resp
         @valid_sid = true
+      else
+        self.meta = {}
+        @valid_sid = false
       end
       @suppress_error = false
     end
 
     def list
       get('/')
+      # MAYBE/2017-08-17:
+      #   ret = get('/')
+      #   return [] unless ret.is_a?(Array)
+      #   sort_by_name(ret)
     end
 
     def usage
@@ -231,9 +247,17 @@ module MrMurano
       unless @name.to_s.empty? || @meta[:name].to_s == @name.to_s
         warning "Name mismatch. Server says ‘#{@meta[:name]}’, but config says ‘#{@name}’."
       end
-      set_name(@meta[:name])
-      # What did server send that we think is invalid?
-      warning "Server returned invalid name ‘#{@meta[:name]}’, how weird is that." unless @valid_name
+      if !@meta[:name].to_s.empty?
+        set_name(@meta[:name])
+        unless @valid_name || type == :solution
+          warning "Unexpected: Server returned invalid name: ‘#{@meta[:name]}’"
+        end
+      elsif @meta[:domain]
+        # This could be a pre-ADC/pre-Murano business.
+        warning "Unexpected: Server returned no name for domain: ‘#{@meta[:domain]}’"
+      else
+        warning "Unexpected: Server returned no name for solution: ‘#{@meta}’"
+      end
     end
 
     def domain
@@ -309,6 +333,14 @@ module MrMurano
     def valid_name?
       @valid_name
     end
+
+    def name_validate_regex
+      /^$/
+    end
+
+    def name_validate_help
+      ''
+    end
   end
 
   class Application < Solution
@@ -364,5 +396,23 @@ no more than 63.
       ).strip
     end
   end
+end
+
+def solution_factory_reset(sol)
+  new_sol = nil
+  if sol.is_a? MrMurano::Solution
+    unless sol.meta[:template].to_s.empty?
+      begin
+        clazz = Object.const_get("MrMurano::#{sol.meta[:template].capitalize}")
+        new_sol = clazz.new(sol)
+        new_sol.meta = sol.meta
+      rescue NameError => _err
+        MrMurano::Verbose.warning(
+          "Unrecognized solution :template value: #{sol.meta[:template]}"
+        )
+      end
+    end
+  end
+  new_sol || sol
 end
 

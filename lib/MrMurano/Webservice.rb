@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.26 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -39,7 +39,7 @@ module MrMurano
       def endpoint(path='')
         super
         parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
-        s = parts.map{|v| v.to_s}.join('/')
+        s = parts.map(&:to_s).join('/')
         URI(s + path.to_s)
       end
       # …

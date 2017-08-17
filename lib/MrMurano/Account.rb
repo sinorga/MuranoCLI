@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -11,6 +11,7 @@ require 'net/http'
 require 'pathname'
 require 'uri'
 require 'yaml'
+require 'MrMurano/hash'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
 require 'MrMurano/Business'
@@ -136,7 +137,7 @@ Or set your password with `murano password set <username>`.
 
     # ---------------------------------------------------------------------
 
-    def businesses(match_bid=nil, match_name=nil, match_either=nil)
+    def businesses(bid: nil, name: nil, fuzzy: nil)
       # Ask user for name and password, if not saved to config and password files.
       login_info if user.empty?
       raise 'Missing user?!' if user.empty?
@@ -144,19 +145,30 @@ Or set your password with `murano password set <username>`.
       MrMurano::Verbose.whirly_start 'Fetching Businesses...'
       bizes = get('user/' + user + '/membership/')
       MrMurano::Verbose.whirly_stop
+      return [] unless bizes.is_a?(Array) && bizes.any?
 
       # 2017-06-30: The data for each message contains a :bizid, :role, and :name.
       #   :role is probably generally "owner".
 
-      bizes.select! { |biz| biz[:bizid] == match_bid } unless match_bid.to_s.empty?
-      bizes.select! { |biz| biz[:name] == match_name } unless match_name.to_s.empty?
-      unless match_either.to_s.empty?
+      match_bid = ensure_array(bid)
+      match_name = ensure_array(name)
+      match_fuzzy = ensure_array(fuzzy)
+      if match_bid.any? || match_name.any? || match_fuzzy.any?
         bizes.select! do |biz|
-          biz[:name] == match_either || biz[:bizid] == match_either
+          (
+            match_bid.include?(biz[:bizid]) ||
+            match_name.include?(biz[:name]) ||
+            match_termy.any? do |term|
+              biz[:name] =~ /#{Regexp.escape(term)}/i || biz[:bizid] =~ /#{Regexp.escape(term)}/i
+            end
+          )
         end
       end
 
-      bizes.map { |meta| MrMurano::Business.new(meta) }
+      bizes.map! { |meta| MrMurano::Business.new(meta) }
+
+      # Sort results.
+      bizes.sort_by!(&:name)
     end
 
     # ---------------------------------------------------------------------

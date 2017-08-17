@@ -5,24 +5,16 @@
 
 #__murano_common_options=(
 __app_switches=(
-    --verbose
-    --dry
-    --curl
-    --skip-plugins
-    --configfile
-    --config
     --no-color
-    --no-progress
+    --config
+    --configfile
+    --curl
+    --dry
     --exclude-scopes
-    --business
-    --business-name
-    --business-id
-    --application
-    --application-name
-    --application-id
-    --product
-    --product-name
-    --product-id
+    --no-page
+    --no-plugins
+    --no-progress
+    --verbose
     --help
     --version
     --trace
@@ -70,8 +62,8 @@ function _murano () {
     if [[ -z $cmd0 ]]; then
       local -a comp_list
       comp_list=(
-        app
         application
+        applications
         assign
         business
         businesses
@@ -79,22 +71,28 @@ function _murano () {
         config
         content
         cors
+        create
+        delete
         device
         devices
         diff
         domain
+        find
         help
         init
         keystore
         link
         links
+        list
         login
+        logout
         logs
         mock
         password
         passwords
         postgresql
         product
+        products
         pull
         push
         setting
@@ -118,11 +116,11 @@ function _murano () {
       COMPREPLY=($(compgen -W '${comp_list[@]}' -- "$last"))
     else
       case $cmd0 in
-        (app)
-          __murano-app "$cmd1" "$cmd2" "${used_switches[@]}"
-        ;;
         (application)
           __murano-application "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
+        (applications)
+          __murano-applications "$cmd1" "$cmd2" "${used_switches[@]}"
         ;;
         (assign)
           __murano-assign "$cmd1" "$cmd2" "${used_switches[@]}"
@@ -145,6 +143,12 @@ function _murano () {
         (cors)
           __murano-cors "$cmd1" "$cmd2" "${used_switches[@]}"
         ;;
+        (create)
+          __murano-create "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
+        (delete)
+          __murano-delete "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
         (device)
           __murano-device "$cmd1" "$cmd2" "${used_switches[@]}"
         ;;
@@ -156,6 +160,9 @@ function _murano () {
         ;;
         (domain)
           __murano-domain "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
+        (find)
+          __murano-find "$cmd1" "$cmd2" "${used_switches[@]}"
         ;;
         (help)
           __murano-help "$cmd1" "$cmd2" "${used_switches[@]}"
@@ -172,8 +179,14 @@ function _murano () {
         (links)
           __murano-links "$cmd1" "$cmd2" "${used_switches[@]}"
         ;;
+        (list)
+          __murano-list "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
         (login)
           __murano-login "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
+        (logout)
+          __murano-logout "$cmd1" "$cmd2" "${used_switches[@]}"
         ;;
         (logs)
           __murano-logs "$cmd1" "$cmd2" "${used_switches[@]}"
@@ -192,6 +205,9 @@ function _murano () {
         ;;
         (product)
           __murano-product "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
+        (products)
+          __murano-products "$cmd1" "$cmd2" "${used_switches[@]}"
         ;;
         (pull)
           __murano-pull "$cmd1" "$cmd2" "${used_switches[@]}"
@@ -233,8 +249,8 @@ function _murano () {
     fi
 }
 
-# Completion for subcommand: "app".
-function __murano-app () {
+# Completion for subcommand: "application".
+function __murano-application () {
   local subcmd1="$1"
   local subcmd2="$2"
   #local subcmdn="$3"
@@ -256,8 +272,14 @@ function __murano-app () {
     comp_list=(
       create
       delete
+      diff
+      domain
+      find
       list
-      rm
+      logs
+      pull
+      push
+      usage
     )
   else
     case $subcmd1 in
@@ -271,12 +293,42 @@ function __murano-app () {
         {--trace}
       )
       ;;
+      (diff)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (domain)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (find)
+      more_switches=(
+        {--trace}
+      )
+      ;;
       (list)
       more_switches=(
         {--trace}
       )
       ;;
-      (rm)
+      (logs)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (pull)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (push)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (usage)
       more_switches=(
         {--trace}
       )
@@ -318,8 +370,8 @@ function __murano-app () {
   COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
 }
 
-# Completion for subcommand: "application".
-function __murano-application () {
+# Completion for subcommand: "applications".
+function __murano-applications () {
   local subcmd1="$1"
   local subcmd2="$2"
   #local subcmdn="$3"
@@ -339,35 +391,11 @@ function __murano-application () {
   #       Are there sub-sub-commands we shoud list?
   if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
     comp_list=(
-      create
-      delete
       list
-      logs
-      rm
     )
   else
     case $subcmd1 in
-      (create)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (delete)
-      more_switches=(
-        {--trace}
-      )
-      ;;
       (list)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (logs)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (rm)
       more_switches=(
         {--trace}
       )
@@ -443,10 +471,12 @@ function __murano-assign () {
       ;;
       (set)
       more_switches=(
+        {--trace}
       )
       ;;
       (unset)
       more_switches=(
+        {--trace}
       )
       ;;
     esac
@@ -507,10 +537,16 @@ function __murano-business () {
   #       Are there sub-sub-commands we shoud list?
   if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
     comp_list=(
+      find
       list
     )
   else
     case $subcmd1 in
+      (find)
+      more_switches=(
+        {--trace}
+      )
+      ;;
       (list)
       more_switches=(
         {--trace}
@@ -883,6 +919,152 @@ function __murano-cors () {
   COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
 }
 
+# Completion for subcommand: "create".
+function __murano-create () {
+  local subcmd1="$1"
+  local subcmd2="$2"
+  #local subcmdn="$3"
+  local used_switches="${@:3}"
+  local last="${COMP_WORDS[COMP_CWORD]}"
+  local len=$(($COMP_CWORD - 1))
+
+  local -a more_switches
+
+  local -a comp_list
+
+  #>&2 echo -e "\nsubcmd1=$subcmd1 / subcmd2=$subcmd2 / last=$last / len=$len"
+  #>&2 echo "used_switches=$used_switches"
+  #>&2 echo "more_switches=$more_switches"
+
+  # NOTE: Not doing anything special for ${subcmd2}.
+  #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      application
+      product
+    )
+  else
+    case $subcmd1 in
+      (application)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (product)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+    esac
+  fi
+
+  # Add unused application-wide flags.
+  local idx
+  for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+    local switch=${__app_switches[$idx]}
+    if ! contains_element "$switch" "${used_switches[@]}"; then
+      comp_list+=("$switch")
+    fi
+  done
+  # Add unused subcommand flags.
+  for ((idx = 0; idx < ${#more_switches[@]}; idx++)); do
+    local switch=${more_switches[$idx]}
+    comp_list+=("$switch")
+  done
+
+  # If there are only --flags, <TAB> will put the common prefix,
+  # "--", but maybe the user doesn't want to add a flag after all.
+  if [[ -z ${last} ]]; then
+    local flags_only=true
+    for ((idx = 0; idx < ${#comp_list[@]}; idx++)); do
+      local switch=${comp_list[$idx]}
+      if [[ ${switch} != --* ]]; then
+        flags_only=false
+        break
+      fi
+    done
+    if ${flags_only}; then
+      # Use two Unicode en spaces to prevent compgen from prefixing "--".
+      comp_list+=("	 ")
+    fi
+  fi
+
+  COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
+}
+
+# Completion for subcommand: "delete".
+function __murano-delete () {
+  local subcmd1="$1"
+  local subcmd2="$2"
+  #local subcmdn="$3"
+  local used_switches="${@:3}"
+  local last="${COMP_WORDS[COMP_CWORD]}"
+  local len=$(($COMP_CWORD - 1))
+
+  local -a more_switches
+
+  local -a comp_list
+
+  #>&2 echo -e "\nsubcmd1=$subcmd1 / subcmd2=$subcmd2 / last=$last / len=$len"
+  #>&2 echo "used_switches=$used_switches"
+  #>&2 echo "more_switches=$more_switches"
+
+  # NOTE: Not doing anything special for ${subcmd2}.
+  #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      application
+      product
+    )
+  else
+    case $subcmd1 in
+      (application)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (product)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+    esac
+  fi
+
+  # Add unused application-wide flags.
+  local idx
+  for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+    local switch=${__app_switches[$idx]}
+    if ! contains_element "$switch" "${used_switches[@]}"; then
+      comp_list+=("$switch")
+    fi
+  done
+  # Add unused subcommand flags.
+  for ((idx = 0; idx < ${#more_switches[@]}; idx++)); do
+    local switch=${more_switches[$idx]}
+    comp_list+=("$switch")
+  done
+
+  # If there are only --flags, <TAB> will put the common prefix,
+  # "--", but maybe the user doesn't want to add a flag after all.
+  if [[ -z ${last} ]]; then
+    local flags_only=true
+    for ((idx = 0; idx < ${#comp_list[@]}; idx++)); do
+      local switch=${comp_list[$idx]}
+      if [[ ${switch} != --* ]]; then
+        flags_only=false
+        break
+      fi
+    done
+    if ${flags_only}; then
+      # Use two Unicode en spaces to prevent compgen from prefixing "--".
+      comp_list+=("	 ")
+    fi
+  fi
+
+  COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
+}
+
 # Completion for subcommand: "device".
 function __murano-device () {
   local subcmd1="$1"
@@ -1068,6 +1250,25 @@ function __murano-diff () {
 
   # NOTE: Not doing anything special for ${subcmd2}.
   #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      application
+      product
+    )
+  else
+    case $subcmd1 in
+      (application)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (product)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+    esac
+  fi
 
   # Add unused application-wide flags.
   local idx
@@ -1124,43 +1325,12 @@ function __murano-domain () {
   #       Are there sub-sub-commands we shoud list?
   if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
     comp_list=(
-      app
       application
-      applications
-      apps
-      prod
-      prods
       product
-      products
     )
   else
     case $subcmd1 in
-      (app)
-      more_switches=(
-        {--trace}
-      )
-      ;;
       (application)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (applications)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (apps)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (prod)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (prods)
       more_switches=(
         {--trace}
       )
@@ -1170,7 +1340,75 @@ function __murano-domain () {
         {--trace}
       )
       ;;
-      (products)
+    esac
+  fi
+
+  # Add unused application-wide flags.
+  local idx
+  for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+    local switch=${__app_switches[$idx]}
+    if ! contains_element "$switch" "${used_switches[@]}"; then
+      comp_list+=("$switch")
+    fi
+  done
+  # Add unused subcommand flags.
+  for ((idx = 0; idx < ${#more_switches[@]}; idx++)); do
+    local switch=${more_switches[$idx]}
+    comp_list+=("$switch")
+  done
+
+  # If there are only --flags, <TAB> will put the common prefix,
+  # "--", but maybe the user doesn't want to add a flag after all.
+  if [[ -z ${last} ]]; then
+    local flags_only=true
+    for ((idx = 0; idx < ${#comp_list[@]}; idx++)); do
+      local switch=${comp_list[$idx]}
+      if [[ ${switch} != --* ]]; then
+        flags_only=false
+        break
+      fi
+    done
+    if ${flags_only}; then
+      # Use two Unicode en spaces to prevent compgen from prefixing "--".
+      comp_list+=("	 ")
+    fi
+  fi
+
+  COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
+}
+
+# Completion for subcommand: "find".
+function __murano-find () {
+  local subcmd1="$1"
+  local subcmd2="$2"
+  #local subcmdn="$3"
+  local used_switches="${@:3}"
+  local last="${COMP_WORDS[COMP_CWORD]}"
+  local len=$(($COMP_CWORD - 1))
+
+  local -a more_switches
+
+  local -a comp_list
+
+  #>&2 echo -e "\nsubcmd1=$subcmd1 / subcmd2=$subcmd2 / last=$last / len=$len"
+  #>&2 echo "used_switches=$used_switches"
+  #>&2 echo "more_switches=$more_switches"
+
+  # NOTE: Not doing anything special for ${subcmd2}.
+  #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      application
+      product
+    )
+  else
+    case $subcmd1 in
+      (application)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (product)
       more_switches=(
         {--trace}
       )
@@ -1540,10 +1778,12 @@ function __murano-link () {
       ;;
       (set)
       more_switches=(
+        {--trace}
       )
       ;;
       (unset)
       more_switches=(
+        {--trace}
       )
       ;;
     esac
@@ -1650,8 +1890,153 @@ function __murano-links () {
   COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
 }
 
+# Completion for subcommand: "list".
+function __murano-list () {
+  local subcmd1="$1"
+  local subcmd2="$2"
+  #local subcmdn="$3"
+  local used_switches="${@:3}"
+  local last="${COMP_WORDS[COMP_CWORD]}"
+  local len=$(($COMP_CWORD - 1))
+
+  local -a more_switches
+
+  local -a comp_list
+
+  #>&2 echo -e "\nsubcmd1=$subcmd1 / subcmd2=$subcmd2 / last=$last / len=$len"
+  #>&2 echo "used_switches=$used_switches"
+  #>&2 echo "more_switches=$more_switches"
+
+  # NOTE: Not doing anything special for ${subcmd2}.
+  #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      application
+      applications
+      product
+      products
+      solutions
+    )
+  else
+    case $subcmd1 in
+      (application)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (applications)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (product)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (products)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (solutions)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+    esac
+  fi
+
+  # Add unused application-wide flags.
+  local idx
+  for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+    local switch=${__app_switches[$idx]}
+    if ! contains_element "$switch" "${used_switches[@]}"; then
+      comp_list+=("$switch")
+    fi
+  done
+  # Add unused subcommand flags.
+  for ((idx = 0; idx < ${#more_switches[@]}; idx++)); do
+    local switch=${more_switches[$idx]}
+    comp_list+=("$switch")
+  done
+
+  # If there are only --flags, <TAB> will put the common prefix,
+  # "--", but maybe the user doesn't want to add a flag after all.
+  if [[ -z ${last} ]]; then
+    local flags_only=true
+    for ((idx = 0; idx < ${#comp_list[@]}; idx++)); do
+      local switch=${comp_list[$idx]}
+      if [[ ${switch} != --* ]]; then
+        flags_only=false
+        break
+      fi
+    done
+    if ${flags_only}; then
+      # Use two Unicode en spaces to prevent compgen from prefixing "--".
+      comp_list+=("	 ")
+    fi
+  fi
+
+  COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
+}
+
 # Completion for subcommand: "login".
 function __murano-login () {
+  local subcmd1="$1"
+  local subcmd2="$2"
+  #local subcmdn="$3"
+  local used_switches="${@:3}"
+  local last="${COMP_WORDS[COMP_CWORD]}"
+  local len=$(($COMP_CWORD - 1))
+
+  local -a more_switches
+
+  local -a comp_list
+
+  #>&2 echo -e "\nsubcmd1=$subcmd1 / subcmd2=$subcmd2 / last=$last / len=$len"
+  #>&2 echo "used_switches=$used_switches"
+  #>&2 echo "more_switches=$more_switches"
+
+  # NOTE: Not doing anything special for ${subcmd2}.
+  #       Are there sub-sub-commands we shoud list?
+
+  # Add unused application-wide flags.
+  local idx
+  for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+    local switch=${__app_switches[$idx]}
+    if ! contains_element "$switch" "${used_switches[@]}"; then
+      comp_list+=("$switch")
+    fi
+  done
+  # Add unused subcommand flags.
+  for ((idx = 0; idx < ${#more_switches[@]}; idx++)); do
+    local switch=${more_switches[$idx]}
+    comp_list+=("$switch")
+  done
+
+  # If there are only --flags, <TAB> will put the common prefix,
+  # "--", but maybe the user doesn't want to add a flag after all.
+  if [[ -z ${last} ]]; then
+    local flags_only=true
+    for ((idx = 0; idx < ${#comp_list[@]}; idx++)); do
+      local switch=${comp_list[$idx]}
+      if [[ ${switch} != --* ]]; then
+        flags_only=false
+        break
+      fi
+    done
+    if ${flags_only}; then
+      # Use two Unicode en spaces to prevent compgen from prefixing "--".
+      comp_list+=("	 ")
+    fi
+  fi
+
+  COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
+}
+
+# Completion for subcommand: "logout".
+function __murano-logout () {
   local subcmd1="$1"
   local subcmd2="$2"
   #local subcmdn="$3"
@@ -1723,6 +2108,25 @@ function __murano-logs () {
 
   # NOTE: Not doing anything special for ${subcmd2}.
   #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      application
+      product
+    )
+  else
+    case $subcmd1 in
+      (application)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (product)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+    esac
+  fi
 
   # Add unused application-wide flags.
   local idx
@@ -2075,9 +2479,15 @@ function __murano-product () {
       create
       delete
       device
+      devices
+      diff
+      domain
+      find
       list
       logs
-      rm
+      pull
+      push
+      usage
     )
   else
     case $subcmd1 in
@@ -2095,6 +2505,25 @@ function __murano-product () {
       more_switches=(
       )
       ;;
+      (devices)
+      more_switches=(
+      )
+      ;;
+      (diff)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (domain)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (find)
+      more_switches=(
+        {--trace}
+      )
+      ;;
       (list)
       more_switches=(
         {--trace}
@@ -2105,7 +2534,84 @@ function __murano-product () {
         {--trace}
       )
       ;;
-      (rm)
+      (pull)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (push)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (usage)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+    esac
+  fi
+
+  # Add unused application-wide flags.
+  local idx
+  for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+    local switch=${__app_switches[$idx]}
+    if ! contains_element "$switch" "${used_switches[@]}"; then
+      comp_list+=("$switch")
+    fi
+  done
+  # Add unused subcommand flags.
+  for ((idx = 0; idx < ${#more_switches[@]}; idx++)); do
+    local switch=${more_switches[$idx]}
+    comp_list+=("$switch")
+  done
+
+  # If there are only --flags, <TAB> will put the common prefix,
+  # "--", but maybe the user doesn't want to add a flag after all.
+  if [[ -z ${last} ]]; then
+    local flags_only=true
+    for ((idx = 0; idx < ${#comp_list[@]}; idx++)); do
+      local switch=${comp_list[$idx]}
+      if [[ ${switch} != --* ]]; then
+        flags_only=false
+        break
+      fi
+    done
+    if ${flags_only}; then
+      # Use two Unicode en spaces to prevent compgen from prefixing "--".
+      comp_list+=("	 ")
+    fi
+  fi
+
+  COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
+}
+
+# Completion for subcommand: "products".
+function __murano-products () {
+  local subcmd1="$1"
+  local subcmd2="$2"
+  #local subcmdn="$3"
+  local used_switches="${@:3}"
+  local last="${COMP_WORDS[COMP_CWORD]}"
+  local len=$(($COMP_CWORD - 1))
+
+  local -a more_switches
+
+  local -a comp_list
+
+  #>&2 echo -e "\nsubcmd1=$subcmd1 / subcmd2=$subcmd2 / last=$last / len=$len"
+  #>&2 echo "used_switches=$used_switches"
+  #>&2 echo "more_switches=$more_switches"
+
+  # NOTE: Not doing anything special for ${subcmd2}.
+  #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      list
+    )
+  else
+    case $subcmd1 in
+      (list)
       more_switches=(
         {--trace}
       )
@@ -2166,6 +2672,25 @@ function __murano-pull () {
 
   # NOTE: Not doing anything special for ${subcmd2}.
   #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      application
+      product
+    )
+  else
+    case $subcmd1 in
+      (application)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (product)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+    esac
+  fi
 
   # Add unused application-wide flags.
   local idx
@@ -2220,6 +2745,25 @@ function __murano-push () {
 
   # NOTE: Not doing anything special for ${subcmd2}.
   #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      application
+      product
+    )
+  else
+    case $subcmd1 in
+      (application)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+      (product)
+      more_switches=(
+        {--trace}
+      )
+      ;;
+    esac
+  fi
 
   # Add unused application-wide flags.
   local idx
@@ -2488,8 +3032,8 @@ function __murano-solution () {
     comp_list=(
       create
       delete
+      find
       list
-      rm
     )
   else
     case $subcmd1 in
@@ -2503,12 +3047,12 @@ function __murano-solution () {
         {--trace}
       )
       ;;
-      (list)
+      (find)
       more_switches=(
         {--trace}
       )
       ;;
-      (rm)
+      (list)
       more_switches=(
         {--trace}
       )
@@ -2571,29 +3115,17 @@ function __murano-solutions () {
   #       Are there sub-sub-commands we shoud list?
   if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
     comp_list=(
-      delete
       expunge
       list
-      rm
     )
   else
     case $subcmd1 in
-      (delete)
-      more_switches=(
-        {--trace}
-      )
-      ;;
       (expunge)
       more_switches=(
         {--trace}
       )
       ;;
       (list)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (rm)
       more_switches=(
         {--trace}
       )
@@ -2896,53 +3428,17 @@ function __murano-usage () {
   #       Are there sub-sub-commands we shoud list?
   if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
     comp_list=(
-      app
       application
-      applications
-      apps
-      prod
-      prods
       product
-      products
     )
   else
     case $subcmd1 in
-      (app)
-      more_switches=(
-        {--trace}
-      )
-      ;;
       (application)
       more_switches=(
         {--trace}
       )
       ;;
-      (applications)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (apps)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (prod)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (prods)
-      more_switches=(
-        {--trace}
-      )
-      ;;
       (product)
-      more_switches=(
-        {--trace}
-      )
-      ;;
-      (products)
       more_switches=(
         {--trace}
       )

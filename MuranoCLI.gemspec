@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -48,10 +48,16 @@ explicitly specifying the version. For instance,
   s.add_runtime_dependency('certified', '1.0.0')
   s.add_runtime_dependency('commander', '~> 4.4.3')
   s.add_runtime_dependency('dotenv', '~> 2.1.1')
+  # 2017-08-15: Getting warning when running --user-install gem in 2.4.0. [lb]:
+  #   Ignoring eventmachine-1.2.3 because its extensions are not built.
+  #     Try: gem pristine eventmachine --version 1.2.3
+  #   This might be because 'json' was also being complained about.
+  #s.add_runtime_dependency('eventmachine', '~> 1.2.3')
   s.add_runtime_dependency('highline', '~> 1.7.8')
-  s.add_runtime_dependency('http-form_data', '~> 1.0.1')
+  s.add_runtime_dependency('http-form_data', '~> 1.0.3')
   s.add_runtime_dependency('inflecto')
   s.add_runtime_dependency('inifile', '~> 3.0')
+  s.add_runtime_dependency('json', '~> 2.1.0')
   s.add_runtime_dependency('json-schema', '~> 2.7.0')
   s.add_runtime_dependency('mime-types', '~> 3.1')
   s.add_runtime_dependency('mime-types-data', '~> 3.2016.0521')
@@ -63,11 +69,17 @@ explicitly specifying the version. For instance,
   s.add_runtime_dependency('whirly', '~> 0.2.4')
 
   s.add_development_dependency('bundler', '~> 1.7.6')
-  s.add_development_dependency('ocra', '~> 1.3.8')
+  s.add_development_dependency('byebug', '~> 9.0.6')
+  #s.add_development_dependency('coderay', '~> ???')
   s.add_development_dependency('rake', '~> 10.1.1')
   s.add_development_dependency('rspec', '~> 3.5')
+  s.add_development_dependency('rubocop', '~> 0.49.1')
   s.add_development_dependency('simplecov')
-  s.add_development_dependency('webmock', '~> 2.1.0')
+  s.add_development_dependency('webmock', '~> 2.3.0')
   # maybe? s.add_development_dependency('vcr', '~> ???')
+  s.add_development_dependency('yard')
+
+  # Windows:
+  s.add_development_dependency('ocra', '~> 1.3.8')
 end
 

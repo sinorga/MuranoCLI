@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -21,7 +21,7 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
 
     @applctn_name = rname('syncupTestApp')
-    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @applctn_name, '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'application', 'create', @applctn_name, '--save'))
     expect(err).to eq('')
     soln_id = out
     expect(soln_id.chomp).to match(/^[a-zA-Z0-9]+$/)
@@ -36,12 +36,12 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name, '-y'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name, '-y'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
@@ -61,8 +61,9 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     def verify_err_missing_location(err)
       elines = err.lines
       # E.g.,
-      #   Skipping missing location ‘/tmp/d20170809-7670-z315jn/project/services’ (Application Events)
-      expect(elines).to satisfy { |v| elines.length == 1 }
+      #   Skipping missing location ‘/tmp/d20170809-7670-z315jn/project/services’ (Services)
+      #   Skipping missing location ‘/tmp/d20170809-7670-z315jn/project/services’ (Interfaces)
+      expect(elines).to satisfy { |v| elines.length == 2 }
       elines.each do |line|
         expect(line.encode!('UTF-8', 'UTF-8')).to start_with("\e[33mSkipping missing location ‘")
       end
@@ -72,26 +73,27 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       out, err, status = Open3.capture3(capcmd('murano', 'syncup'))
       outl = out.lines
       # The spec tests set --no-progress, so each sync action gets reported.
-      expect(outl[0]).to eq("Adding item table_util\n")
-      #expect(outl[1]).to eq("Updating item c3juj9vnmec000000_event\n")
+      #expect(outl[0]).to eq("Adding item state\n")
+      #expect(outl[1]).to eq("Adding item temperature\n")
+      #expect(outl[2]).to eq("Adding item uptime\n")
+      #expect(outl[3]).to eq("Adding item humidity\n")
+      (0..3).each { |ln| expect(outl[ln]).to start_with("Adding item ") }
+      expect(outl[4]).to eq("Updating product resources\n")
+      expect(outl[5]).to eq("Adding item table_util\n")
+      #expect(outl[6]).to eq("Updating item c3juj9vnmec000000_event\n")
       # The order isn't always consistent, so just do start_with.
-      #expect(outl[2]).to eq("Updating item tsdb_exportJob\n")
-      #expect(outl[3]).to eq("Updating item timer_timer\n")
-      #expect(outl[4]).to eq("Updating item user_account\n")
-      (1..4).each { |ln| expect(outl[ln]).to start_with("Updating item ") }
-      #expect(outl[5]).to eq("Adding item POST_/api/fire\n")
-      #expect(outl[6]).to eq("Adding item PUT_/api/fire/{code}\n")
-      #expect(outl[7]).to eq("Adding item DELETE_/api/fire/{code}\n")
-      #expect(outl[8]).to eq("Adding item GET_/api/onfire\n")
-      #expect(outl[9]).to eq("Adding item /js/script.js\n")
-      #expect(outl[10]).to eq("Adding item /icon.png\n")
-      #expect(outl[11]).to eq("Adding item /\n")
-      #expect(outl[12]).to eq("Adding item state\n")
-      #expect(outl[13]).to eq("Adding item temperature\n")
-      #expect(outl[14]).to eq("Adding item uptime\n")
-      #expect(outl[15]).to eq("Adding item humidity\n")
-      (5..15).each { |ln| expect(outl[ln]).to start_with("Adding item ") }
-      expect(outl[16]).to eq("Updating product resources\n")
+      #expect(outl[7]).to eq("Updating item timer_timer\n")
+      #expect(outl[8]).to eq("Updating item user_account\n")
+      #expect(outl[9]).to eq("Updating item tsdb_exportJob\n")
+      (6..9).each { |ln| expect(outl[ln]).to start_with("Updating item ") }
+      #expect(outl[10]).to eq("Adding item POST_/api/fire\n")
+      #expect(outl[11]).to eq("Adding item PUT_/api/fire/{code}\n")
+      #expect(outl[12]).to eq("Adding item DELETE_/api/fire/{code}\n")
+      #expect(outl[13]).to eq("Adding item GET_/api/onfire\n")
+      #expect(outl[14]).to eq("Adding item /icon.png\n")
+      #expect(outl[15]).to eq("Adding item /\n")
+      #expect(outl[16]).to eq("Adding item /js/script.js\n")
+      (10..16).each { |ln| expect(outl[ln]).to start_with("Adding item ") }
       verify_err_missing_location(err)
       expect(status.exitstatus).to eq(0)
 

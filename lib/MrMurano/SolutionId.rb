@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.27 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -8,6 +8,7 @@
 module MrMurano
   module SolutionId
     INVALID_SID = '-1'
+    UNEXPECTED_TYPE_OR_ERROR_MSG = 'Unexpected result type or error: assuming empty instead'
 
     attr_reader :sid
     attr_reader :valid_sid

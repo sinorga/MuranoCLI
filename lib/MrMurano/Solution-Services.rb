@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -41,8 +41,10 @@ module MrMurano
       raise 'Missing name!' if name.nil?
       raise 'Empty name!' if name.empty?
       ret = get('/' + CGI.escape(name))
-      error "Unexpected result type, assuming empty instead: #{ret}" unless ret.is_a?(Hash)
-      ret = {} unless ret.is_a?(Hash)
+      unless ret.is_a?(Hash) && !ret.key?(:error)
+        error "#{UNEXPECTED_TYPE_OR_ERROR_MSG}: #{ret}"
+        ret = {}
+      end
       if block_given?
         yield (ret[:script] || '')
       else
@@ -92,7 +94,7 @@ module MrMurano
           #   Unfortunately, we don't get the latest updated_at, so
           #   a subsequent status will show this module as dirty.
           ret = get('/' + CGI.escape(name))
-          if !ret.nil? && ret.is_a?(Hash) && ret.key?(:updated_at)
+          if ret.is_a?(Hash) && ret.key?(:updated_at)
             updated_at = ret[:updated_at]
           else
             warning "Failed to verify updated_at: #{ret}"
@@ -285,6 +287,9 @@ module MrMurano
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
       return [] unless ret.key?(:items)
       ret[:items].map { |i| ModuleItem.new(i) }
+      # MAYBE/2017-08-17:
+      #   ret[:items].map!
+      #   sort_by_name(ret[:items])
     end
 
     def to_remote_item(root, path)
@@ -361,7 +366,8 @@ module MrMurano
 
     def list(call=nil, data=nil, &block)
       ret = get(call, data, &block)
-      return [] if ret.is_a?(Hash) && ret.key?(:error)
+      return [] unless ret.is_a?(Hash) && !ret.key?(:error)
+      return [] unless ret.key?(:items)
       # eventhandler.skiplist is a list of whitespace separated dot-paired values.
       # fe: service.event service service service.event
       skiplist = ($cfg['eventhandler.skiplist'] || '').split
@@ -371,6 +377,9 @@ module MrMurano
         toss
       end
       items.map { |item| EventHandlerItem.new(item) }
+        # MAYBE/2017-08-17:
+        #   items.map! ...
+        #   sort_by_name(items)
     end
 
     def skip?(item, skiplist)
@@ -397,8 +406,8 @@ module MrMurano
 
     def fetch(name)
       ret = get('/' + CGI.escape(name))
-      if ret.nil?
-        error "Fetch for #{name} returned nil; skipping"
+      unless ret.is_a?(Hash) && !ret.key?(:error)
+        error "Fetch for #{name} returned nil or error; skipping"
         return ''
       end
       aheader = (ret[:script].lines.first || '').chomp
@@ -444,11 +453,21 @@ module MrMurano
         # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
         md = @match_header.match(line)
         if !md.nil?
-          # [lb] asks: Is this too hacky?
+          # FIXME/2017-08-09: device2.event is now in the skiplist,
+          #   but some tests have a "device2 data_in" script, which
+          #   gets changed to "device2.event" here and then uploaded
+          #   (note that skiplist does not apply to local items).
+          #   You can test this code via:
+          #     rspec ./spec/cmd_syncdown_spec.rb
+          #   which has a fixture with device2.data_in specified.
+          #   QUESTION: Does writing device2.event do anything?
+          #     You cannot edit that handler from the web UI...
+          #     - Should we change the test?
+          #     - Should we get rid of this device2 hack?
           if md[:service] == 'device2'
             event_event = 'event'
             event_type = md[:event]
-            # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's not 'event'.
+            # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's now 'event'?
             #   Want this?:
             #     event_type = 'event' if event_type == 'data_in'
           else
@@ -613,7 +632,7 @@ module MrMurano
   #   there are different events for Applications and Products.
   #   Except there aren't any product events the user should care about (yet?).
   SyncRoot.instance.add(
-    'eventhandlers', EventHandlerSolnApp, 'E', true, %w[services]
+    'services', EventHandlerSolnApp, 'S', true, %w[eventhandlers]
   )
   # 2017-08-08: device2 and interface are now part of the skiplist, so no
   # product event handlers will be found, unless the user modifies the skiplist.

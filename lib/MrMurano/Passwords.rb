@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -95,6 +95,8 @@ module MrMurano
       ret = {}
       @data.each_pair { |key, value| ret[key] = value.keys } unless @data.nil?
       ret
+      # MAYBE/2017-08-17:
+      #   sort_by_name(ret)
     end
   end
 end

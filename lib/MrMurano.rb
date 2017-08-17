@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.01 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -17,21 +17,19 @@ require 'MrMurano/Config'
 require 'MrMurano/ProjectFile'
 
 require 'MrMurano/Account'
+require 'MrMurano/Business'
 
+require 'MrMurano/Content'
+require 'MrMurano/Gateway'
+require 'MrMurano/Setting'
 require 'MrMurano/Solution'
 require 'MrMurano/Solution-Services'
 require 'MrMurano/Solution-ServiceConfig'
-
+require 'MrMurano/Solution-Users'
 require 'MrMurano/Webservice-Cors'
 require 'MrMurano/Webservice-Endpoint'
 require 'MrMurano/Webservice-File'
 
-require 'MrMurano/Solution-Users'
-
-require 'MrMurano/Gateway'
-require 'MrMurano/Content'
-
-require 'MrMurano/Setting'
 require 'MrMurano/ReCommander'
 require 'MrMurano/commands'
 

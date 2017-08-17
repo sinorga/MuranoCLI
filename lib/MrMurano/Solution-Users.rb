@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -23,6 +23,10 @@ module MrMurano
 
     def list
       get
+      # MAYBE/2017-08-17:
+      #   ret = get
+      #   return [] unless ret.is_a?(Array)
+      #   sort_by_name(ret)
     end
 
     def fetch(id)
@@ -109,7 +113,9 @@ module MrMurano
       from.open { |io| here = YAML.load(io) }
       here = [] if here == false
 
-      here.map { |i| Hash.transform_keys_to_symbols(i) }
+      here.map! { |i| Hash.transform_keys_to_symbols(i) }
+
+      sort_by_name(here)
     end
   end
 
@@ -127,7 +133,7 @@ module MrMurano
       %(Role)
     end
   end
-  #SyncRoot.instance.add('roles', Role, 'R', false)
+  #SyncRoot.instance.add('roles', Role, 'G', false)
 
   # …/user
   # :nocov:

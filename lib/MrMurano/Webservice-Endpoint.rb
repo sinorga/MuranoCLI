@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -38,15 +38,16 @@ module MrMurano
 
       def self.description
         # 2017-08-07: UI and ProjectFile call these "Routes". Let's be consistent.
-        #%(Endpoint)
-        %(Route)
+        # 2017-08-14: UI team says "Route" changing to "Endpoint" in new UI.
+        #%(Route)
+        %(Endpoint)
       end
 
       ##
       # This gets all data about all endpoints
       def list
-        ret = get()
-        return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+        ret = get
+        return [] unless ret.is_a?(Array)
         ret.map do |item|
           if item[:content_type].to_s.empty? then
             item[:content_type] = 'application/json'
@@ -54,10 +55,18 @@ module MrMurano
           # XXX should this update the script header?
           RouteItem.new(item)
         end
+        # MAYBE/2017-08-17:
+        #   ret.map! ...
+        #   sort_by_name(ret)
       end
 
       def fetch(id)
         ret = get('/' + id.to_s)
+        unless ret.is_a?(Hash) && !ret.key?(:error)
+          error "#{UNEXPECTED_TYPE_OR_ERROR_MSG}: #{ret}"
+          ret = {}
+        end
+
         ret[:content_type] = 'application/json' if ret[:content_type].empty?
 
         script = ret[:script].lines.map{|l|l.chomp}
@@ -219,7 +228,7 @@ module MrMurano
       end
     end
 
-    SyncRoot.instance.add('endpoints', Endpoint, 'A', true, %w[routes])
+    SyncRoot.instance.add('endpoints', Endpoint, 'E', true, %w[routes])
   end
 end
 

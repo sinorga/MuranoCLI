@@ -42,6 +42,10 @@ module MrMurano
       # List of what is in the content area?
       def list
         get('?full=true')
+        # MAYBE/2017-08-17:
+        #   ret = get('?full=true')
+        #   return [] unless ret.is_a?(Array)
+        #   sort_by_name(ret)
       end
 
       # Delete Everything in you content area
@@ -82,7 +86,7 @@ module MrMurano
 
         ret = get("/#{CGI.escape(name)}/upload?#{URI.encode_www_form(params)}")
         debug "POST instructions: #{ret}"
-        raise "Method isn't POST!!!" unless ret[:method] == 'POST'
+        raise "Method isn't POST!!!" unless ret.is_a?(Hash) && ret[:method] == 'POST'
         raise "EncType isn't multipart/form-data" unless ret[:enctype] == 'multipart/form-data'
 
         uri = URI(ret[:url])
@@ -140,7 +144,7 @@ module MrMurano
         # 2: fetch from S3.
         ret = get("/#{CGI.escape(name)}/download")
         debug "GET instructions: #{ret}"
-        raise "Method isn't GET!!!" unless ret[:method] == 'GET'
+        raise "Method isn't GET!!!" unless ret.is_a?(Hash) && ret[:method] == 'GET'
 
         uri = URI(ret[:url])
         request = Net::HTTP::Get.new(uri)

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Last Modified: 2017.07.31 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -35,6 +35,14 @@ program :version, MrMurano::VERSION
 program :description, %(
   Manage Applications and Products in Exosite's Murano
 ).strip
+
+# The Commander defaults to paged help.
+# The user can disable with --no-page, e.g.,
+#   alias murano='murano --no-page'
+if ARGV.include?('--no-page')
+  program :help_paging, false
+  ARGV.delete('--no-page')
+end
 
 default_command :help
 

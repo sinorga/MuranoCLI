@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.07 /coding: utf-8
+# Last Modified: 2017.08.14 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -22,14 +22,18 @@ module MrMurano
       acc = MrMurano::Account.instance
       @token = acc.token
       #raise 'Not logged in!' if @token.nil?
-      if @token.nil?
-        error 'Not logged in!'
-        exit 1
-      end
+      ensure_token! @token
       # MAYBE: Check that ADC is enabled on the business. If not, tell
       #   user to run Murano 2.x. See adc_compat_check for comments.
       #acc.adc_compat_check
       @token
+    end
+
+    def ensure_token!(tok)
+      if tok.nil?
+        error 'Not logged in!'
+        exit 1
+      end
     end
 
     def json_opts
@@ -92,6 +96,9 @@ module MrMurano
 
     def set_def_headers(request)
       request.content_type = 'application/json'
+      # 2017-08-14: MrMurano::Account overrides the token method, and
+      # it doesn't exit if no token, and then we end up here.
+      ensure_token! token
       request['Authorization'] = 'token ' + token
       request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
       request

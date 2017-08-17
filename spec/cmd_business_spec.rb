@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -49,8 +49,8 @@ RSpec.describe 'murano business', :cmd, :needs_password do
       expect(data).to match(/^(\S+\s)*\S+$/)
     end
 
-    it "all fields" do
-      out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--all'))
+    it "fewer fields" do
+      out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--brief'))
       expect(err).to eq("")
       olines = out.lines
       expect(olines[0]).to match(/^(\+-+)+\+$/)

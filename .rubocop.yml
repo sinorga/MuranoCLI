@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -27,7 +27,6 @@ Layout/TrailingBlankLines:
 # "Script file murano doesn't have execute permission."
 Lint/ScriptPermission:
   Exclude:
-    - 'bin/mr'
     - 'bin/murano'
 
 # "Assignment Branch Condition size for XXX is too high."
@@ -109,6 +108,7 @@ Style/FileName:
     - 'lib/MrMurano/Config.rb'
     - 'lib/MrMurano/Content.rb'
     - 'lib/MrMurano/Gateway.rb'
+    - 'lib/MrMurano/Keystore.rb'
     - 'lib/MrMurano/Mock.rb'
     - 'lib/MrMurano/Passwords.rb'
     - 'lib/MrMurano/ProjectFile.rb'
@@ -182,7 +182,6 @@ Style/SafeNavigation:
 
 AllCops:
   Include:
-    - 'bin/mr'
     - 'bin/murano'
     # These are included by default:
     #- '**/Gemfile'
@@ -198,33 +197,26 @@ AllCops:
     # 2017-07-31: 7735 offenses in the Spec tests -- not worth it to fix!!
     - 'spec/**/*'
     #
+    # Not sure if the templates are included by default or not, but ignore.
+    - 'lib/MrMurano/commands/completion-bash.erb'
+    - 'lib/MrMurano/commands/completion-zsh.erb'
+    #
+    # 2017-08-16: Ug.
+    - 'lib/MrMurano/optparse.rb'
+    #
     # FIXME/2017-07-25: Finish linting these files, and delete from this list.
-    # 2017-07-31: 943 offenses herein these 26 files.
-    - 'lib/MrMurano/Config-Migrate.rb'
+    # ✗ 2017-07-31: 943 offenses herein these 26 files.
+    # ✓ 2017-08-16: 420 offenses herein these 15 files.
     - 'lib/MrMurano/Content.rb'
-    - 'lib/MrMurano/Gateway.rb'
     - 'lib/MrMurano/Mock.rb'
     - 'lib/MrMurano/Setting.rb'
     - 'lib/MrMurano/SubCmdGroupContext.rb'
-    - 'lib/MrMurano/Webservice-Cors.rb'
     - 'lib/MrMurano/Webservice-Endpoint.rb'
     - 'lib/MrMurano/Webservice-File.rb'
-    - 'lib/MrMurano/Webservice.rb'
-    - 'lib/MrMurano/commands.rb'
     - 'lib/MrMurano/hash.rb'
     - 'lib/MrMurano/http.rb'
     - 'lib/MrMurano/makePretty.rb'
     - 'lib/MrMurano/commands/business.rb'
-    - 'lib/MrMurano/commands/completion-bash.erb'
-    - 'lib/MrMurano/commands/completion-zsh.erb'
-    - 'lib/MrMurano/commands/completion.rb'
-    - 'lib/MrMurano/commands/content.rb'
     - 'lib/MrMurano/commands/cors.rb'
-    - 'lib/MrMurano/commands/devices.rb'
-    - 'lib/MrMurano/commands/gb.rb'
-    - 'lib/MrMurano/commands/keystore.rb'
-    - 'lib/MrMurano/commands/mock.rb'
     - 'lib/MrMurano/commands/settings.rb'
-    - 'lib/MrMurano/commands/timeseries.rb'
-    - 'lib/MrMurano/commands/tsdb.rb'
 

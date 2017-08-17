@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -56,12 +56,12 @@ RSpec.describe 'murano status', :cmd, :needs_password do
   end
 
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name, '-y'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
 
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name, '-y'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
@@ -69,74 +69,74 @@ RSpec.describe 'murano status', :cmd, :needs_password do
 
   def match_syncable_contents(slice)
       expect(slice).to include(
-        a_string_matching(/ \+ M  .*modules\/table_util\.lua/),
-        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua/),
-        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/),
-        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:7/),
+        a_string_matching(/ \+ \w  .*modules\/table_util\.lua/),
+        a_string_matching(/ \+ \w  .*routes\/manyRoutes\.lua/),
+        a_string_matching(/ \+ \w  .*routes\/manyRoutes\.lua:4/),
+        a_string_matching(/ \+ \w  .*routes\/manyRoutes\.lua:7/),
         # singleRoute only appears in some of the tests.
-        a_string_matching(/ \+ A  .*routes\/singleRoute\.lua/),
-        a_string_matching(/ \+ S  .*files\/js\/script\.js/),
-        a_string_matching(/ \+ S  .*files\/icon\.png/),
-        a_string_matching(/ \+ S  .*files\/index\.html/),
+        a_string_matching(/ \+ \w  .*routes\/singleRoute\.lua/),
+        a_string_matching(/ \+ \w  .*files\/js\/script\.js/),
+        a_string_matching(/ \+ \w  .*files\/icon\.png/),
+        a_string_matching(/ \+ \w  .*files\/index\.html/),
       )
   end
 
   def match_syncable_contents_resources(slice)
       expect(slice).to include(
-        a_string_matching(/ \+ T  state/),
-        a_string_matching(/ \+ T  temperature/),
-        a_string_matching(/ \+ T  uptime/),
-        a_string_matching(/ \+ T  humidity/),
+        a_string_matching(/ \+ \w  state/),
+        a_string_matching(/ \+ \w  temperature/),
+        a_string_matching(/ \+ \w  uptime/),
+        a_string_matching(/ \+ \w  humidity/),
       )
   end
 
   def match_syncable_contents_except_singleRoute(slice)
       expect(slice).to include(
-        a_string_matching(/ \+ M  .*modules\/table_util\.lua/),
-        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua/),
-        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/),
-        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:7/),
+        a_string_matching(/ \+ \w  .*modules\/table_util\.lua/),
+        a_string_matching(/ \+ \w  .*routes\/manyRoutes\.lua/),
+        a_string_matching(/ \+ \w  .*routes\/manyRoutes\.lua:4/),
+        a_string_matching(/ \+ \w  .*routes\/manyRoutes\.lua:7/),
         # singleRoute does not appear in old Solutionfile tests
         # that don't specify it.
-        #a_string_matching(/ \+ A  .*routes\/singleRoute\.lua/),
-        a_string_matching(/ \+ S  .*files\/js\/script\.js/),
-        a_string_matching(/ \+ S  .*files\/icon\.png/),
-        a_string_matching(/ \+ S  .*files\/index\.html/),
+        #a_string_matching(/ \+ \w  .*routes\/singleRoute\.lua/),
+        a_string_matching(/ \+ \w  .*files\/js\/script\.js/),
+        a_string_matching(/ \+ \w  .*files\/icon\.png/),
+        a_string_matching(/ \+ \w  .*files\/index\.html/),
       )
   end
 
   def match_remote_boilerplate_v1_0_0_service(slice)
-    expect(slice).to contain_exactly(
-      #" - E  device2_event\n",
-      #" - E  interface_addGatewayResource\n",
-      #" - E  interface_addIdentity\n",
-      #" - E  interface_clearContent\n",
-      #" - E  interface_deleteContent\n",
-      #" - E  interface_downloadContent\n",
-      #" - E  interface_getGatewayResource\n",
-      #" - E  interface_getGatewaySettings\n",
-      #" - E  interface_getIdentity\n",
-      #" - E  interface_getIdentityState\n",
-      #" - E  interface_infoContent\n",
-      #" - E  interface_listContent\n",
-      #" - E  interface_listIdentities\n",
-      #" - E  interface_makeIdentity\n",
-      #" - E  interface_removeGatewayResource\n",
-      #" - E  interface_removeIdentity\n",
-      #" - E  interface_setIdentityState\n",
-      #" - E  interface_updateGatewayResource\n",
-      #" - E  interface_updateGatewaySettings\n",
-      #" - E  interface_updateIdentity\n",
-      #" - E  interface_uploadContent\n",
-      #" - E  timer_timer (Application Event Handlers)\n",
-      #" - E  tsdb_exportJob (Application Event Handlers)\n",
-      #" - E  user_account (Application Event Handlers)\n",
-      #" - E  timer_timer\n",
-      #" - E  tsdb_exportJob\n",
-      #" - E  user_account\n",
-      " M E  timer_timer\.lua\n",
-      " M E  tsdb_exportJob\.lua\n",
-      " M E  user_account\.lua\n",
+    expect(slice).to include(
+      #a_string_matching(/ - \w  device2_event/),
+      #a_string_matching(/ - \w  interface_addGatewayResource/),
+      #a_string_matching(/ - \w  interface_addIdentity/),
+      #a_string_matching(/ - \w  interface_clearContent/),
+      #a_string_matching(/ - \w  interface_deleteContent/),
+      #a_string_matching(/ - \w  interface_downloadContent/),
+      #a_string_matching(/ - \w  interface_getGatewayResource/),
+      #a_string_matching(/ - \w  interface_getGatewaySettings/),
+      #a_string_matching(/ - \w  interface_getIdentity/),
+      #a_string_matching(/ - \w  interface_getIdentityState/),
+      #a_string_matching(/ - \w  interface_infoContent/),
+      #a_string_matching(/ - \w  interface_listContent/),
+      #a_string_matching(/ - \w  interface_listIdentities/),
+      #a_string_matching(/ - \w  interface_makeIdentity/),
+      #a_string_matching(/ - \w  interface_removeGatewayResource/),
+      #a_string_matching(/ - \w  interface_removeIdentity/),
+      #a_string_matching(/ - \w  interface_setIdentityState/),
+      #a_string_matching(/ - \w  interface_updateGatewayResource/),
+      #a_string_matching(/ - \w  interface_updateGatewaySettings/),
+      #a_string_matching(/ - \w  interface_updateIdentity/),
+      #a_string_matching(/ - \w  interface_uploadContent/),
+      #a_string_matching(/ - \w  timer_timer (Application Event Handlers)/),
+      #a_string_matching(/ - \w  tsdb_exportJob (Application Event Handlers)/),
+      #a_string_matching(/ - \w  user_account (Application Event Handlers)/),
+      #a_string_matching(/ - \w  timer_timer/),
+      #a_string_matching(/ - \w  tsdb_exportJob/),
+      #a_string_matching(/ - \w  user_account/),
+      a_string_matching(/ M \w  timer_timer\.lua/),
+      a_string_matching(/ M \w  tsdb_exportJob\.lua/),
+      a_string_matching(/ M \w  user_account\.lua/),
     )
   end
 
@@ -159,8 +159,8 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       # 2: Path prefixes could be different.
       olines = out.lines
       expect(olines[0]).to eq("Only on local machine:\n")
-      match_syncable_contents(olines[1..8])
-      match_syncable_contents_resources(olines[9..12])
+      match_syncable_contents_resources(olines[1..4])
+      match_syncable_contents(olines[5..12])
       #expect(olines[13]).to eq("Only on remote server:\n")
       expect(olines[13]).to eq("Nothing new remotely\n")
       # FIMXE/2017-06-23: We should DRY this long list which is same in each test.
@@ -177,8 +177,8 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       #if is_windows
       #  expect(olines[14]).to eq("Items that differ:\n")
       #  expect(olines[15..16]).to contain_exactly(
-      #    a_string_matching(/ M E  .*services\/timer_timer\.lua/),
-      #    a_string_matching(/ M E  .*services\/tsdb_exportJob\.lua/),
+      #    a_string_matching(/ M \w  .*services\/timer_timer\.lua/),
+      #    a_string_matching(/ M \w  .*services\/tsdb_exportJob\.lua/),
       #  )
       #else
         expect(olines[14]).to eq("Nothing that differs\n")
@@ -192,7 +192,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(err).to eq('')
       expect(out.lines).to match([
         "Only on local machine:\n",
-        a_string_matching(/ \+ S  .*files\/icon\.png/),
+        a_string_matching(/ \+ \w  .*files\/icon\.png/),
         "Nothing new remotely\n",
         "Nothing that differs\n",
       ])
@@ -204,7 +204,7 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(err).to eq('')
       expect(out.lines).to match([
         "Only on local machine:\n",
-        a_string_matching(/ \+ A  .*routes\/manyRoutes\.lua:4/),
+        a_string_matching(/ \+ \w  .*routes\/manyRoutes\.lua:4/),
         "Nothing new remotely\n",
         "Nothing that differs\n",
       ])
@@ -232,8 +232,8 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(err).to eq('')
       olines = out.lines
       expect(olines[0]).to eq("Only on local machine:\n")
-      match_syncable_contents(olines[1..8])
-      match_syncable_contents_resources(olines[9..12])
+      match_syncable_contents_resources(olines[1..4])
+      match_syncable_contents(olines[5..12])
       expect(olines[13]).to eq("Nothing new remotely\n")
 
       # NOTE: On Windows, touch doesn't work, so items differ.
@@ -242,8 +242,8 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       if is_windows
         expect(olines[14]).to eq("Items that differ:\n")
         expect(olines[15..16]).to include(
-          a_string_matching(/ M E  .*services\/timer_timer\.lua/),
-          a_string_matching(/ M E  .*services\/tsdb_exportJob\.lua/),
+          a_string_matching(/ M \w  .*services\/timer_timer\.lua/),
+          a_string_matching(/ M \w  .*services\/tsdb_exportJob\.lua/),
         )
       else
         expect(olines[14]).to eq("Nothing that differs\n")
@@ -284,15 +284,15 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       # Not a single match, because the order of items within groups can shift
       olines = out.lines
       expect(olines[0]).to eq("Only on local machine:\n")
-      match_syncable_contents_except_singleRoute(olines[1..7])
-      match_syncable_contents_resources(olines[8..11])
+      match_syncable_contents_resources(olines[1..4])
+      match_syncable_contents_except_singleRoute(olines[5..11])
       #expect(olines[12]).to eq("Only on remote server:\n")
       #match_remote_boilerplate_v1_0_0_service(olines[13..15])
       expect(olines[12]).to eq("Nothing new remotely\n")
       #expect(olines[16]).to eq("Nothing that differs\n")
       ##expect(olines[11]).to eq("Items that differ:\n")
       ##expect(olines[12..12]).to contain_exactly(
-      ##  a_string_matching(/ M E  .*services\/devdata\.lua/),
+      ##  a_string_matching(/ M \w  .*services\/devdata\.lua/),
       ##)
       expect(olines[13]).to eq("Items that differ:\n")
       match_remote_boilerplate_v1_0_0_service(olines[14..16])
@@ -335,8 +335,8 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       expect(err).to eq('')
       olines = out.lines
       expect(olines[0]).to eq("Only on local machine:\n")
-      match_syncable_contents_except_singleRoute(olines[1..7])
-      match_syncable_contents_resources(olines[8..11])
+      match_syncable_contents_resources(olines[1..4])
+      match_syncable_contents_except_singleRoute(olines[5..11])
       #expect(olines[12]).to eq("Only on remote server:\n")
       #match_remote_boilerplate_v1_0_0_service(olines[13..15])
       expect(olines[12]).to eq("Nothing new remotely\n")

@@ -9,7 +9,7 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
 
   before(:example) do
     @product_name = rname('keystoreTest')
-    out, err, status = Open3.capture3(capcmd('murano', 'app', 'create', @product_name, '--save'))
+    out, err, status = Open3.capture3(capcmd('murano', 'application', 'create', @product_name, '--save'))
     expect(err).to eq('')
     expect(out.chomp).to match(/^[a-zA-Z0-9]+$/)
     expect(status.exitstatus).to eq(0)
@@ -20,7 +20,7 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name, '-y'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)

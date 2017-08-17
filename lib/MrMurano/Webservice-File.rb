@@ -38,9 +38,12 @@ module MrMurano
       # Get a list of all of the static content
       # @return [Array<FileItem>] List of items on server
       def list
-        ret = get()
-        return [] if ret.is_a?(Hash) and ret.has_key?(:error)
+        ret = get
+        return [] unless ret.is_a?(Array)
         ret.map { |i| FileItem.new(i) }
+        # MAYBE/2017-08-17:
+        #   ret.map! { |i| FileItem.new(i) }
+        #   sort_by_name(ret)
       end
 
       ##
@@ -184,7 +187,7 @@ module MrMurano
       end
     end
 
-    SyncRoot.instance.add('files', File, 'S', true, %w[assets])
+    SyncRoot.instance.add('assets', File, 'A', true, %w[files])
   end
 end
 #  vim: set ai et sw=2 ts=2 :

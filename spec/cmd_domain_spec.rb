@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.03 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -26,11 +26,11 @@ RSpec.describe 'murano domain', :cmd, :needs_password do
   end
 
   after(:example) do
-    out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @product_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'product', 'delete', @product_name, '-y'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
-    out, err, status = Open3.capture3(capcmd('murano', 'application', 'delete', @product_name))
+    out, err, status = Open3.capture3(capcmd('murano', 'application', 'delete', @product_name, '--yes'))
     expect(out).to eq('')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)

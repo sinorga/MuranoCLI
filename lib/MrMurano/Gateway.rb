@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -58,7 +58,6 @@ module MrMurano
       # Get the protocol settings
       def protocol
         ret = get
-        return {} if ret.nil?
         return {} unless ret.is_a?(Hash)
         return {} unless ret.key?(:protocol)
         return {} unless ret[:protocol].is_a?(Hash)
@@ -74,7 +73,6 @@ module MrMurano
 
       def identity_format
         ret = get
-        return {} if ret.nil?
         return {} unless ret.is_a?(Hash)
         return {} unless ret.key?(:identity_format)
         return {} unless ret[:identity_format].is_a?(Hash)
@@ -91,7 +89,6 @@ module MrMurano
 
       def provisioning
         ret = get
-        return {} if ret.nil?
         return {} unless ret.is_a?(Hash)
         return {} unless ret.key?(:provisioning)
         return {} unless ret[:provisioning].is_a?(Hash)
@@ -125,8 +122,9 @@ module MrMurano
       end
 
       def list
-        ret = get('')
-        return [] unless ret.key? :resources
+        ret = get
+        return [] unless ret.is_a?(Hash)
+        return [] unless ret.key?(:resources)
 
         # convert hash to array.
         res = []
@@ -134,6 +132,8 @@ module MrMurano
           res << value.merge(alias: key.to_s)
         end
         res
+        # MAYBE/2017-08-17:
+        #   sort_by_name(res)
       end
 
       def upload_all(data)
@@ -150,6 +150,7 @@ module MrMurano
       ###################################################
 
       def syncup_before
+        super
         @there = list
       end
 
@@ -163,13 +164,14 @@ module MrMurano
       end
 
       def syncup_after
+        super
         if !@there.empty?
           if !$cfg['tool.dry']
             sync_update_progress('Updating product resources')
             upload_all(@there)
           else
             MrMurano::Verbose.whirly_interject do
-              say("--dry: Not updating resources")
+              say('--dry: Not updating resources')
             end
           end
         elsif $cfg['tool.verbose']
@@ -183,8 +185,9 @@ module MrMurano
       ###################################################
 
       def syncdown_before
-        # FIXME/2017-07-02: Could there be duplicate gateway items?
-        #   [lb] just added code to SyncUpDown.locallist and am curious.
+        super
+        # TEST/2017-07-02: Could there be duplicate gateway items?
+        #   [lb] just added code to SyncUpDown.locallist and is curious.
         @here = locallist
       end
 
@@ -199,7 +202,7 @@ module MrMurano
 
       def diff_download(tmp_path, merged)
         @there = list if @there.nil?
-        items = @there.reject { |item| item[:alias] != merged[:alias] }
+        items = @there.select { |item| item[:alias] == merged[:alias] }
         if items.length > 1
           error(
             "Unexpected: more than 1 resource with the same alias: #{merged[:alias]} / #{items}"
@@ -223,6 +226,7 @@ module MrMurano
       end
 
       def syncdown_after(local)
+        super
         resources_write(local)
         @here = nil
       end
@@ -293,7 +297,8 @@ module MrMurano
         end
 
         here = {}
-        # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
+        # rubocop:disable Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
+        # MAYBE/2017-07-02: Convert to safe_load.
         from.open { |io| here = YAML.load(io) }
         here = {} if here == false
 
@@ -313,7 +318,8 @@ module MrMurano
         here.each_pair do |key, value|
           res << Hash.transform_keys_to_symbols(value).merge(alias: key.to_s)
         end
-        res
+
+        sort_by_name(res)
       end
 
       def docmp(item_a, item_b)
@@ -324,7 +330,7 @@ module MrMurano
     #   call was ignored bydefault (you'd have to add --resources to syncup,
     #   syncdown, diff, and status commands). Against Murano, this call seems
     #   normal speed, so including by default.
-    SyncRoot.instance.add('resources', Resources, 'T', true, %w[specs])
+    SyncRoot.instance.add('resources', Resources, 'R', true, %w[specs])
 
     ##############################################################################
     ##
@@ -344,6 +350,10 @@ module MrMurano
         pr[:before] = before unless before.nil?
         pr = nil if pr.empty?
         get('/', pr)
+        # MAYBE/2017-08-17:
+        #   ret = get('/', pr)
+        #   return [] unless ret.is_a?(Array)
+        #   sort_by_name(ret)
       end
 
       def query(args)

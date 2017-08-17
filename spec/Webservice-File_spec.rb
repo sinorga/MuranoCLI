@@ -28,22 +28,27 @@ RSpec.describe MrMurano::Webservice::File do
 
   it "lists" do
     body = [
-      {:path=>"/",
-       :mime_type=>"text/html",
-       :checksum=>"f535dad52b2877a49717a034b4eee5ff1cdb8a18"},
-      {:path=>"/batteryMeter.svg",
-       :mime_type=>"image/svg+xml",
-       :checksum=>"06a1aab86ba8cb9b3f2913c673d4aa243c553494"},
-      {:path=>"/meter.html",
-       :mime_type=>"text/html",
-       :checksum=>"82e12125c2f1324bbf7bd64bf187f3334416117e"}
+      {
+        :path=>"/",
+        :mime_type=>"text/html",
+        :checksum=>"f535dad52b2877a49717a034b4eee5ff1cdb8a18",
+      },
+      {
+        :path=>"/batteryMeter.svg",
+        :mime_type=>"image/svg+xml",
+        :checksum=>"06a1aab86ba8cb9b3f2913c673d4aa243c553494",
+      },
+      {
+        :path=>"/meter.html",
+        :mime_type=>"text/html",
+        :checksum=>"82e12125c2f1324bbf7bd64bf187f3334416117e",
+      }
     ]
     stub_request(:get, @baseURI).
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
                       to_return(body: body.to_json)
-
-    ret = @srv.list()
+    ret = @srv.list
     expect(ret).to eq(body)
   end
 

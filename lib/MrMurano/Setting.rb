@@ -1,7 +1,6 @@
 require 'MrMurano/verbosing'
 
 module MrMurano
-
   class Setting
     include Verbose
 
@@ -19,7 +18,7 @@ module MrMurano
     def mapservice(service)
       service = service.to_s.downcase
       SERVICE_MAP.each_pair do |k, v|
-        if service == k.downcase or service == v.downcase then
+        if service == k.downcase || service == v.downcase
           return v
         end
       end
@@ -32,13 +31,11 @@ module MrMurano
         gb = Object::const_get("MrMurano::#{mapservice(service)}::Settings").new
         meth = setting.to_sym
         debug %{Looking up method "#{meth}"}
-        if gb.respond_to? meth then
+        if gb.respond_to?(meth)
           return gb.__send__(meth)
-
         else
           error "Unknown setting '#{setting}' on '#{service}'"
         end
-
       rescue NameError => e
         error "No Settings on \"#{service}\""
         if $cfg['tool.debug'] then
@@ -50,19 +47,17 @@ module MrMurano
 
     def write(service, setting, value)
       begin
-        debug %{Looking up class "MrMurano::#{mapservice(service)}::Settings"}
+        debug %(Looking up class "MrMurano::#{mapservice(service)}::Settings")
         gb = Object::const_get("MrMurano::#{mapservice(service)}::Settings").new
         meth = "#{setting}=".to_sym
-        debug %{Looking up method "#{meth}"}
+        debug %(Looking up method "#{meth}")
         if gb.respond_to? meth then
           return gb.__send__(meth, value)
-
         else
           error "Unknown setting '#{setting}' on '#{service}'"
         end
-
       rescue NameError => e
-        error "No Settings on \"#{service}\""
+        error %(No Settings on "#{service}")
         if $cfg['tool.debug'] then
           error e.message
           error e.to_s
@@ -85,9 +80,10 @@ module MrMurano
         end
       end
       result
+      # MAYBE/2017-08-17:
+      #   sort_by_name(result)
     end
   end
-
 end
 
 #  vim: set ai et sw=2 ts=2 :

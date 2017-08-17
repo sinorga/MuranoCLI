@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -10,7 +10,7 @@ require 'MrMurano/verbosing'
 require 'MrMurano/SyncRoot'
 
 # Load options to control which things to sync
-def command_add_syncable_options(cmd)
+def cmd_option_syncable_pickers(cmd)
   MrMurano::SyncRoot.instance.each_option do |short, long, desc|
     cmd.option short, long, Inflecto.pluralize(desc)
   end
@@ -19,7 +19,7 @@ def command_add_syncable_options(cmd)
   end
 end
 
-def command_set_syncable_defaults(options)
+def cmd_defaults_syncable_pickers(options)
   # Weird. The options is a Commander::Command::Options object, but
   # options.class says nil! Also, you cannot index properties or
   # even options.send('opt'). But we can just twiddle the raw table.
@@ -36,7 +36,7 @@ def command_set_syncable_defaults(options)
 end
 
 command :status do |c|
-  c.syntax = %(murano status [options] [filters])
+  c.syntax = %(murano status [--options] [filters])
   c.summary = %(Get the status of files)
   c.description = %(
 Get the status of files.
@@ -58,6 +58,9 @@ Each item type also supports specific filters. These always start with #.
 Endpoints can be selected with a "#<method>#<path glob>" pattern.
   ).gsub(/^ +/, '').strip
 
+  # Add flag: --type [application|product|all].
+  cmd_add_solntype_pickers(c)
+
   c.option '--all', 'Check everything'
   c.option '--[no-]asdown', %(Report as if syncdown instead of syncup)
   c.option '--[no-]asup', %(Report as if syncup instead of syncdown (default: true))
@@ -65,10 +68,12 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
   c.option '--[no-]grouped', %(Group all adds, deletes, and mods together)
   c.option '--[no-]show-all', %(List unchanged as well)
   c.option '--[no-]show-type', %(Include type of item)
-  command_add_syncable_options(c)
+  cmd_option_syncable_pickers(c)
 
   c.action do |args, options|
+    # SKIP: c.verify_arg_count!(args)
     options.default(
+      all: nil,
       asdown: nil,
       asup: nil,
       diff: false,
@@ -82,7 +87,8 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       create: true,
       update: true,
     )
-    command_set_syncable_defaults(options)
+    cmd_defaults_solntype_pickers(options)
+    cmd_defaults_syncable_pickers(options)
 
     def fmtr(item, options)
       if item.key?(:local_path)
@@ -177,7 +183,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       pretty(out, options) unless options.grouped
     end
 
-    # Method code starts here!
+    # *** Method code starts here ***
 
     # Check that user doesn't try to asdown and asup, or no-asdown and no-asup.
     if options.asdown.nil? && options.asup.nil?
@@ -205,14 +211,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       rescue StandardError => _err
         raise
       else
-        # Different syncables use different solution types, so if a
-        # certain solution doesn't exist, its syncables won't have an sid.
-        if syncable.sid?
-          ret = syncable.status(options, args)
-        else
-          ret = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
-          ret[:skipd] << { synckey: desc }
-        end
+        ret = syncable.status(options, args)
         gmerge(ret, type, desc, options)
       end
     end
@@ -221,6 +220,9 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
     pretty(@grouped, options) if options.grouped
   end
 end
-
-alias_command :diff, :status, '--diff', '--no-grouped'
+alias_command 'diff', 'status', '--diff', '--no-grouped'
+alias_command 'diff application', 'status', '--diff', '--no-grouped', '--type', 'application'
+alias_command 'diff product', 'status', '--diff', '--no-grouped', '--type', 'product'
+alias_command 'application diff', 'status', '--diff', '--no-grouped', '--type', 'application'
+alias_command 'product diff', 'status', '--diff', '--no-grouped', '--type', 'product'
 

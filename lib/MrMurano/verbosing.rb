@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.27 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -127,19 +127,41 @@ module MrMurano
     end
 
     def self.ask_yes_no(question, default)
+      answer = default
       whirly_interject do
         confirm = ask(question)
         if default
-          answer = ['', 'y', 'ye', 'yes'].include?(confirm.downcase)
+          answer = !%w[n no].include?(confirm.downcase)
         else
-          answer = !['', 'n', 'no'].include?(confirm.downcase)
+          answer = %w[y ye yes].include?(confirm.downcase)
         end
-        answer
       end
+      answer
     end
 
     def ask_yes_no(question, default)
       MrMurano::Verbose.ask_yes_no(question, default)
+    end
+
+    def self.cmd_confirm_delete!(name, auto_yes, exit_msg)
+      if auto_yes
+        yield true if block_given?
+        return true
+      end
+      confirmed = MrMurano::Verbose.ask_yes_no(
+        "Really delete ‘#{name}’? [y/N] ", false
+      )
+      MrMurano::Verbose.warning(exit_msg) if !confirmed && exit_msg
+      if block_given?
+        yield confirmed
+      elsif !confirmed
+        exit 1
+      end
+      confirmed
+    end
+
+    def cmd_confirm_delete!(name, auto_yes, exit_msg)
+      MrMurano::Verbose.cmd_confirm_delete!(name, auto_yes, exit_msg)
     end
 
     def self.pluralize?(word, count)

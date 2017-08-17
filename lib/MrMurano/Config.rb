@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.08 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -189,6 +189,7 @@ module MrMurano
       # 2017-08-07: device.datapoint is the v1 device event handler.
       #   It is deprecated and will be removed in 12 months.
       #   So it technically still works, but eventually will not.
+      #   CAVEAT: One must manually enable the Device V1 service for a Murano 1.1 business.
       # device2.event is the event handler that is created when two solutions
       #   are linked (say, an application and a product). Do not delete this.
       # The interface service contains lots of simple device event handlers
@@ -349,6 +350,69 @@ module MrMurano
         return sec[ikey] if sec.key?(ikey)
       end
       nil
+    end
+
+    ## Get one or more key-values for the specified scopes, honoring '*' wildcard.
+    # key is <section>.<key>, <section>.*, or *.<key>
+    def get_wild(key, scope=CFG_SCOPES)
+      scope = [scope] unless scope.is_a? Array
+      paths = @paths.select { |p| scope.include? p.kind }
+      paths = paths.reject { |p| @exclude_scopes.include? p.kind }
+
+      seen = {}
+
+      kvals = []
+      is_wild = wild?(key)
+      section, ikey = key.split('.')
+      paths.each do |path|
+        if section != '*' || !is_wild
+          next unless path.data.has_section?(section)
+          sec = path.data[section]
+          if ikey != '*' || !is_wild
+            # blah.blug query
+            if !ikey.nil?
+              next unless sec.key?(ikey)
+              kvals += [["#{section}.#{ikey}", sec[ikey], path.kind]]
+            else
+              sec.each do |skey|
+                kvals += [["#{section}.#{skey}", sec[skey], path.kind]]
+              end
+            end
+            return kvals
+          else
+            # blah.* query
+            sec.each do |kv|
+              kvid = "#{section}.#{kv[0]}"
+              next if seen[kvid]
+              seen[kvid] = true
+              kvals += [[kvid, kv[1].to_s, path.kind]]
+            end
+          end
+        else
+          # *.blah query
+          path.data.each do |ini|
+            path.data[ini].keys.each do |skey|
+              next unless ikey == '*' || skey == ikey
+              kvid = "#{ini}.#{skey}"
+              next if seen[kvid]
+              seen[kvid] = true
+              kvals += [[kvid, path.data[ini][skey].to_s, path.kind]]
+            end
+          end
+        end
+      end
+      kvals.sort_by! { |kv| kv[0] }
+      kvals
+    end
+
+    def wild?(key)
+      section, ikey = key.split('.')
+      is_wild = (
+        !section.to_s.empty? &&
+        !ikey.to_s.empty? &&
+        ((section == '*') || (ikey == '*'))
+      )
+      is_wild
     end
 
     def set(key, value, scope=:project)

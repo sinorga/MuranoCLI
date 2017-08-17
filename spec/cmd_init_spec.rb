@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.09 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -181,12 +181,12 @@ RSpec.describe 'murano init', :cmd do
         FileUtils.remove_entry('.murano')
       end
       after(:example) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name, '-y'))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
 
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name, '-y'))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -222,12 +222,12 @@ RSpec.describe 'murano init', :cmd do
         @product_name = rname('initCreatingPrd')
       end
       after(:example) do
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name, '-y'))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
 
-        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+        out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name, '-y'))
         expect(out).to eq('')
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -320,14 +320,14 @@ RSpec.describe 'murano init', :cmd do
     after(:example) do
       Dir.chdir(ENV['HOME']) do
         if defined?(@product_name)
-          out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name))
+          out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @product_name, '-y'))
           expect(out).to eq('')
           expect(err).to eq('')
           expect(status.exitstatus).to eq(0)
         end
 
         if defined?(@applctn_name)
-          out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name))
+          out, err, status = Open3.capture3(capcmd('murano', 'solution', 'delete', @applctn_name, '-y'))
           expect(out).to eq('')
           expect(err).to eq('')
           expect(status.exitstatus).to eq(0)

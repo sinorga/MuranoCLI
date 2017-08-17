@@ -1,12 +1,14 @@
-# Last Modified: 2017.08.02 /coding: utf-8
+# Last Modified: 2017.08.16 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
-require 'MrMurano/Business'
 require 'MrMurano/verbosing'
+require 'MrMurano/Business'
+require 'MrMurano/ReCommander'
+require 'MrMurano/Solution'
 
 command 'show' do |c|
   c.syntax = %(murano show)
@@ -65,14 +67,16 @@ Show readable information about the current configuration.
         MrMurano::Verbose.error MrMurano::Business.missing_business_id_msg
       end
 
-      # E.g., {:bizid=>"AAAAAAAAAAAAAAAA", :type=>"application",
-      #   :apiId=>"CCCCCCCCCCCCCCCCC", :sid=>"CCCCCCCCCCCCCCCCC",
-      #   :domain=>"AAAAAAAAAAAAAAAA.apps.exosite.io", :name=>"AAAAAAAAAAAAAAAA"}
+      id_not_in_biz = false
+
+      # E.g., {:bizid=>"ABC", :type=>"application", :apiId=>"XXX", :sid=>"XXX",
+      #        :name=>"ABC", :domain=>"ABC.apps.exosite.io" }
       if selected_application
         puts %(application: https://#{selected_application.domain})
       elsif selected_application_id
         #puts 'selected application not in business'
         puts "application ID from config is not in business (#{selected_application_id})"
+        id_not_in_biz = true
       elsif !selected_business
         puts 'application ID depends on business ID'
       else
@@ -80,20 +84,22 @@ Show readable information about the current configuration.
         puts 'application ID not found in config'
       end
 
-      # E.g., {:bizid=>"AAAAAAAAAAAAAAAA", :type=>"product",
-      #   :apiId=>"BBBBBBBBBBBBBBBBB", :sid=>"BBBBBBBBBBBBBBBBB",
-      #   :domain=>"BBBBBBBBBBBBBBBBB.m2.exosite.io", :name=>"AAAAAAAAAAAAAAAA"}
+      # E.g., {:bizid=>"ABC", :type=>"product", :apiId=>"XXX", :sid=>"XXX",
+      #        :name=>"ABC", :domain=>"ABC.m2.exosite.io" }
       if selected_product
         puts %(product: #{selected_product.name})
       elsif selected_product_id
         #puts 'selected product not in business'
         puts "product ID from config is not in business (#{selected_product_id})"
+        id_not_in_biz = true
       elsif !selected_business
         puts 'product ID depends on business ID'
       else
         #puts 'no product selected'
         puts 'product ID not found in config'
       end
+
+      MrMurano::SolutionBase.warn_configfile_env_maybe if id_not_in_biz
     end
   end
 end
@@ -106,7 +112,8 @@ Show readable information about the current configuration.
   ).strip
   c.project_not_required = true
 
-  c.action do |_args, _options|
+  c.action do |args, _options|
+    c.verify_arg_count!(args)
     puts %(base: #{$cfg['location.base']})
     $cfg['location'].each { |key, value| puts %(#{key}: #{$cfg['location.base']}/#{value}) }
   end
