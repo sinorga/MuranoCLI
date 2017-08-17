@@ -203,6 +203,9 @@ AllCops:
     - 'lib/MrMurano/commands/completion-bash.erb'
     - 'lib/MrMurano/commands/completion-zsh.erb'
     #
+    # 2017-08-16: Ug.
+    - 'lib/MrMurano/optparse.rb'
+    #
     # FIXME/2017-07-25: Finish linting these files, and delete from this list.
     # ✗ 2017-07-31: 943 offenses herein these 26 files.
     # ✓ 2017-08-16: 420 offenses herein these 15 files.

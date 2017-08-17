@@ -5,6 +5,9 @@
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'optparse'
+require 'MrMurano/optparse'
+
 require 'MrMurano/verbosing'
 
 module MrMurano
