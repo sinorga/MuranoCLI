@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -106,6 +106,10 @@ command :init do |c|
   c.syntax = %(murano init)
   c.summary = %(The easy way to start a project)
   c.description = init_cmd_description
+
+  c.example %(
+    Initialize Murano project using specific Business and Solutions
+  ).strip, 'murano init --business-id 12345 --product-name myprod --application-name myapp'
 
   # Let user specify existing business and/or solution IDs and/or names.
   cmd_option_business_pickers(c)

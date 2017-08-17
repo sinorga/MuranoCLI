@@ -325,6 +325,18 @@ Find solution by name or ID.
   ).strip
   c.project_not_required = true
 
+  c.example %(
+    Find any solution named "mysolution"
+  ).strip, 'murano solution find mysolution --name'
+
+  c.example %(
+    Find product with ID "abcdef123456"
+  ).strip, 'murano product find abcdef123456 --id'
+
+  c.example %(
+    Find application with name of ID matching "1234"
+  ).strip, 'murano application find 1234'
+
   cmd_solution_find_add_options(c)
 
   cmd_add_solntype_pickers(c)
