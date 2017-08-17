@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -36,7 +36,8 @@ List the solutions that are linked.
 
   # MAYBE: Here and elsewhere: hyphenate, e.g., --id-only
   c.option '--idonly', 'Only return the ids'
-  c.option '--[no-]brief', 'Show fewer fields: only name, key, and service'
+  #c.option '--[no-]brief', 'Show fewer fields: only name, key, and service'
+  c.option '--[no-]full', 'Show all fields, not just name, key, and service'
   c.option '--[no-]all', 'Show links for all Solutions in Business, not just Project'
 
   c.action do |args, options|
@@ -71,7 +72,7 @@ List the solutions that are linked.
     if options.idonly
       headers = [:service]
       scfgs = scfgs.map { |row| [row[:service]] }
-    elsif options.brief
+    elsif !options.full
       headers = %i[name script_key service]
       scfgs = scfgs.map { |r| headers.map { |h| r[h] } }
     else
