@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -29,7 +29,7 @@ gem 'vine', '~> 0.4'
 gem 'whirly', '~> 0.2.4'
 
 group :test do
-  gem 'bundler', '~> 1.7.6'
+  #gem 'bundler', '~> 1.7.6'
   gem 'byebug', '~> 9.0.6'
   gem 'coderay', require: false
   gem 'rake', '~> 10.1.1'
