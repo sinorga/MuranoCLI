@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -107,6 +107,8 @@ Delete a solution from the business.
     # SKIP: c.verify_arg_count!(args)
     cmd_defaults_solntype_pickers(options)
     cmd_defaults_id_and_name(options)
+    # Set all: true, so that cmd_solution_del_get_names_and_ids finds 'em all.
+    options.default(all: true)
 
     biz = MrMurano::Business.new
     biz.must_business_id!
@@ -179,6 +181,7 @@ Delete all solutions in business.
   ).strip
   c.project_not_required = true
 
+  c.option('--[no-]all', 'Delete all Solutions in Business, not just Project')
   c.option('-y', '--[no-]yes', %(Answer "yes" to all prompts and run non-interactively))
 
   c.action do |args, options|
@@ -296,6 +299,8 @@ List solutions in the current business.
 
   c.action do |args, options|
     c.verify_arg_count!(args)
+    # Set all: true, so that must_fetch_solutions! finds 'em all.
+    options.default(all: true)
     cmd_defaults_solntype_pickers(options)
     cmd_solution_find_and_output(args, options)
   end
@@ -335,6 +340,8 @@ Find solution by name or ID.
     # SKIP: c.verify_arg_count!(args)
     cmd_defaults_solntype_pickers(options)
     cmd_defaults_id_and_name(options)
+    # Set all: true, so that must_fetch_solutions! finds 'em all.
+    options.default(all: true)
     if args.none? && !any_solution_pickers!(options)
       MrMurano::Verbose.error('What would you like to find?')
       exit 1

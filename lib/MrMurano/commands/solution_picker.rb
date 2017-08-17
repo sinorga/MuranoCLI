@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.17 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -97,7 +97,7 @@ def must_fetch_solutions!(options, args=[], biz=nil)
     biz.must_business_id!
   end
   if args.any?
-    raise 'Cannot use options.all and solution pickers' unless options.all.nil?
+    #raise 'Cannot use options.all and solution pickers' unless options.all.nil?
     flattened = args.map { |cell| cell.split(',') }.flatten
     sid = []
     name = []
@@ -115,7 +115,7 @@ def must_fetch_solutions!(options, args=[], biz=nil)
   end
 
   if any_solution_pickers!(options)
-    raise 'Cannot use options.all and solution pickers' unless options.all.nil?
+    #raise 'Cannot use options.all and solution pickers' unless options.all.nil?
     #
     # MAYBE: DRY this code. Rather than copy-paste-find-replace block of code.
     #   See also: any_business_pickers?
@@ -472,7 +472,7 @@ module MrMurano
           sol = nil
         end
       else
-        solution_choose_solution(solz, sol.type_name)
+        sol = solution_choose_solution(solz, sol.type_name)
       end
       sol
     end
