@@ -418,7 +418,7 @@ class OptionParser
     end
 
     # [lb] added: typ param
-    def self.candidate(typ, key, icase = false, pat = nil, &block)
+    def self.candidate(key, icase = false, pat = nil, typ = nil, &block)
       pat ||= Completion.regexp(key, icase)
       candidates = []
       block.call do |k, *v|
@@ -449,16 +449,16 @@ class OptionParser
     end
 
     # [lb] added: typ param
-    def candidate(typ, key, icase = false, pat = nil)
+    def candidate(key, icase = false, pat = nil, typ = nil)
       # [lb] added: typ param
-      Completion.candidate(typ, key, icase, pat, &method(:each))
+      Completion.candidate(key, icase, pat, typ, &method(:each))
     end
 
     public
     # [lb] added: typ param
-    def complete(typ, key, icase = false, pat = nil)
+    def complete(key, icase = false, pat = nil, typ = nil)
       # [lb] added: typ param
-      candidates = candidate(typ, key, icase, pat, &method(:each)).sort_by {|k, v, kn| kn.size}
+      candidates = candidate(key, icase, pat, typ, &method(:each)).sort_by {|k, v, kn| kn.size}
       if candidates.size == 1
         canon, sw, * = candidates[0]
       elsif candidates.size > 1
@@ -864,7 +864,7 @@ class OptionParser
     #
     def complete(id, opt, icase = false, *pat, &block)
       # [lb] added: id param to complete params
-      __send__(id).complete(id, opt, icase, *pat, &block)
+      __send__(id).complete(opt, icase, *pat, id, &block)
     end
 
     #
