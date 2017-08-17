@@ -17,13 +17,15 @@ Print the domain for this solution.
   ).strip
 
   c.option '--[no-]raw', %(Don't add scheme (default with brief))
-  c.option '--[no-]brief', %(Show the URL but not the solution ID)
+  c.option '--[no-]brief', %(Show fewer fields: only the URL)
+  c.option '--[no-]all', 'Show domains for all Solutions in Business, not just Project'
 
   # Add flag: --type [application|product|all].
   cmd_add_solntype_pickers(c)
 
   c.action do |args, options|
     c.verify_arg_count!(args)
+    options.default(all: false)
     options.default(raw: true) if options.brief
     cmd_defaults_solntype_pickers(options)
 

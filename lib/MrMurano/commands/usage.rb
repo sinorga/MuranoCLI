@@ -18,9 +18,14 @@ Get usage info for solution(s).
   # Add flag: --type [application|product|all].
   cmd_add_solntype_pickers(c)
 
+  c.option '--[no-]all', 'Show usage for all Solutions in Business, not just Project'
+  c.option(
+    '--[no-]header', %(Output solution descriptions (default: true))
+  )
 
   c.action do |args, options|
     c.verify_arg_count!(args)
+    options.default(all: false, header: true)
     cmd_defaults_solntype_pickers(options)
 
     solz = must_fetch_solutions!(options)

@@ -97,7 +97,7 @@ def must_fetch_solutions!(options, args=[], biz=nil)
     biz.must_business_id!
   end
   if args.any?
-    raise 'Cannot use options.project and solution pickers' unless options.project.nil?
+    raise 'Cannot use options.all and solution pickers' unless options.all.nil?
     sid = []
     name = []
     fuzzy = []
@@ -114,7 +114,7 @@ def must_fetch_solutions!(options, args=[], biz=nil)
   end
 
   if any_solution_pickers!(options)
-    raise 'Cannot use options.project and solution pickers' unless options.project.nil?
+    raise 'Cannot use options.all and solution pickers' unless options.all.nil?
     #
     # MAYBE: DRY this code. Rather than copy-paste-find-replace block of code.
     #   See also: any_business_pickers?
@@ -154,7 +154,7 @@ def must_fetch_solutions!(options, args=[], biz=nil)
   end
 
   if args.none? && !any_solution_pickers!(options)
-    if options.project
+    if !options.all
       if $cfg['application.id']
         solz += solution_get_solutions(
           biz, :application, sid: $cfg['application.id']

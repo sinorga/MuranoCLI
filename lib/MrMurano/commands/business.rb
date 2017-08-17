@@ -37,8 +37,7 @@ def cmd_business_add_options(c)
 # MAYBE/2017-08-15: Rename to --id-only.
   c.option '--idonly', 'Only return the IDs'
 
-  # 2017-08-15: BizAPI only returns these three headers, so no need for --brief.
-  #c.option '--[no-]brief', 'Show fewer fields'
+  c.option '--[no-]brief', 'Show fewer fields: only Business ID and name'
 
   # FIXME: Move -o to a file with --json, etc.; smells like a universal output format.
   c.option '-o', '--output FILE', 'Download to file instead of STDOUT'
@@ -269,9 +268,11 @@ def cmd_business_output_businesses(acc, bizz, options)
     headers = [:bizid]
     bizz = bizz.map(&:bizid)
   elsif options.brief
-    headers = %i[bizid role name]
+    #headers = %i[bizid role name]
+    headers = %i[bizid name]
     bizz = bizz.map { |biz| [biz.bizid, biz.role, biz.name] }
   else
+    # 2017-08-16: There are only 3 keys: bizid, role, and name.
     headers = bizz[0].meta.keys
     headers.sort_by! do |hdr|
       case hdr

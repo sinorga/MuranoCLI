@@ -286,8 +286,8 @@ end
 
 def cmd_solution_find_add_options(c)
   c.option '--idonly', 'Only return the ids'
-  c.option '--[no-]brief', 'Show fewer fields: only Solution ID and Domain'
-  c.option '--[no-]project', 'Show only solutions in project'
+  c.option '--[no-]brief', 'Show fewer fields: only Solution ID and domain'
+  c.option '--[no-]all', 'Find all Solutions in Business, not just Project'
   c.option '-o', '--output FILE', %(Download to file instead of STDOUT)
 end
 

@@ -36,8 +36,8 @@ List the solutions that are linked.
 
   # MAYBE: Here and elsewhere: hyphenate, e.g., --id-only
   c.option '--idonly', 'Only return the ids'
-  c.option '--[no-]brief', 'Show fewer columns'
-  c.option '--[no-]project', 'Show links only for solutions in project'
+  c.option '--[no-]brief', 'Show fewer fields: only name, key, and service'
+  c.option '--[no-]all', 'Show links for all Solutions in Business, not just Project'
 
   c.action do |args, options|
     c.verify_arg_count!(args)
@@ -49,7 +49,7 @@ List the solutions that are linked.
     pids = products.map(&:apiId)
 
     sol_opts = { biz: biz, type: :application }
-    sol_opts[:match_sid] = $cfg['application.id'] if options.project
+    sol_opts[:match_sid] = $cfg['application.id'] if !options.all
     appl = solution_find_or_create(**sol_opts)
 
     if !appl.nil?
@@ -64,7 +64,7 @@ List the solutions that are linked.
     end
 
     scfgs.select! { |s| pids.include? s[:service] }
-    # MAYBE/2017-08-16: filter by $cfg['product.id'] if options.project
+    # MAYBE/2017-08-16: filter by $cfg['product.id'] if !options.all
 
     io = File.open(options.output, 'w') if options.output
 
