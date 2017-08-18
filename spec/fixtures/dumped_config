@@ -38,6 +38,7 @@ undeletable = *.event timer.timer tsdb.exportJob user.account
 [modules]
 searchFor = *.lua **/*.lua
 ignoring = *_test.lua *_spec.lua .*
+no-nesting = false
 
 [diff]
 cmd = <%= Gem.win_platform? ? 'fc' : 'diff -u' %>
