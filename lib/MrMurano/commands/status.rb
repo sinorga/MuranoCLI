@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -16,6 +16,14 @@ def cmd_option_syncable_pickers(cmd)
   end
   MrMurano::SyncRoot.instance.each_alias_opt do |long, desc|
     cmd.option long, Inflecto.pluralize(desc)
+  end
+
+  cmd.option(
+    '--[no-]nesting',
+    %(Disable support for arranging Lua modules hierarchically)
+  ) do |nestation|
+    # This is only called if user specifies switch.
+    $cfg['modules.no-nesting'] = !nestation
   end
 end
 

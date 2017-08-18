@@ -1,4 +1,4 @@
-# Last Modified: 2017.07.25 /coding: utf-8
+# Last Modified: 2017.08.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -40,10 +40,10 @@ module MrMurano
       # @param obj [Hash] Data to load in
       def load(obj)
         members.reject { |key| [:legacy].include? key }.each do |key|
-          self[key] = obj[key] if obj.key? key
+          self[key] = obj[key] if obj.key?(key)
         end
         members.select { |k| %i[include exclude].include? k }.each do |key|
-          self[key] = [self[key]] unless self[key].is_a? Array
+          self[key] = [self[key]] unless self[key].nil? || self[key].is_a?(Array)
         end
       end
 

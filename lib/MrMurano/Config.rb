@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -209,15 +209,25 @@ module MrMurano
         user.account
       ].join(' '), :defaults)
 
+      # 2017-07-26: Nested Lua support: Change '*/*.lua' to '**/*.lua'.
+      #   There are similar changes made to the ProjectFile,
+      #   to modules.include and modules.exclude, which, if set,
+      #   override modules.searchFor and modules.ignoring, respectively.
+      # NOTE: ** finds files in subdirs in subdirs,
+      #     e.g., modules/subdir1/subdir2/<here>/and/<here>
+      #     otherwise, */*.lua just finds files modules/subdir1/<here>.
       set('modules.searchFor', %w[
         *.lua
         **/*.lua
       ].join(' '), :defaults)
+
       set('modules.ignoring', %w[
         *_test.lua
         *_spec.lua
         .*
       ].join(' '), :defaults)
+
+      set('modules.no-nesting', false, :defaults)
 
       if Gem.win_platform?
         set('diff.cmd', 'fc', :defaults)
