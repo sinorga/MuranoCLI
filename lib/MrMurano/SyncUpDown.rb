@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -555,7 +555,8 @@ module MrMurano
       # 2017-07-27: Add uniq to cull duplicate entries that globbing
       # all the ways might produce, otherwise status/sync/diff complain
       # about duplicate resources. I [lb] think this problem has existed
-      # but was exacerbated by the change to support sub-directory scripts.
+      # but was exacerbated by the change to support sub-directory scripts
+      # (Nested Lua support).
       items = Dir[*sf].uniq.flatten.compact.reject do |path|
         if ::File.directory?(path)
           true
@@ -568,8 +569,11 @@ module MrMurano
         # otherwise it makes nested Lua support tricky, because
         # symlinks might be outside the root item path, and then
         # the nested Lua path looks like ".......some_dir/some_item".
-        #rpath = Pathname.new(path).realpath
-        rpath = Pathname.new(path).expand_path
+        if $cfg['modules.no-nesting']
+          rpath = Pathname.new(path).realpath
+        else
+          rpath = Pathname.new(path).expand_path
+        end
         item = to_remote_item(from, rpath)
         if item.is_a?(Array)
           item.compact.map { |i| i[:local_path] = rpath; i }
@@ -586,16 +590,21 @@ module MrMurano
     end
 
     def ignore?(path, pattern)
-      if pattern.start_with?('**/')
+      # 2017-08-18: [lb] not sure this block should be disabled for no-nesting.
+      # The block *was* added for Nested Lua support. But I think it was
+      # more necessary because modules.include is now '**/*.lua', not '*/*.lua'.
+      # Or maybe this block was because we now use expand_path, not realpath.
+      if !$cfg['modules.no-nesting'] && pattern.start_with?('**/')
         # E.g., '**/.*' or '**/*'
         dirname = File.dirname(path)
         return true if ['.', ::File::ALT_SEPARATOR, ::File::SEPARATOR].include?(dirname)
         # There's at least one ancestor directory.
-        # Remove the '**', which ::File.fnmatch doesn't recognize.
+        # Remove the '**', which ::File.fnmatch doesn't recognize, and the path delimiter.
         # 2017-08-08: Why does Rubocop not follow Style/RegexpLiteral here?
         #pattern = pattern.gsub(/^\*\*\//, '')
         pattern = pattern.gsub(%r{^\*\*\/}, '')
       end
+
       ::File.fnmatch(pattern, path)
     end
 

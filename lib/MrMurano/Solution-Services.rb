@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.18 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -264,8 +264,9 @@ module MrMurano
     end
 
     def tolocalname(item, _key)
+      name = item[:name]
       # Nested Lua support: the platform dot-delimits modules in a require.
-      name = File.join(item[:name].split('.'))
+      name = File.join(name.split('.')) unless $cfg['modules.no-nesting']
       # NOTE: On syncup, user can specify file extension (or use * glob),
       # but on syncdown, the ".lua" extension is hardcoded (here).
       "#{name}.lua"
@@ -293,8 +294,17 @@ module MrMurano
     end
 
     def to_remote_item(root, path)
+      if $cfg['modules.no-nesting']
+        name = path.basename.to_s.sub(/\..*/, '')
+      else
+        name = remote_item_nested_name(root, path)
+      end
+      ModuleItem.new(name: name)
+    end
+
+    def remote_item_nested_name(root, path)
+      # 2017-07-26: Nested Lua support.
       root = root.expand_path
-      # MAYBE/2017-08-08: Let user disable nested Lua module feature?
       if path.basename.sub(/\.lua$/i, '').to_s.include?('.')
         warning(
           "WARNING: Do not use periods in filenames. Rename: ‘#{path.basename}’"
@@ -311,9 +321,8 @@ module MrMurano
       relpath = path.relative_path_from(root).to_s
       # MAYBE: Use ALT_SEPARATOR to support Windows?
       #   ::File::ALT_SEPARATOR || ::File::SEPARATOR
-      #name = relpath.sub(/\..*$/, '').tr(::File::SEPARATOR, '.')
-      name = relpath.sub(/\.lua$/i, '').tr(::File::SEPARATOR, '.')
-      ModuleItem.new(name: name)
+      #relpath.sub(/\..*$/, '').tr(::File::SEPARATOR, '.')
+      relpath.sub(/\.lua$/i, '').tr(::File::SEPARATOR, '.')
     end
 
     def synckey(item)
