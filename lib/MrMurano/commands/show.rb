@@ -18,6 +18,8 @@ Show readable information about the current configuration.
   ).strip
   c.project_not_required = true
 
+  c.option '--[no-]ids', 'Show IDs'
+
   c.action do |args, _options|
     if args.include?('help')
       ::Commander::UI.enable_paging
@@ -61,7 +63,9 @@ Show readable information about the current configuration.
       end
 
       if selected_business
-        puts %(business: #{selected_business.name})
+        biz_info = %(business: #{selected_business.name})
+        biz_info += %( <#{selected_business.bid}>)
+        puts biz_info
       else
         #puts 'no business selected'
         MrMurano::Verbose.error MrMurano::Business.missing_business_id_msg
@@ -72,7 +76,9 @@ Show readable information about the current configuration.
       # E.g., {:bizid=>"ABC", :type=>"application", :apiId=>"XXX", :sid=>"XXX",
       #        :name=>"ABC", :domain=>"ABC.apps.exosite.io" }
       if selected_application
-        puts %(application: https://#{selected_application.domain})
+        sol_info = %(application: https://#{selected_application.domain})
+        sol_info += %( <#{selected_application.sid}>)
+        puts sol_info
       elsif selected_application_id
         #puts 'selected application not in business'
         puts "application ID from config is not in business (#{selected_application_id})"
@@ -87,7 +93,9 @@ Show readable information about the current configuration.
       # E.g., {:bizid=>"ABC", :type=>"product", :apiId=>"XXX", :sid=>"XXX",
       #        :name=>"ABC", :domain=>"ABC.m2.exosite.io" }
       if selected_product
-        puts %(product: #{selected_product.name})
+        sol_info = %(product: #{selected_product.name})
+        sol_info += %( <#{selected_product.sid}>)
+        puts sol_info
       elsif selected_product_id
         #puts 'selected product not in business'
         puts "product ID from config is not in business (#{selected_product_id})"
