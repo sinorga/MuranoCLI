@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -21,8 +21,6 @@ module MrMurano
       return unless solsecret.exist?
       # Is in JSON, which as a subset of YAML, so use YAML parser
       solsecret.open do |io|
-        # rubocop:disable Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
-        # MAYBE/2017-07-02: Switch to YAML.safe_load.
         ss = YAML.load(io)
 
         pff = $cfg.file_at('passwords', :user)

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.18 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -605,7 +605,9 @@ module MrMurano
         pattern = pattern.gsub(%r{^\*\*\/}, '')
       end
 
-      ::File.fnmatch(pattern, path)
+      ignore = ::File.fnmatch(pattern, path)
+      debug "Excluded #{path}" if ignore
+      ignore
     end
 
     #######################################################################

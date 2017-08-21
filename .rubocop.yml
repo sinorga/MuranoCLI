@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -71,6 +71,14 @@ Metrics/PerceivedComplexity:
 Metrics/LineLength:
   Enabled: false
 
+# "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
+# Rubocop suggests using safe_load.
+#   https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-load
+#   https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-safe_load
+# I think Psych.safe_load was added in Ruby 2.1, so we shouldn't use it. [lb]
+Security/YAMLLoad:
+  Enabled: false
+
 # "Use only ascii symbols in comments."
 Style/AsciiComments:
   Enabled: false
@@ -83,6 +91,12 @@ Style/Documentation:
 #  http://www.rubydoc.info/github/bbatsov/RuboCop/RuboCop/Cop/Style/ConditionalAssignment
 Style/ConditionalAssignment:
   EnforcedStyle: assign_inside_condition
+
+# "Use each_with_object instead of inject."
+Style/EachWithObject:
+  Exclude:
+    # Methods copy-pasted from a blog.
+    - 'lib/MrMurano/hash.rb'
 
 # "Put empty method definitions on a single line."
 # You can do, e.g.,
@@ -102,6 +116,7 @@ Style/FileName:
     - 'MuranoCLI.gemspec'
     - 'Rakefile'
     - 'lib/MrMurano.rb'
+    - 'lib/MrMurano/makePretty.rb'
     - 'lib/MrMurano/Account.rb'
     - 'lib/MrMurano/Business.rb'
     - 'lib/MrMurano/Config-Migrate.rb'
@@ -137,6 +152,23 @@ Style/GlobalVars:
 Style/NumericPredicate:
   Enabled: false
 
+# "Don't use parentheses around the condition of an elsif."
+# This is a matter of taste. Rubocop would have you do, e.g.,
+#   if something
+#      ...
+#   elsif another_thing ||
+#         something_else
+#     ...
+# But if you don't like lining up the condition like that, you
+# might want to try, e.g.,
+#   elsif (
+#     another_thing ||
+#     something_else
+#   )
+#     ...
+Style/ParenthesesAroundCondition:
+  Enabled: false
+
 # "Provide an exception class and message as arguments to raise."
 Style/RaiseArgs:
   EnforcedStyle: compact
@@ -159,6 +191,22 @@ Style/RedundantParentheses:
 #  #EnforcedStyle: percent_r
 #  EnforcedStyle: slashes
 
+# "Use safe navigation (&.) instead of checking if an object exists before
+#  calling the method."
+#
+# - "The Safe Navigation Operator (&.) in Ruby"
+#    http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/
+#
+# The safe nav op was only added in Ruby 2.3.0, and we support 2.0.
+Style/SafeNavigation:
+  Enabled: false
+
+# "Do not use semicolons to terminate expressions."
+Style/Semicolon:
+  Exclude:
+    # Methods copy-pasted from a blog.
+    - 'lib/MrMurano/hash.rb'
+
 # "Avoid comma after the last parameter of a method call."
 # FIXME/2017-06-30: Is this okay?
 Style/TrailingCommaInArguments:
@@ -169,16 +217,6 @@ Style/TrailingCommaInLiteral:
   # Rather than disable, tweak for multiline lists, so Rubocop will
   # still tell you not to use trailing comma in single-line list.
   EnforcedStyleForMultiline: "consistent_comma"
-
-# "Use safe navigation (&.) instead of checking if an object exists before
-#  calling the method."
-#
-# - "The Safe Navigation Operator (&.) in Ruby"
-#    http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/
-#
-# The safe nav op was only added in Ruby 2.3.0, and we support 2.0.
-Style/SafeNavigation:
-  Enabled: false
 
 AllCops:
   Include:
@@ -203,20 +241,4 @@ AllCops:
     #
     # 2017-08-16: Ug.
     - 'lib/MrMurano/optparse.rb'
-    #
-    # FIXME/2017-07-25: Finish linting these files, and delete from this list.
-    # ✗ 2017-07-31: 943 offenses herein these 26 files.
-    # ✓ 2017-08-16: 420 offenses herein these 15 files.
-    - 'lib/MrMurano/Content.rb'
-    - 'lib/MrMurano/Mock.rb'
-    - 'lib/MrMurano/Setting.rb'
-    - 'lib/MrMurano/SubCmdGroupContext.rb'
-    - 'lib/MrMurano/Webservice-Endpoint.rb'
-    - 'lib/MrMurano/Webservice-File.rb'
-    - 'lib/MrMurano/hash.rb'
-    - 'lib/MrMurano/http.rb'
-    - 'lib/MrMurano/makePretty.rb'
-    - 'lib/MrMurano/commands/business.rb'
-    - 'lib/MrMurano/commands/cors.rb'
-    - 'lib/MrMurano/commands/settings.rb'
 

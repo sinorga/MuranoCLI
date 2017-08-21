@@ -1,3 +1,10 @@
+# Last Modified: 2017.08.20 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'erb'
 require 'securerandom'
 
@@ -9,55 +16,56 @@ module MrMurano
     end
 
     def show
-      file = Pathname.new(get_testpoint_path)
-      if file.exist? then
-        authorization = %{if request.headers["authorization"] == "}
+      file = Pathname.new(testpoint_path)
+      if file.exist?
+        authorization = %(if request.headers["authorization"] == ")
         file.open('rb') do |io|
           io.each_line do |line|
             auth_line = line.include?(authorization)
-            if auth_line then
+            if auth_line
               capture = /\=\= "(.*)"/.match(line)
               return capture.captures[0]
             end
           end
         end
       end
-      return false
+      false
     end
 
-    def get_mock_template
-      path = get_mock_template_path()
-      return ::File.read(path)
+    def mock_template
+      path = mock_template_path
+      ::File.read(path)
     end
 
-    def get_testpoint_path
+    def testpoint_path
       file_name = 'testpoint.post.lua'
-      path = %{#{$cfg['location.endpoints']}/#{file_name}}
-      return path
+      path = %(#{$cfg['location.endpoints']}/#{file_name})
+      path
     end
 
-    def get_mock_template_path
-      return ::File.join(::File.dirname(__FILE__), 'template', 'mock.erb')
+    def mock_template_path
+      ::File.join(::File.dirname(__FILE__), 'template', 'mock.erb')
     end
 
     def create_testpoint
       uuid = SecureRandom.uuid
-      template = ERB.new(get_mock_template)
+      template = ERB.new(mock_template)
       endpoint = template.result(binding)
 
-      Pathname.new(get_testpoint_path).open('wb') do |io|
+      Pathname.new(testpoint_path).open('wb') do |io|
         io << endpoint
       end
-      return uuid
+      uuid
     end
 
     def remove_testpoint
-      file = Pathname.new(get_testpoint_path)
-      if file.exist? then
+      file = Pathname.new(testpoint_path)
+      if file.exist?
         file.unlink
         return true
       end
-      return false
+      false
     end
   end
 end
+

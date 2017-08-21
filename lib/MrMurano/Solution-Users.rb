@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -59,9 +59,6 @@ module MrMurano
       # for now, we'll read, modify, write
       here = []
       if local.exist?
-        # FIXME/2017-07-18: Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
-        #   Disabling [rubo]cop for now.
-        # rubocop:disable Security/YAMLLoad
         local.open('rb') { |io| here = YAML.load(io) }
         here = [] if here == false
       end
@@ -79,7 +76,6 @@ module MrMurano
       # for now, we'll read, modify, write
       here = []
       if local.exist?
-        # FIXME/2017-07-18: Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
         local.open('rb') { |io| here = YAML.load(io) }
         here = [] if here == false
       end
@@ -109,7 +105,6 @@ module MrMurano
 
       # MAYBE/2017-07-03: Do we care if there are duplicate keys in the yaml? See dup_count.
       here = []
-      # FIXME/2017-07-18: Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
       from.open { |io| here = YAML.load(io) }
       here = [] if here == false
 

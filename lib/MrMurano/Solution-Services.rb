@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.18 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -181,8 +181,6 @@ module MrMurano
       cache_file = $cfg.file_at(cache_file_name)
       if cache_file.file?
         cache_file.open('r+') do |io|
-          # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
-          # rubocop:disable Security/YAMLLoad
           cache = YAML.load(io)
           cache = {} unless cache
           io.rewind
@@ -205,7 +203,6 @@ module MrMurano
       return nil unless cache_file.file?
       ret = nil
       cache_file.open('r') do |io|
-        # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
         cache = YAML.load(io)
         return nil unless cache
         if cache.key?(local_path.to_s)

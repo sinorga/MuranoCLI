@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -10,7 +10,7 @@ require 'MrMurano/Account'
 require 'MrMurano/Business'
 require 'MrMurano/ReCommander'
 
-MSG_BUSINESSES_NONE_FOUND = 'No businesses found' if !defined? MSG_BUSINESSES_NONE_FOUND
+MSG_BUSINESSES_NONE_FOUND = 'No businesses found' unless defined? MSG_BUSINESSES_NONE_FOUND
 
 # *** Base business command help.
 # -------------------------------
@@ -49,19 +49,17 @@ def cmd_options_add_id_and_name(c)
 end
 
 def cmd_defaults_id_and_name(options)
-  if !options.id.nil? && !options.name.nil?
-    MrMurano::Verbose.error('Please only --id or --name but not both')
-    exit 1
-  end
+  return if options.id.nil? || options.name.nil?
+  MrMurano::Verbose.error('Please specify only --id or --name but not both')
+  exit 1
 end
 
 def cmd_verify_args_and_id_or_name!(args, options)
-  if !args.any? && (options.id || options.name)
-    MrMurano::Verbose.warning(
-      'The --id and --name options only apply when specifying a business name or ID.'
-    )
-    exit 1
-  end
+  return unless args.none? && (options.id || options.name)
+  MrMurano::Verbose.warning(
+    'The --id and --name options only apply when specifying a business name or ID.'
+  )
+  exit 1
 end
 
 def cmd_option_business_pickers(c)
@@ -123,7 +121,7 @@ Find business by name or ID.
   c.action do |args, options|
     # SKIP: c.verify_arg_count!(args)
     cmd_defaults_id_and_name(options)
-    if !args.any? && !any_business_pickers?(options)
+    if args.none? && !any_business_pickers?(options)
       MrMurano::Verbose.error('What would you like to find?')
       exit 1
     end
@@ -149,9 +147,9 @@ def business_find_or_ask!(acc, options)
     biz = businesses_ask_which(acc) if biz.nil?
   end
 
-  match_bid = $cfg.set('business.id', nil, :internal)
-  match_name = $cfg.set('business.name', nil, :internal)
-  match_fuzzy = $cfg.set('business.fuzzy', nil, :internal)
+  $cfg.set('business.id', nil, :internal)
+  $cfg.set('business.name', nil, :internal)
+  $cfg.set('business.fuzzy', nil, :internal)
 
   biz
 end

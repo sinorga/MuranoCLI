@@ -1,16 +1,23 @@
+# Last Modified: 2017.08.20 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
 
 module MrMurano
   class SubCmdGroupHelp
-    attr :name, :description
+    attr_reader :description
+    attr_reader :name
 
     def initialize(command)
       @name = command.syntax.to_s
       @description = command.description.to_s
       @runner = ::Commander::Runner.instance
       prefix = /^#{command.name.to_s} /
-      cmds = @runner.instance_variable_get(:@commands).select{|n,_| n.to_s =~ prefix}
+      cmds = @runner.instance_variable_get(:@commands).select { |n, _| n.to_s =~ prefix }
       @commands = cmds
-      als = @runner.instance_variable_get(:@aliases).select{|n,_| n.to_s =~ prefix}
+      als = @runner.instance_variable_get(:@aliases).select { |n, _| n.to_s =~ prefix }
       @aliases = als
 
       @options = {}
@@ -24,6 +31,8 @@ module MrMurano
         @description
       when :help
         nil
+      # rubucop/disable Style/EmptyElse: "Redundant else-clause."
+      # Rubocop seems incorrect about this one.
       else
         nil
       end
@@ -37,6 +46,8 @@ module MrMurano
       @commands[name.to_s]
     end
 
+    # rubocop:disable Style/AccessorMethodName
+    # "Do not prefix reader method names with get_."
     def get_help
       hf = @runner.program(:help_formatter).new(self)
       pc = Commander::HelpFormatter::ProgramContext.new(self).get_binding
@@ -45,5 +56,3 @@ module MrMurano
   end
 end
 
-
-#  vim: set ai et sw=2 ts=2 :

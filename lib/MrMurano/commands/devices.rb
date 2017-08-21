@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -198,7 +198,7 @@ Enables Identifiers, creating the digial shadow in Murano.
         exit 1
       end
       unless header =~ /\s*ID\s*(,SSL Client Certificate\s*)?/
-        prd.error "Missing column headers in file \"#{options.file}\""
+        prd.error %(Missing column headers in file "#{options.file}")
         prd.error %(First line in file should be either "ID" or "ID, SSL Client Certificate")
         exit 2
       end

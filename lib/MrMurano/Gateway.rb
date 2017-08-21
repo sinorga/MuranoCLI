@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -297,8 +297,6 @@ module MrMurano
         end
 
         here = {}
-        # rubocop:disable Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
-        # MAYBE/2017-07-02: Convert to safe_load.
         from.open { |io| here = YAML.load(io) }
         here = {} if here == false
 
@@ -412,7 +410,7 @@ module MrMurano
         file = HTTP::FormData::File.new(local.to_s, content_type: 'text/csv')
         form = HTTP::FormData.create(identities: file)
         req = Net::HTTP::Post.new(uri)
-        set_def_headers(req)
+        add_headers(req)
         req.content_type = form.content_type
         req.content_length = form.content_length
         req.body = form.to_s
