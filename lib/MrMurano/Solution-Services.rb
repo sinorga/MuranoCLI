@@ -70,6 +70,9 @@ module MrMurano
         raise 'no file' unless thereitem.script
         script = thereitem.script
       end
+
+      script = config_vars_decode(script)
+
       localpath = Pathname.new(localpath) unless localpath.is_a?(Pathname)
       name = mkname(thereitem)
       pst = thereitem.to_h.merge(
@@ -383,6 +386,10 @@ module MrMurano
       [remote[:service], remote[:event]].join('_')
     end
 
+    def synckey(item)
+      "#{item[:service]}_#{item[:event]}"
+    end
+
     def list(call=nil, data=nil, &block)
       ret = get(call, data, &block)
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
@@ -395,20 +402,37 @@ module MrMurano
         debug "skiplist excludes: #{item[:service]}.#{item[:event]}" if toss
         toss
       end
-      items.map do |item|
-        if item[:event] == 'event'
-          if item[:service] == $cfg['product.id']
-            # MAGIC_STRING: {config.value} substitution.
-            item[:svc_alias] = '{product.id}'
-          else
-            debug "No svc_alias determined for item: #{item}"
-          end
-        end
-        EventHandlerItem.new(item)
-      end
+      items.map { |item| EventHandlerItem.new(item) }
       # MAYBE/2017-08-17:
       #   items.map! ...
       #   sort_by_name(items)
+    end
+
+    def resolve_config_var_usage!(there, local)
+      # Substitute '{product.id}' for the actual product.id if a corresponding
+      # local file does not exist, or if the local file already uses the alias.
+      encode_items = {}
+      local.each do |item|
+        encode_items[item.service] = {} if encode_items[item.service].nil?
+        encode_items[item.service][item.event] = item.svc_alias
+      end
+      there.map! do |item|
+        if (
+          !encode_items[item.service].nil? &&
+          !encode_items[item.service][item.event].nil?
+        )
+          svc_alias = encode_items[item.service][item.event]
+        else
+          # There's no corresponding local item.
+          _encoded, svc_alias = encode_config_var(item.service)
+        end
+        svc_alias = nil if svc_alias == item.service
+        unless svc_alias.nil?
+          item.svc_alias = svc_alias
+          item.name.sub!($cfg[svc_alias], "{#{svc_alias}}")
+        end
+        item
+      end
     end
 
     def skip?(item, skiplist)
@@ -486,43 +510,10 @@ module MrMurano
         # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
         md = @match_header.match(line)
         if !md.nil?
-          # Try to match svc against a {config.value}.
-          mat = /^\{([^\.}]+)\.([^\.}]+)\}$/.match(md[:service])
-          if mat.nil?
-            service = md[:service]
-          else
-            # User specified a config value, e.g., "--#EVENT {product.id} event".
-            service = $cfg["#{mat[1]}.#{mat[2]}"]
-            if service.nil?
-              warning "Config value not found for variable: ‘#{md[:service]}’"
-              # The platform should complain about file not found,
-              # and we'll process everything else.
-              service = md[:service]
-            end
-          end
-          # FIXME/2017-08-09: device2.event is now in the skiplist,
-          #   but some tests have a "device2 data_in" script, which
-          #   gets changed to "device2.event" here and then uploaded
-          #   (note that skiplist does not apply to local items).
-          #   You can test this code via:
-          #     rspec ./spec/cmd_syncdown_spec.rb
-          #   which has a fixture with device2.data_in specified.
-          #   QUESTION: Does writing device2.event do anything?
-          #     You cannot edit that handler from the web UI...
-          #     - Should we change the test?
-          #     - Should we get rid of this device2 hack?
-          if service == 'device2'
-            event_event = 'event'
-            event_type = md[:event]
-            # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's now 'event'?
-            #   Want this?:
-            #     event_type = 'event' if event_type == 'data_in'
-          else
-            event_event = md[:event]
-            event_type = nil
-          end
+          service, config_var = decode_config_var(md[:service])
+          event_event, event_type = resolve_event_type(service, md[:event])
           # Header line.
-          svc_alias = md[:service] if service != md[:service]
+          svc_alias = config_var if service != md[:service]
           cur = EventHandlerItem.new(
             #name
             local_path: path,
@@ -598,8 +589,88 @@ module MrMurano
       true # Both match (or both empty).
     end
 
-    def synckey(item)
-      "#{item[:service]}_#{item[:event]}"
+    def config_vars_decode(script)
+      config_vars_translate(script, method(:decode_config_var))
+    end
+
+    def config_vars_encode(script)
+      config_vars_translate(script, method(:encode_config_var))
+    end
+
+    def config_vars_translate(script, codec)
+      new_script = ''
+      # Replace the service with a {{config.value}} if appropriate.
+      script.lines.each do |line|
+        # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
+        md = @match_header.match(line)
+        unless md.nil?
+          service, _config_var = codec.call(md[:service])
+          line = line.gsub(
+            /--#EVENT (?<service>\S+) (?<event>\S+)/,
+            "--#EVENT #{service} \\k<event>"
+          )
+        end
+        new_script += line
+      end
+      new_script
+    end
+
+    def decode_config_var(term)
+      decoded = term
+      config_var = nil
+      # Try to match svc against a {config.value}.
+      mat = /^\{([^\.}]+)\.([^\.}]+)\}$/.match(term)
+      unless mat.nil?
+        # User specified a config value, e.g., "--#EVENT {product.id} event".
+        config_var = "#{mat[1]}.#{mat[2]}"
+        decoded = $cfg[config_var]
+        if decoded.nil?
+          warning "Config value not found for variable: ‘#{term}’"
+          # The platform should complain about file not found,
+          # and we'll process everything else.
+          decoded = term
+          config_var = nil
+        end
+      end
+      [decoded, config_var]
+    end
+
+    def encode_config_var(term)
+      encoded = term
+      config_var = nil
+      # MEH/2017-08-22: For now, only matching against one config var.
+      #   Maybe in the future we'd want to examine all the config vars?
+      # MAGIC_STRING: {config.value} substitution.
+      if term == $cfg['product.id']
+        encoded = '{product.id}'
+        config_var = 'product.id'
+      end
+      [encoded, config_var]
+    end
+
+    def resolve_event_type(service, event)
+      # FIXME/2017-08-09: device2.event is now in the skiplist,
+      #   but some tests have a "device2 data_in" script, which
+      #   gets changed to "device2.event" here and then uploaded
+      #   (note that skiplist does not apply to local items).
+      #   You can test this code via:
+      #     rspec ./spec/cmd_syncdown_spec.rb
+      #   which has a fixture with device2.data_in specified.
+      #   QUESTION: Does writing device2.event do anything?
+      #     You cannot edit that handler from the web UI...
+      #     - Should we change the test?
+      #     - Should we get rid of this device2 hack?
+      if service == 'device2'
+        event_event = 'event'
+        event_type = event
+        # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's now 'event'?
+        #   Want this?:
+        #     event_type = 'event' if event_type == 'data_in'
+      else
+        event_event = event
+        event_type = nil
+      end
+      [event_event, event_type]
     end
 
     def resurrect_undeletables(localbox, therebox)

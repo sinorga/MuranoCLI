@@ -311,7 +311,7 @@ module MrMurano
       local.dirname.mkpath
       local.open('wb') do |io|
         fetch(id) do |chunk|
-          io.write chunk
+          io.write config_vars_encode chunk
         end
       end
       update_mtime(local, item)
@@ -411,7 +411,9 @@ module MrMurano
     end
 
     def diff_item_write(io, merged, _local, _remote)
-      io << merged[:local_path].read
+      contents = merged[:local_path].read
+      contents = config_vars_decode(contents)
+      io << contents
     end
 
     #
@@ -614,6 +616,18 @@ module MrMurano
       ignore
     end
 
+    def resolve_config_var_usage!(there, local)
+      # pass; derived classes should implement.
+    end
+
+    def config_vars_decode(script)
+      script
+    end
+
+    def config_vars_encode(script)
+      script
+    end
+
     def sync_item_allowed(actioning, item_name)
       if $cfg['tool.dry']
         MrMurano::Verbose.whirly_interject do
@@ -784,7 +798,7 @@ module MrMurano
       tlcl = Tempfile.new([tolocalname(merged, @itemkey) + '_local_', '.lua'])
       Pathname.new(tlcl.path).open('wb') do |io|
         if merged.key?(:script)
-          io << merged[:script]
+          io << config_vars_decode(merged[:script])
         else
           # For most items, read the local file.
           # For resources, it's a bit trickier.
@@ -979,8 +993,11 @@ module MrMurano
     def items_lists(options, selected)
       # Fetch arrays of items there, and items here/local.
       there = list
-      there = _matcher(there, selected)
       local = locallist(skip_warn: options[:skip_missing_warning])
+
+      resolve_config_var_usage!(there, local)
+
+      there = _matcher(there, selected)
       local = _matcher(local, selected)
 
       therebox = {}
