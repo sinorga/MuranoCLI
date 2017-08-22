@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.21 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -31,7 +31,7 @@ module MrMurano
         @description
       when :help
         nil
-      # rubucop/disable Style/EmptyElse: "Redundant else-clause."
+      # rubocop:disable Style/EmptyElse: "Redundant else-clause."
       # Rubocop seems incorrect about this one.
       else
         nil
