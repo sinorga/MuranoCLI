@@ -116,8 +116,7 @@ module MrMurano
         end
         limitkeys = [:method, :path, :script, :content_type, @itemkey]
         remote = remote.to_h.select { |k, _v| limitkeys.include? k }
-        #      post('', remote)
-        if remote.is_a? @itemkey
+        if remote.key? @itemkey
           return unless upload_item_allowed(remote[@itemkey])
           put('/' + remote[@itemkey], remote) do |request, http|
             response = http.request(request)
