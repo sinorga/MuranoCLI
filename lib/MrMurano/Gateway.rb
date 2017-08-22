@@ -25,6 +25,7 @@ module MrMurano
       include Http
       include Verbose
       include SolutionId
+      include SyncAllowed
 
       def initialize
         @solntype = 'product.id'

@@ -18,6 +18,7 @@ require 'MrMurano/verbosing'
 require 'MrMurano/hash'
 #require 'MrMurano/Config'
 #require 'MrMurano/ProjectFile'
+require 'MrMurano/SyncAllowed'
 ##require 'MrMurano/SyncRoot'
 
 module MrMurano
@@ -27,6 +28,8 @@ module MrMurano
   # pulling those things.
   #
   module SyncUpDown
+    include SyncAllowed
+
     # This is one item that can be synced.
     class Item
       # @return [String] The name of this item.
@@ -628,33 +631,6 @@ module MrMurano
       script
     end
 
-    def sync_item_allowed(actioning, item_name)
-      if $cfg['tool.dry']
-        MrMurano::Verbose.whirly_interject do
-          say("--dry: Not #{actioning} item: #{fancy_tick(item_name)}")
-        end
-        false
-      else
-        true
-      end
-    end
-
-    def remove_item_allowed(id)
-      sync_item_allowed('removing', id)
-    end
-
-    def upload_item_allowed(id)
-      sync_item_allowed('uploading', id)
-    end
-
-    def download_item_allowed(id)
-      sync_item_allowed('downloading', id)
-    end
-
-    def removelocal_item_allowed(id)
-      sync_item_allowed('removing-local', id)
-    end
-
     #######################################################################
     # Methods that provide the core status/syncup/syncdown
 
@@ -1044,7 +1020,7 @@ module MrMurano
 
       (localbox.keys & therebox.keys).each do |key|
         # Skip this item if it's got duplicate conflicts.
-        next if localbox[key].dup_count == 0
+        next if !localbox[key].is_a?(Hash) && localbox[key].dup_count == 0
         # Want 'local' to override 'there' except for itemkey.
         if options[:asdown]
           mrg = therebox[key].reject { |k, _v| k == @itemkey.to_sym }

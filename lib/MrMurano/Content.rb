@@ -15,6 +15,7 @@ require 'MrMurano/Config'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
 require 'MrMurano/SolutionId'
+require 'MrMurano/SyncAllowed'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
@@ -24,6 +25,7 @@ module MrMurano
       include Http
       include Verbose
       include SolutionId
+      include SyncAllowed
 
       def initialize
         @solntype = 'product.id'
