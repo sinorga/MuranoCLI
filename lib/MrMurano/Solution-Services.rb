@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.21 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -54,6 +54,7 @@ module MrMurano
 
     # ??? remove
     def remove(name)
+      return unless remove_item_allowed(name)
       delete('/' + name)
     end
 
@@ -79,10 +80,18 @@ module MrMurano
         name: name,
       )
       debug "f: #{localpath} >> #{pst.reject { |k, _| k == :script }.to_json}"
+      therealias = mkalias(thereitem)
+      upload_script(therealias, name, localpath, pst)
+    end
+
+    def upload_script(therealias, name, localpath, pst)
       # Try PUT. If 404, then POST.
       # I.e., PUT if not exists, else POST to create.
       updated_at = nil
-      put('/' + mkalias(thereitem), pst) do |request, http|
+
+      return unless upload_item_allowed(therealias)
+
+      put('/' + therealias, pst) do |request, http|
         response = http.request(request)
         isj, jsn = isJSON(response.body)
         # ORDER: An HTTPNoContent is also a HTTPSuccess, so the latter comes first.

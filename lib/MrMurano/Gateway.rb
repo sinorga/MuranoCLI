@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -155,10 +155,13 @@ module MrMurano
       end
 
       def remove(itemkey)
+        return unless remove_item_allowed(itemkey)
         @there.delete_if { |item| item[@itemkey] == itemkey }
       end
 
       def upload(_local, remote, _modify)
+        # Not calling, e.g., `return unless upload_item_allowed(local)`
+        #   See instead: syncup_after and syncdown_after/resources_write
         @there.delete_if { |item| item[@itemkey] == remote[@itemkey] }
         @there << remote.reject { |k, _v| %i[synckey synctype].include? k }
       end
@@ -192,6 +195,8 @@ module MrMurano
       end
 
       def download(_local, item)
+        # Not calling, e.g., `return unless download_item_allowed(item[@itemkey])`
+        #   See instead: syncup_after and syncdown_after/resources_write
         @here = locallist if @here.nil?
         # needs to append/merge with file
         @here.delete_if do |i|
@@ -218,7 +223,9 @@ module MrMurano
       end
 
       def removelocal(_local, item)
-        # needs to append/merge with file
+        # Not calling, e.g., `return unless removelocal_item_allowed(item[@itemkey])`
+        #   See instead: syncup_after and syncdown_after/resources_write
+        # Append/merge with file.
         key = @itemkey.to_sym
         @here.delete_if do |it|
           it[key] == item[key]
@@ -423,6 +430,7 @@ module MrMurano
       ## Delete a device
       # @param identifier [String] Who to delete.
       def remove(identifier)
+        return unless remove_item_allowed(identifier)
         delete("/#{CGI.escape(identifier.to_s)}")
       end
 

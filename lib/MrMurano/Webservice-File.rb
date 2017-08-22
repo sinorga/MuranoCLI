@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -82,6 +82,7 @@ module MrMurano
       # @param path [String] The identifying key for this item
       def remove(path)
         path = path[1..-1] if path[0] == '/'
+        return unless remove_item_allowed(path)
         delete('/' + URI.encode_www_form_component(path))
       end
 
@@ -119,6 +120,9 @@ module MrMurano
         form = HTTP::FormData.create(file: file)
         req = Net::HTTP::Put.new(uri)
         add_headers(req)
+
+        return unless upload_item_allowed(remote[@itemkey])
+
         workit(req) do |request, http|
           request.content_type = form.content_type
           request.content_length = form.content_length

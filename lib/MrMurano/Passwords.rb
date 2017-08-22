@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -81,6 +81,11 @@ module MrMurano
       return unless @data.is_a?(Hash)
       hd = @data[host]
       return unless !hd.nil? && hd.is_a?(Hash)
+      if $cfg['tool.dry']
+        MrMurano::Verbose.whirly_interject do
+          say(%(--dry: Not removing password for #{fancy_tick("#{user}@#{host}")}))
+        end
+      end
       @data[host].delete(user) if hd.key?(user)
     end
 

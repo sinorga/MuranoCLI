@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -70,6 +70,7 @@ module MrMurano
     end
 
     def remove(id)
+      return unless remove_item_allowed(id)
       delete("/#{id}")
     end
 

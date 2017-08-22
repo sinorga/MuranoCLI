@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -170,6 +170,18 @@ module MrMurano
 
     def pluralize?(word, count)
       MrMurano::Verbose.pluralize?(word, count)
+    end
+
+    def self.fancy_tick(string)
+      if $cfg['tool.ascii']
+        "'#{string}'"
+      else
+        "‘#{string}’"
+      end
+    end
+
+    def fancy_tick(string)
+      MrMurano::Verbose.fancy_tick(string)
     end
 
     # 2017-07-01: Whirly wrappers. Maybe delete someday

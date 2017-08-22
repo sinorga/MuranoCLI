@@ -297,7 +297,6 @@ module MrMurano
 #        warning "Not downloading into bundled item #{synckey(item)}"
 #        return
 #      end
-      local.dirname.mkpath
       id = item[@itemkey.to_sym]
       if id.nil?
         debug "!!! Missing '#{@itemkey}', using :id instead!"
@@ -305,6 +304,11 @@ module MrMurano
         id = item[:id]
         raise "Both #{@itemkey} and id in item are nil!" if id.nil?
       end
+
+      relpath = local.relative_path_from(Pathname.pwd).to_s
+      return unless download_item_allowed(relpath)
+
+      local.dirname.mkpath
       local.open('wb') do |io|
         fetch(id) do |chunk|
           io.write chunk
@@ -388,6 +392,7 @@ module MrMurano
     # @param dest [Pathname] Full path of item to be removed
     # @param item [Item] Full details of item to be removed
     def removelocal(dest, _item)
+      return unless removelocal_item_allowed(dest)
       dest.unlink if dest.exist?
     end
 
@@ -609,6 +614,33 @@ module MrMurano
       ignore
     end
 
+    def sync_item_allowed(actioning, item_name)
+      if $cfg['tool.dry']
+        MrMurano::Verbose.whirly_interject do
+          say("--dry: Not #{actioning} item: #{fancy_tick(item_name)}")
+        end
+        false
+      else
+        true
+      end
+    end
+
+    def remove_item_allowed(id)
+      sync_item_allowed('removing', id)
+    end
+
+    def upload_item_allowed(id)
+      sync_item_allowed('uploading', id)
+    end
+
+    def download_item_allowed(id)
+      sync_item_allowed('downloading', id)
+    end
+
+    def removelocal_item_allowed(id)
+      sync_item_allowed('removing-local', id)
+    end
+
     #######################################################################
     # Methods that provide the core status/syncup/syncdown
 
@@ -670,16 +702,11 @@ module MrMurano
 
     def syncup_item(item, options, action, verbage)
       if options[action]
-        if !$cfg['tool.dry']
-          prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
-          prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
-          sync_update_progress(prog_msg)
-          yield item
-        else
-          MrMurano::Verbose.whirly_interject do
-            say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
-          end
-        end
+        # It's up to the callback to check and honor $cfg['tool.dry'].
+        prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
+        prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
+        sync_update_progress(prog_msg)
+        yield item
       elsif $cfg['tool.verbose']
         MrMurano::Verbose.whirly_interject do
           say("--no-#{action}: Not #{verbage.downcase} item #{item[:synckey]}")
@@ -735,15 +762,11 @@ module MrMurano
 
     def syncdown_item(item, into, options, action, verbage)
       if options[action]
-        if !$cfg['tool.dry']
-          prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
-          prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
-          sync_update_progress(prog_msg)
-          dest = tolocalpath(into, item)
-          yield dest, item
-        else
-          say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
-        end
+        prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
+        prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
+        sync_update_progress(prog_msg)
+        dest = tolocalpath(into, item)
+        yield dest, item
       elsif $cfg['tool.verbose']
         say("--no-#{action}: Not #{verbage.downcase} item #{item[:synckey]}")
       end

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -59,10 +59,16 @@ module MrMurano
         if !file.nil?
           data = YAML.load_file(file)
         else
-          data = $project['routes.cors']
+          file = $project['routes.cors']
           # If it is just a string, then is a file to load.
-          data = YAML.load_file(data) if data.is_a? String
+          if file.is_a? String
+            data = YAML.load_file(file)
+          else
+            data = file
+            file = %(ProjectFile['routes.cors'])
+          end
         end
+        return unless upload_item_allowed(file)
         put('', data)
       end
     end

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -118,6 +118,7 @@ module MrMurano
         remote = remote.to_h.select { |k, _v| limitkeys.include? k }
         #      post('', remote)
         if remote.is_a? @itemkey
+          return unless upload_item_allowed(remote[@itemkey])
           put('/' + remote[@itemkey], remote) do |request, http|
             response = http.request(request)
             case response
@@ -133,6 +134,8 @@ module MrMurano
           end
         else
           verbose "\tNo itemkey, creating"
+          #return unless upload_item_allowed(remote)
+          return unless upload_item_allowed(local)
           post('', remote)
         end
       end
@@ -140,6 +143,7 @@ module MrMurano
       ##
       # Delete an endpoint
       def remove(id)
+        return unless remove_item_allowed(id)
         delete('/' + id.to_s)
       end
 

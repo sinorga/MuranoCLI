@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -34,11 +34,13 @@ module MrMurano
     end
 
     def remove(id)
+      return unless remove_item_allowed(id)
       delete('/' + id.to_s)
     end
 
     # @param modify Bool: True if item exists already and this is changing it
     def upload(_local, remote, _modify)
+      return unless upload_item_allowed(remote[@itemkey])
       # Roles cannot be modified, so must delete and post.
       delete('/' + remote[@itemkey]) do |request, http|
         response = http.request(request)
@@ -66,6 +68,7 @@ module MrMurano
         Hash.transform_keys_to_symbols(i)[@itemkey] == item[@itemkey]
       end
       here << item.reject { |k, _v| %i[synckey synctype].include? k }
+      return unless download_item_allowed(item[@itemkey])
       local.open('wb') do |io|
         io.write here.map { |i| Hash.transform_keys_to_strings(i) }.to_yaml
       end
@@ -83,6 +86,7 @@ module MrMurano
       here.delete_if do |it|
         Hash.transform_keys_to_symbols(it)[key] == item[key]
       end
+      return unless removelocal_item_allowed(item[key])
       local.open('wb') do |io|
         io.write here.map { |i| Hash.transform_keys_to_strings(i) }.to_yaml
       end
@@ -147,10 +151,11 @@ module MrMurano
     end
 
     # @param modify Bool: True if item exists already and this is changing it
-    def upload(_local, _remote, _modify)
+    def upload(local, _remote, _modify)
       # TODO: figure out APIs for updating users.
       warning %(Updating Users is not yet implemented.)
       # post does work if the :password field is set.
+      return unless upload_item_allowed(local)
     end
 
     def synckey(item)

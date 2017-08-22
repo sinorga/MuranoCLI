@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -89,6 +89,8 @@ module MrMurano
         }
         params[:tags] = tags.to_json if !tags.nil? && tags.is_a?(Hash)
 
+        return unless upload_item_allowed(name)
+
         ret = get("/#{CGI.escape(name)}/upload?#{URI.encode_www_form(params)}")
         debug "POST instructions: #{ret}"
         raise "Method isn't POST!!!" unless ret.is_a?(Hash) && ret[:method] == 'POST'
@@ -140,6 +142,7 @@ module MrMurano
       # Remove content by name
       # @param name [String] Name of content to be deleted
       def remove(name)
+        return unless remove_item_allowed(name)
         delete("/#{CGI.escape(name)}")
       end
 
@@ -147,6 +150,7 @@ module MrMurano
       # @param name [String] Name of content to be downloaded
       # @param block [Block] Block to process data as it is downloaded
       def download(name, &block)
+        return unless download_item_allowed(name)
         # This is a two step process.
         # 1: Get the get instructions for S3.
         # 2: fetch from S3.
