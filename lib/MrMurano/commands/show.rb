@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -20,7 +20,7 @@ Show readable information about the current configuration.
 
   c.option '--[no-]ids', 'Show IDs'
 
-  c.action do |args, _options|
+  c.action do |args, options|
     if args.include?('help')
       ::Commander::UI.enable_paging
       say MrMurano::SubCmdGroupHelp.new(c).get_help
@@ -64,7 +64,7 @@ Show readable information about the current configuration.
 
       if selected_business
         biz_info = %(business: #{selected_business.name})
-        biz_info += %( <#{selected_business.bid}>)
+        biz_info += %( <#{selected_business.bid}>) if options.ids
         puts biz_info
       else
         #puts 'no business selected'
@@ -77,7 +77,7 @@ Show readable information about the current configuration.
       #        :name=>"ABC", :domain=>"ABC.apps.exosite.io" }
       if selected_application
         sol_info = %(application: https://#{selected_application.domain})
-        sol_info += %( <#{selected_application.sid}>)
+        sol_info += %( <#{selected_application.sid}>) if options.ids
         puts sol_info
       elsif selected_application_id
         #puts 'selected application not in business'
@@ -94,7 +94,7 @@ Show readable information about the current configuration.
       #        :name=>"ABC", :domain=>"ABC.m2.exosite.io" }
       if selected_product
         sol_info = %(product: #{selected_product.name})
-        sol_info += %( <#{selected_product.sid}>)
+        sol_info += %( <#{selected_product.sid}>) if options.ids
         puts sol_info
       elsif selected_product_id
         #puts 'selected product not in business'
