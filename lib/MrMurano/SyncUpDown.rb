@@ -293,10 +293,10 @@ module MrMurano
     # @param local [Pathname] Full path of where to download to
     # @param item [Item] The item to download
     def download(local, item)
-#      if item[:bundled]
-#        warning "Not downloading into bundled item #{synckey(item)}"
-#        return
-#      end
+      #if item[:bundled]
+      #  warning "Not downloading into bundled item #{synckey(item)}"
+      #  return
+      #end
       id = item[@itemkey.to_sym]
       if id.nil?
         debug "!!! Missing '#{@itemkey}', using :id instead!"
