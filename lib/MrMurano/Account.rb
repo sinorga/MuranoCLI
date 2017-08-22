@@ -158,7 +158,7 @@ Or set your password with `murano password set <username>`.
           (
             match_bid.include?(biz[:bizid]) ||
             match_name.include?(biz[:name]) ||
-            match_termy.any? do |term|
+            match_fuzzy.any? do |term|
               biz[:name] =~ /#{Regexp.escape(term)}/i || biz[:bizid] =~ /#{Regexp.escape(term)}/i
             end
           )
