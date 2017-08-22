@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -42,6 +42,26 @@ program :description, %(
 if ARGV.include?('--no-page')
   program :help_paging, false
   ARGV.delete('--no-page')
+end
+
+# If being piped, e.g.,
+#   murano command ... | ...
+# or
+#   VAR=$(murano command ...)
+# etc., then do not do progress.
+# NOTE: This only works on POSIX systems....
+begin
+  # For files, `readlink` returns, e.g.,
+  #   fu5rse4xdww2ke29
+  # For piped subshells, `readlink` returns, e.g.,
+  #   pipe:[973352]
+  # MAGIC_NUMBER: 1 is the processes's output file descriptor.
+  link = File.readlink("/proc/#{$$}/fd/1")
+  if link.start_with?('pipe:') && !ARGV.include?('--no-progress') && !ARGV.include?('--progress')
+    ARGV.push('--no-progress')
+  end
+rescue Errno::ENOENT
+  # Meh.
 end
 
 default_command :help
