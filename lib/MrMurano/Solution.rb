@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.21 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -127,6 +127,8 @@ module MrMurano
       #     the results.
       #path = path || '?select=id,service'
       matches = list(path)
+      # 2017-08-21: The only caller so far is the link command,
+      #   which passes the Solution ID as svc_name.
       matches.select { |match| match[:service] == svc_name }
     end
 
