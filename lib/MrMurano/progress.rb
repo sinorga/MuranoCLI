@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.02 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -32,6 +32,13 @@ module MrMurano
       '▗',
     ].freeze
 
+    EXO_QUADRANTS_7 = [
+      '-',
+      '\\',
+      '|',
+      '/',
+    ].freeze
+
     def whirly_start(msg)
       if $cfg['tool.verbose']
         whirly_pause if @whirly_users > 0
@@ -54,7 +61,7 @@ module MrMurano
 
     def whirly_show
       Whirly.start(
-        spinner: EXO_QUADRANTS,
+        spinner: $cfg['tool.ascii'] && EXO_QUADRANTS_7 || EXO_QUADRANTS,
         status: @whirly_msg,
         append_newline: false,
         #remove_after_stop: false,
