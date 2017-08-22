@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.21 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -49,8 +49,6 @@ module MrMurano
       attr_accessor :synckey
       # @return [String] The syncable type.
       attr_accessor :synctype
-      # @return [String] For device2, the event type.
-      attr_accessor :type
       # @return [String] The updated_at time from the server is used to detect changes.
       attr_accessor :updated_at
       # @return [Integer] Positive if multiple conflicting files found for same item.
