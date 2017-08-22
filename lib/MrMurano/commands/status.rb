@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.18 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -109,6 +109,7 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       unless item[:pp_desc].to_s.empty? || item[:pp_desc] == item[:synckey]
         desc += " (#{item[:pp_desc]})"
       end
+      # NOTE: This path is the endpoint path.
       desc += " [#{item[:method]} #{item[:path]}]" if item[:method] && item[:path]
       desc
     end
@@ -149,6 +150,16 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
         end
       end
 
+      unless ret[:clash].empty?
+        pretty_group_header(
+          ret[:clash], 'Conflicting items', 'in conflict', options.grouped
+        )
+        ret[:clash].each do |item|
+          abbrev = $cfg['tool.ascii'] && 'x' || '✗'
+          interject " #{abbrev} #{item[:pp_type]}  #{highlight_del(fmtr(item, options))}"
+        end
+      end
+
       return unless options.show_all
       interject 'Unchanged:' if options.grouped
       ret[:unchg].each { |item| interject "   #{item[:pp_type]}  #{fmtr(item, options)}" }
@@ -171,15 +182,15 @@ Endpoints can be selected with a "#<method>#<path glob>" pattern.
       Rainbow(msg).red.bright
     end
 
-    @grouped = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
+    @grouped = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [], clash: [] }
     def gmerge(ret, type, desc, options)
       if options.grouped
         out = @grouped
       else
-        out = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
+        out = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [], clash: [] }
       end
 
-      %i[toadd todel tomod unchg skipd].each do |kind|
+      %i[toadd todel tomod unchg skipd clash].each do |kind|
         ret[kind].each do |item|
           item = item.to_h
           item[:pp_type] = type

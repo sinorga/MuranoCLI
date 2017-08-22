@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.21 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -458,33 +458,34 @@ module MrMurano
         # Get a list of SyncUpDown::Item's, or a class derived thereof.
         bitems = localitems(location)
         # Use synckey for quicker merging.
-        # 2017-07-02: Argh. If two files have the same identity, this
-        # simple loop masks that there are two files with the same identity!
         #bitems.each { |b| items[synckey(b)] = b }
-        warns = {}
+        # 2017-07-02: If two files have the same identity, the simple loop
+        #   masks that there are two files with the same identity. So check
+        #   first for duplicates, and then process each item.
+        seen = {}
         bitems.each do |item|
           skey = synckey(item)
-          if items.key? skey
-            warns[skey] = 0 unless warns.key?(skey)
-            if warns[skey].zero?
-              items[skey][:dup_count] = warns[skey]
-              # The dumb_synckey is just so we don't overwrite the
-              # original item, or other duplicates, in the hash.
-              dumb_synckey = "#{skey}-#{warns[skey]}"
-              # This just sets the alias for the output, so duplicates look unique.
-              item[@itemkey.to_sym] = dumb_synckey
-              # Don't delete the original item, so that other dupes see it.
-              #items.delete(skey)
-              msg = "Duplicate local file(s) found for ‘#{skey}’"
-              msg += " for ‘#{self.class.description}’" if self.class.description.to_s != ''
-              #msg += '!'
-              warning(msg)
+          seen[skey] = seen.key?(skey) && seen[skey] + 1 || 1
+        end
+        counts = {}
+        bitems.each do |item|
+          skey = synckey(item)
+          if seen[skey] > 1
+            if items[skey].nil?
+              items[skey] = MrMurano::EventHandler::EventHandlerItem.new(item)
+              items[skey][:dup_count] = 0
             end
-            warns[skey] += 1
-            item[:dup_count] = warns[skey]
-            dumb_synckey = "#{skey}-#{warns[skey]}"
-            item[@itemkey.to_sym] = dumb_synckey
-            items[dumb_synckey] = item
+            counts[skey] = counts.key?(skey) && counts[skey] + 1 || 1
+            # Use a unique synckey so all duplicates make it in the list.
+            uniq_synckey = "#{skey}-#{counts[skey]}"
+            item[:dup_count] = counts[skey]
+            # This sets the alias for the output, so duplicates look unique.
+            item[@itemkey.to_sym] = uniq_synckey
+            items[uniq_synckey] = item
+            msg = "Duplicate definition found for ‘#{skey}’"
+            msg += " for ‘#{self.class.description}’" if self.class.description.to_s != ''
+            warning(msg)
+            warning(" #{item.local_path}")
           else
             items[skey] = item
           end
@@ -866,15 +867,25 @@ module MrMurano
 
       tomod, unchg = items_mods_and_chgs(options, therebox, localbox)
 
+      clash = items_cull_clashes!([toadd, todel, tomod, unchg])
+
       if options[:unselected]
-        { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
+        {
+          toadd: toadd,
+          todel: todel,
+          tomod: tomod,
+          unchg: unchg,
+          skipd: [],
+          clash: clash,
+        }
       else
         {
-          toadd: toadd.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          todel: todel.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          tomod: tomod.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          unchg: unchg.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          toadd: select_selected(toadd),
+          todel: select_selected(todel),
+          tomod: select_selected(tomod),
+          unchg: select_selected(unchg),
           skipd: [],
+          clash: select_selected(clash),
         }
       end
     end
@@ -930,7 +941,7 @@ module MrMurano
         skip_sol = true if tested && !passed
       end
       return nil unless skip_sol
-      ret = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
+      ret = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [], clash: [] }
       ret[:skipd] << { synckey: self.class.description }
       ret
     end
@@ -962,10 +973,12 @@ module MrMurano
       local.each do |item|
         skey = synckey(item)
         # 2017-07-02: Check for local duplicates.
-        skey += "-#{item[:dup_count]}" unless item[:dup_count].nil?
+        unless item[:dup_count].nil? || item[:dup_count].zero?
+          skey += "-#{item[:dup_count]}"
+        end
         item[:synckey] = skey
         item[:synctype] = self.class.description
-        localbox[item[:synckey]] = item
+        localbox[skey] = item
       end
 
       # Some items are considered "undeletable", meaning if a
@@ -992,6 +1005,8 @@ module MrMurano
       unchg = []
 
       (localbox.keys & therebox.keys).each do |key|
+        # Skip this item if it's got duplicate conflicts.
+        next if localbox[key].dup_count == 0
         # Want 'local' to override 'there' except for itemkey.
         if options[:asdown]
           mrg = therebox[key].reject { |k, _v| k == @itemkey.to_sym }
@@ -1022,6 +1037,29 @@ module MrMurano
       else
         list.sort_by(&:name)
       end
+    end
+
+    def select_selected(items)
+      items.select { |i| i[:selected] }.map { |i| i.delete(:selected); i }
+    end
+
+    def items_cull_clashes!(items_list)
+      items_list = [items_list] unless items_list.is_a?(Array)
+      clash = []
+      items_list.each do |items|
+        items.select! do |item|
+          if item[:dup_count].nil?
+            true
+          elsif item[:dup_count].zero?
+            # This is the control item.
+            false
+          else
+            clash.push(item)
+            false
+          end
+        end
+      end
+      clash
     end
   end
 end

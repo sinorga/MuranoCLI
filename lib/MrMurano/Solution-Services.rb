@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.21 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -247,7 +247,6 @@ module MrMurano
     end
 
     def initialize(sid=nil)
-      # FIXME/VERIFY/2017-07-02: Check that products do not have Modules.
       @solntype = 'application.id'
       super
       @uriparts << :module
@@ -346,7 +345,12 @@ module MrMurano
       attr_accessor :event
       # @return [String] For device2 events, the type of event.
       attr_accessor :type
+      # @return [String] Service alias, e.g., "{product.id}"
+      attr_accessor :svc_alias
       # @return [Boolean] True if local phantom item via eventhandler.undeletable.
+      #                   I.e., the file does not exist locally and is the
+      #                   empty string on the server, so locally considered
+      #                   empty string, too.
       attr_accessor :phantom
     end
 
@@ -382,10 +386,20 @@ module MrMurano
         debug "skiplist excludes: #{item[:service]}.#{item[:event]}" if toss
         toss
       end
-      items.map { |item| EventHandlerItem.new(item) }
-        # MAYBE/2017-08-17:
-        #   items.map! ...
-        #   sort_by_name(items)
+      items.map do |item|
+        if item[:event] == 'event'
+          if item[:service] == $cfg['product.id']
+            # MAGIC_STRING: {config.value} substitution.
+            item[:svc_alias] = '{product.id}'
+          else
+            debug "No svc_alias determined for item: #{item}"
+          end
+        end
+        EventHandlerItem.new(item)
+      end
+      # MAYBE/2017-08-17:
+      #   items.map! ...
+      #   sort_by_name(items)
     end
 
     def skip?(item, skiplist)
@@ -397,15 +411,19 @@ module MrMurano
 
     def cmp_svc_evt(item, svc_evt)
       service, event = svc_evt.split('.', 2)
+      svc_match = (
+        service == item[:service] ||
+        (!item[:svc_alias].to_s.empty? && service == item[:svc_alias])
+      )
       if event.nil? || item[:event] == '*'
-        service == item[:service]
+        svc_match
       else
         # rubocop:disable Style/IfInsideElse
         #svc_evt == "#{item[:service]}.#{item[:event]}"
         if service == '*'
           event == item[:event]
         else
-          service == item[:service] && event == item[:event]
+          svc_match && event == item[:event]
         end
       end
     end
@@ -459,6 +477,20 @@ module MrMurano
         # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
         md = @match_header.match(line)
         if !md.nil?
+          # Try to match svc against a {config.value}.
+          mat = /^\{([^\.}]+)\.([^\.}]+)\}$/.match(md[:service])
+          if mat.nil?
+            service = md[:service]
+          else
+            # User specified a config value, e.g., "--#EVENT {product.id} event".
+            service = $cfg["#{mat[1]}.#{mat[2]}"]
+            if service.nil?
+              warning "Config value not found for variable: ‘#{md[:service]}’"
+              # The platform should complain about file not found,
+              # and we'll process everything else.
+              service = md[:service]
+            end
+          end
           # FIXME/2017-08-09: device2.event is now in the skiplist,
           #   but some tests have a "device2 data_in" script, which
           #   gets changed to "device2.event" here and then uploaded
@@ -470,7 +502,7 @@ module MrMurano
           #     You cannot edit that handler from the web UI...
           #     - Should we change the test?
           #     - Should we get rid of this device2 hack?
-          if md[:service] == 'device2'
+          if service == 'device2'
             event_event = 'event'
             event_type = md[:event]
             # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's now 'event'?
@@ -480,14 +512,31 @@ module MrMurano
             event_event = md[:event]
             event_type = nil
           end
-          # header line.
+          # Header line.
+          svc_alias = md[:service] if service != md[:service]
           cur = EventHandlerItem.new(
-            service: md[:service],
+            #name
+            local_path: path,
+            #id
+            script: line,
+            line: lineno,
+            #line_end
+            #diff
+            #selected
+            #synckey
+            #synctype
+            #type
+            #updated_at
+            #dup_count
+            #alias
+            #updated_at
+            #created_at
+            #solution_id
+            service: service,
             event: event_event,
             type: event_type,
-            local_path: path,
-            line: lineno,
-            script: line,
+            #phantom
+            svc_alias: svc_alias,
           )
         elsif !cur.nil? && !cur[:script].nil?
           # 2017-07-02: Frozen string literal: change << to +=
@@ -498,24 +547,27 @@ module MrMurano
       cur[:line_end] = lineno unless cur.nil?
 
       # If cur is nil here, then we need to do a :legacy check.
-      if cur.nil? && $project['services.legacy'].is_a?(Hash)
-        spath = path.relative_path_from(from)
-        debug "No headers: #{spath}"
-        service, event = $project['services.legacy'][spath.to_s]
-        debug "Legacy lookup #{spath} => [#{service}, #{event}]"
-        unless service.nil? || event.nil?
-          warning %(Event in #{spath} missing header, but has legacy support.)
-          warning %(Please add the header "--#EVENT #{service} #{event}")
-          cur = EventHandlerItem.new(
-            service: service,
-            event: event,
-            type: nil,
-            local_path: path,
-            line: 0,
-            line_end: lineno,
-            script: path.read, # FIXME: ick, fix this.
-          )
-        end
+      to_remote_item_legacy_check(cur, path, from, lineno)
+    end
+
+    def to_remote_item_legacy_check(cur, path, from, lineno)
+      return cur unless cur.nil? && $project['services.legacy'].is_a?(Hash)
+      spath = path.relative_path_from(from)
+      debug "No headers: #{spath}"
+      service, event = $project['services.legacy'][spath.to_s]
+      debug "Legacy lookup #{spath} => [#{service}, #{event}]"
+      unless service.nil? || event.nil?
+        warning %(Event in #{spath} missing header, but has legacy support.)
+        warning %(Please add the header "--#EVENT #{service} #{event}")
+        cur = EventHandlerItem.new(
+          service: service,
+          event: event,
+          type: nil,
+          local_path: path,
+          line: 0,
+          line_end: lineno,
+          script: path.read, # FIXME: ick, fix this.
+        )
       end
       cur
     end
@@ -526,9 +578,15 @@ module MrMurano
       md = pattern_pattern.match(pattern)
       return false if md.nil?
       debug "match pattern: '#{md[:service]}' '#{md[:event]}'"
-      return false unless md[:service].empty? || item[:service].casecmp(md[:service]).zero?
+      if (
+        !md[:service].empty? &&
+        !item[:service].casecmp(md[:service]).zero? &&
+        (item[:svc_alias].to_s.empty? || !item[:svc_alias].casecmp(md[:service]).zero?)
+      )
+        return false
+      end
       return false unless md[:event].empty? || item[:event].casecmp(md[:event]).zero?
-      true # Both match (or are empty.)
+      true # Both match (or both empty).
     end
 
     def synckey(item)
