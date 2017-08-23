@@ -152,8 +152,8 @@ module Commander
     # or we did something elsewhere that seriously cripples it. In any
     # case, this fixes all its quirks.
     def help_hack
-      fix_args
-      show_alias_help_maybe!
+      do_help = fix_args
+      show_alias_help_maybe! if do_help
     end
 
     def help_opts
@@ -165,6 +165,8 @@ module Commander
       # But if `murano command --help` is specified, don't let cmdr
       # handle it, otherwise it just shows the command description,
       # but not any of the subcommands (our SubCmdGroupContext code).
+      # Note: not checking help_opts here, which includes 'help, because
+      #   'help' might really be a command argument (like solution name).
       do_help = (@args & %w[-h --help]).any? || active_command.name == 'help'
       if do_help
         # If there are options in addition to --help, then Commander
@@ -187,12 +189,49 @@ module Commander
         # and `--help` flag are moved from @args, and then `murano usage 1234`
         # is executed (and args are not validated by Commander but merely passed
         # to the command action, so `usage` gets args=['1234']). Whadda wreck.
-        @args.reject! { |arg| arg.start_with?('-') && !help_opts.include?(arg) }
+        reject_next = false
+        @args.reject! do |arg|
+          reject = false
+          if reject_next
+            reject = true
+            reject_next = false
+          elsif arg.start_with?('-') && !help_opts.include?(arg)
+            reject = true
+            # See if the next argument should also be consumed.
+            switches = @options.select do |opt|
+              if arg =~ /^-[^-]/
+                # Single char abbrev: look for exact match.
+                opt[:args].include?(arg)
+              else
+                # Long switch: Commander matches abbrevs of longs...
+                opt[:args].any? { |oarg| oarg =~ /^#{arg}/ }
+              end
+            end
+            if switches.length > 1
+              # MAYBE/2017-08-23: Always do this check, not just for help.
+              ambig = MrMurano::Verbose.fancy_ticks(arg)
+              match = switches.map { |sw| MrMurano::Verbose.fancy_ticks(sw) }
+              if match.length > 1
+                match[-1] = "and #{match[-1]}"
+              end
+              match = match.join(', ')
+              MrMurano::Verbose.error('Ambiguous option: #{ambig} matches: #{match}')
+              exit 2
+            elsif switches.length == 1
+              if switches.first[:args].any? { |opt| opt.start_with?('--') && opt.include?(' ') }
+                # There's a space in the --long setting, e.g., '--config KEY=VAL',
+                # so we know there's a argument following.
+                reject_next = true
+              end
+            end
+          end
+          reject
+        end
       end
       @purargs = @args - help_opts
-      return if active_command.name == 'help'
+      return do_help if active_command.name == 'help'
       # Any command other than `murano help` or `murano --help`.
-      return if !do_help || active_command.name.include?(' ')
+      return do_help if !do_help || active_command.name.include?(' ')
       # This is a single-word command, e.g., 'link', not 'link list',
       #   as in `murano link --help`, not `murano link list --help`.
       # Positional parameters break Commander. E.g.,
@@ -203,6 +242,7 @@ module Commander
       @args = @args[0..0]
       # Add back in the --help if the command is not a subcommand help.
       @args.push('--help') unless active_command.subcmdgrouphelp
+      do_help
     end
 
     def show_alias_help_maybe!
