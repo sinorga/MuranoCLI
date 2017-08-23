@@ -496,13 +496,33 @@ module MrMurano
       # @param values [Hash] Aliases and the values to write.
       def write(identifier, values)
         debug "Will Write: #{values}"
+        # EXPLAIN/2017-08-23: Why not escape the ID?
+        #   #{CGI.escape(identifier.to_s)}
         patch("/#{identifier}/state", values)
       end
 
       # Read the current state for a device
       # @param identifier [String] The identifier for the device to read.
       def read(identifier)
+        # EXPLAIN/2017-08-23: Why not escape the ID?
+        #   #{CGI.escape(identifier.to_s)}
         get("/#{identifier}/state")
+      end
+
+      def lock(identifier)
+        patch("/#{CGI.escape(identifier.to_s)}", locked: true)
+      end
+
+      def unlock(identifier)
+        patch("/#{CGI.escape(identifier.to_s)}", locked: false)
+      end
+
+      def revoke(identifier)
+        patch("/#{CGI.escape(identifier.to_s)}", auth: { expire: 0 })
+      end
+
+      def authenticize(identifier, key, type)
+        patch("/#{CGI.escape(identifier.to_s)}", auth: { key: key, type: type })
       end
     end
   end

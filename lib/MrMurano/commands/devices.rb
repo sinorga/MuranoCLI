@@ -6,6 +6,7 @@
 #  vim:tw=0:ts=2:sw=2:et:ai
 
 require 'date'
+require 'securerandom'
 require 'MrMurano/Gateway'
 require 'MrMurano/ReCommander'
 
@@ -335,6 +336,90 @@ Get the URL for the HTTP-Data-API for this Project.
   end
 end
 
+command 'device lock' do |c|
+  c.syntax = %(murano device lock <identifier>)
+  c.summary = %(Lock a device, not allowing connections to it until unlocked)
+  c.description = %(
+Lock a device, not allowing connections to it until unlocked.
+  ).strip
+
+  c.action do |args, _options|
+    c.verify_arg_count!(args, 1, ['Missing device identifier'])
+    prd = MrMurano::Gateway::Device.new
+    prd.lock(args[0])
+  end
+end
+
+command 'device unlock' do |c|
+  c.syntax = %(murano device unlock <identifier>)
+  c.summary = %(Unlock a device, allowing connections to it again)
+  c.description = %(
+Unlock a device, allowing connections to it again.
+  ).strip
+
+  c.action do |args, _options|
+    c.verify_arg_count!(args, 1, ['Missing device identifier'])
+    prd = MrMurano::Gateway::Device.new
+    prd.unlock(args[0])
+  end
+end
+
+command 'device revoke' do |c|
+  c.syntax = %(murano device revoke <identifier>)
+  c.summary = %(Force device to reprovision)
+  c.description = %(
+Force device to reprovision.
+
+This will revoke the device's keys and cause it to temporarily disconnect. The will then reconnect and be provisioned with new keys.
+  ).strip
+
+  c.action do |args, _options|
+    c.verify_arg_count!(args, 1, ['Missing device identifier'])
+    prd = MrMurano::Gateway::Device.new
+    # MAYBE/2017-08-23: This command doesn't return an error if the device
+    # ID was not found, or if the keys were already revoked. Do we care?
+    # At least the lock command fails if the device ID is not found.
+    prd.revoke(args[0])
+  end
+end
+
+command 'device token' do |c|
+  c.syntax = %(murano device revoke <identifier> (<token>|--random) [--options])
+  c.summary = %(Set authentication key token)
+  c.description = %(
+Set authentication key token.
+  ).strip
+
+  c.option '-r', '--random', %(Generate a random, 40 character token)
+
+  c.action do |args, options|
+    c.verify_arg_count!(args, 1, ['Missing device identifier'])
+
+    prd = MrMurano::Gateway::Device.new
+
+    if args.count < 2 && !options.random
+      prd.error %(Please specify a token or --random)
+      exit 1
+    elsif args.count > 1 && options.random
+      prd.error 'Please specify a token or --random but not both'
+      exit 1
+    end
+
+    if options.random
+      #pool = [*('a'..'z'), *('A'..'Z'), *('0'..'9')]
+      pool = [*('a'..'z'), *('0'..'9')]
+      token = [*0..39].map { |_| pool[SecureRandom.random_number(pool.length)] }.join('')
+    elsif args.count > 1
+      token = args[1]
+    else
+      raise 'Impossible'
+    end
+
+    prd.authenticize(args[0], token, :token)
+    puts token
+  end
+end
+
 alias_command 'product device', 'device'
 alias_command 'product device list', 'device list'
 alias_command 'product devices list', 'device list'
@@ -345,4 +430,8 @@ alias_command 'product device enable', 'device enable'
 alias_command 'product device activate', 'device activate'
 alias_command 'product device delete', 'device delete'
 alias_command 'product device httpurl', 'device httpurl'
+alias_command 'product device lock', 'device lock'
+alias_command 'product device unlock', 'device unlock'
+alias_command 'product device revoke', 'device revoke'
+alias_command 'product device token', 'device token'
 
