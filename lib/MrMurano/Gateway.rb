@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -381,23 +381,35 @@ module MrMurano
       ## Create a device with given Identity
       # @param id [String] The new identity
       # @param opts [Hash] Options for the new device
+      # @option opts [Integer] :expire Time at microsecs since epoch when activation window closes.
+      #   (EXPLAIN/2017-08-23: For a certificate, is this different? Time when it must be reprovisioned?)
+      # @option opts [String,Pathname,IO] :key Shared secret for hash, password, token types;
+      #                                        or public key for certificate auth type.
+      #                                        May be string or IO/Pathname to file.
       # @option opts [String] :type One of: certificate, hash, password, signature, token
-      # @option opts [String,Pathname,IO] :publickey The certificate, or IO/Pathname to cert file
-      # @option opts [String] :privatekey Shared secret for hash, password, token types
-      # @option opts [String,Integer] :expire For Cert, when it must be reprovisioned, otherwise when the activation window closes.
+      DEVICE_AUTH_TYPES = %i[certificate hash password signature token].freeze
       def enable(id, opts=nil)
-        if !opts.nil?
-          #opts.reject! { |k, _v| !%i[type publickey privatekey expire].include?(k) }
-          opts.select! { |k, _v| %i[type publickey privatekey expire].include?(k) }
-          if opts.key?(:publickey) && !opts[:publickey].is_a?(String)
-            io = opts[:publickey]
-            opts[:publickey] = io.read
+        opts = {} if opts.nil?
+        props = { auth: {}, locked: false }
+        # See: okami_api/api/swagger/swagger.yaml
+        unless opts[:expire].nil?
+          raise ':expire must be a number' unless opts[:expire] =~ /^[0-9]+$/
+          props[:auth][:expire] = opts[:expire]
+        end
+        unless opts[:type].nil?
+          opts[:type] = opts[:type].to_sym
+          unless DEVICE_AUTH_TYPES.include?(opts[:type])
+            complaint = ":type must be one of #{DEVICE_AUTH_TYPES.join('|')}"
+            raise complaint
           end
-        else
-          opts = {}
+          props[:auth][:type] = opts[:type]
+        end
+        unless opts[:key].nil?
+          props[:auth][:key] = opts[:key].is_a?(String) && opts[:key] || opts[:key].read
+          props[:auth][:type] = :certificate if props[:auth][:type].nil?
         end
         whirly_start('Enabling Device...')
-        putted = put("/#{CGI.escape(id.to_s)}", opts)
+        putted = put("/#{CGI.escape(id.to_s)}", props)
         whirly_stop
         putted
       end
@@ -406,17 +418,19 @@ module MrMurano
 
       ## Create a bunch of devices at once
       # @param local [String, Pathname] CSV file of identifiers
-      # @param expire [Number] Expire time for all identities (ignored)
+      # @param expire [Number] Expire time for all identities
       # @return [void]
-      def enable_batch(local, _expire=nil)
+      def enable_batch(local, expire=nil)
         # Need to modify @uriparts for just this endpoint call.
         uriparts = @uriparts
         @uriparts[-1] = :identities
         uri = endpoint
         @uriparts = uriparts
-
         file = HTTP::FormData::File.new(local.to_s, content_type: 'text/csv')
-        form = HTTP::FormData.create(identities: file)
+        opts = {}
+        opts[:identities] = file
+        opts[:expire] = expire unless expire.nil?
+        form = HTTP::FormData.create(**opts)
         req = Net::HTTP::Post.new(uri)
         add_headers(req)
         req.content_type = form.content_type

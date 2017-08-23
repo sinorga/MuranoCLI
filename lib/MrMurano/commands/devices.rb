@@ -1,10 +1,11 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'date'
 require 'MrMurano/Gateway'
 require 'MrMurano/ReCommander'
 
@@ -175,25 +176,80 @@ If an alias is not settable, this will fail.
 end
 
 command 'device enable' do |c|
-  c.syntax = %(murano device enable [<identifier>|--file <identifiers>])
-  c.summary = %(Enable an Identifier; Creates device in Murano)
+  c.syntax = %(murano device enable (<identifier>|--file <path>) [--options])
+  c.summary = %(Enable Identifiers in Murano for real world devices)
   c.description = %(
-Enables Identifiers, creating the digial shadow in Murano.
+Enables Identifiers, creating devices, or digital shadows, in Murano.
   ).strip
 
+  c.option '-e', '--expire HOURS', %(Devices that do not activate within HOURS hours will be deleted for security purposes)
   c.option '-f', '--file FILE', %(A file of serial numbers, one per line)
-  c.option '--key FILE', %(Public TLS key for this device)
+  c.option '--key FILE', %(Path to file containing public TLS key for this device)
+  allowed_types = MrMurano::Gateway::Device::DEVICE_AUTH_TYPES.map(&:to_s).sort
+  c.option '--auth TYPE', %(Type of credential used to authenticate [#{allowed_types.join('|')}])
+  c.option '--cred KEY', %(The credential used to authenticate, e.g., token, password, etc.)
 
   c.action do |args, options|
-    # SKIP: c.verify_arg_count!(args)
+    c.verify_arg_count!(args, 1)
+
     prd = MrMurano::Gateway::Device.new
-    if !options.file.nil? && !options.key.nil?
-      prd.error %(Cannot use both --file and --key)
+
+    if args.count.zero? && options.file.to_s.empty?
+      prd.error 'Missing device identifier or --file'
+      exit 1
+    elsif !args.count.zero? && !options.file.to_s.empty?
+      prd.error 'Please specify an identifier or --file but not both'
       exit 1
     end
-    if options.file
+
+    if !options.file.nil? && (!options.key.nil? || !options.auth.nil? || !options.cred.nil?)
+      prd.error %(Cannot use --file with any of: --key, --auth, or --cred)
+      exit 1
+    end
+    if !options.key.nil? && !options.cred.nil?
+      prd.error %(Please use either --cred or --key but not both)
+      exit 1
+    end
+    if options.auth.nil? ^ options.cred.nil?
+      prd.error %(Please specify both --auth and --cred or neither)
+      exit 1
+    end
+    options.auth = options.auth.to_sym unless options.auth.nil?
+    unless options.key.nil?
+      if !options.auth.nil? && options.auth != :certificate
+        prd.warning %(You probably mean to use "--auth certificate" with --key)
+      else
+        options.auth = :certificate
+      end
+    end
+
+    unless options.expire.nil?
+      unless options.expire =~ /^[0-9]+$/
+        prd.error %(The --expire value is not a number of hours: #{prd.fancy_tick(options.expire)})
+        exit 1
+      end
+      options.expire.to_i
+      micros_since_epoch = DateTime.now.strftime('%Q').to_i * 1000
+      mircos_until_purge = options.expire.to_i * 60 * 1000 * 1000
+      options.expire = micros_since_epoch + mircos_until_purge
+    end
+
+    unless options.auth.nil?
+      options.auth = options.auth.to_sym
+      unless MrMurano::Gateway::Device.DEVICE_AUTH_TYPES.include?(options.auth)
+        MrMurano::Verbose.error("unrecognized --auth: #{options.auth}")
+        exit 1
+      end
+    end
+
+    if !options.file.to_s.empty?
       # Check file for headers.
-      header = File.new(options.file).gets
+      begin
+        header = File.new(options.file).gets
+      rescue Errno::ENOENT => err
+        prd.error %(Unable to open file #{prd.fancy_tick(options.file)}: #{err.message})
+        exit 2
+      end
       if header.nil?
         prd.error 'Nothing in file!'
         exit 1
@@ -203,17 +259,22 @@ Enables Identifiers, creating the digial shadow in Murano.
         prd.error %(First line in file should be either "ID" or "ID, SSL Client Certificate")
         exit 2
       end
-      prd.enable_batch(options.file)
+      prd.enable_batch(options.file, options.expire)
     elsif args.count > 0
+      opts = {}
+      opts[:expire] = options.expire unless options.expire.nil?
+      opts[:type] = options.auth unless options.auth.nil?
       if options.key
         File.open(options.key, 'rb') do |io|
-          prd.enable(args[0], type: :certificate, publickey: io)
+          prd.enable(args[0], **opts, key: io)
         end
       else
-        prd.enable(args[0])
+        opts[:key] = options.cred unless options.cred.nil?
+        prd.enable(args[0], **opts)
       end
     else
-      prd.error 'Missing an Identifier to enable'
+      # Impossible path: neither args nor --file; would've exited by now.
+      raise 'Impossible'
     end
   end
 end
