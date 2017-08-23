@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -42,22 +42,9 @@ program :description, %(
 # or
 #   VAR=$(murano command ...)
 # etc., then do not do progress.
-# NOTE: This only works on POSIX systems....
-begin
-  # For files, `readlink` returns, e.g.,
-  #   fu5rse4xdww2ke29
-  # For piped subshells, `readlink` returns, e.g.,
-  #   pipe:[973352]
-  # MAGIC_NUMBER: 1 is the processes's output file descriptor.
-  #link = File.readlink("/proc/#{$$}/fd/1")
-  link = File.readlink("/proc/#{$PROCESS_ID}/fd/1")
-  if link.start_with?('pipe:') && !ARGV.include?('--no-progress') && !ARGV.include?('--progress')
-    ARGV.push('--no-progress')
-  end
-# rubocop:disable Lint/HandleExceptions: "Do not suppress exceptions."
-# Seems like a dumb rule. [lb]
-rescue Errno::ENOENT
-  # Meh.
+# TEST/2017-08-23: Does this work on Windows?
+unless $stdout.tty?
+  ARGV.push('--no-progress')
 end
 
 default_command :help
