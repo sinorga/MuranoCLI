@@ -165,8 +165,8 @@ module Commander
       # But if `murano command --help` is specified, don't let cmdr
       # handle it, otherwise it just shows the command description,
       # but not any of the subcommands (our SubCmdGroupContext code).
-      # Note: not checking help_opts here, which includes 'help, because
-      #   'help' might really be a command argument (like solution name).
+      # Note: not checking help_opts here, which includes 'help', because
+      #   'help' might really be a command argument (e.g., a solution name).
       do_help = (@args & %w[-h --help]).any? || active_command.name == 'help'
       if do_help
         # If there are options in addition to --help, then Commander
@@ -220,7 +220,7 @@ module Commander
             elsif switches.length == 1
               if switches.first[:args].any? { |opt| opt.start_with?('--') && opt.include?(' ') }
                 # There's a space in the --long setting, e.g., '--config KEY=VAL',
-                # so we know there's a argument following.
+                # so we know there's an argument following.
                 reject_next = true
               end
             end
@@ -254,7 +254,7 @@ module Commander
       # Though it sometimes work, like with:
       #   $ murano --help product device enable
       # but only because Commander shows help for the 'device' command.
-      # I.e., this doesn't work: murano product push --help
+      # I.e., this doesn't work: `murano product push --help`
       # So we'll just roll our own help for aliases!
       @args -= help_opts
       cli_cmd = MrMurano::Verbose.fancy_ticks(@purargs.join(' '))

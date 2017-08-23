@@ -599,7 +599,7 @@ module MrMurano
 
     def config_vars_translate(script, codec)
       new_script = ''
-      # Replace the service with a {{config.value}} if appropriate.
+      # Replace the service with a {config.variable} if appropriate.
       script.lines.each do |line|
         # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
         md = @match_header.match(line)
@@ -618,7 +618,7 @@ module MrMurano
     def decode_config_var(term)
       decoded = term
       config_var = nil
-      # Try to match svc against a {config.value}.
+      # Try to match svc against a {config.variable}.
       mat = /^\{([^\.}]+)\.([^\.}]+)\}$/.match(term)
       unless mat.nil?
         # User specified a config value, e.g., "--#EVENT {product.id} event".
@@ -640,7 +640,7 @@ module MrMurano
       config_var = nil
       # MEH/2017-08-22: For now, only matching against one config var.
       #   Maybe in the future we'd want to examine all the config vars?
-      # MAGIC_STRING: {config.value} substitution.
+      # MAGIC_STRING: {config.variable} substitution.
       if term == $cfg['product.id']
         encoded = '{product.id}'
         config_var = 'product.id'
