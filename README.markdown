@@ -153,7 +153,7 @@ The current CORS options can be fetched with `murano cors`.
 There are three options for setting, the first and preferred way is to put
 your CORS options into a file named `cors.yaml`.
 
-Second and third are to put the CORS options in your project file.  In the
+Second and third are to put the CORS options in your project file. In the
 `routes` section, add a `cors` sub-section with either the name of the file
 to read, or the CORS options inline.
 
@@ -179,7 +179,7 @@ method and path. You set this with the following line:
 ```
 
 Optionally, you can set what the expected content type is too. (If you don't
-set this, the value is `application/json`)
+set this, the value is `application/json`.)
 
 ```lua
 --#ENDPOINT METHOD PATH CONTENT_TYPE
@@ -234,10 +234,10 @@ Tsdb.write{
 
 ### MURANO_CONFIGFILE environment and Dotenv
 
-The environment variable `MURANO_CONFIGFILE` is checked for an additional
-config to load. This, in conjunction with
-[dotenv](https://github.com/bkeepers/dotenv) support, allows for easily
-switching between development, staging, and production setups.
+The environment variable `MURANO_CONFIGFILE` is checked for an additional config
+to load. This, in conjunction with [dotenv](https://github.com/bkeepers/dotenv)
+support, allows for easily switching between development, staging, and production
+setups.
 
 To use this, write the three solution ids into `.murano.dev`, `.murano.stg`,
 and `.murano.prod`. Then write the `.env` file to point at the system you're
@@ -279,8 +279,8 @@ Currently these are:
 
 ### Output Format
 
-Many sub-commands respect the `outformat` setting.  This lets you switch the
-output between YAML, JSON, Ruby, CSV, and pretty tables.  Not all formats
+Many sub-commands respect the `outformat` setting. This lets you switch the
+output between YAML, JSON, Ruby, CSV, and pretty tables. Not all formats
 work with all commands.
 
 ```
@@ -294,8 +294,8 @@ work with all commands.
 ### Product Content Area
 
 MuranoCLI can manage the content area for a product. This area is a place to
-store files for use by devices.  Typically holding firmware images for
-Over-The-Air updating.  Although any kind of fleet wide data that devices
+store files for use by devices. Typically holding firmware images for
+Over-The-Air updating. Although any kind of fleet wide data that devices
 may need to download can be stored here.
 
 Once the `product.id` is set, the content for that product can be accessed
