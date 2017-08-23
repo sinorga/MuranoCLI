@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -50,12 +50,18 @@ global_option('--exclude-scopes SCOPES', Array, exclude_help) do |value|
 end
 
 # --no-page is handled early on, in bin/murano.
-global_option('--no-page', %(Do not page --help output))
+global_option('--[no-]page', %(Do not page --help output)) do |value|
+  $cfg['tool.no-page'] = !value
+end
 
 global_option('--[no-]plugins', %(Do not load plugins. Good for when one goes bad))
 
 global_option('--[no-]progress', %(Disable spinner and progress message)) do |value|
   $cfg['tool.no-progress'] = !value
+end
+
+global_option('--[no-]ascii', %(Use only ASCII in output)) do |value|
+  $cfg['tool.ascii'] = value
 end
 
 global_option('-V', '--verbose', %(Be chatty)) do

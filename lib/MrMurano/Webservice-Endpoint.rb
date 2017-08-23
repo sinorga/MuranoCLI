@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -16,7 +16,6 @@ module MrMurano
   # …/endpoint
   module Webservice
     class Endpoint < WebserviceBase
-
       # Route Specific details on an Item
       class RouteItem < Item
         # @return [String] HTTP method for this endpoint
@@ -49,7 +48,7 @@ module MrMurano
         ret = get
         return [] unless ret.is_a?(Array)
         ret.map do |item|
-          if item[:content_type].to_s.empty? then
+          if item[:content_type].to_s.empty?
             item[:content_type] = 'application/json'
           end
           # XXX should this update the script header?
@@ -69,9 +68,9 @@ module MrMurano
 
         ret[:content_type] = 'application/json' if ret[:content_type].empty?
 
-        script = ret[:script].lines.map{|l|l.chomp}
+        script = ret[:script].lines.map(&:chomp)
 
-        aheader = (script.first or "")
+        aheader = (script.first || '')
 
         rh = ['--#ENDPOINT', ret[:method].upcase, ret[:path]]
         rh << ret[:content_type] if ret[:content_type] != 'application/json'
@@ -81,19 +80,21 @@ module MrMurano
         # If header is wrong, replace it.
 
         md = @match_header.match(aheader)
-        if md.nil? then
+        if md.nil?
           # header missing.
           script.unshift rheader
-        elsif md[:method] != ret[:method] or
-          md[:path] != ret[:path] or
-          md[:ctype] != ret[:content_type] then
+        elsif (
+          md[:method] != ret[:method] ||
+          md[:path] != ret[:path] ||
+          md[:ctype] != ret[:content_type]
+        )
           # header is wrong.
           script[0] = rheader
         end
         # otherwise current header is good.
 
         script = script.join("\n") + "\n"
-        if block_given? then
+        if block_given?
           yield script
         else
           script
@@ -105,23 +106,24 @@ module MrMurano
       # @param local [Pathname] path to file to push
       # @param remote [RouteItem] of method and endpoint path
       # @param modify [Boolean] True if item exists already and this is changing it
-      def upload(local, remote, modify)
-        local = Pathname.new(local) unless local.kind_of? Pathname
-        raise "no file" unless local.exist?
+      def upload(local, remote, _modify)
+        local = Pathname.new(local) unless local.is_a? Pathname
+        raise 'no file' unless local.exist?
         # we assume these are small enough to slurp.
-        if remote.script.nil? then
+        if remote.script.nil?
           script = local.read
           remote[:script] = script
         end
         limitkeys = [:method, :path, :script, :content_type, @itemkey]
-        remote = remote.to_h.select{|k,v| limitkeys.include? k }
-        #      post('', remote)
-        if remote.has_key? @itemkey then
+        remote = remote.to_h.select { |k, _v| limitkeys.include? k }
+        if remote.key? @itemkey
+          return unless upload_item_allowed(remote[@itemkey])
           put('/' + remote[@itemkey], remote) do |request, http|
             response = http.request(request)
             case response
             when Net::HTTPSuccess
               #return JSON.parse(response.body)
+              return
             when Net::HTTPNotFound
               verbose "\tDoesn't exist, creating"
               post('/', remote)
@@ -131,6 +133,8 @@ module MrMurano
           end
         else
           verbose "\tNo itemkey, creating"
+          #return unless upload_item_allowed(remote)
+          return unless upload_item_allowed(local)
           post('', remote)
         end
       end
@@ -138,29 +142,31 @@ module MrMurano
       ##
       # Delete an endpoint
       def remove(id)
+        return unless remove_item_allowed(id)
         delete('/' + id.to_s)
       end
 
-      def tolocalname(item, key)
+      def tolocalname(item, _key)
         name = ''
         # 2017-07-02: Changing shovel operator << to +=
         # to support Ruby 3.0 frozen string literals.
-        name += item[:path].split('/').reject { |i| i.empty? }.join('-')
+        name += item[:path].split('/').reject(&:empty?).join('-')
         name += '.'
         # This downcase is just for the filename.
         name += item[:method].downcase
         name += '.lua'
+        name
       end
 
-      def to_remote_item(from, path)
+      def to_remote_item(_from, path)
         # Path could be have multiple endpoints in side, so a loop.
         items = []
-        path = Pathname.new(path) unless path.kind_of? Pathname
+        path = Pathname.new(path) unless path.is_a? Pathname
         cur = nil
         lineno = 0
-        path.readlines().each do |line|
+        path.readlines.each do |line|
           md = @match_header.match(line)
-          if not md.nil? then
+          if !md.nil?
             # header line.
             cur[:line_end] = lineno unless cur.nil?
             items << cur unless cur.nil?
@@ -181,12 +187,12 @@ module MrMurano
               #method: md[:method],
               method: md[:method].upcase,
               path: md[:path],
-              content_type: (md[:ctype] or 'application/json'),
+              content_type: (md[:ctype] || 'application/json'),
               local_path: path,
               line: lineno,
               script: up_line,
             )
-          elsif not cur.nil? and not cur[:script].nil? then
+          elsif !cur.nil? && !cur[:script].nil?
             # 2017-07-02: Frozen string literal: change << to +=
             cur[:script] += line
           end
@@ -204,27 +210,27 @@ module MrMurano
         return false if md.nil?
         debug "match pattern: '#{md[:method]}' '#{md[:path]}'"
 
-        unless md[:method].empty? then
+        unless md[:method].empty?
           return false unless item[:method].casecmp(md[:method]).zero?
         end
 
         return true if md[:path].empty?
 
-        ::File.fnmatch(md[:path],item[:path])
+        ::File.fnmatch(md[:path], item[:path])
       end
 
       def synckey(item)
         "#{item[:method].upcase}_#{item[:path]}"
       end
 
-      def docmp(itemA, itemB)
-        if itemA[:script].nil? and itemA[:local_path] then
-          itemA[:script] = itemA[:local_path].read
+      def docmp(item_a, item_b)
+        if item_a[:script].nil? && item_a[:local_path]
+          item_a[:script] = item_a[:local_path].read
         end
-        if itemB[:script].nil? and itemB[:local_path] then
-          itemB[:script] = itemB[:local_path].read
+        if item_b[:script].nil? && item_b[:local_path]
+          item_b[:script] = item_b[:local_path].read
         end
-        return (itemA[:script] != itemB[:script] or itemA[:content_type] != itemB[:content_type])
+        (item_a[:script] != item_b[:script] || item_a[:content_type] != item_b[:content_type])
       end
     end
 

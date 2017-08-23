@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -19,9 +19,10 @@ command :solution do |c|
 Commands for working with Application and Product solutions.
   ).strip
   c.project_not_required = true
+  c.subcmdgrouphelp = true
 
   c.action do |_args, _options|
-    ::Commander::UI.enable_paging
+    ::Commander::UI.enable_paging unless $cfg['tool.no-page']
     say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end
@@ -156,7 +157,7 @@ def cmd_solution_del_get_names_and_ids!(biz, args, options)
   end
   solz = must_fetch_solutions!(options, args, biz)
   solz.each do |sol|
-    nmorids += [[sol.sid, "‘#{sol.name}’ <#{sol.sid}>", sol]]
+    nmorids += [[sol.sid, "#{MrMurano::Verbose.fancy_ticks(sol.name)} <#{sol.sid}>", sol]]
   end
   nmorids
 end
@@ -230,7 +231,8 @@ def solution_delete(name_or_id, use_sol: nil, type: :all, yes: false)
   n_faulted = 0
   if solz.empty?
     if !name_or_id.empty?
-      MrMurano::Verbose.error("No solution matching ‘#{name_or_id}’ found")
+      name_or_id_q = MrMurano::Verbose.fancy_ticks(name_or_id)
+      MrMurano::Verbose.error("No solution matching #{name_or_id_q} found")
     else
       MrMurano::Verbose.error(MSG_SOLUTIONS_NONE_FOUND)
     end

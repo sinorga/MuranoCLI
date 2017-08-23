@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -156,12 +156,12 @@ def must_fetch_solutions!(options, args=[], biz=nil)
 
   if args.none? && !any_solution_pickers!(options)
     if !options.all
-      if $cfg['application.id']
+      if %i[all application].include?(options.type) && $cfg['application.id']
         solz += solution_get_solutions(
           biz, :application, sid: $cfg['application.id']
         )
       end
-      if $cfg['product.id']
+      if %i[all product].include?(options.type) && $cfg['product.id']
         solz += solution_get_solutions(
           biz, :product, sid: $cfg['product.id']
         )
@@ -449,7 +449,8 @@ module MrMurano
             say "Found #{sol.type_name} #{sol.pretty_desc}"
           elsif !@searching
             # The solution ID in the config was not found for this business.
-            say "The #{sol.type_name} ID ‘#{tried_sid}’ from the config was not found"
+            tried_sid = MrMurano::Verbose.fancy_ticks(tried_sid)
+            say "The #{sol.type_name} ID #{tried_sid} from the config was not found"
           end
           puts ''
         end

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -125,7 +125,9 @@ extra table in your database. (__murano_cli__.migrate_version)
 
   c.action do |args, options|
     c.verify_arg_count!(args, 2, ['Missing direction'])
-    options.default(dir: File.join($cfg['location.base'], ($cfg['postgresql.migrations_dir'] || '')))
+    options.default(
+      dir: File.join($cfg['location.base'], ($cfg['postgresql.migrations_dir'] || '')),
+    )
 
     pg = MrMurano::Postgresql.new
 
@@ -135,7 +137,7 @@ extra table in your database. (__murano_cli__.migrate_version)
     elsif direction =~ /up/i
       direction = 'up'
     else
-      pg.error "Unrecogized direction: ‘#{direction}’"
+      pg.error "Unrecognized direction: #{MrMurano::Verbose.fancy_ticks(direction)}"
       exit 1
     end
 

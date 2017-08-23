@@ -16,7 +16,7 @@ RSpec.describe MrMurano::Mock, "#mock" do
   it "can create the testpoint file" do
       uuid = @mock.create_testpoint()
       expect(uuid.length).to be("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX".length)
-      path = @mock.get_testpoint_path()
+      path = @mock.testpoint_path()
       testpoint = File.read(path)
       expect(testpoint.include? uuid).to be(true)
   end
@@ -29,14 +29,14 @@ RSpec.describe MrMurano::Mock, "#mock" do
 
   it "can remove the testpoint file" do
       @mock.create_testpoint()
-      path = @mock.get_testpoint_path()
+      path = @mock.testpoint_path()
       removed = @mock.remove_testpoint()
       expect(removed).to be(true)
       expect(File.exist?(path)).to be(false)
   end
 
   it "can remove the missing testpoint file" do
-      path = @mock.get_testpoint_path()
+      path = @mock.testpoint_path()
       removed = @mock.remove_testpoint()
       expect(removed).to be(false)
       expect(File.exist?(path)).to be(false)

@@ -1,20 +1,27 @@
+# Last Modified: 2017.08.20 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'date'
 require 'json'
 require 'highline'
 
 module MrMurano
   module Pretties
-
-    HighLine::Style.new(:name=>:on_aliceblue, :code=>"\e[48;5;231m", :rgb=>[240, 248, 255])
+    HighLine::Style.new(name: :on_aliceblue, code: "\e[48;5;231m", rgb: [240, 248, 255])
     PRETTIES_COLORSCHEME = HighLine::ColorScheme.new do |cs|
-      cs[:subject] = [:red, :on_aliceblue]
+      cs[:subject] = %i[red on_aliceblue]
       cs[:timestamp] = [:blue]
       cs[:json] = [:magenta]
     end
     HighLine.color_scheme = PRETTIES_COLORSCHEME
 
+    # rubocop:disable Style/MethodName: "Use snake_case for method names."
     def self.makeJsonPretty(data, options)
-      if options.pretty then
+      if options.pretty
         ret = JSON.pretty_generate(data).to_s
         ret[0] = HighLine.color(ret[0], :json)
         ret[-1] = HighLine.color(ret[-1], :json)
@@ -31,9 +38,9 @@ module MrMurano
       out += HighLine.color("#{line[:type] || '--'} ".upcase, :subject)
       out += HighLine.color("[#{line[:subject] || ''}]", :subject)
       out += ' '
-      if line.has_key?(:timestamp) then
-        if line[:timestamp].kind_of? Numeric then
-          if options.localtime then
+      if line.key?(:timestamp)
+        if line[:timestamp].is_a? Numeric
+          if options.localtime
             curtime = Time.at(line[:timestamp]).localtime.to_datetime.iso8601(3)
           else
             curtime = Time.at(line[:timestamp]).gmtime.to_datetime.iso8601(3)
@@ -46,11 +53,11 @@ module MrMurano
       end
       out += HighLine.color(curtime, :timestamp)
       out += ":\n"
-      if line.has_key?(:data) then
+      if line.key?(:data)
         data = line[:data]
 
-        if data.kind_of?(Hash) then
-          if data.has_key?(:request) and data.has_key?(:response) then
+        if data.is_a?(Hash)
+          if data.key?(:request) && data.key?(:response)
             out += "---------\nrequest:"
             out += makeJsonPretty(data[:request], options)
 
@@ -71,7 +78,6 @@ module MrMurano
       end
       out
     end
-
   end
 end
-#  vim: set ai et sw=2 ts=2 :
+

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -96,7 +96,7 @@ module MrMurano
             #query.push ['limit', 20]
             query.push ['offset', total - remaining]
           elsif remaining != 0
-            warning "Unexpected: negative remaining: ‘#{total}’"
+            warning "Unexpected: negative remaining: #{fancy_ticks(total)}"
             remaining = 0
           end
           if aggregate.nil?
@@ -127,6 +127,8 @@ module MrMurano
       #     the results.
       #path = path || '?select=id,service'
       matches = list(path)
+      # 2017-08-21: The only caller so far is the link command,
+      #   which passes the Solution ID as svc_name.
       matches.select { |match| match[:service] == svc_name }
     end
 
@@ -240,23 +242,35 @@ module MrMurano
         end
       end
       unless @sid.to_s.empty? || sid.to_s == @sid.to_s
-        warning "#{type_name} ID mismatch. Server says ‘#{sid}’, but config says ‘#{@sid}’."
+        warning(
+          "#{type_name} ID mismatch. Server says #{fancy_ticks(sid)}, " \
+          "but config says #{fancy_ticks(@sid)}."
+        )
       end
       self.sid = sid
       # Verify/set the name.
       unless @name.to_s.empty? || @meta[:name].to_s == @name.to_s
-        warning "Name mismatch. Server says ‘#{@meta[:name]}’, but config says ‘#{@name}’."
+        warning(
+          "Name mismatch. Server says #{fancy_ticks(@meta[:name])}, " \
+          "but config says #{fancy_ticks(@name)}."
+        )
       end
       if !@meta[:name].to_s.empty?
         set_name(@meta[:name])
         unless @valid_name || type == :solution
-          warning "Unexpected: Server returned invalid name: ‘#{@meta[:name]}’"
+          warning(
+            "Unexpected: Server returned invalid name: #{fancy_ticks(@meta[:name])}"
+          )
         end
       elsif @meta[:domain]
         # This could be a pre-ADC/pre-Murano business.
-        warning "Unexpected: Server returned no name for domain: ‘#{@meta[:domain]}’"
+        warning(
+          "Unexpected: Server returned no name for domain: #{fancy_ticks(@meta[:domain])}"
+        )
       else
-        warning "Unexpected: Server returned no name for solution: ‘#{@meta}’"
+        warning(
+          "Unexpected: Server returned no name for solution: #{fancy_ticks(@meta)}"
+        )
       end
     end
 
@@ -322,7 +336,7 @@ module MrMurano
       if @name.to_s.empty?
         ''
       else
-        "‘#{@name}’"
+        fancy_ticks(@name)
       end
     end
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -8,6 +8,7 @@
 
 require 'commander/import'
 require 'dotenv'
+require 'English'
 require 'highline'
 require 'pathname'
 #require 'pp'
@@ -36,13 +37,13 @@ program :description, %(
   Manage Applications and Products in Exosite's Murano
 ).strip
 
-# The Commander defaults to paged help.
-# The user can disable with --no-page, e.g.,
-#   alias murano='murano --no-page'
-if ARGV.include?('--no-page')
-  program :help_paging, false
-  ARGV.delete('--no-page')
-end
+# If being piped, e.g.,
+#   murano command ... | ...
+# or
+#   VAR=$(murano command ...)
+# etc., then do not do progress.
+# TEST/2017-08-23: Does this work on Windows?
+ARGV.push('--no-progress') unless $stdout.tty?
 
 default_command :help
 
@@ -80,4 +81,18 @@ $cfg.validate_cmd
 # Look for a (legacy) Solutionfile.json.
 $project = MrMurano::ProjectFile.new
 $project.load
+
+# The Commander defaults to paged help.
+# The user can disable with --no-page, e.g.,
+#   alias murano='murano --no-page'
+# We define this here and not in globals.rb because
+#   `murano --help` does not cause globals.rb to be sourced.
+paging = nil
+paging = true if ARGV.include?('--page')
+paging = false if ARGV.include?('--no-page')
+unless paging.nil?
+  program :help_paging, paging
+  $cfg['tool.no-page'] = !paging
+end
+# else, commander defaults to paging.
 

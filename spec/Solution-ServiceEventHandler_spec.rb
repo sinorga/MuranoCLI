@@ -1,3 +1,10 @@
+# Last Modified: 2017.08.22 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'tempfile'
 require 'MrMurano/version'
 require 'MrMurano/ProjectFile'
@@ -30,94 +37,105 @@ RSpec.describe MrMurano::EventHandler do
   end
 
   it "lists" do
-    body = {:items=>[{:id=>"9K0",
-             :name=>"debug",
-             :alias=>"XYZ_debug",
-             :solution_id=>"XYZ",
-             :service=>"device",
-             :event=>"datapoint",
-             :created_at=>"2016-07-07T19:16:19.479Z",
-             :updated_at=>"2016-09-12T13:26:55.868Z"}],
-            :total=>1}
+    body = {
+      items: [
+        {
+          id: "9K0",
+          name: "debug",
+          alias: "XYZ_debug",
+          solution_id: "XYZ",
+          service: "device",
+          event: "datapoint",
+          created_at: "2016-07-07T19:16:19.479Z",
+          updated_at: "2016-09-12T13:26:55.868Z",
+        },
+      ],
+      total: 1,
+    }
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
-
+      with(headers: {
+        'Authorization'=>'token TTTTTTTTTT',
+        'Content-Type'=>'application/json',
+      }).to_return(body: body.to_json)
     ret = @srv.list
     expect(ret).to eq(body[:items])
   end
 
   it "fetches, with header" do
-    body = {:id=>"9K0",
-             :name=>"debug",
-             :alias=>"XYZ_debug",
-             :solution_id=>"XYZ",
-             :service=>"device",
-             :event=>"datapoint",
-             :created_at=>"2016-07-07T19:16:19.479Z",
-             :updated_at=>"2016-09-12T13:26:55.868Z",
-             :script=>%{--#EVENT device datapoint
-             -- lua code is here
-    function foo(bar)
-      return bar + 1
-    end
-    }
+    body = {
+      id: "9K0",
+      name: "debug",
+      alias: "XYZ_debug",
+      solution_id: "XYZ",
+      service: "device",
+      event: "datapoint",
+      created_at: "2016-07-07T19:16:19.479Z",
+      updated_at: "2016-09-12T13:26:55.868Z",
+      script: %{--#EVENT device datapoint
+-- lua code is here
+function foo(bar)
+  return bar + 1
+end
+      },
     }
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
-
+      with(headers: {
+        'Authorization'=>'token TTTTTTTTTT',
+        'Content-Type'=>'application/json',
+      }).to_return(body: body.to_json)
     ret = @srv.fetch('9K0')
     expect(ret).to eq(body[:script])
   end
 
   it "fetches, with header into block" do
-    body = {:id=>"9K0",
-             :name=>"debug",
-             :alias=>"XYZ_debug",
-             :solution_id=>"XYZ",
-             :service=>"device",
-             :event=>"datapoint",
-             :created_at=>"2016-07-07T19:16:19.479Z",
-             :updated_at=>"2016-09-12T13:26:55.868Z",
-             :script=>%{--#EVENT device datapoint
-             -- lua code is here
-    function foo(bar)
-      return bar + 1
-    end
-    }
+    body = {
+      id: "9K0",
+      name: "debug",
+      alias: "XYZ_debug",
+      solution_id: "XYZ",
+      service: "device",
+      event: "datapoint",
+      created_at: "2016-07-07T19:16:19.479Z",
+      updated_at: "2016-09-12T13:26:55.868Z",
+      script: %{
+        --#EVENT device datapoint
+        -- lua code is here
+        function foo(bar)
+          return bar + 1
+        end
+      },
     }
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
-
+      with(headers: {
+        'Authorization'=>'token TTTTTTTTTT',
+        'Content-Type'=>'application/json',
+      }).to_return(body: body.to_json)
     ret = nil
     @srv.fetch('9K0') { |sc| ret = sc }
     expect(ret).to eq(body[:script])
   end
 
   it "fetches, without header" do
-    body = {:id=>"9K0",
-             :name=>"debug",
-             :alias=>"XYZ_debug",
-             :solution_id=>"XYZ",
-             :service=>"device",
-             :event=>"datapoint",
-             :created_at=>"2016-07-07T19:16:19.479Z",
-             :updated_at=>"2016-09-12T13:26:55.868Z",
-             :script=>%{-- lua code is here
+    body = {
+      id: "9K0",
+      name: "debug",
+      alias: "XYZ_debug",
+      solution_id: "XYZ",
+      service: "device",
+      event: "datapoint",
+      created_at: "2016-07-07T19:16:19.479Z",
+      updated_at: "2016-09-12T13:26:55.868Z",
+      script: %{-- lua code is here
 function foo(bar)
   return bar + 1
 end
-}
+},
     }
     stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
+      with(headers: {
+        'Authorization'=>'token TTTTTTTTTT',
+        'Content-Type'=>'application/json',
+      }).to_return(body: body.to_json)
 
     ret = @srv.fetch('9K0')
     expect(ret).to eq(%{--#EVENT device datapoint
@@ -130,9 +148,10 @@ end
 
   it "removes" do
     stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/9K0").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: "")
+      with(headers: {
+        'Authorization'=>'token TTTTTTTTTT',
+        'Content-Type'=>'application/json',
+      }).to_return(body: "")
 
     ret = @srv.remove('9K0')
     expect(ret).to eq({})
@@ -140,24 +159,26 @@ end
 
   it "uploads over old version" do
     stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/XYZ_data_datapoint").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: "")
+      with(headers: {
+        'Authorization'=>'token TTTTTTTTTT',
+        'Content-Type'=>'application/json',
+      }).to_return(body: "")
 
     Tempfile.open('foo') do |tio|
-      tio << %{-- lua code is here
-    function foo(bar)
-      return bar + 1
-    end
+      tio << %{
+        -- lua code is here
+        function foo(bar)
+          return bar + 1
+        end
       }
       tio.close
 
       ret = @srv.upload(tio.path,
         MrMurano::EventHandler::EventHandlerItem.new(
-          :id=>"9K0",
-          :service=>'data',
-          :event=>'datapoint',
-          :solution_id=>"XYZ",
+          id: "9K0",
+          service: 'data',
+          event: 'datapoint',
+          solution_id: "XYZ",
       ))
       expect(ret)
     end
@@ -165,28 +186,31 @@ end
 
   it "uploads when nothing is there" do
     stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/XYZ_device_datapoint").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(status: 404)
+      with(headers: {
+        'Authorization'=>'token TTTTTTTTTT',
+        'Content-Type'=>'application/json',
+      }).to_return(status: 404)
     stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/eventhandler/").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: "")
+      with(headers: {
+        'Authorization'=>'token TTTTTTTTTT',
+        'Content-Type'=>'application/json',
+      }).to_return(body: "")
 
     Tempfile.open('foo') do |tio|
-      tio << %{-- lua code is here
-    function foo(bar)
-      return bar + 1
-    end
+      tio << %{
+        -- lua code is here
+        function foo(bar)
+          return bar + 1
+        end
       }
       tio.close
 
       ret = @srv.upload(tio.path,
         MrMurano::EventHandler::EventHandlerItem.new(
-          :id=>"9K0",
-          :service=>'device',
-          :event=>'datapoint',
-          :solution_id=>"XYZ",
+          id: "9K0",
+          service: 'device',
+          event: 'datapoint',
+          solution_id: "XYZ",
       ))
       expect(ret)
     end
@@ -195,22 +219,26 @@ end
 
   context "compares" do
     before(:example) do
-      @iA = {:id=>"9K0",
-            :name=>"debug",
-            :alias=>"XYZ_debug",
-            :solution_id=>"XYZ",
-             :service=>"device",
-             :event=>"datapoint",
-            :created_at=>"2016-07-07T19:16:19.479Z",
-            :updated_at=>"2016-09-12T13:26:55.868Z"}
-      @iB = {:id=>"9K0",
-            :name=>"debug",
-            :alias=>"XYZ_debug",
-            :solution_id=>"XYZ",
-             :service=>"device",
-             :event=>"datapoint",
-            :created_at=>"2016-07-07T19:16:19.479Z",
-            :updated_at=>"2016-09-12T13:26:55.868Z"}
+      @iA = {
+        id: "9K0",
+        name: "debug",
+        alias: "XYZ_debug",
+        solution_id: "XYZ",
+        service: "device",
+        event: "datapoint",
+        created_at: "2016-07-07T19:16:19.479Z",
+        updated_at: "2016-09-12T13:26:55.868Z",
+      }
+      @iB = {
+        id: "9K0",
+        name: "debug",
+        alias: "XYZ_debug",
+        solution_id: "XYZ",
+        service: "device",
+        event: "datapoint",
+        created_at: "2016-07-07T19:16:19.479Z",
+        updated_at: "2016-09-12T13:26:55.868Z",
+      }
     end
     it "both have updated_at" do
       ret = @srv.docmp(@iA, @iB)
@@ -221,13 +249,13 @@ end
       Tempfile.open('foo') do |tio|
         tio << "something"
         tio.close
-        iA = @iA.reject{|k,v| k == :updated_at}.merge({
-          :local_path => Pathname.new(tio.path)
+        iA = @iA.reject { |k, _v| k == :updated_at }.merge({
+          local_path: Pathname.new(tio.path),
         })
         ret = @srv.docmp(iA, @iB)
         expect(ret).to eq(true)
 
-        iB = @iB.merge({:updated_at=>Pathname.new(tio.path).mtime.getutc})
+        iB = @iB.merge( { updated_at: Pathname.new(tio.path).mtime.getutc })
         ret = @srv.docmp(iA, iB)
         expect(ret).to eq(false)
       end
@@ -237,13 +265,13 @@ end
       Tempfile.open('foo') do |tio|
         tio << "something"
         tio.close
-        iB = @iB.reject{|k,v| k == :updated_at}.merge({
-          :local_path => Pathname.new(tio.path)
+        iB = @iB.reject{ |k, _v| k == :updated_at }.merge({
+          local_path: Pathname.new(tio.path),
         })
         ret = @srv.docmp(@iA, iB)
         expect(ret).to eq(true)
 
-        iA = @iA.merge({:updated_at=>Pathname.new(tio.path).mtime.getutc})
+        iA = @iA.merge({ updated_at: Pathname.new(tio.path).mtime.getutc })
         ret = @srv.docmp(iA, iB)
         expect(ret).to eq(false)
       end
@@ -252,12 +280,12 @@ end
 
   context "Lookup functions" do
     it "gets local name" do
-      ret = @srv.tolocalname({ :name=>"bob" }, nil)
+      ret = @srv.tolocalname({ name: "bob" }, nil)
       expect(ret).to eq('bob.lua')
     end
 
     it "gets synckey" do
-      ret = @srv.synckey({ :service=>'device', :event=>'datapoint' })
+      ret = @srv.synckey({ service: 'device', event: 'datapoint' })
       expect(ret).to eq("device_datapoint")
     end
 
@@ -275,25 +303,25 @@ end
 
     it "raises on alias without service" do
       expect {
-        @srv.mkname(MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob'))
+        @srv.mkname(MrMurano::EventHandler::EventHandlerItem.new(event: 'bob'))
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on alias without event" do
       expect {
-        @srv.mkalias(MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob'))
+        @srv.mkalias(MrMurano::EventHandler::EventHandlerItem.new(service: 'bob'))
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
 
     it "raises on name without service" do
       expect {
-        @srv.mkalias(MrMurano::EventHandler::EventHandlerItem.new(:event=>'bob'))
+        @srv.mkalias(MrMurano::EventHandler::EventHandlerItem.new(event: 'bob'))
       }.to raise_error %{Missing parts! {"event":"bob"}}
     end
 
     it "raises on name without event" do
       expect {
-        @srv.mkname(MrMurano::EventHandler::EventHandlerItem.new(:service=>'bob'))
+        @srv.mkname(MrMurano::EventHandler::EventHandlerItem.new(service: 'bob'))
       }.to raise_error %{Missing parts! {"service":"bob"}}
     end
   end
@@ -312,14 +340,18 @@ end
         tio.close
 
         ret = @srv.to_remote_item(nil, tio.path)
-        expect(ret).to eq({:service=>'device',
-                           :event=>'datapoint',
-                           :type=>nil,
-                           :line=>0,
-                           :line_end=>3,
-                           :local_path=>Pathname.new(tio.path),
-                           :script=>%{--#EVENT device datapoint\n-- do something.\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
-        })
+        expect(ret).to eq(
+          {
+            service: 'device',
+            event: 'datapoint',
+            svc_alias: nil,
+            type: nil,
+            line: 0,
+            line_end: 3,
+            local_path: Pathname.new(tio.path),
+            script: %{--#EVENT device datapoint\n-- do something.\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
+          }
+        )
       end
     end
 
@@ -348,13 +380,14 @@ end
         ret = @srv.to_remote_item(nil, tio.path)
         expect(ret).to eq(
           MrMurano::EventHandler::EventHandlerItem.new(
-            :service=>'device',
-            :event=>'datapoint',
-            :type=>nil,
-            :line=>1,
-            :line_end=>3,
-            :local_path=>Pathname.new(tio.path),
-            :script=>%{--#EVENT device datapoint\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
+            service: 'device',
+            event: 'datapoint',
+            svc_alias: nil,
+            type: nil,
+            line: 1,
+            line_end: 3,
+            local_path: Pathname.new(tio.path),
+            script: %{--#EVENT device datapoint\nTsdb.write{tags={sn='1'},metrics={[data.alias]=data.value[2]}}\n},
           ))
       end
     end
@@ -364,9 +397,9 @@ end
   context "Matching" do
     before(:example) do
       @an_item = {
-        :service=>'bob',
-        :event=>'built',
-        :local_path=>Pathname.new('a/relative/path.lua'),
+        service: 'bob',
+        event: 'built',
+        local_path: Pathname.new('a/relative/path.lua'),
       }
     end
     context "service" do
@@ -397,4 +430,4 @@ end
     end
   end
 end
-#  vim: set ai et sw=2 ts=2 :
+

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.18 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -335,6 +335,8 @@ module MrMurano
       @paths.each(&:load)
       # If user wants curl commands dumped to a file, open that file.
       init_curl_file
+      # If user doesn't want paging, disable it.
+      program :help_paging, !$cfg['tool.no-page'] unless $cfg['tool.no-page'].nil?
     end
 
     ## Load specified file into the config stack
@@ -354,6 +356,7 @@ module MrMurano
 
       section, ikey = key.split('.')
       paths.each do |path|
+        next if path.data.nil?
         next unless path.data.has_section?(section)
         sec = path.data[section]
         return sec if ikey.nil?
@@ -435,8 +438,12 @@ module MrMurano
       end
 
       paths = @paths.select { |p| scope == p.kind }
-      raise "Unknown scope ‘#{scope}’" if paths.empty?
-      raise "Too many scopes ‘#{scope}’" if paths.length > 1
+      if paths.empty? || paths.length > 1
+        scope_q = fancy_ticks(scope)
+        raise "Unknown scope: #{scope_q}" if paths.empty?
+        paths_q = fancy_ticks(paths)
+        raise "Too many paths: #{paths_q} / scope: #{scope_q}" if paths.length > 1
+      end
 
       cfg = paths.first
       data = cfg.data
@@ -488,7 +495,8 @@ module MrMurano
 
         cfg_paths = @paths.select { |p| p.kind == scope }
 
-        msg = "Scope: ‘#{scope}’\n\n"
+        scope_q = fancy_ticks(scope)
+        msg = "Scope: #{scope_q}\n\n"
         locats += Rainbow(msg).bright.underline
 
         if !cfg_paths.empty?
@@ -498,9 +506,9 @@ module MrMurano
             path = "Path: #{cfg.path}\n"
           elsif %i[internal defaults].include? cfg.kind
             # cfg.path is nil.
-            path = "Path: ‘#{scope}’ config is not saved.\n"
+            path = "Path: #{scope_q} config is not saved.\n"
           else
-            path = "Path: ‘#{scope}’ config does not exist.\n"
+            path = "Path: #{scope_q} config does not exist.\n"
           end
           #locats += Rainbow(path).bright
           locats += path
@@ -535,11 +543,11 @@ module MrMurano
             locats += msg
           end
         else
-          msg = "No config found for ‘#{scope}’.\n"
+          msg = "No config found for #{scope_q}.\n"
           if scope != :specified
             locats += Rainbow(msg).red.bright
           else
-            locats += "Path: ‘#{scope}’ config does not exist.\n\n"
+            locats += "Path: #{scope_q} config does not exist.\n\n"
             locats += "Use --configfile to specify this config file.\n"
           end
         end

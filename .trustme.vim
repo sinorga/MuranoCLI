@@ -13,12 +13,16 @@
 " since every time we call autocmd, the command is appended,
 " and this file gets sourced every switch to a corresponding
 " project buffer.
-augroup trustme
-  " Remove! all trustme autocommands.
-  autocmd! trustme
-  "autocmd BufWrite *.rb silent !touch TOUCH
-  "autocmd BufWrite <buffer> echom "trustme is hooked!"
-  " MEH/2017-08-02: This won't hook bin/murano.
-  autocmd BufWrite <buffer> silent !./.trustme.sh &
-augroup END
+"augroup trustme
+"  " Remove! all trustme autocommands.
+"  autocmd! trustme
+"  "autocmd BufWrite *.rb silent !touch TOUCH
+"  "autocmd BufWrite <buffer> echom "trustme is hooked!"
+"  " MEH/2017-08-02: This won't hook bin/murano.
+""  autocmd BufWrite <buffer> silent !./.trustme.sh &
+"  autocmd BufWritePost <buffer> silent !./.trustme.sh &
+"augroup END
+
+"echomsg 'Calling trustme.sh'
+silent !./.trustme.sh &
 

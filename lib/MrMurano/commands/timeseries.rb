@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -42,9 +42,10 @@ The timeseries sub-commands let you interact directly with the Timeseries
 instance in a solution. This allows for easier debugging, being able to
 quickly try out different queries or write test data.
   ).strip
+  c.subcmdgrouphelp = true
 
   c.action do |_args, _options|
-    ::Commander::UI.enable_paging
+    ::Commander::UI.enable_paging unless $cfg['tool.no-page']
     say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.18 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -54,6 +54,7 @@ module MrMurano
 
     # ??? remove
     def remove(name)
+      return unless remove_item_allowed(name)
       delete('/' + name)
     end
 
@@ -69,6 +70,9 @@ module MrMurano
         raise 'no file' unless thereitem.script
         script = thereitem.script
       end
+
+      script = config_vars_decode(script)
+
       localpath = Pathname.new(localpath) unless localpath.is_a?(Pathname)
       name = mkname(thereitem)
       pst = thereitem.to_h.merge(
@@ -79,10 +83,18 @@ module MrMurano
         name: name,
       )
       debug "f: #{localpath} >> #{pst.reject { |k, _| k == :script }.to_json}"
+      therealias = mkalias(thereitem)
+      upload_script(therealias, name, localpath, pst)
+    end
+
+    def upload_script(therealias, name, localpath, pst)
       # Try PUT. If 404, then POST.
       # I.e., PUT if not exists, else POST to create.
       updated_at = nil
-      put('/' + mkalias(thereitem), pst) do |request, http|
+
+      return unless upload_item_allowed(therealias)
+
+      put('/' + therealias, pst) do |request, http|
         response = http.request(request)
         isj, jsn = isJSON(response.body)
         # ORDER: An HTTPNoContent is also a HTTPSuccess, so the latter comes first.
@@ -181,8 +193,6 @@ module MrMurano
       cache_file = $cfg.file_at(cache_file_name)
       if cache_file.file?
         cache_file.open('r+') do |io|
-          # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
-          # rubocop:disable Security/YAMLLoad
           cache = YAML.load(io)
           cache = {} unless cache
           io.rewind
@@ -205,7 +215,6 @@ module MrMurano
       return nil unless cache_file.file?
       ret = nil
       cache_file.open('r') do |io|
-        # FIXME/2017-07-02: "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
         cache = YAML.load(io)
         return nil unless cache
         if cache.key?(local_path.to_s)
@@ -250,7 +259,6 @@ module MrMurano
     end
 
     def initialize(sid=nil)
-      # FIXME/VERIFY/2017-07-02: Check that products do not have Modules.
       @solntype = 'application.id'
       super
       @uriparts << :module
@@ -307,14 +315,14 @@ module MrMurano
       root = root.expand_path
       if path.basename.sub(/\.lua$/i, '').to_s.include?('.')
         warning(
-          "WARNING: Do not use periods in filenames. Rename: ‘#{path.basename}’"
+          "WARNING: Do not use periods in filenames. Rename: #{fancy_ticks(path.basename)}"
         )
       end
       path.dirname.ascend do |ancestor|
         break if ancestor == root
         if ancestor.basename.to_s.include?('.')
           warning(
-            "WARNING: Do not use periods in directory names. Rename: ‘#{ancestor.basename}’"
+            "WARNING: Do not use periods in directory names. Rename: #{fancy_ticks(ancestor.basename)}"
           )
         end
       end
@@ -349,7 +357,12 @@ module MrMurano
       attr_accessor :event
       # @return [String] For device2 events, the type of event.
       attr_accessor :type
+      # @return [String] Service alias, e.g., "{product.id}"
+      attr_accessor :svc_alias
       # @return [Boolean] True if local phantom item via eventhandler.undeletable.
+      #                   I.e., the file does not exist locally and is the
+      #                   empty string on the server, so locally considered
+      #                   empty string, too.
       attr_accessor :phantom
     end
 
@@ -373,6 +386,10 @@ module MrMurano
       [remote[:service], remote[:event]].join('_')
     end
 
+    def synckey(item)
+      "#{item[:service]}_#{item[:event]}"
+    end
+
     def list(call=nil, data=nil, &block)
       ret = get(call, data, &block)
       return [] unless ret.is_a?(Hash) && !ret.key?(:error)
@@ -386,9 +403,36 @@ module MrMurano
         toss
       end
       items.map { |item| EventHandlerItem.new(item) }
-        # MAYBE/2017-08-17:
-        #   items.map! ...
-        #   sort_by_name(items)
+      # MAYBE/2017-08-17:
+      #   items.map! ...
+      #   sort_by_name(items)
+    end
+
+    def resolve_config_var_usage!(there, local)
+      # Substitute '{product.id}' for the actual product.id if a corresponding
+      # local file does not exist, or if the local file already uses the alias.
+      encode_items = {}
+      local.each do |item|
+        encode_items[item.service] = {} if encode_items[item.service].nil?
+        encode_items[item.service][item.event] = item.svc_alias
+      end
+      there.map! do |item|
+        if (
+          !encode_items[item.service].nil? &&
+          !encode_items[item.service][item.event].nil?
+        )
+          svc_alias = encode_items[item.service][item.event]
+        else
+          # There's no corresponding local item.
+          _encoded, svc_alias = encode_config_var(item.service)
+        end
+        svc_alias = nil if svc_alias == item.service
+        unless svc_alias.nil?
+          item.svc_alias = svc_alias
+          item.name.sub!($cfg[svc_alias], "{#{svc_alias}}")
+        end
+        item
+      end
     end
 
     def skip?(item, skiplist)
@@ -400,15 +444,19 @@ module MrMurano
 
     def cmp_svc_evt(item, svc_evt)
       service, event = svc_evt.split('.', 2)
+      svc_match = (
+        service == item[:service] ||
+        (!item[:svc_alias].to_s.empty? && service == item[:svc_alias])
+      )
       if event.nil? || item[:event] == '*'
-        service == item[:service]
+        svc_match
       else
         # rubocop:disable Style/IfInsideElse
         #svc_evt == "#{item[:service]}.#{item[:event]}"
         if service == '*'
           event == item[:event]
         else
-          service == item[:service] && event == item[:event]
+          svc_match && event == item[:event]
         end
       end
     end
@@ -462,35 +510,33 @@ module MrMurano
         # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
         md = @match_header.match(line)
         if !md.nil?
-          # FIXME/2017-08-09: device2.event is now in the skiplist,
-          #   but some tests have a "device2 data_in" script, which
-          #   gets changed to "device2.event" here and then uploaded
-          #   (note that skiplist does not apply to local items).
-          #   You can test this code via:
-          #     rspec ./spec/cmd_syncdown_spec.rb
-          #   which has a fixture with device2.data_in specified.
-          #   QUESTION: Does writing device2.event do anything?
-          #     You cannot edit that handler from the web UI...
-          #     - Should we change the test?
-          #     - Should we get rid of this device2 hack?
-          if md[:service] == 'device2'
-            event_event = 'event'
-            event_type = md[:event]
-            # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's now 'event'?
-            #   Want this?:
-            #     event_type = 'event' if event_type == 'data_in'
-          else
-            event_event = md[:event]
-            event_type = nil
-          end
-          # header line.
+          service, config_var = decode_config_var(md[:service])
+          event_event, event_type = resolve_event_type(service, md[:event])
+          # Header line.
+          svc_alias = config_var if service != md[:service]
           cur = EventHandlerItem.new(
-            service: md[:service],
+            #name
+            local_path: path,
+            #id
+            script: line,
+            line: lineno,
+            #line_end
+            #diff
+            #selected
+            #synckey
+            #synctype
+            #type
+            #updated_at
+            #dup_count
+            #alias
+            #updated_at
+            #created_at
+            #solution_id
+            service: service,
             event: event_event,
             type: event_type,
-            local_path: path,
-            line: lineno,
-            script: line,
+            #phantom
+            svc_alias: svc_alias,
           )
         elsif !cur.nil? && !cur[:script].nil?
           # 2017-07-02: Frozen string literal: change << to +=
@@ -501,24 +547,27 @@ module MrMurano
       cur[:line_end] = lineno unless cur.nil?
 
       # If cur is nil here, then we need to do a :legacy check.
-      if cur.nil? && $project['services.legacy'].is_a?(Hash)
-        spath = path.relative_path_from(from)
-        debug "No headers: #{spath}"
-        service, event = $project['services.legacy'][spath.to_s]
-        debug "Legacy lookup #{spath} => [#{service}, #{event}]"
-        unless service.nil? || event.nil?
-          warning %(Event in #{spath} missing header, but has legacy support.)
-          warning %(Please add the header "--#EVENT #{service} #{event}")
-          cur = EventHandlerItem.new(
-            service: service,
-            event: event,
-            type: nil,
-            local_path: path,
-            line: 0,
-            line_end: lineno,
-            script: path.read, # FIXME: ick, fix this.
-          )
-        end
+      to_remote_item_legacy_check(cur, path, from, lineno)
+    end
+
+    def to_remote_item_legacy_check(cur, path, from, lineno)
+      return cur unless cur.nil? && $project['services.legacy'].is_a?(Hash)
+      spath = path.relative_path_from(from)
+      debug "No headers: #{spath}"
+      service, event = $project['services.legacy'][spath.to_s]
+      debug "Legacy lookup #{spath} => [#{service}, #{event}]"
+      unless service.nil? || event.nil?
+        warning %(Event in #{spath} missing header, but has legacy support.)
+        warning %(Please add the header "--#EVENT #{service} #{event}")
+        cur = EventHandlerItem.new(
+          service: service,
+          event: event,
+          type: nil,
+          local_path: path,
+          line: 0,
+          line_end: lineno,
+          script: path.read, # FIXME: ick, fix this.
+        )
       end
       cur
     end
@@ -529,13 +578,99 @@ module MrMurano
       md = pattern_pattern.match(pattern)
       return false if md.nil?
       debug "match pattern: '#{md[:service]}' '#{md[:event]}'"
-      return false unless md[:service].empty? || item[:service].casecmp(md[:service]).zero?
+      if (
+        !md[:service].empty? &&
+        !item[:service].casecmp(md[:service]).zero? &&
+        (item[:svc_alias].to_s.empty? || !item[:svc_alias].casecmp(md[:service]).zero?)
+      )
+        return false
+      end
       return false unless md[:event].empty? || item[:event].casecmp(md[:event]).zero?
-      true # Both match (or are empty.)
+      true # Both match (or both empty).
     end
 
-    def synckey(item)
-      "#{item[:service]}_#{item[:event]}"
+    def config_vars_decode(script)
+      config_vars_translate(script, method(:decode_config_var))
+    end
+
+    def config_vars_encode(script)
+      config_vars_translate(script, method(:encode_config_var))
+    end
+
+    def config_vars_translate(script, codec)
+      new_script = ''
+      # Replace the service with a {config.variable} if appropriate.
+      script.lines.each do |line|
+        # @match_header finds a service and an event string, e.g., "--EVENT svc evt\n"
+        md = @match_header.match(line)
+        unless md.nil?
+          service, _config_var = codec.call(md[:service])
+          line = line.gsub(
+            /--#EVENT (?<service>\S+) (?<event>\S+)/,
+            "--#EVENT #{service} \\k<event>"
+          )
+        end
+        new_script += line
+      end
+      new_script
+    end
+
+    def decode_config_var(term)
+      decoded = term
+      config_var = nil
+      # Try to match svc against a {config.variable}.
+      mat = /^\{([^\.}]+)\.([^\.}]+)\}$/.match(term)
+      unless mat.nil?
+        # User specified a config value, e.g., "--#EVENT {product.id} event".
+        config_var = "#{mat[1]}.#{mat[2]}"
+        decoded = $cfg[config_var]
+        if decoded.nil?
+          warning "Config value not found for variable: #{fancy_ticks(term)}"
+          # The platform should complain about file not found,
+          # and we'll process everything else.
+          decoded = term
+          config_var = nil
+        end
+      end
+      [decoded, config_var]
+    end
+
+    def encode_config_var(term)
+      encoded = term
+      config_var = nil
+      # MEH/2017-08-22: For now, only matching against one config var.
+      #   Maybe in the future we'd want to examine all the config vars?
+      # MAGIC_STRING: {config.variable} substitution.
+      if term == $cfg['product.id']
+        encoded = '{product.id}'
+        config_var = 'product.id'
+      end
+      [encoded, config_var]
+    end
+
+    def resolve_event_type(service, event)
+      # FIXME/2017-08-09: device2.event is now in the skiplist,
+      #   but some tests have a "device2 data_in" script, which
+      #   gets changed to "device2.event" here and then uploaded
+      #   (note that skiplist does not apply to local items).
+      #   You can test this code via:
+      #     rspec ./spec/cmd_syncdown_spec.rb
+      #   which has a fixture with device2.data_in specified.
+      #   QUESTION: Does writing device2.event do anything?
+      #     You cannot edit that handler from the web UI...
+      #     - Should we change the test?
+      #     - Should we get rid of this device2 hack?
+      if service == 'device2'
+        event_event = 'event'
+        event_type = event
+        # FIXME/CONFIRM/2017-07-02: 'data_in' was the old event name? It's now 'event'?
+        #   Want this?:
+        #     event_type = 'event' if event_type == 'data_in'
+      else
+        event_event = event
+        event_type = nil
+      end
+      [event_event, event_type]
     end
 
     def resurrect_undeletables(localbox, therebox)

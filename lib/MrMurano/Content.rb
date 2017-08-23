@@ -1,3 +1,10 @@
+# Last Modified: 2017.08.23 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'uri'
 require 'cgi'
 require 'net/http'
@@ -8,6 +15,7 @@ require 'MrMurano/Config'
 require 'MrMurano/http'
 require 'MrMurano/verbosing'
 require 'MrMurano/SolutionId'
+require 'MrMurano/SyncAllowed'
 require 'MrMurano/SyncUpDown'
 
 module MrMurano
@@ -17,6 +25,7 @@ module MrMurano
       include Http
       include Verbose
       include SolutionId
+      include SyncAllowed
 
       def initialize
         @solntype = 'product.id'
@@ -35,7 +44,7 @@ module MrMurano
       def endpoint(path='')
         super
         parts = ['https:/', $cfg['net.host'], 'api:1'] + @uriparts
-        s = parts.map{|v| v.to_s}.join('/')
+        s = parts.map(&:to_s).join('/')
         URI(s + path.to_s)
       end
 
@@ -73,16 +82,16 @@ module MrMurano
         # ?type=
         sha256 = Digest::SHA256.new
         sha256.file(local_path.to_s)
-        mime = MIME::Types.type_for(local_path.to_s)[0] || MIME::Types["application/octet-stream"][0]
+        mime = MIME::Types.type_for(local_path.to_s)[0] || MIME::Types['application/octet-stream'][0]
 
         params = {
-          :sha256 => sha256.hexdigest,
-          :expires_in => 30,
-          :type => mime,
+          sha256: sha256.hexdigest,
+          expires_in: 30,
+          type: mime,
         }
-        if not tags.nil? and tags.kind_of? Hash then
-          params[:tags] = tags.to_json
-        end
+        params[:tags] = tags.to_json if !tags.nil? && tags.is_a?(Hash)
+
+        return unless upload_item_allowed(name)
 
         ret = get("/#{CGI.escape(name)}/upload?#{URI.encode_www_form(params)}")
         debug "POST instructions: #{ret}"
@@ -91,24 +100,24 @@ module MrMurano
 
         uri = URI(ret[:url])
         request = Net::HTTP::Post.new(uri)
-        file = HTTP::FormData::File.new(local_path.to_s, {:content_type=>mime})
-        form = HTTP::FormData.create(ret[:inputs].merge({ret[:field]=>file}))
+        file = HTTP::FormData::File.new(local_path.to_s, content_type: mime)
+        form = HTTP::FormData.create(ret[:inputs].merge(ret[:field] => file))
 
         request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
         request.content_type = form.content_type
         request.content_length = form.content_length
         request.body = form.to_s
 
-        if $cfg['tool.curldebug'] then
+        if $cfg['tool.curldebug']
           a = []
-          a << %{curl -s}
-          a << %{-H 'User-Agent: #{request['User-Agent']}'}
-          a << %{-X #{request.method}}
-          a << %{'#{request.uri.to_s}'}
+          a << %(curl -s)
+          a << %(-H 'User-Agent: #{request['User-Agent']}')
+          a << %(-X #{request.method})
+          a << %('#{request.uri}')
           ret[:inputs].each_pair do |key, value|
-            a << %{-F '#{key}=#{value}'}
+            a << %(-F '#{key}=#{value}')
           end
-          a << %{-F #{ret[:field]}=@#{local_path.to_s}}
+          a << %(-F #{ret[:field]}=@#{local_path})
           if $cfg.curlfile_f.nil?
             puts a.join(' ')
           else
@@ -117,14 +126,17 @@ module MrMurano
           end
         end
 
-        unless $cfg['tool.dry'] then
-          Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
-            response = ihttp.request(request)
-            case response
-            when Net::HTTPSuccess
-            else
-              showHttpError(request, response)
-            end
+        return if $cfg['tool.dry']
+        Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |ihttp|
+          response = ihttp.request(request)
+          case response
+          # rubocop:disable Lint/EmptyWhen
+          # "Avoid when branches without a body."
+          # "I'm going to allow this."
+          when Net::HTTPSuccess
+            # pass
+          else
+            showHttpError(request, response)
           end
         end
       end
@@ -132,6 +144,7 @@ module MrMurano
       # Remove content by name
       # @param name [String] Name of content to be deleted
       def remove(name)
+        return unless remove_item_allowed(name)
         delete("/#{CGI.escape(name)}")
       end
 
@@ -139,6 +152,7 @@ module MrMurano
       # @param name [String] Name of content to be downloaded
       # @param block [Block] Block to process data as it is downloaded
       def download(name, &block)
+        return unless download_item_allowed(name)
         # This is a two step process.
         # 1: Get the get instructions for S3.
         # 2: fetch from S3.
@@ -150,12 +164,12 @@ module MrMurano
         request = Net::HTTP::Get.new(uri)
         request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
 
-        if $cfg['tool.curldebug'] then
+        if $cfg['tool.curldebug']
           a = []
-          a << %{curl -s}
-          a << %{-H 'User-Agent: #{request['User-Agent']}'}
-          a << %{-X #{request.method}}
-          a << %{'#{request.uri.to_s}'}
+          a << %(curl -s)
+          a << %(-H 'User-Agent: #{request['User-Agent']}')
+          a << %(-X #{request.method})
+          a << %('#{request.uri}')
           if $cfg.curlfile_f.nil?
             puts a.join(' ')
           else
@@ -164,28 +178,25 @@ module MrMurano
           end
         end
 
-        unless $cfg['tool.dry'] then
-          Net::HTTP.start(uri.host, uri.port, {:use_ssl=>true}) do |ihttp|
-            ihttp.request(request) do |response|
-              case response
-              when Net::HTTPSuccess
-                if block_given? then
-                  response.read_body(&block)
-                else
-                  response.read_body do |chunk|
-                    $stdout.write chunk
-                  end
-                end
+        return if $cfg['tool.dry']
+        Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |ihttp|
+          ihttp.request(request) do |response|
+            case response
+            when Net::HTTPSuccess
+              if block_given?
+                response.read_body(&block)
               else
-                showHttpError(request, response)
+                response.read_body do |chunk|
+                  $stdout.write chunk
+                end
               end
+            else
+              showHttpError(request, response)
             end
           end
         end
       end
-
     end
   end
 end
 
-#  vim: set ai et sw=2 ts=2 :

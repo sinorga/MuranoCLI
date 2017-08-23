@@ -1,5 +1,12 @@
+# Last Modified: 2017.08.22 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'digest/sha1'
-require "http/form_data"
+require 'http/form_data'
 require 'mime/types'
 require 'net/http'
 require 'uri'
@@ -50,12 +57,12 @@ module MrMurano
       # Get one item of the static content.
       def fetch(path, &block)
         path = path[1..-1] if path[0] == '/'
-        path = '/'+ URI.encode_www_form_component(path)
+        path = '/' + URI.encode_www_form_component(path)
         get(path) do |request, http|
           http.request(request) do |resp|
             case resp
             when Net::HTTPSuccess
-              if block_given? then
+              if block_given?
                 resp.read_body(&block)
               else
                 resp.read_body do |chunk|
@@ -75,15 +82,14 @@ module MrMurano
       # @param path [String] The identifying key for this item
       def remove(path)
         path = path[1..-1] if path[0] == '/'
+        return unless remove_item_allowed(path)
         delete('/' + URI.encode_www_form_component(path))
       end
 
       def curldebug(request)
         # The upload will get printed out inside of upload.
         # Because we don't have the correct info here.
-        if request.method != 'PUT' then
-          super(request)
-        end
+        super(request) if request.method != 'PUT'
       end
 
       ##
@@ -91,8 +97,8 @@ module MrMurano
       # @param src [Pathname] Full path of where to upload from
       # @param item [Hash] The item details to upload
       # @param modify [Boolean] True if item exists already and this is changing it
-      def upload(local, remote, modify)
-        local = Pathname.new(local) unless local.kind_of? Pathname
+      def upload(local, remote, _modify)
+        local = Pathname.new(local) unless local.is_a? Pathname
 
         path = remote[:path]
         path = path[1..-1] if path[0] == '/'
@@ -110,22 +116,25 @@ module MrMurano
         # Most of these pull into ram.  So maybe just go with that. Would guess that
         # truely large static content is rare, and we can optimize/fix that later.
 
-        file = HTTP::FormData::File.new(local.to_s, { content_type: remote[:mime_type] })
+        file = HTTP::FormData::File.new(local.to_s, content_type: remote[:mime_type])
         form = HTTP::FormData.create(file: file)
         req = Net::HTTP::Put.new(uri)
-        set_def_headers(req)
+        add_headers(req)
+
+        return unless upload_item_allowed(remote[@itemkey])
+
         workit(req) do |request, http|
           request.content_type = form.content_type
           request.content_length = form.content_length
           request.body = form.to_s
 
-          if $cfg['tool.curldebug'] then
+          if $cfg['tool.curldebug']
             a = []
-            a << %{curl -s -H 'Authorization: #{request['authorization']}'}
-            a << %{-H 'User-Agent: #{request['User-Agent']}'}
-            a << %{-X #{request.method}}
-            a << %{'#{request.uri.to_s}'}
-            a << %{-F file=@#{local.to_s}}
+            a << %(curl -s -H 'Authorization: #{request['authorization']}')
+            a << %(-H 'User-Agent: #{request['User-Agent']}')
+            a << %(-X #{request.method})
+            a << %('#{request.uri}')
+            a << %(-F file=@#{local})
             if $cfg.curlfile_f.nil?
               puts a.join(' ')
             else
@@ -156,20 +165,22 @@ module MrMurano
         name = '/' if name == $cfg['files.default_page']
         name = "/#{name}" unless name.chars.first == '/'
 
-        mime = MIME::Types.type_for(path.to_s)[0] || MIME::Types["application/octet-stream"][0]
+        mime = MIME::Types.type_for(path.to_s)[0] || MIME::Types['application/octet-stream'][0]
 
         # It does not actually take the SHA1 of the file.
         # It first converts the file to hex, then takes the SHA1 of that string
         #sha1 = Digest::SHA1.file(path.to_s).hexdigest
         sha1 = Digest::SHA1.new
         path.open('rb:ASCII-8BIT') do |io|
-          while chunk = io.read(1048576) do
+          # rubocop:disable Lint/AssignmentInCondition
+          # "Assignment in condition - you probably meant to use ==."
+          while chunk = io.read(1_048_576)
             sha1 << Digest.hexencode(chunk)
           end
         end
         debug "Checking #{name} (#{mime.simplified} #{sha1.hexdigest})"
 
-        FileItem.new(:path=>name, :mime_type=>mime.simplified, :checksum=>sha1.hexdigest)
+        FileItem.new(path: name, mime_type: mime.simplified, checksum: sha1.hexdigest)
       end
 
       # @param item [FileItem] The item to get a key from
@@ -179,11 +190,11 @@ module MrMurano
       end
 
       # Compare items.
-      # @param itemA [FileItem]
-      # @param itemB [FileItem]
-      def docmp(itemA, itemB)
-        return (itemA[:mime_type] != itemB[:mime_type] or
-          itemA[:checksum] != itemB[:checksum])
+      # @param item_a [FileItem]
+      # @param item_b [FileItem]
+      def docmp(item_a, item_b)
+        (item_a[:mime_type] != item_b[:mime_type] ||
+        item_a[:checksum] != item_b[:checksum])
       end
     end
 

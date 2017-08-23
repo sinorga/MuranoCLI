@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -149,7 +149,7 @@ module MrMurano
         return true
       end
       confirmed = MrMurano::Verbose.ask_yes_no(
-        "Really delete ‘#{name}’? [y/N] ", false
+        "Really delete #{MrMurano::Verbose.fancy_ticks(name)}? [y/N] ", false
       )
       MrMurano::Verbose.warning(exit_msg) if !confirmed && exit_msg
       if block_given?
@@ -170,6 +170,18 @@ module MrMurano
 
     def pluralize?(word, count)
       MrMurano::Verbose.pluralize?(word, count)
+    end
+
+    def self.fancy_ticks(obj)
+      if $cfg.nil? || $cfg['tool.ascii']
+        "'#{obj}'"
+      else
+        "‘#{obj}’"
+      end
+    end
+
+    def fancy_ticks(obj)
+      MrMurano::Verbose.fancy_ticks(obj)
     end
 
     # 2017-07-01: Whirly wrappers. Maybe delete someday

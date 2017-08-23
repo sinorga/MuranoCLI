@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -129,7 +129,7 @@ Or set your password with `murano password set <username>`.
         error 'Check to see if username and password are correct.'
         unless ENV['MURANO_PASSWORD'].to_s.empty?
           pwd_path = $cfg.file_at('passwords', :user)
-          warning "BEWARE: The password used was from MURANO_PASSWORD, not from #{pwd_path}"
+          warning "NOTE: MURANO_PASSWORD specifies the password; it was not read from #{pwd_path}"
         end
         @token = nil
       end
@@ -158,7 +158,7 @@ Or set your password with `murano password set <username>`.
           (
             match_bid.include?(biz[:bizid]) ||
             match_name.include?(biz[:name]) ||
-            match_termy.any? do |term|
+            match_fuzzy.any? do |term|
               biz[:name] =~ /#{Regexp.escape(term)}/i || biz[:bizid] =~ /#{Regexp.escape(term)}/i
             end
           )

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -25,6 +25,7 @@ module MrMurano
       include Http
       include Verbose
       include SolutionId
+      include SyncAllowed
 
       def initialize
         @solntype = 'product.id'
@@ -155,10 +156,13 @@ module MrMurano
       end
 
       def remove(itemkey)
+        return unless remove_item_allowed(itemkey)
         @there.delete_if { |item| item[@itemkey] == itemkey }
       end
 
       def upload(_local, remote, _modify)
+        # Not calling, e.g., `return unless upload_item_allowed(local)`
+        #   See instead: syncup_after and syncdown_after/resources_write
         @there.delete_if { |item| item[@itemkey] == remote[@itemkey] }
         @there << remote.reject { |k, _v| %i[synckey synctype].include? k }
       end
@@ -192,6 +196,8 @@ module MrMurano
       end
 
       def download(_local, item)
+        # Not calling, e.g., `return unless download_item_allowed(item[@itemkey])`
+        #   See instead: syncup_after and syncdown_after/resources_write
         @here = locallist if @here.nil?
         # needs to append/merge with file
         @here.delete_if do |i|
@@ -218,7 +224,9 @@ module MrMurano
       end
 
       def removelocal(_local, item)
-        # needs to append/merge with file
+        # Not calling, e.g., `return unless removelocal_item_allowed(item[@itemkey])`
+        #   See instead: syncup_after and syncdown_after/resources_write
+        # Append/merge with file.
         key = @itemkey.to_sym
         @here.delete_if do |it|
           it[key] == item[key]
@@ -297,8 +305,6 @@ module MrMurano
         end
 
         here = {}
-        # rubocop:disable Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load.
-        # MAYBE/2017-07-02: Convert to safe_load.
         from.open { |io| here = YAML.load(io) }
         here = {} if here == false
 
@@ -375,23 +381,39 @@ module MrMurano
       ## Create a device with given Identity
       # @param id [String] The new identity
       # @param opts [Hash] Options for the new device
+      # @option opts [Integer] :expire Time at microsecs since epoch when activation window closes.
+      #   (EXPLAIN/2017-08-23: For a certificate, is this different? Time when it must be reprovisioned?)
+      # @option opts [String,Pathname,IO] :key Shared secret for hash, password, token types;
+      #                                        or public key for certificate auth type.
+      #                                        May be string or IO/Pathname to file.
       # @option opts [String] :type One of: certificate, hash, password, signature, token
-      # @option opts [String,Pathname,IO] :publickey The certificate, or IO/Pathname to cert file
-      # @option opts [String] :privatekey Shared secret for hash, password, token types
-      # @option opts [String,Integer] :expire For Cert, when it must be reprovisioned, otherwise when the activation window closes.
+      DEVICE_AUTH_TYPES = %i[certificate hash password signature token].freeze
       def enable(id, opts=nil)
-        if !opts.nil?
-          #opts.reject! { |k, _v| !%i[type publickey privatekey expire].include?(k) }
-          opts.select! { |k, _v| %i[type publickey privatekey expire].include?(k) }
-          if opts.key?(:publickey) && !opts[:publickey].is_a?(String)
-            io = opts[:publickey]
-            opts[:publickey] = io.read
+        opts = {} if opts.nil?
+        props = { auth: {}, locked: false }
+        # See: okami_api/api/swagger/swagger.yaml
+        unless opts[:expire].nil?
+          begin
+            props[:auth][:expire] = Integer(opts[:expire])
+          rescue ArgumentError
+            # Callers should prevent this, so ugly raise is okay.
+            raise ':expire option is not a valid number: #{fancy_ticks(opts[:expire])}'
           end
-        else
-          opts = {}
+        end
+        unless opts[:type].nil?
+          opts[:type] = opts[:type].to_sym
+          unless DEVICE_AUTH_TYPES.include?(opts[:type])
+            complaint = ":type must be one of #{DEVICE_AUTH_TYPES.join('|')}"
+            raise complaint
+          end
+          props[:auth][:type] = opts[:type]
+        end
+        unless opts[:key].nil?
+          props[:auth][:key] = opts[:key].is_a?(String) && opts[:key] || opts[:key].read
+          props[:auth][:type] = :certificate if props[:auth][:type].nil?
         end
         whirly_start('Enabling Device...')
-        putted = put("/#{CGI.escape(id.to_s)}", opts)
+        putted = put("/#{CGI.escape(id.to_s)}", props)
         whirly_stop
         putted
       end
@@ -400,19 +422,21 @@ module MrMurano
 
       ## Create a bunch of devices at once
       # @param local [String, Pathname] CSV file of identifiers
-      # @param expire [Number] Expire time for all identities (ignored)
+      # @param expire [Number] Expire time for all identities
       # @return [void]
-      def enable_batch(local, _expire=nil)
+      def enable_batch(local, expire=nil)
         # Need to modify @uriparts for just this endpoint call.
         uriparts = @uriparts
         @uriparts[-1] = :identities
         uri = endpoint
         @uriparts = uriparts
-
         file = HTTP::FormData::File.new(local.to_s, content_type: 'text/csv')
-        form = HTTP::FormData.create(identities: file)
+        opts = {}
+        opts[:identities] = file
+        opts[:expire] = expire unless expire.nil?
+        form = HTTP::FormData.create(**opts)
         req = Net::HTTP::Post.new(uri)
-        set_def_headers(req)
+        add_headers(req)
         req.content_type = form.content_type
         req.content_length = form.content_length
         req.body = form.to_s
@@ -425,6 +449,7 @@ module MrMurano
       ## Delete a device
       # @param identifier [String] Who to delete.
       def remove(identifier)
+        return unless remove_item_allowed(identifier)
         delete("/#{CGI.escape(identifier.to_s)}")
       end
 
@@ -475,13 +500,29 @@ module MrMurano
       # @param values [Hash] Aliases and the values to write.
       def write(identifier, values)
         debug "Will Write: #{values}"
+        # EXPLAIN/2017-08-23: Why not escape the ID?
+        #   #{CGI.escape(identifier.to_s)}
         patch("/#{identifier}/state", values)
       end
 
       # Read the current state for a device
       # @param identifier [String] The identifier for the device to read.
       def read(identifier)
+        # EXPLAIN/2017-08-23: Why not escape the ID?
+        #   #{CGI.escape(identifier.to_s)}
         get("/#{identifier}/state")
+      end
+
+      def lock(identifier)
+        patch("/#{CGI.escape(identifier.to_s)}", locked: true)
+      end
+
+      def unlock(identifier)
+        patch("/#{CGI.escape(identifier.to_s)}", locked: false)
+      end
+
+      def revoke(identifier)
+        patch("/#{CGI.escape(identifier.to_s)}", auth: { expire: 0 })
       end
     end
   end

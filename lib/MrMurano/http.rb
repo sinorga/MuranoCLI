@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.14 /coding: utf-8
+# Last Modified: 2017.08.20 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -30,49 +30,47 @@ module MrMurano
     end
 
     def ensure_token!(tok)
-      if tok.nil?
-        error 'Not logged in!'
-        exit 1
-      end
+      return unless tok.nil?
+      error 'Not logged in!'
+      exit 1
     end
 
     def json_opts
-      return @json_opts unless not defined?(@json_opts) or @json_opts.nil?
+      return @json_opts unless !defined?(@json_opts) || @json_opts.nil?
       @json_opts = {
-        :allow_nan => true,
-        :symbolize_names => true,
-        :create_additions => false
+        allow_nan: true,
+        symbolize_names: true,
+        create_additions: false,
       }
     end
 
     def curldebug(request)
-      if $cfg['tool.curldebug']
-        formp = (request.content_type =~ %r{multipart/form-data})
-        a = []
-        a << %{curl -s}
-        if request.key?('Authorization')
-          a << %{-H 'Authorization: #{request['Authorization']}'}
-        end
-        a << %{-H 'User-Agent: #{request['User-Agent']}'}
-        a << %{-H 'Content-Type: #{request.content_type}'} unless formp
-        a << %{-X #{request.method}}
-        a << %{'#{request.uri.to_s}'}
-        unless request.body.nil?
-          if formp
-            m = request.body.match(
-              %r{form-data;\s+name="(?<name>[^"]+)";\s+filename="(?<filename>[^"]+)"}
-            )
-            a << %{-F #{m[:name]}=@#{m[:filename]}} unless m.nil?
-          else
-            a << %{-d '#{request.body}'}
-          end
-        end
-        if $cfg.curlfile_f.nil?
-          MrMurano::Progress.instance.whirly_interject { puts a.join(' ') }
+      return unless $cfg['tool.curldebug']
+      formp = (request.content_type =~ %r{multipart/form-data})
+      a = []
+      a << %(curl -s)
+      if request.key?('Authorization')
+        a << %(-H 'Authorization: #{request['Authorization']}')
+      end
+      a << %(-H 'User-Agent: #{request['User-Agent']}')
+      a << %(-H 'Content-Type: #{request.content_type}') unless formp
+      a << %(-X #{request.method})
+      a << %('#{request.uri}')
+      unless request.body.nil?
+        if formp
+          m = request.body.match(
+            /form-data;\s+name="(?<name>[^"]+)";\s+filename="(?<filename>[^"]+)"/
+          )
+          a << %(-F #{m[:name]}=@#{m[:filename]}) unless m.nil?
         else
-          $cfg.curlfile_f << a.join(' ') + "\n\n"
-          $cfg.curlfile_f.flush
+          a << %(-d '#{request.body}')
         end
+      end
+      if $cfg.curlfile_f.nil?
+        MrMurano::Progress.instance.whirly_interject { puts a.join(' ') }
+      else
+        $cfg.curlfile_f << a.join(' ') + "\n\n"
+        $cfg.curlfile_f.flush
       end
     end
 
@@ -83,18 +81,19 @@ module MrMurano
 
     def http
       uri = URI('https://' + $cfg['net.host'])
-      if not defined?(@http) or @http.nil?
+      if !defined?(@http) || @http.nil?
         @http = Net::HTTP.new(uri.host, uri.port)
         @http.use_ssl = true
         @http.start
       end
       @http
     end
+
     def http_reset
       @http = nil
     end
 
-    def set_def_headers(request)
+    def add_headers(request)
       request.content_type = 'application/json'
       # 2017-08-14: MrMurano::Account overrides the token method, and
       # it doesn't exit if no token, and then we end up here.
@@ -104,24 +103,24 @@ module MrMurano
       request
     end
 
+    # rubocop:disable Style/MethodName "Use snake_case for method names."
+    # 2017-08-20: isJSON and showHttpError are grandparented into lint exceptions.
     def isJSON(data)
-      begin
-        [true, JSON.parse(data, json_opts)]
-      rescue
-        [false, data]
-      end
+      [true, JSON.parse(data, json_opts)]
+    rescue
+      [false, data]
     end
 
     def showHttpError(request, response)
       if $cfg['tool.debug']
-        puts "Sent #{request.method} #{request.uri.to_s}"
-        request.each_capitalized{|k,v| puts "> #{k}: #{v}"}
+        puts "Sent #{request.method} #{request.uri}"
+        request.each_capitalized { |k, v| puts "> #{k}: #{v}" }
         if request.body.nil?
         else
           puts ">> #{request.body[0..156]}"
         end
         puts "Got #{response.code} #{response.message}"
-        response.each_capitalized{|k,v| puts "< #{k}: #{v}"}
+        response.each_capitalized { |k, v| puts "< #{k}: #{v}" }
       end
       isj, jsn = isJSON(response.body)
       resp = "Request Failed: #{response.code}: "
@@ -130,25 +129,25 @@ module MrMurano
         # to support Ruby 3.0 frozen string literals.
         if $cfg['tool.fullerror']
           resp += JSON.pretty_generate(jsn)
-        elsif jsn.kind_of? Hash
-          resp += "[#{jsn[:statusCode]}] " if jsn.has_key? :statusCode
-          resp += jsn[:message] if jsn.has_key? :message
+        elsif jsn.is_a? Hash
+          resp += "[#{jsn[:statusCode]}] " if jsn.key? :statusCode
+          resp += jsn[:message] if jsn.key? :message
         else
           resp += jsn.to_s
         end
       else
-        resp += (jsn or 'nil')
+        resp += (jsn || 'nil')
       end
       # assuming verbosing was included.
       error resp
     end
 
-    def workit(request, &block)
+    def workit(request)
       curldebug(request)
       if block_given?
-        yield request, http()
+        yield request, http
       else
-        response = http().request(request)
+        response = http.request(request)
         case response
         when Net::HTTPSuccess
           workit_response(response)
@@ -174,13 +173,13 @@ module MrMurano
     def get(path='', query=nil, &block)
       uri = endpoint(path)
       uri.query = URI.encode_www_form(query) unless query.nil?
-      workit(set_def_headers(Net::HTTP::Get.new(uri)), &block)
+      workit(add_headers(Net::HTTP::Get.new(uri)), &block)
     end
 
     def post(path='', body={}, &block)
       uri = endpoint(path)
       req = Net::HTTP::Post.new(uri)
-      set_def_headers(req)
+      add_headers(req)
       req.body = JSON.generate(body)
       workit(req, &block)
     end
@@ -188,7 +187,7 @@ module MrMurano
     def postf(path='', form={}, &block)
       uri = endpoint(path)
       req = Net::HTTP::Post.new(uri)
-      set_def_headers(req)
+      add_headers(req)
       req.content_type = 'application/x-www-form-urlencoded; charset=utf-8'
       req.form_data = form
       workit(req, &block)
@@ -197,7 +196,7 @@ module MrMurano
     def put(path='', body={}, &block)
       uri = endpoint(path)
       req = Net::HTTP::Put.new(uri)
-      set_def_headers(req)
+      add_headers(req)
       req.body = JSON.generate(body)
       workit(req, &block)
     end
@@ -205,14 +204,14 @@ module MrMurano
     def patch(path='', body={}, &block)
       uri = endpoint(path)
       req = Net::HTTP::Patch.new(uri)
-      set_def_headers(req)
+      add_headers(req)
       req.body = JSON.generate(body)
       workit(req, &block)
     end
 
     def delete(path='', &block)
       uri = endpoint(path)
-      workit(set_def_headers(Net::HTTP::Delete.new(uri)), &block)
+      workit(add_headers(Net::HTTP::Delete.new(uri)), &block)
     end
   end
 end
@@ -238,17 +237,17 @@ if RUBY_VERSION == '2.0.0'
         end
 
         D "opening connection to #{conn_address}:#{conn_port}..."
-        s = Timeout.timeout(@open_timeout, Net::OpenTimeout) {
+        s = Timeout.timeout(@open_timeout, Net::OpenTimeout) do
           TCPSocket.open(conn_address, conn_port, @local_host, @local_port)
-        }
+        end
         s.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
-        D "opened"
+        D 'opened'
         if use_ssl?
-          ssl_parameters = Hash.new
+          ssl_parameters = {}
           iv_list = instance_variables
           SSL_IVNAMES.each_with_index do |ivname, i|
-            if iv_list.include?(ivname) and
-                value = instance_variable_get(ivname)
+            if iv_list.include?(ivname)
+              value = instance_variable_get(ivname)
               ssl_parameters[SSL_ATTRIBUTES[i]] = value if value
             end
           end
@@ -257,7 +256,7 @@ if RUBY_VERSION == '2.0.0'
           D "starting SSL for #{conn_address}:#{conn_port}..."
           s = OpenSSL::SSL::SSLSocket.new(s, @ssl_context)
           s.sync_close = true
-          D "SSL established"
+          D 'SSL established'
         end
         @socket = BufferedIO.new(s)
         @socket.read_timeout = @read_timeout
@@ -281,8 +280,8 @@ if RUBY_VERSION == '2.0.0'
             end
             # Server Name Indication (SNI) RFC 3546
             s.hostname = @address if s.respond_to? :hostname=
-            if @ssl_session and
-                Time.now < @ssl_session.time + @ssl_session.timeout
+            if @ssl_session &&
+               Time.now < @ssl_session.time + @ssl_session.timeout
               s.session = @ssl_session if @ssl_session
             end
             Timeout.timeout(@open_timeout, Net::OpenTimeout) { s.connect }
@@ -292,7 +291,7 @@ if RUBY_VERSION == '2.0.0'
             @ssl_session = s.session
           rescue => exception
             D "Conn close because of connect error #{exception}"
-            @socket.close if @socket and not @socket.closed?
+            @socket.close if @socket && !@socket.closed?
             raise exception
           end
         end

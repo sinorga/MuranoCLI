@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -32,12 +32,6 @@ module MrMurano
       return unless @path.exist?
       @path.chmod(0o600)
       @path.open('rb') do |io|
-        # 2017-07-01: Rubocop suggests using safe_load.
-        #  https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-load
-        #  https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-safe_load
-        # 2017-07-05: Oh, I don't think safe_load exists in Ruby 2 or 2.2...
-        #@data = YAML.safe_load(io)
-        # rubocop:disable Security/YAMLLoad
         @data = YAML.load(io)
       end
     end
@@ -87,6 +81,12 @@ module MrMurano
       return unless @data.is_a?(Hash)
       hd = @data[host]
       return unless !hd.nil? && hd.is_a?(Hash)
+      if $cfg['tool.dry']
+        MrMurano::Verbose.whirly_interject do
+          say(%(--dry: Not removing password for #{fancy_ticks("#{user}@#{host}")}))
+        end
+        return
+      end
       @data[host].delete(user) if hd.key?(user)
     end
 

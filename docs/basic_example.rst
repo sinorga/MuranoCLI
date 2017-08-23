@@ -247,7 +247,7 @@ just grab a random UUID.
 
     $ SOME_ID=$(uuidgen)
 
-    $ murano device enable ${SOME_ID}
+    $ murano device enable ${SOME_ID} --expire 1
 
     $ murano device list
 

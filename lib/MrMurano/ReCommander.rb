@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -7,7 +7,6 @@
 
 require 'optparse'
 require 'MrMurano/optparse'
-
 require 'MrMurano/verbosing'
 
 module MrMurano
@@ -50,6 +49,8 @@ module Commander
     # A command sets prompt_if_logged_off if it
     # is okay to ask the user for their password.
     attr_accessor :prompt_if_logged_off
+    # A command sets subcmdgrouphelp if it's help.
+    attr_accessor :subcmdgrouphelp
 
     def verify_arg_count!(args, max_args=0, mandatory=[])
       if !max_args.nil? && max_args.zero?
@@ -126,38 +127,164 @@ module Commander
 
     alias old_parse_global_options parse_global_options
     def parse_global_options
+      # User can specify, e.g., status.options, to set options for specific commands.
       defopts = ($cfg["#{active_command.name}.options"] || '').split
       @args.push(*defopts)
-      begin
-        old_parse_global_options
-      rescue OptionParser::MissingArgument => err
-        if err.message.start_with?('missing argument:')
-          puts err.message
-        else
-          MrMurano::Verbose.error(
-            "There was a problem interpreting the options: ‘#{err.message}’"
-          )
-        end
-        exit 2
-      end
+      help_hack
+      parse_global_options_real
     end
 
-    # Weird. --help doesn't work if other flags also specified.
-    # E.g., this shows the help for usage:
-    #   $ murano --help usage
-    # but if a flag is added, the command gets run, e.g.,
-    #   $ murano usage --id 1234 --help
-    # ignores the --help and runs the usage command.
-    # ([lb] walked the code and it looks like when Commander tries to
-    # validate the args, it doesn't like the --id flag (maybe because
-    # the "help" command is being used to validate?). Then it removes
-    # the --id flags (after --help was previously removed) and tries
-    # the command *again* (in gems/commander-4.4.3/lib/commander/runner.rb,
-    # look for the comment, "Remove the offending args and retry").
-    #
-    # 2017-06-14: [lb] tried to override run! here to show help correctly
-    # in this use case, but I could not get it to work. Oh, well... a
-    # minor annoyance; just live with it, I guess.
+    def parse_global_options_real
+      old_parse_global_options
+    rescue OptionParser::MissingArgument => err
+      if err.message.start_with?('missing argument:')
+        puts err.message
+      else
+        err_msg = MrMurano::Verbose.fancy_ticks(err.message)
+        MrMurano::Verbose.error(
+          "There was a problem interpreting the options: #{err_msg}"
+        )
+      end
+      exit 2
+    end
+
+    # 2017-08-22: Commander's help infrastructure is either really weak,
+    # or we did something elsewhere that seriously cripples it. In any
+    # case, this fixes all its quirks.
+    def help_hack
+      do_help = fix_args
+      show_alias_help_maybe! if do_help
+    end
+
+    def help_opts
+      %w[-h --help help].freeze
+    end
+
+    def fix_args
+      # If `murano --help` is specified, let rb-commander handle it.
+      # But if `murano command --help` is specified, don't let cmdr
+      # handle it, otherwise it just shows the command description,
+      # but not any of the subcommands (our SubCmdGroupContext code).
+      # Note: not checking help_opts here, which includes 'help', because
+      #   'help' might really be a command argument (e.g., a solution name).
+      do_help = (@args & %w[-h --help]).any? || active_command.name == 'help'
+      if do_help
+        # If there are options in addition to --help, then Commander
+        # runs the command! So remove all options.
+        #
+        # E.g., this shows the help for usage:
+        #   $ murano --help usage
+        # but if a flag is added, the command gets run, e.g.,
+        #   $ murano usage --id 1234 --help
+        # runs the usage command.
+        #
+        # I [lb] walked the code and it looks like when Commander tries to
+        # validate the args, it doesn't like the --id flag (maybe because
+        # the "help" command is being used to validate, and it does not
+        # define any options?). Then it removes the --id switch (after the
+        # --help switch was previously removed) and tries the command *again*
+        # (in gems/commander-4.4.3/lib/commander/runner.rb, look for the
+        # comment, "Remove the offending args and retry"). So in the example
+        # given above, `murano usage --id 1234 --help`, both the `--id` flag
+        # and `--help` flag are moved from @args, and then `murano usage 1234`
+        # is executed (and args are not validated by Commander but merely passed
+        # to the command action, so `usage` gets args=['1234']). Whadda wreck.
+        reject_next = false
+        @args.reject! do |arg|
+          reject = false
+          if reject_next
+            reject = true
+            reject_next = false
+          elsif arg.start_with?('-') && !help_opts.include?(arg)
+            reject = true
+            # See if the next argument should also be consumed.
+            switches = @options.select do |opt|
+              if arg =~ /^-[^-]/
+                # Single char abbrev: look for exact match.
+                opt[:args].include?(arg)
+              else
+                # Long switch: Commander matches abbrevs of longs...
+                opt[:args].any? { |oarg| oarg =~ /^#{arg}/ }
+              end
+            end
+            if switches.length > 1
+              # MAYBE/2017-08-23: Always do this check, not just for help.
+              ambig = MrMurano::Verbose.fancy_ticks(arg)
+              match = switches.map { |sw| MrMurano::Verbose.fancy_ticks(sw) }
+              if match.length > 1
+                match[-1] = "and #{match[-1]}"
+              end
+              match = match.join(', ')
+              MrMurano::Verbose.error('Ambiguous option: #{ambig} matches: #{match}')
+              exit 2
+            elsif switches.length == 1
+              if switches.first[:args].any? { |opt| opt.start_with?('--') && opt.include?(' ') }
+                # There's a space in the --long setting, e.g., '--config KEY=VAL',
+                # so we know there's an argument following.
+                reject_next = true
+              end
+            end
+          end
+          reject
+        end
+      end
+      @purargs = @args - help_opts
+      return do_help if active_command.name == 'help'
+      # Any command other than `murano help` or `murano --help`.
+      return do_help if !do_help || active_command.name.include?(' ')
+      # This is a single-word command, e.g., 'link', not 'link list',
+      #   as in `murano link --help`, not `murano link list --help`.
+      # Positional parameters break Commander. E.g.,
+      #   $ murano --help config application.id
+      #   invalid command. Use --help for more information
+      # so remove any remaining --options and use the first term.
+      @args -= help_opts
+      @args = @args[0..0]
+      # Add back in the --help if the command is not a subcommand help.
+      @args.push('--help') unless active_command.subcmdgrouphelp
+      do_help
+    end
+
+    def show_alias_help_maybe!
+      return unless alias?(command_name_from_args) || (active_command.name == 'help' && @args.length > 1)
+      # Why, oh why, Commander, do you flake out on aliases?
+      # E.g.,
+      #   $ murano product --help
+      #   invalid command. Use --help for more information
+      # Though it sometimes work, like with:
+      #   $ murano --help product device enable
+      # but only because Commander shows help for the 'device' command.
+      # I.e., this doesn't work: `murano product push --help`
+      # So we'll just roll our own help for aliases!
+      @args -= help_opts
+      cli_cmd = MrMurano::Verbose.fancy_ticks(@purargs.join(' '))
+      if active_command.name == 'help'
+        arg_cmd = @args.join(' ')
+      else
+        arg_cmd = command_name_from_args
+      end
+      mur_msg = ''
+      if @aliases[arg_cmd].nil?
+        matches = @aliases.keys.find_all { |key| key.start_with?('arg_cmd') }
+        matches = @aliases.keys.find_all { |key| key.start_with?(@args[0]) } if matches.empty?
+        unless matches.empty?
+          matches = matches.map { |match| MrMurano::Verbose.fancy_ticks(match) }
+          matches = matches.sort.join(', ')
+          mur_msg = %(The #{cli_cmd} command includes: #{matches})
+        end
+      else
+        mur_cmd = []
+        mur_cmd += [active_command.name] if active_command.name != 'help'
+        mur_cmd += @aliases[arg_cmd] unless @aliases[arg_cmd].empty?
+        mur_cmd = mur_cmd.join(' ')
+        #mur_cmd = active_command.name if mur_cmd.empty?
+        mur_cmd = MrMurano::Verbose.fancy_ticks(mur_cmd)
+        mur_msg = %(The #{cli_cmd} command is really: #{mur_cmd})
+      end
+      return if mur_msg.empty?
+      puts mur_msg
+      exit 0
+    end
   end
 end
 

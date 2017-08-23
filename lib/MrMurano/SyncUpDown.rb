@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.18 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -18,6 +18,7 @@ require 'MrMurano/verbosing'
 require 'MrMurano/hash'
 #require 'MrMurano/Config'
 #require 'MrMurano/ProjectFile'
+require 'MrMurano/SyncAllowed'
 ##require 'MrMurano/SyncRoot'
 
 module MrMurano
@@ -27,6 +28,8 @@ module MrMurano
   # pulling those things.
   #
   module SyncUpDown
+    include SyncAllowed
+
     # This is one item that can be synced.
     class Item
       # @return [String] The name of this item.
@@ -49,8 +52,6 @@ module MrMurano
       attr_accessor :synckey
       # @return [String] The syncable type.
       attr_accessor :synctype
-      # @return [String] For device2, the event type.
-      attr_accessor :type
       # @return [String] The updated_at time from the server is used to detect changes.
       attr_accessor :updated_at
       # @return [Integer] Positive if multiple conflicting files found for same item.
@@ -295,11 +296,10 @@ module MrMurano
     # @param local [Pathname] Full path of where to download to
     # @param item [Item] The item to download
     def download(local, item)
-#      if item[:bundled]
-#        warning "Not downloading into bundled item #{synckey(item)}"
-#        return
-#      end
-      local.dirname.mkpath
+      #if item[:bundled]
+      #  warning "Not downloading into bundled item #{synckey(item)}"
+      #  return
+      #end
       id = item[@itemkey.to_sym]
       if id.nil?
         debug "!!! Missing '#{@itemkey}', using :id instead!"
@@ -307,9 +307,14 @@ module MrMurano
         id = item[:id]
         raise "Both #{@itemkey} and id in item are nil!" if id.nil?
       end
+
+      relpath = local.relative_path_from(Pathname.pwd).to_s
+      return unless download_item_allowed(relpath)
+
+      local.dirname.mkpath
       local.open('wb') do |io|
         fetch(id) do |chunk|
-          io.write chunk
+          io.write config_vars_encode chunk
         end
       end
       update_mtime(local, item)
@@ -390,6 +395,7 @@ module MrMurano
     # @param dest [Pathname] Full path of item to be removed
     # @param item [Item] Full details of item to be removed
     def removelocal(dest, _item)
+      return unless removelocal_item_allowed(dest)
       dest.unlink if dest.exist?
     end
 
@@ -408,7 +414,9 @@ module MrMurano
     end
 
     def diff_item_write(io, merged, _local, _remote)
-      io << merged[:local_path].read
+      contents = merged[:local_path].read
+      contents = config_vars_decode(contents)
+      io << contents
     end
 
     #
@@ -458,33 +466,36 @@ module MrMurano
         # Get a list of SyncUpDown::Item's, or a class derived thereof.
         bitems = localitems(location)
         # Use synckey for quicker merging.
-        # 2017-07-02: Argh. If two files have the same identity, this
-        # simple loop masks that there are two files with the same identity!
         #bitems.each { |b| items[synckey(b)] = b }
-        warns = {}
+        # 2017-07-02: If two files have the same identity, the simple loop
+        #   masks that there are two files with the same identity. So check
+        #   first for duplicates, and then process each item.
+        seen = {}
         bitems.each do |item|
           skey = synckey(item)
-          if items.key? skey
-            warns[skey] = 0 unless warns.key?(skey)
-            if warns[skey].zero?
-              items[skey][:dup_count] = warns[skey]
-              # The dumb_synckey is just so we don't overwrite the
-              # original item, or other duplicates, in the hash.
-              dumb_synckey = "#{skey}-#{warns[skey]}"
-              # This just sets the alias for the output, so duplicates look unique.
-              item[@itemkey.to_sym] = dumb_synckey
-              # Don't delete the original item, so that other dupes see it.
-              #items.delete(skey)
-              msg = "Duplicate local file(s) found for ‘#{skey}’"
-              msg += " for ‘#{self.class.description}’" if self.class.description.to_s != ''
-              #msg += '!'
-              warning(msg)
+          seen[skey] = seen.key?(skey) && seen[skey] + 1 || 1
+        end
+        counts = {}
+        bitems.each do |item|
+          skey = synckey(item)
+          if seen[skey] > 1
+            if items[skey].nil?
+              items[skey] = MrMurano::EventHandler::EventHandlerItem.new(item)
+              items[skey][:dup_count] = 0
             end
-            warns[skey] += 1
-            item[:dup_count] = warns[skey]
-            dumb_synckey = "#{skey}-#{warns[skey]}"
-            item[@itemkey.to_sym] = dumb_synckey
-            items[dumb_synckey] = item
+            counts[skey] = counts.key?(skey) && counts[skey] + 1 || 1
+            # Use a unique synckey so all duplicates make it in the list.
+            uniq_synckey = "#{skey}-#{counts[skey]}"
+            item[:dup_count] = counts[skey]
+            # This sets the alias for the output, so duplicates look unique.
+            item[@itemkey.to_sym] = uniq_synckey
+            items[uniq_synckey] = item
+            msg = "Duplicate definition found for #{fancy_ticks(skey)}"
+            if self.class.description.to_s != ''
+              msg += " for #{fancy_ticks(self.class.description)}"
+            end
+            warning(msg)
+            warning(" #{item.local_path}")
           else
             items[skey] = item
           end
@@ -495,9 +506,10 @@ module MrMurano
           # MEH/2017-07-31: This message is a little misleading on syncdown,
           #   e.g., in rspec ./spec/cmd_syncdown_spec.rb, one test blows away
           #   local directories and does a syncdown, and on stderr you'll see
-          #     Skipping missing location ‘/tmp/d20170731-3150-1f50uj4/project/specs/resources.yaml’ (Resources)
+          #     Skipping missing location
+          #      ‘/tmp/d20170731-3150-1f50uj4/project/specs/resources.yaml’ (Resources)
           #   but then later in the syncdown, that directory and file gets created.
-          msg = "Skipping missing location ‘#{location}’"
+          msg = "Skipping missing location #{fancy_ticks(location)}"
           unless self.class.description.to_s.empty?
             msg += " (#{Inflecto.pluralize(self.class.description)})"
           end
@@ -605,7 +617,21 @@ module MrMurano
         pattern = pattern.gsub(%r{^\*\*\/}, '')
       end
 
-      ::File.fnmatch(pattern, path)
+      ignore = ::File.fnmatch(pattern, path)
+      debug "Excluded #{path}" if ignore
+      ignore
+    end
+
+    def resolve_config_var_usage!(there, local)
+      # pass; derived classes should implement.
+    end
+
+    def config_vars_decode(script)
+      script
+    end
+
+    def config_vars_encode(script)
+      script
     end
 
     #######################################################################
@@ -669,16 +695,11 @@ module MrMurano
 
     def syncup_item(item, options, action, verbage)
       if options[action]
-        if !$cfg['tool.dry']
-          prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
-          prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
-          sync_update_progress(prog_msg)
-          yield item
-        else
-          MrMurano::Verbose.whirly_interject do
-            say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
-          end
-        end
+        # It's up to the callback to check and honor $cfg['tool.dry'].
+        prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
+        prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
+        sync_update_progress(prog_msg)
+        yield item
       elsif $cfg['tool.verbose']
         MrMurano::Verbose.whirly_interject do
           say("--no-#{action}: Not #{verbage.downcase} item #{item[:synckey]}")
@@ -734,15 +755,11 @@ module MrMurano
 
     def syncdown_item(item, into, options, action, verbage)
       if options[action]
-        if !$cfg['tool.dry']
-          prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
-          prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
-          sync_update_progress(prog_msg)
-          dest = tolocalpath(into, item)
-          yield dest, item
-        else
-          say("--dry: Not #{verbage.downcase} item #{item[:synckey]}")
-        end
+        prog_msg = "#{verbage.capitalize} item #{item[:synckey]}"
+        prog_msg += " (#{item[:synctype]})" if $cfg['tool.verbose']
+        sync_update_progress(prog_msg)
+        dest = tolocalpath(into, item)
+        yield dest, item
       elsif $cfg['tool.verbose']
         say("--no-#{action}: Not #{verbage.downcase} item #{item[:synckey]}")
       end
@@ -760,7 +777,7 @@ module MrMurano
       tlcl = Tempfile.new([tolocalname(merged, @itemkey) + '_local_', '.lua'])
       Pathname.new(tlcl.path).open('wb') do |io|
         if merged.key?(:script)
-          io << merged[:script]
+          io << config_vars_decode(merged[:script])
         else
           # For most items, read the local file.
           # For resources, it's a bit trickier.
@@ -864,15 +881,25 @@ module MrMurano
 
       tomod, unchg = items_mods_and_chgs(options, therebox, localbox)
 
+      clash = items_cull_clashes!([toadd, todel, tomod, unchg])
+
       if options[:unselected]
-        { toadd: toadd, todel: todel, tomod: tomod, unchg: unchg, skipd: [] }
+        {
+          toadd: toadd,
+          todel: todel,
+          tomod: tomod,
+          unchg: unchg,
+          skipd: [],
+          clash: clash,
+        }
       else
         {
-          toadd: toadd.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          todel: todel.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          tomod: tomod.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
-          unchg: unchg.select { |i| i[:selected] }.map { |i| i.delete(:selected); i },
+          toadd: select_selected(toadd),
+          todel: select_selected(todel),
+          tomod: select_selected(tomod),
+          unchg: select_selected(unchg),
           skipd: [],
+          clash: select_selected(clash),
         }
       end
     end
@@ -928,7 +955,7 @@ module MrMurano
         skip_sol = true if tested && !passed
       end
       return nil unless skip_sol
-      ret = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [] }
+      ret = { toadd: [], todel: [], tomod: [], unchg: [], skipd: [], clash: [] }
       ret[:skipd] << { synckey: self.class.description }
       ret
     end
@@ -945,8 +972,11 @@ module MrMurano
     def items_lists(options, selected)
       # Fetch arrays of items there, and items here/local.
       there = list
-      there = _matcher(there, selected)
       local = locallist(skip_warn: options[:skip_missing_warning])
+
+      resolve_config_var_usage!(there, local)
+
+      there = _matcher(there, selected)
       local = _matcher(local, selected)
 
       therebox = {}
@@ -960,10 +990,12 @@ module MrMurano
       local.each do |item|
         skey = synckey(item)
         # 2017-07-02: Check for local duplicates.
-        skey += "-#{item[:dup_count]}" unless item[:dup_count].nil?
+        unless item[:dup_count].nil? || item[:dup_count].zero?
+          skey += "-#{item[:dup_count]}"
+        end
         item[:synckey] = skey
         item[:synctype] = self.class.description
-        localbox[item[:synckey]] = item
+        localbox[skey] = item
       end
 
       # Some items are considered "undeletable", meaning if a
@@ -990,6 +1022,8 @@ module MrMurano
       unchg = []
 
       (localbox.keys & therebox.keys).each do |key|
+        # Skip this item if it's got duplicate conflicts.
+        next if !localbox[key].is_a?(Hash) && localbox[key].dup_count == 0
         # Want 'local' to override 'there' except for itemkey.
         if options[:asdown]
           mrg = therebox[key].reject { |k, _v| k == @itemkey.to_sym }
@@ -1020,6 +1054,29 @@ module MrMurano
       else
         list.sort_by(&:name)
       end
+    end
+
+    def select_selected(items)
+      items.select { |i| i[:selected] }.map { |i| i.delete(:selected); i }
+    end
+
+    def items_cull_clashes!(items_list)
+      items_list = [items_list] unless items_list.is_a?(Array)
+      clash = []
+      items_list.each do |items|
+        items.select! do |item|
+          if item[:dup_count].nil?
+            true
+          elsif item[:dup_count].zero?
+            # This is the control item.
+            false
+          else
+            clash.push(item)
+            false
+          end
+        end
+      end
+      clash
     end
   end
 end

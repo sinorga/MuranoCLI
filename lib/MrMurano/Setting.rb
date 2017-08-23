@@ -1,3 +1,10 @@
+# Last Modified: 2017.08.20 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'MrMurano/verbosing'
 
 module MrMurano
@@ -18,50 +25,41 @@ module MrMurano
     def mapservice(service)
       service = service.to_s.downcase
       SERVICE_MAP.each_pair do |k, v|
-        if service == k.downcase || service == v.downcase
-          return v
-        end
+        return v if [k.downcase, v.downcase].include? service
       end
-      return service.sub(/(.)(.*)/){"#{$1.upcase}#{$2.downcase}"}
+      # rubocop:disable Style/PerlBackrefs: "Avoid the use of Perl-style backrefs."
+      # Because of the upcase, we cannot just call, e.g.,
+      #   service.sub(/(.)(.*)/, "\\1\\2")
+      service.sub(/(.)(.*)/) { "#{$1.upcase}#{$2.downcase}" }
     end
 
     def read(service, setting)
-      begin
-        debug %{Looking up class "MrMurano::#{mapservice(service)}::Settings"}
-        gb = Object::const_get("MrMurano::#{mapservice(service)}::Settings").new
-        meth = setting.to_sym
-        debug %{Looking up method "#{meth}"}
-        if gb.respond_to?(meth)
-          return gb.__send__(meth)
-        else
-          error "Unknown setting '#{setting}' on '#{service}'"
-        end
-      rescue NameError => e
-        error "No Settings on \"#{service}\""
-        if $cfg['tool.debug'] then
-          error e.message
-          error e.to_s
-        end
+      debug %(Looking up class "MrMurano::#{mapservice(service)}::Settings")
+      gb = Object.const_get("MrMurano::#{mapservice(service)}::Settings").new
+      meth = setting.to_sym
+      debug %(Looking up method "#{meth}")
+      return gb.__send__(meth) if gb.respond_to?(meth)
+      error "Unknown setting '#{setting}' on '#{service}'"
+    rescue NameError => e
+      error %(No Settings on "#{service}")
+      if $cfg['tool.debug']
+        error e.message
+        error e.to_s
       end
     end
 
     def write(service, setting, value)
-      begin
-        debug %(Looking up class "MrMurano::#{mapservice(service)}::Settings")
-        gb = Object::const_get("MrMurano::#{mapservice(service)}::Settings").new
-        meth = "#{setting}=".to_sym
-        debug %(Looking up method "#{meth}")
-        if gb.respond_to? meth then
-          return gb.__send__(meth, value)
-        else
-          error "Unknown setting '#{setting}' on '#{service}'"
-        end
-      rescue NameError => e
-        error %(No Settings on "#{service}")
-        if $cfg['tool.debug'] then
-          error e.message
-          error e.to_s
-        end
+      debug %(Looking up class "MrMurano::#{mapservice(service)}::Settings")
+      gb = Object.const_get("MrMurano::#{mapservice(service)}::Settings").new
+      meth = "#{setting}=".to_sym
+      debug %(Looking up method "#{meth}")
+      return gb.__send__(meth, value) if gb.respond_to? meth
+      error "Unknown setting '#{setting}' on '#{service}'"
+    rescue NameError => e
+      error %(No Settings on "#{service}")
+      if $cfg['tool.debug']
+        error e.message
+        error e.to_s
       end
     end
 
@@ -74,9 +72,11 @@ module MrMurano
       result = {}
       ::MrMurano.constants.each do |maybe|
         begin
-          gb = Object::const_get("MrMurano::#{maybe}::Settings")
-          result[maybe] = gb.instance_methods(false).select{|i| i.to_s[-1] != '='}
+          gb = Object.const_get("MrMurano::#{maybe}::Settings")
+          result[maybe] = gb.instance_methods(false).reject { |i| i.to_s[-1] == '=' }
+        # rubocop:disable Lint/HandleExceptions: Do not suppress exceptions."
         rescue
+          # EXPLAIN/2017-08-20: When/Why does this happen?
         end
       end
       result
@@ -85,6 +85,4 @@ module MrMurano
     end
   end
 end
-
-#  vim: set ai et sw=2 ts=2 :
 
