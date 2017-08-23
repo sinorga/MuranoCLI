@@ -228,6 +228,10 @@ Enables Identifiers, creating devices, or digital shadows, in Murano.
         prd.error %(The --expire value is not a number of hours: #{prd.fancy_ticks(options.expire)})
         exit 1
       end
+      # The platform expects the expiration time to be an integer
+      # representing microseconds since the epoch, e.g.,
+      #    hours * mins/hour * secs/min * msec/sec * μsec/msec
+      # or hours * 60        * 60       * 1000     * 1000
       micros_since_epoch = DateTime.now.strftime('%Q').to_i * 1000
       mircos_until_purge = options.expire.to_i * 60 * 60 * 1000 * 1000
       options.expire = micros_since_epoch + mircos_until_purge
