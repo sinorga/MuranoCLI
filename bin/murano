@@ -8,6 +8,7 @@
 
 require 'commander/import'
 require 'dotenv'
+require 'English'
 require 'highline'
 require 'pathname'
 #require 'pp'
@@ -36,14 +37,6 @@ program :description, %(
   Manage Applications and Products in Exosite's Murano
 ).strip
 
-# The Commander defaults to paged help.
-# The user can disable with --no-page, e.g.,
-#   alias murano='murano --no-page'
-if ARGV.include?('--no-page')
-  program :help_paging, false
-  ARGV.delete('--no-page')
-end
-
 # If being piped, e.g.,
 #   murano command ... | ...
 # or
@@ -56,10 +49,13 @@ begin
   # For piped subshells, `readlink` returns, e.g.,
   #   pipe:[973352]
   # MAGIC_NUMBER: 1 is the processes's output file descriptor.
-  link = File.readlink("/proc/#{$$}/fd/1")
+  #link = File.readlink("/proc/#{$$}/fd/1")
+  link = File.readlink("/proc/#{$PROCESS_ID}/fd/1")
   if link.start_with?('pipe:') && !ARGV.include?('--no-progress') && !ARGV.include?('--progress')
     ARGV.push('--no-progress')
   end
+# rubocop:disable Lint/HandleExceptions: "Do not suppress exceptions."
+# Seems like a dumb rule. [lb]
 rescue Errno::ENOENT
   # Meh.
 end
@@ -100,4 +96,18 @@ $cfg.validate_cmd
 # Look for a (legacy) Solutionfile.json.
 $project = MrMurano::ProjectFile.new
 $project.load
+
+# The Commander defaults to paged help.
+# The user can disable with --no-page, e.g.,
+#   alias murano='murano --no-page'
+# We define this here and not in globals.rb because
+#   `murano --help` does not cause globals.rb to be sourced.
+paging = nil
+paging = true if ARGV.include?('--page')
+paging = false if ARGV.include?('--no-page')
+unless paging.nil?
+  program :help_paging, paging
+  $cfg['tool.no-page'] = !paging
+end
+# else, commander defaults to paging.
 

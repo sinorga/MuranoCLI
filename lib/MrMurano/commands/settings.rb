@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -11,11 +11,26 @@ require 'MrMurano/hash'
 require 'MrMurano/ReCommander'
 require 'MrMurano/Setting'
 
+command :setting do |c|
+  c.syntax = %(murano setting)
+  c.summary = %(Use the setting commands to manage service settings)
+  c.description = %(
+Use the setting commands to manage service settings.
+  ).strip
+  c.project_not_required = true
+  c.subcmdgrouphelp = true
+
+  c.action do |_args, _options|
+    ::Commander::UI.enable_paging unless $cfg['tool.no-page']
+    say(MrMurano::SubCmdGroupHelp.new(c).get_help)
+  end
+end
+
 command 'setting list' do |c|
   c.syntax = %(murano setting list)
-  c.summary = %(List which services and settings are avalible.)
+  c.summary = %(List which services and settings are available)
   c.description = %(
-List which services and settings are avalible.
+List which services and settings are available.
   ).strip
   c.project_not_required = true
 

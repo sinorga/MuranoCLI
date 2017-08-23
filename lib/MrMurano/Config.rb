@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.18 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -335,6 +335,8 @@ module MrMurano
       @paths.each(&:load)
       # If user wants curl commands dumped to a file, open that file.
       init_curl_file
+      # If user doesn't want paging, disable it.
+      program :help_paging, !$cfg['tool.no-page'] unless $cfg['tool.no-page'].nil?
     end
 
     ## Load specified file into the config stack

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -8,16 +8,17 @@
 require 'MrMurano/Gateway'
 require 'MrMurano/ReCommander'
 
-command 'device' do |c|
+command :device do |c|
   c.syntax = %(murano device)
   c.summary = %(Interact with a device)
   c.description = %(
 Interact with a device.
   ).strip
   c.project_not_required = true
+  c.subcmdgrouphelp = true
 
   c.action do |_args, _options|
-    ::Commander::UI.enable_paging
+    ::Commander::UI.enable_paging unless $cfg['tool.no-page']
     say MrMurano::SubCmdGroupHelp.new(c).get_help
   end
 end

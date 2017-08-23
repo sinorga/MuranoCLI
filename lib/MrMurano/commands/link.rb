@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.22 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,16 +13,17 @@ require 'MrMurano/SolutionId'
 
 MSG_SERVICE_LINKS_NONE_FOUND = 'No service links found' unless defined? MSG_SERVICE_LINKS_NONE_FOUND
 
-command 'link' do |c|
+command :link do |c|
   c.syntax = %(murano link)
   c.summary = %(Use the link commands to manage solution links)
   c.description = %(
 Use the link commands to manage solution links.
   ).strip
   c.project_not_required = true
+  c.subcmdgrouphelp = true
 
   c.action do |_args, _options|
-    ::Commander::UI.enable_paging
+    ::Commander::UI.enable_paging unless $cfg['tool.no-page']
     say(MrMurano::SubCmdGroupHelp.new(c).get_help)
   end
 end
