@@ -17,6 +17,11 @@
 #
 require 'simplecov'
 SimpleCov.start do
+  if ENV['CI_MR_EXE'].nil? then
+    coverage_dir "coverage/cov-#{RUBY_VERSION.gsub(/\./,'_')}"
+  else
+    coverage_dir "coverage/cov-#{RUBY_VERSION.gsub(/\./,'_')}-exe"
+  end
   add_group "Specs", "spec/.*"
   add_group "Solution", "lib/MrMurano/Solution.*"
   add_group "Product", "lib/MrMurano/Product.*"

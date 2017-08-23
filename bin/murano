@@ -1,71 +1,62 @@
 #!/usr/bin/env ruby
+# Last Modified: 2017.08.23 /coding: utf-8
+# frozen_string_literal: true
 
-require 'rubygems'
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'commander/import'
-require 'pathname'
-require 'MrMurano'
-require 'pp'
 require 'dotenv'
+require 'English'
+require 'highline'
+require 'pathname'
+#require 'pp'
+require 'rainbow'
+require 'rubygems'
+require 'MrMurano'
+require 'MrMurano/Config'
+require 'MrMurano/ProjectFile'
+
+# DEVs: Store environs in an .env file that gets loaded here. Alternatively,
+#   run a Bash or similar script before you start developing.
 Dotenv.load
 
-Signal.trap('INT', 'EXIT') # Don't drop traces on ^C
+# Don't drop traces on ^C.
+# EXPLAIN/2017-06-30: [lb] not sure what "drop traces" means.
+#   What happens if we don't trap Ctrl-C?
+# NOTE: The second parameter is either a string, or a command or block to
+#   call or run. Ruby honors certain special strings, like 'EXIT':
+#   "If the command is “EXIT”, the script will be terminated by the signal."
+#   Per https://ruby-doc.org/core-2.2.0/Signal.html
+Signal.trap('INT', 'EXIT')
 
 program :version, MrMurano::VERSION
-program :description, %{Manage a Solution and Product in Exosite's Murano}
 
-global_option('-V', '--verbose', 'Be chatty') {
-  $cfg['tool.verbose'] = true
-}
-global_option('-n', '--dry', %{Don't run actions that make changes}) {
-  $cfg['tool.dry'] = true
-  $cfg['tool.verbose'] = true # dry implies verbose
-}
-global_option('-L', '--curl', 'Print out a curl command for each network call') {
-  $cfg['tool.curldebug'] = true
-}
-global_option '--skip-plugins', %{Don't load plugins. Good for when one goes bad.}
+program :description, %(
+  Manage Applications and Products in Exosite's Murano
+).strip
 
-global_option('-C', '--configfile FILE', %{Load additional configuration file}) {|file|
-  # this is called after all of the top level code in this file.
-  $cfg.load_specific(file)
-}
-global_option('-c', '--config KEY=VALUE', %{Set a single config key}) {|param|
-  key, value = param.split('=', 2)
-  # a=b :> ["a","b"]
-  # a= :> ["a",""]
-  # a :> ["a"]
-  raise "Bad config '#{param}'" if key.nil?
-  if value.nil? then
-    $cfg[key] = 'true'
-  else
-    $cfg[key] = value
-  end
-}
+# If being piped, e.g.,
+#   murano command ... | ...
+# or
+#   VAR=$(murano command ...)
+# etc., then do not do progress.
+# TEST/2017-08-23: Does this work on Windows?
+ARGV.push('--no-progress') unless $stdout.tty?
 
 default_command :help
-#default_command :syncup
 
-$cfg = MrMurano::Config.new
-$cfg.load
-$project = MrMurano::ProjectFile.new
-$project.load
-
-# Basic command support is:
-# - read/write config file in [Project, User, System] (all are optional)
-# - TODO: Introspection for tab completion.
-# - TODO: Look for tools in PATH that are +x and "mr-foo..."
-
-
-# Look for plug-ins
+# Look for plug-ins.
 pgds = [
   Pathname.new(Dir.home) + '.mrmurano' + 'plugins',
-  Pathname.new(Dir.home) + '.murano' + 'plugins'
+  Pathname.new(Dir.home) + '.murano' + 'plugins',
 ]
 # Add plugin dirs from configs
 # This is run before the command line options are parsed, so need to check old way.
-if not ARGV.include? '--skip-plugins' then
-  pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.has_key? 'MR_MURANO_PLUGIN_DIR'
-  pgds << Pathname.new(ENV['MURANO_PLUGIN_DIR']) if ENV.has_key? 'MURANO_PLUGIN_DIR'
+unless ARGV.include? '--skip-plugins'
+  pgds << Pathname.new(ENV['MR_MURANO_PLUGIN_DIR']) if ENV.key? 'MR_MURANO_PLUGIN_DIR'
+  pgds << Pathname.new(ENV['MURANO_PLUGIN_DIR']) if ENV.key? 'MURANO_PLUGIN_DIR'
   pgds.each do |path|
     next unless path.exist?
     path.each_child do |plugin|
@@ -74,11 +65,34 @@ if not ARGV.include? '--skip-plugins' then
       next if plugin.basename.fnmatch('.*') # don't read anything starting with .
       begin
         require plugin.to_s
-      rescue Exception => e
-        $stderr.puts "Failed to load plugin at #{plugin} because #{e}"
+      #rescue Exception => err
+      rescue StandardError => err
+        $stderr.puts "Failed to load plugin at #{plugin} because #{err}"
       end
     end
   end
 end
 
-#  vim: set ai et sw=2 ts=2 :
+# Look for .murano/config files.
+$cfg = MrMurano::Config.new(::Commander::Runner.instance)
+$cfg.load
+$cfg.validate_cmd
+
+# Look for a (legacy) Solutionfile.json.
+$project = MrMurano::ProjectFile.new
+$project.load
+
+# The Commander defaults to paged help.
+# The user can disable with --no-page, e.g.,
+#   alias murano='murano --no-page'
+# We define this here and not in globals.rb because
+#   `murano --help` does not cause globals.rb to be sourced.
+paging = nil
+paging = true if ARGV.include?('--page')
+paging = false if ARGV.include?('--no-page')
+unless paging.nil?
+  program :help_paging, paging
+  $cfg['tool.no-page'] = !paging
+end
+# else, commander defaults to paging.
+

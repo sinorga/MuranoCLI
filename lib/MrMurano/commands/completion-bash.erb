@@ -1,0 +1,166 @@
+#!/bin/bash
+# Bash completion (compspec) for <%= program :name %>.
+#  vim: set ai et sw=2 ts=2 ft=bash
+#  #ft=eruby
+
+#__<%= program :name %>_common_options=(
+__app_switches=(
+<% for option in @options -%>
+  <%- if flatswitches(option).count > 1 -%>
+    <%= flatswitches(option)[1] %>
+  <%- else -%>
+    <%= flatswitches(option).first %>
+  <%- end -%>
+<%- end -%>
+)
+
+# Util. fcn.
+function contains_element () {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  return 1
+}
+
+# Completion "main".
+function _<%= program :name %> () {
+    #local cmd0="${1##*/}"
+    local cmd0=""
+    local cmd1=""
+    local cmd2=""
+    #local -a cmdn
+    local last="${COMP_WORDS[COMP_CWORD]}"
+    local line="${COMP_LINE}"
+    local -a used_switches
+
+    local len=$(($COMP_CWORD - 1))
+    local idx
+    for ((idx=1; idx<=len; idx++)); do
+        local cur="${COMP_WORDS[$idx]}"
+        # If positional argument is not a flag, it's the command or subcommand.
+        if [[ $cur != -* ]]; then
+          if [[ -z $cmd0 ]]; then
+            cmd0="$cur"
+          elif [[ -z $cmd1 ]]; then
+            cmd1="$cur"
+          elif [[ -z $cmd2 ]]; then
+            cmd2="$cur"
+          #else
+          #  cmdn+=("$cur")
+          fi
+        else
+          used_switches+=("$cur")
+        fi
+    done
+    #>&2 echo -e "\ncmd0=$cmd0 / cmd1=$cmd1 / cmd2=$cmd2 / len=$len"
+
+    if [[ -z $cmd0 ]]; then
+      local -a comp_list
+      comp_list=(
+      <%- for name, subs in cmdTree -%>
+        <%= name %>
+      <%-end-%>
+      )
+      
+      for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+        local switch=${__app_switches[$idx]}
+        if ! contains_element "$switch" "${used_switches[@]}"; then
+          comp_list+=("$switch")
+        fi
+      done
+      COMPREPLY=($(compgen -W '${comp_list[@]}' -- "$last"))
+    else
+      case $cmd0 in
+      <%- for name, subs in cmdTree -%>
+        (<%= name %>)
+          __<%=program :name%>-<%= name %> "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
+      <%-end-%>
+      esac
+    fi
+}
+
+<%- for name, subs in cmdTree -%>
+  <%- command = subs["\0cmd"]; subs = subs.reject{|k,_| k == "\0cmd"} -%>
+# Completion for subcommand: "<%= name %>".
+function __<%=program :name%>-<%= name %> () {
+  local subcmd1="$1"
+  local subcmd2="$2"
+  #local subcmdn="$3"
+  local used_switches="${@:3}"
+  local last="${COMP_WORDS[COMP_CWORD]}"
+  local len=$(($COMP_CWORD - 1))
+
+  local -a more_switches
+
+  local -a comp_list
+
+  #>&2 echo -e "\nsubcmd1=$subcmd1 / subcmd2=$subcmd2 / last=$last / len=$len"
+  #>&2 echo "used_switches=$used_switches"
+  #>&2 echo "more_switches=$more_switches"
+
+  # NOTE: Not doing anything special for ${subcmd2}.
+  #       Are there sub-sub-commands we shoud list?
+  <%- unless subs.empty? -%>
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+    <%- for sname, ssubs in subs -%>
+      <%=sname%>
+    <%-end-%>
+    )
+  else
+    case $subcmd1 in
+    <%- for sname, ssubs in subs -%>
+      <%- command = ssubs["\0cmd"]; subs = ssubs.reject{|k,_| k == "\0cmd"} -%>
+      (<%=sname%>)
+      more_switches=(
+    <%- unless command.nil? or command.options.empty? then -%>
+      <%- if flatswitches(option).count > 1 -%>
+        {<%= flatswitches(option)[1] %>}
+      <%- else -%>
+        <%= flatswitches(option).first %>
+      <%- end -%>
+    <%- end -%>
+      )
+      ;;
+    <%-end-%>
+    esac
+  fi
+  <%-end-%>
+
+  # Add unused application-wide flags.
+  local idx
+  for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+    local switch=${__app_switches[$idx]}
+    if ! contains_element "$switch" "${used_switches[@]}"; then
+      comp_list+=("$switch")
+    fi
+  done
+  # Add unused subcommand flags.
+  for ((idx = 0; idx < ${#more_switches[@]}; idx++)); do
+    local switch=${more_switches[$idx]}
+    comp_list+=("$switch")
+  done
+
+  # If there are only --flags, <TAB> will put the common prefix,
+  # "--", but maybe the user doesn't want to add a flag after all.
+  if [[ -z ${last} ]]; then
+    local flags_only=true
+    for ((idx = 0; idx < ${#comp_list[@]}; idx++)); do
+      local switch=${comp_list[$idx]}
+      if [[ ${switch} != --* ]]; then
+        flags_only=false
+        break
+      fi
+    done
+    if ${flags_only}; then
+      # Use two Unicode en spaces to prevent compgen from prefixing "--".
+      comp_list+=("	 ")
+    fi
+  fi
+
+  COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
+}
+
+<%- end -%>
+complete -F _murano murano
+

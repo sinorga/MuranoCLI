@@ -1,0 +1,32 @@
+---
+type: object
+description: Map of the Resources allowed on Devices in this project.
+patternProperties:
+  "[a-z]+":
+    type: object
+    description: Name of a resource with info
+    properties:
+      format:
+        type: string
+        pattern: "(string|boolean|number)"
+        description: The type of data stored in aliases for this resource.
+      unit:
+        type: string
+        description: Helpful unit description for the alias.
+      settable:
+        type: boolean
+        description: True if the cloud can write to this
+      allowed:
+        type: array
+        description: |-
+          Simple data format validations.
+
+          Any set of values that matches the format.  Although for number format,
+          you can also use a string that represents a range. eg. [1,3,"9-11",21]
+
+          Or for string string format eg. ["on", "off"].
+
+          Boolean is implied [true, false] and not needed.
+
+#  vim: set et sw=2 ts=2 :
+

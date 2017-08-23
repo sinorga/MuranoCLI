@@ -1,8 +1,0 @@
-#!/usr/bin/env ruby
-require 'highline'
-
-puts HighLine.color("!"*80, :yellow)
-puts HighLine.color("The command 'mr' is deprecated.  Use 'murano' instead.", :yellow)
-puts HighLine.color("!"*80, :yellow)
-
-exec 'murano', *ARGV
