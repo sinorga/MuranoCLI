@@ -14,6 +14,7 @@ __app_switches=(
     --no-page
     --no-plugins
     --no-progress
+    --no-ascii
     --verbose
     --help
     --version
@@ -78,6 +79,7 @@ function _murano () {
         diff
         domain
         find
+        gwe
         help
         init
         keystore
@@ -163,6 +165,9 @@ function _murano () {
         ;;
         (find)
           __murano-find "$cmd1" "$cmd2" "${used_switches[@]}"
+        ;;
+        (gwe)
+          __murano-gwe "$cmd1" "$cmd2" "${used_switches[@]}"
         ;;
         (help)
           __murano-help "$cmd1" "$cmd2" "${used_switches[@]}"
@@ -795,6 +800,7 @@ function __murano-content () {
     case $subcmd1 in
       (delete)
       more_switches=(
+        {--trace}
       )
       ;;
       (download)
@@ -1091,7 +1097,10 @@ function __murano-device () {
       enable
       httpurl
       list
+      lock
       read
+      revoke
+      unlock
       write
     )
   else
@@ -1118,9 +1127,21 @@ function __murano-device () {
         {--trace}
       )
       ;;
+      (lock)
+      more_switches=(
+      )
+      ;;
       (read)
       more_switches=(
         {--trace}
+      )
+      ;;
+      (revoke)
+      more_switches=(
+      )
+      ;;
+      (unlock)
+      more_switches=(
       )
       ;;
       (write)
@@ -1411,6 +1432,72 @@ function __murano-find () {
       (product)
       more_switches=(
         {--trace}
+      )
+      ;;
+    esac
+  fi
+
+  # Add unused application-wide flags.
+  local idx
+  for ((idx = 0; idx < ${#__app_switches[@]}; idx++)); do
+    local switch=${__app_switches[$idx]}
+    if ! contains_element "$switch" "${used_switches[@]}"; then
+      comp_list+=("$switch")
+    fi
+  done
+  # Add unused subcommand flags.
+  for ((idx = 0; idx < ${#more_switches[@]}; idx++)); do
+    local switch=${more_switches[$idx]}
+    comp_list+=("$switch")
+  done
+
+  # If there are only --flags, <TAB> will put the common prefix,
+  # "--", but maybe the user doesn't want to add a flag after all.
+  if [[ -z ${last} ]]; then
+    local flags_only=true
+    for ((idx = 0; idx < ${#comp_list[@]}; idx++)); do
+      local switch=${comp_list[$idx]}
+      if [[ ${switch} != --* ]]; then
+        flags_only=false
+        break
+      fi
+    done
+    if ${flags_only}; then
+      # Use two Unicode en spaces to prevent compgen from prefixing "--".
+      comp_list+=("	 ")
+    fi
+  fi
+
+  COMPREPLY=($(compgen -W '${comp_list[@]}' -- "${last}"))
+}
+
+# Completion for subcommand: "gwe".
+function __murano-gwe () {
+  local subcmd1="$1"
+  local subcmd2="$2"
+  #local subcmdn="$3"
+  local used_switches="${@:3}"
+  local last="${COMP_WORDS[COMP_CWORD]}"
+  local len=$(($COMP_CWORD - 1))
+
+  local -a more_switches
+
+  local -a comp_list
+
+  #>&2 echo -e "\nsubcmd1=$subcmd1 / subcmd2=$subcmd2 / last=$last / len=$len"
+  #>&2 echo "used_switches=$used_switches"
+  #>&2 echo "more_switches=$more_switches"
+
+  # NOTE: Not doing anything special for ${subcmd2}.
+  #       Are there sub-sub-commands we shoud list?
+  if [[ -z ${subcmd1} || ${len} -eq 1 ]]; then
+    comp_list=(
+      app
+    )
+  else
+    case $subcmd1 in
+      (app)
+      more_switches=(
       )
       ;;
     esac
@@ -2274,6 +2361,7 @@ function __murano-password () {
       ;;
       (delete)
       more_switches=(
+        {--trace}
       )
       ;;
       (list)
