@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -135,18 +135,16 @@ module Commander
     end
 
     def parse_global_options_real
-      begin
-        old_parse_global_options
-      rescue OptionParser::MissingArgument => err
-        if err.message.start_with?('missing argument:')
-          puts err.message
-        else
-          MrMurano::Verbose.error(
-            "There was a problem interpreting the options: ‘#{err.message}’"
-          )
-        end
-        exit 2
+      old_parse_global_options
+    rescue OptionParser::MissingArgument => err
+      if err.message.start_with?('missing argument:')
+        puts err.message
+      else
+        MrMurano::Verbose.error(
+          "There was a problem interpreting the options: ‘#{err.message}’"
+        )
       end
+      exit 2
     end
 
     # 2017-08-22: Commander's help infrastructure is either really weak,
@@ -191,64 +189,60 @@ module Commander
         @args.reject! { |arg| arg.start_with?('-') && !help_opts.include?(arg) }
       end
       @purargs = @args - help_opts
-      if active_command.name != 'help'
-        # Any command other than `murano help` or `murano --help`.
-        unless !do_help || active_command.name.include?(' ')
-          # This is a single-word command, e.g., 'link', not 'link list',
-          #   as in `murano link --help`, not `murano link list --help`.
-          # Positional parameters break Commander. E.g.,
-          #   $ murano --help config application.id
-          #   invalid command. Use --help for more information
-          # so remove any remaining --options and use the first term.
-          @args -= help_opts
-          @args = @args[0..0]
-          # Add back in the --help if the command is not a subcommand help.
-          @args.push('--help') unless active_command.subcmdgrouphelp
-        end
-      end
+      return if active_command.name == 'help'
+      # Any command other than `murano help` or `murano --help`.
+      return if !do_help || active_command.name.include?(' ')
+      # This is a single-word command, e.g., 'link', not 'link list',
+      #   as in `murano link --help`, not `murano link list --help`.
+      # Positional parameters break Commander. E.g.,
+      #   $ murano --help config application.id
+      #   invalid command. Use --help for more information
+      # so remove any remaining --options and use the first term.
+      @args -= help_opts
+      @args = @args[0..0]
+      # Add back in the --help if the command is not a subcommand help.
+      @args.push('--help') unless active_command.subcmdgrouphelp
     end
 
     def show_alias_help_maybe!
-      if alias?(command_name_from_args) || (active_command.name == 'help' && @args.length > 1)
-        # Why, oh why, Commander, do you flake out on aliases?
-        # E.g.,
-        #   $ murano product --help
-        #   invalid command. Use --help for more information
-        # Though it sometimes work, like with:
-        #   $ murano --help product device enable
-        # but only because Commander shows help for the 'device' command.
-        # I.e., this doesn't work: murano product push --help
-        # So we'll just roll our own help for aliases!
-        @args -= help_opts
-        cli_cmd = MrMurano::Verbose.fancy_tick(@purargs.join(' '))
-        if active_command.name == 'help'
-          arg_cmd = @args.join(' ')
-        else
-          arg_cmd = command_name_from_args
-        end
-        mur_msg = ''
-        if @aliases[arg_cmd].nil?
-          matches = @aliases.keys.find_all { |key| key.start_with?('arg_cmd') }
-          matches = @aliases.keys.find_all { |key| key.start_with?(@args[0]) } if matches.empty?
-          unless matches.empty?
-            matches = matches.map { |match| MrMurano::Verbose.fancy_tick(match) }
-            matches = matches.sort.join(', ')
-            mur_msg = %(The #{cli_cmd} command includes: #{matches})
-          end
-        else
-          mur_cmd = []
-          mur_cmd += [active_command.name] if active_command.name != 'help'
-          mur_cmd += @aliases[arg_cmd] unless @aliases[arg_cmd].empty?
-          mur_cmd = mur_cmd.join(' ')
-          #mur_cmd = active_command.name if mur_cmd.empty?
-          mur_cmd = MrMurano::Verbose.fancy_tick(mur_cmd)
-          mur_msg = %(The #{cli_cmd} command is really: #{mur_cmd})
-        end
-        unless mur_msg.empty?
-          puts mur_msg
-          exit 0
-        end
+      return unless alias?(command_name_from_args) || (active_command.name == 'help' && @args.length > 1)
+      # Why, oh why, Commander, do you flake out on aliases?
+      # E.g.,
+      #   $ murano product --help
+      #   invalid command. Use --help for more information
+      # Though it sometimes work, like with:
+      #   $ murano --help product device enable
+      # but only because Commander shows help for the 'device' command.
+      # I.e., this doesn't work: murano product push --help
+      # So we'll just roll our own help for aliases!
+      @args -= help_opts
+      cli_cmd = MrMurano::Verbose.fancy_tick(@purargs.join(' '))
+      if active_command.name == 'help'
+        arg_cmd = @args.join(' ')
+      else
+        arg_cmd = command_name_from_args
       end
+      mur_msg = ''
+      if @aliases[arg_cmd].nil?
+        matches = @aliases.keys.find_all { |key| key.start_with?('arg_cmd') }
+        matches = @aliases.keys.find_all { |key| key.start_with?(@args[0]) } if matches.empty?
+        unless matches.empty?
+          matches = matches.map { |match| MrMurano::Verbose.fancy_tick(match) }
+          matches = matches.sort.join(', ')
+          mur_msg = %(The #{cli_cmd} command includes: #{matches})
+        end
+      else
+        mur_cmd = []
+        mur_cmd += [active_command.name] if active_command.name != 'help'
+        mur_cmd += @aliases[arg_cmd] unless @aliases[arg_cmd].empty?
+        mur_cmd = mur_cmd.join(' ')
+        #mur_cmd = active_command.name if mur_cmd.empty?
+        mur_cmd = MrMurano::Verbose.fancy_tick(mur_cmd)
+        mur_msg = %(The #{cli_cmd} command is really: #{mur_cmd})
+      end
+      return if mur_msg.empty?
+      puts mur_msg
+      exit 0
     end
   end
 end
