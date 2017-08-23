@@ -393,8 +393,12 @@ module MrMurano
         props = { auth: {}, locked: false }
         # See: okami_api/api/swagger/swagger.yaml
         unless opts[:expire].nil?
-          raise ':expire must be a number' unless opts[:expire] =~ /^[0-9]+$/
-          props[:auth][:expire] = opts[:expire]
+          begin
+            props[:auth][:expire] = Integer(opts[:expire])
+          rescue ArgumentError
+            # Callers should prevent this, so ugly raise is okay.
+            raise ':expire option is not a valid number: #{fancy_ticks(opts[:expire])}'
+          end
         end
         unless opts[:type].nil?
           opts[:type] = opts[:type].to_sym
