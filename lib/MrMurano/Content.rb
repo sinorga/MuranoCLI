@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -132,7 +132,7 @@ module MrMurano
           case response
           # rubocop:disable Lint/EmptyWhen
           # "Avoid when branches without a body."
-          # "I'm going to all this."
+          # "I'm going to allow this."
           when Net::HTTPSuccess
             # pass
           else
