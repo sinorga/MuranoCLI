@@ -85,6 +85,7 @@ module MrMurano
         MrMurano::Verbose.whirly_interject do
           say(%(--dry: Not removing password for #{fancy_ticks("#{user}@#{host}")}))
         end
+        return
       end
       @data[host].delete(user) if hd.key?(user)
     end
