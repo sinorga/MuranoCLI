@@ -160,6 +160,10 @@ module Commander
       %w[-h --help help].freeze
     end
 
+    def vers_opts
+      %w[-v --version].freeze
+    end
+
     def fix_args
       # If `murano --help` is specified, let rb-commander handle it.
       # But if `murano command --help` is specified, don't let cmdr
@@ -167,6 +171,7 @@ module Commander
       # but not any of the subcommands (our SubCmdGroupContext code).
       # Note: not checking help_opts here, which includes 'help', because
       #   'help' might really be a command argument (e.g., a solution name).
+      # Note: `murano -v`'s active_command is 'help'.
       do_help = (@args & %w[-h --help]).any? || active_command.name == 'help'
       if do_help
         # If there are options in addition to --help, then Commander
@@ -195,30 +200,41 @@ module Commander
           if reject_next
             reject = true
             reject_next = false
-          elsif arg.start_with?('-') && !help_opts.include?(arg)
+          elsif arg.start_with?('-') && !help_opts.include?(arg) && !vers_opts.include?(arg)
             reject = true
             # See if the next argument should also be consumed.
-            switches = @options.select do |opt|
+            arg_opts = @options.select do |opt|
               if arg =~ /^-[^-]/
                 # Single char abbrev: look for exact match.
-                opt[:args].include?(arg)
+                opt[:switches].include?(arg)
               else
                 # Long switch: Commander matches abbrevs of longs...
-                opt[:args].any? { |oarg| oarg =~ /^#{arg}/ }
+                opt[:switches].any? { |oarg| oarg =~ /^#{arg}/ }
               end
             end
-            if switches.length > 1
+            if arg =~ /^--/
+              exact = arg_opts.select do |opt|
+                opt[:switches].include?(arg) || opt[:switches].any? do |sw|
+                  sw.start_with?(arg + ' ')
+                end
+              end
+              arg_opts = exact unless exact.empty?
+            end
+            if arg_opts.length > 1
               # MAYBE/2017-08-23: Always do this check, not just for help.
               ambig = MrMurano::Verbose.fancy_ticks(arg)
-              match = switches.map { |sw| MrMurano::Verbose.fancy_ticks(sw) }
+              match = arg_opts.map do |opt|
+                opt[:switches].map { |sw| MrMurano::Verbose.fancy_ticks(sw) }.join('|')
+              end
+              match = match.flatten
               if match.length > 1
                 match[-1] = "and #{match[-1]}"
               end
               match = match.join(', ')
-              MrMurano::Verbose.error('Ambiguous option: #{ambig} matches: #{match}')
+              MrMurano::Verbose.error("Ambiguous option: #{ambig} matches: #{match}")
               exit 2
-            elsif switches.length == 1
-              if switches.first[:args].any? { |opt| opt.start_with?('--') && opt.include?(' ') }
+            elsif arg_opts.length == 1
+              if arg_opts.first[:switches].any? { |opt| opt.start_with?('--') && opt.include?(' ') }
                 # There's a space in the --long setting, e.g., '--config KEY=VAL',
                 # so we know there's an argument following.
                 reject_next = true
