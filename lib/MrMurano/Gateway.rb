@@ -524,10 +524,6 @@ module MrMurano
       def revoke(identifier)
         patch("/#{CGI.escape(identifier.to_s)}", auth: { expire: 0 })
       end
-
-      def authenticize(identifier, key, type)
-        patch("/#{CGI.escape(identifier.to_s)}", auth: { key: key, type: type })
-      end
     end
   end
 end
