@@ -93,7 +93,7 @@ end
 alias_command 'devices list', 'device list'
 
 command 'device read' do |c|
-  c.syntax = %(murano device read <identifier> (<alias>...))
+  c.syntax = %(murano device read <identifier> [<alias>...] [--options])
   c.summary = %(Read state of a device)
   c.description = %(
 Read state of a device.
@@ -104,7 +104,7 @@ This reads the latest state values for the resources in a device.
   c.option '-o', '--output FILE', %(Download to file instead of STDOUT)
 
   c.action do |args, options|
-    c.verify_arg_count!(args, nil, ['Identifier missing'])
+    c.verify_arg_count!(args, nil, ['Missing device identifier'])
 
     prd = MrMurano::Gateway::Device.new
 
@@ -145,7 +145,7 @@ If an alias is not settable, this will fail.
   ).strip
 
   c.action do |args, _options|
-    c.verify_arg_count!(args, nil, ['Identifier missing'])
+    c.verify_arg_count!(args, nil, ['Missing device identifier'])
 
     resources = (MrMurano::Gateway::GweBase.new.info || {})[:resources]
 
@@ -299,7 +299,7 @@ you cannot retrive the CIK again.
   ).strip
 
   c.action do |args, _options|
-    c.verify_arg_count!(args, nil, ['Identifier missing'])
+    c.verify_arg_count!(args, nil, ['Missing device identifier'])
     prd = MrMurano::Gateway::Device.new
     prd.outf prd.activate(args.first)
   end
@@ -313,7 +313,7 @@ Delete a device.
   ).strip
 
   c.action do |args, _options|
-    c.verify_arg_count!(args, nil, ['Identifier missing'])
+    c.verify_arg_count!(args, nil, ['Missing device identifier'])
     prd = MrMurano::Gateway::Device.new
     snid = args.shift
     ret = prd.remove(snid)
