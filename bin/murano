@@ -43,9 +43,7 @@ program :description, %(
 #   VAR=$(murano command ...)
 # etc., then do not do progress.
 # TEST/2017-08-23: Does this work on Windows?
-unless $stdout.tty?
-  ARGV.push('--no-progress')
-end
+ARGV.push('--no-progress') unless $stdout.tty?
 
 default_command :help
 

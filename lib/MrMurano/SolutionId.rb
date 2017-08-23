@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -8,7 +8,9 @@
 module MrMurano
   module SolutionId
     INVALID_SID = '-1'
-    UNEXPECTED_TYPE_OR_ERROR_MSG = 'Unexpected result type or error: assuming empty instead'
+    UNEXPECTED_TYPE_OR_ERROR_MSG = (
+      'Unexpected result type or error: assuming empty instead'
+    )
 
     attr_reader :sid
     attr_reader :valid_sid
@@ -41,7 +43,9 @@ module MrMurano
 
     def sid=(sid)
       sid = INVALID_SID if sid.nil? || !sid.is_a?(String) || sid.empty?
-      @valid_sid = false if sid.to_s.empty? || sid == INVALID_SID || (defined?(@sid) && sid != @sid)
+      if sid.to_s.empty? || sid == INVALID_SID || (defined?(@sid) && sid != @sid)
+        @valid_sid = false
+      end
       @sid = sid
       # MAGIC_NUMBER: The 2nd element is the solution ID, e.g., solution/<sid>/...
       raise "Unexpected @uriparts_sidex #{@uriparts_sidex}" unless @uriparts_sidex == 1
