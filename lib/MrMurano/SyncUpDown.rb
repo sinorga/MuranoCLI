@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -490,8 +490,10 @@ module MrMurano
             # This sets the alias for the output, so duplicates look unique.
             item[@itemkey.to_sym] = uniq_synckey
             items[uniq_synckey] = item
-            msg = "Duplicate definition found for ‘#{skey}’"
-            msg += " for ‘#{self.class.description}’" if self.class.description.to_s != ''
+            msg = "Duplicate definition found for #{fancy_ticks(skey)}"
+            if self.class.description.to_s != ''
+              msg += " for #{fancy_ticks(self.class.description)}"
+            end
             warning(msg)
             warning(" #{item.local_path}")
           else
@@ -504,9 +506,10 @@ module MrMurano
           # MEH/2017-07-31: This message is a little misleading on syncdown,
           #   e.g., in rspec ./spec/cmd_syncdown_spec.rb, one test blows away
           #   local directories and does a syncdown, and on stderr you'll see
-          #     Skipping missing location ‘/tmp/d20170731-3150-1f50uj4/project/specs/resources.yaml’ (Resources)
+          #     Skipping missing location
+          #      ‘/tmp/d20170731-3150-1f50uj4/project/specs/resources.yaml’ (Resources)
           #   but then later in the syncdown, that directory and file gets created.
-          msg = "Skipping missing location ‘#{location}’"
+          msg = "Skipping missing location #{fancy_ticks(location)}"
           unless self.class.description.to_s.empty?
             msg += " (#{Inflecto.pluralize(self.class.description)})"
           end

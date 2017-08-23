@@ -140,8 +140,9 @@ module Commander
       if err.message.start_with?('missing argument:')
         puts err.message
       else
+        err_msg = MrMurano::Verbose.fancy_ticks(err.message)
         MrMurano::Verbose.error(
-          "There was a problem interpreting the options: ‘#{err.message}’"
+          "There was a problem interpreting the options: #{err_msg}"
         )
       end
       exit 2
@@ -216,7 +217,7 @@ module Commander
       # I.e., this doesn't work: murano product push --help
       # So we'll just roll our own help for aliases!
       @args -= help_opts
-      cli_cmd = MrMurano::Verbose.fancy_tick(@purargs.join(' '))
+      cli_cmd = MrMurano::Verbose.fancy_ticks(@purargs.join(' '))
       if active_command.name == 'help'
         arg_cmd = @args.join(' ')
       else
@@ -227,7 +228,7 @@ module Commander
         matches = @aliases.keys.find_all { |key| key.start_with?('arg_cmd') }
         matches = @aliases.keys.find_all { |key| key.start_with?(@args[0]) } if matches.empty?
         unless matches.empty?
-          matches = matches.map { |match| MrMurano::Verbose.fancy_tick(match) }
+          matches = matches.map { |match| MrMurano::Verbose.fancy_ticks(match) }
           matches = matches.sort.join(', ')
           mur_msg = %(The #{cli_cmd} command includes: #{matches})
         end
@@ -237,7 +238,7 @@ module Commander
         mur_cmd += @aliases[arg_cmd] unless @aliases[arg_cmd].empty?
         mur_cmd = mur_cmd.join(' ')
         #mur_cmd = active_command.name if mur_cmd.empty?
-        mur_cmd = MrMurano::Verbose.fancy_tick(mur_cmd)
+        mur_cmd = MrMurano::Verbose.fancy_ticks(mur_cmd)
         mur_msg = %(The #{cli_cmd} command is really: #{mur_cmd})
       end
       return if mur_msg.empty?

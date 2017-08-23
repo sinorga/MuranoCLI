@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -14,7 +14,7 @@ module MrMurano
     def sync_item_allowed(actioning, item_name)
       if $cfg['tool.dry']
         MrMurano::Verbose.whirly_interject do
-          say("--dry: Not #{actioning} item: #{fancy_tick(item_name)}")
+          say("--dry: Not #{actioning} item: #{fancy_ticks(item_name)}")
         end
         false
       else

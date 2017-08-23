@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -190,9 +190,8 @@ def link_solutions(sol_a, sol_b, options)
       elsif response.is_a?(Net::HTTPConflict)
         svc_cfg_exists = true
       else
-        MrMurano::Verbose.error(
-          "Unable to link solutions: ‘#{Rainbow(response.message).underline}’"
-        )
+        resp_msg = MrMurano::Verbose.fancy_ticks(Rainbow(response.message).underline)
+        MrMurano::Verbose.error("Unable to link solutions: #{resp_msg}")
         sercfg.showHttpError(request, response)
       end
     end
@@ -227,9 +226,8 @@ def link_solutions(sol_a, sol_b, options)
       elsif response.is_a?(Net::HTTPConflict)
         evt_hlr_exists = true
       else
-        MrMurano::Verbose.error(
-          "Failed to create default event handler: ‘#{Rainbow(response.message).underline}’"
-        )
+        resp_msg = MrMurano::Verbose.fancy_ticks(Rainbow(response.message).underline)
+        MrMurano::Verbose.error("Failed to create default event handler: #{resp_msg}")
         evthlr.showHttpError(request, response)
       end
     end
@@ -265,11 +263,11 @@ def unlink_solutions(sol_a, sol_b)
     sercfg.debug "Deleting #{svc[:service]} : #{svc[:script_key]} : #{svc[:id]}"
     ret = sercfg.remove(svc[:id])
     if !ret.nil?
-      msg = "Unlinked ‘#{svc[:script_key]}’"
+      msg = "Unlinked #{MrMurano::Verbose.fancy_ticks(svc[:script_key])}"
       msg += " from #{sol_a.quoted_name}" unless sol_a.quoted_name.to_s.empty?
       say(msg)
     else
-      sercfg.warning "Failed to unlink ‘#{svc[:id]}’"
+      sercfg.warning "Failed to unlink #{MrMurano::Verbose.fancy_ticks(svc[:id])}"
     end
   end
 
@@ -290,11 +288,12 @@ def unlink_solutions(sol_a, sol_b)
     evthlr.debug "Deleting #{evth[:service]} : #{evth[:alias]} : #{evth[:id]}"
     ret = evthlr.remove(evth[:id])
     if !ret.nil?
-      msg = "Removed ‘#{evth[:alias]}’"
+      msg = "Removed #{MrMurano::Verbose.fancy_ticks(evth[:alias])}"
       msg += " from #{sol_a.quoted_name}" unless sol_a.quoted_name.to_s.empty?
       say(msg)
     else
-      MrMurano::Verbose.warning "Failed to remove handler ‘#{svc[:id]}’"
+      svc_id = MrMurano::Verbose.fancy_ticks(svc[:id])
+      MrMurano::Verbose.warning "Failed to remove handler #{svc_id}"
     end
   end
 end

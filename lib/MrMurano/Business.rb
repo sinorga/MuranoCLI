@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -119,7 +119,7 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
     end
 
     def pretty_name_and_id
-      "‘#{Rainbow(name).underline}’ <#{bid}>"
+      "#{fancy_ticks(Rainbow(name).underline)} <#{bid}>"
     end
 
     # ---------------------------------------------------------------------
@@ -247,7 +247,7 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
       elsif type == :product
         sol = MrMurano::Product.new(sid)
       else
-        #raise "Unexpected path: Unrecognized type ‘#{type}’"
+        #raise "Unexpected path: Unrecognized type #{fancy_ticks(type)}"
         sol = MrMurano::Solution.new(sid)
       end
       sol.biz = self
@@ -275,7 +275,7 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
           workit_response(response)
         else
           MrMurano::Verbose.error(
-            "Unable to create #{sol.type_name}: ‘#{sol.name}’"
+            "Unable to create #{sol.type_name}: #{fancy_ticks(sol.name)}"
           )
           ok = false
           if response.is_a?(Net::HTTPConflict)
@@ -329,12 +329,12 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
       #  if ret.count > 1
       #    warning("Found more than 1 matching solution: #{ret}")
       #  elsif ret.count.zero?
-      #    error("Unable to verify solution created for ‘#{sol.name}’: #{ret}")
+      #    error("Unable to verify solution created for #{fancy_ticks(sol.name)}: #{ret}")
       #    exit 3
       #  end
       #  sol.meta = ret.first
       #  if sol.sid.to_s.empty? then
-      #    error("New solution created for ‘#{sol.name}’ missing ID?: #{ret}")
+      #    error("New solution created for #{fancy_ticks(sol.name)} missing ID?: #{ret}")
       #    exit 3
       #  end
       #  sol.sid = sid

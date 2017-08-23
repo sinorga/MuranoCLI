@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -185,7 +185,8 @@ def business_from_config
     if biz.valid?
       say("Found Business #{biz.pretty_name_and_id}")
     else
-      say("Could not find Business ‘#{biz.bid}’ referenced in the config")
+      biz_bid = MrMurano::Verbose.fancy_ticks(biz.bid)
+      say("Could not find Business #{biz_bid} referenced in the config")
     end
     puts('')
   end

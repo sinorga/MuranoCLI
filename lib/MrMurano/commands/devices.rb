@@ -225,7 +225,7 @@ Enables Identifiers, creating devices, or digital shadows, in Murano.
 
     unless options.expire.nil?
       unless options.expire =~ /^[0-9]+$/
-        prd.error %(The --expire value is not a number of hours: #{prd.fancy_tick(options.expire)})
+        prd.error %(The --expire value is not a number of hours: #{prd.fancy_ticks(options.expire)})
         exit 1
       end
       options.expire.to_i
@@ -247,7 +247,7 @@ Enables Identifiers, creating devices, or digital shadows, in Murano.
       begin
         header = File.new(options.file).gets
       rescue Errno::ENOENT => err
-        prd.error %(Unable to open file #{prd.fancy_tick(options.file)}: #{err.message})
+        prd.error %(Unable to open file #{prd.fancy_ticks(options.file)}: #{err.message})
         exit 2
       end
       if header.nil?

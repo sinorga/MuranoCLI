@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -315,14 +315,14 @@ module MrMurano
       root = root.expand_path
       if path.basename.sub(/\.lua$/i, '').to_s.include?('.')
         warning(
-          "WARNING: Do not use periods in filenames. Rename: ‘#{path.basename}’"
+          "WARNING: Do not use periods in filenames. Rename: #{fancy_ticks(path.basename)}"
         )
       end
       path.dirname.ascend do |ancestor|
         break if ancestor == root
         if ancestor.basename.to_s.include?('.')
           warning(
-            "WARNING: Do not use periods in directory names. Rename: ‘#{ancestor.basename}’"
+            "WARNING: Do not use periods in directory names. Rename: #{fancy_ticks(ancestor.basename)}"
           )
         end
       end
@@ -625,7 +625,7 @@ module MrMurano
         config_var = "#{mat[1]}.#{mat[2]}"
         decoded = $cfg[config_var]
         if decoded.nil?
-          warning "Config value not found for variable: ‘#{term}’"
+          warning "Config value not found for variable: #{fancy_ticks(term)}"
           # The platform should complain about file not found,
           # and we'll process everything else.
           decoded = term

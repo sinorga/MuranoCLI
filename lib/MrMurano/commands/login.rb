@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.23 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -75,7 +75,8 @@ Essentially, this command is the same as:
     cfg_val = $cfg.get(cfg_key)
     if cfg_val.to_s.empty?
       cfg_val = nil
-      MrMurano::Verbose.warning("No config key ‘#{cfg_key}’: no password to delete")
+      cfg_key_q = MrMurano::Verbose.fancy_ticks(cfg_key)
+      MrMurano::Verbose.warning("No config key #{cfg_key_q}: no password to delete")
     end
     cfg_val
   end

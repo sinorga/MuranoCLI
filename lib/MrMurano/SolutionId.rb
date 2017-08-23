@@ -5,6 +5,8 @@
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
+require 'MrMurano/verbosing'
+
 module MrMurano
   module SolutionId
     INVALID_SID = '-1'
@@ -69,7 +71,7 @@ module MrMurano
     def endpoint(_path='')
       # This is hopefully just a DEV error, and not something user will ever see!
       return unless @uriparts[@uriparts_sidex] == INVALID_SID
-      error("Solution ID missing! Invalid ‘#{@solntype}’")
+      error("Solution ID missing! Invalid #{MrMurano::Verbose.fancy_ticks(@solntype)}")
       exit 2
     end
   end
