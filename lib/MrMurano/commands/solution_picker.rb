@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.08.24 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -275,6 +275,11 @@ def solution_ask_for_name(sol)
     end
   end
   sol.name
+rescue EOFError
+  # E.g., the user pressed Ctrl-D.
+  #   "error: The input stream is exhausted."
+  MrMurano::Verbose.error('murano out!')
+  exit 2
 end
 
 # *** Interact with the user to identify the solution.
