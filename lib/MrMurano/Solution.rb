@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.08.24 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -241,7 +241,7 @@ module MrMurano
           warning "Unexpected: apiId != sid: #{@meta[:apiId]} != #{@meta[:sid]}"
         end
       end
-      unless @sid.to_s.empty? || sid.to_s == @sid.to_s
+      unless @sid.to_s.empty? || sid.to_s.empty? || sid.to_s == @sid.to_s
         warning(
           "#{type_name} ID mismatch. Server says #{fancy_ticks(sid)}, " \
           "but config says #{fancy_ticks(@sid)}."
@@ -267,7 +267,7 @@ module MrMurano
         warning(
           "Unexpected: Server returned no name for domain: #{fancy_ticks(@meta[:domain])}"
         )
-      else
+      elsif @meta.any?
         warning(
           "Unexpected: Server returned no name for solution: #{fancy_ticks(@meta)}"
         )
