@@ -7,15 +7,39 @@ Version](https://badge.fury.io/rb/MuranoCLI.svg)](https://badge.fury.io/rb/Muran
 
 Do more from the command line with [Murano](https://exosite.com/platform/).
 
-MuranoCLI is the command-line tool that interacts with Murano and makes different
-tasks easier. MuranoCLI makes it easy to deploy code to a solution, import many
-product definitions at once, set up endpoints and APIs, and more.
+MuranoCLI interacts with Murano and makes different tasks easier.
 
-MuranoCLI works around the idea of syncing, much like rsync.  Files from your project
-directory are synced up (or down) from Murano.
+MuranoCLI makes it easy to deploy code to a solution, import
+product definitions, set up endpoints and APIs, and more.
 
+MuranoCLI works around the idea of syncing, much like [`rsync`](https://rsync.samba.org/).
+Your project files are synced up (or down) from Murano.
+
+## Contents
+
+* [Contents](#contents)
+* [Usage](#usage)
+   * [Start a new project easily with init](#start-a-new-project-easily-with-init)
+   * [Start a new project manually, step-by-step](#start-a-new-project-manually-step-by-step)
+* [Install](#install)
+   * [Gem Install (Linux and macOS)](#gem-install-linux-and-macos)
+      * [Working With Different Versions of MuranoCLI](#working-with-different-versions-of-muranocli)
+   * [Windows Install](#windows-install)
+* [Features](#features)
+   * [Logs](#logs)
+   * [CORS](#cors)
+   * [Writing Routes (a.k.a. Endpoints)](#writing-routes-aka-endpoints)
+   * [Writing Service Event Handlers](#writing-service-event-handlers)
+   * [MURANO_CONFIGFILE Environment Variable and Dotenv](#murano_configfile-environment-variable-and-dotenv)
+   * [Direct Service Access](#direct-service-access)
+   * [Output Format](#output-format)
+   * [Product Content Area](#product-content-area)
+* [Developing](#developing)
+   * [Testing](#testing)
 
 ## Usage
+
+### Start a new project easily with `init`
 
 ```
 mkdir myproject
@@ -23,147 +47,268 @@ cd myproject
 murano init
 ```
 
-Update `myproject.murano` with the info about your project.
+If you want to add information about your project, edit `myproject.murano`.
+You can add a description, the list of authors, a version number, and more.
 
-If this is a new project, you will also need to run `murano assign set` to connect
-the product and solution.
+If you are connecting to an existing project
+created with the [web interface](https://www.exosite.io/business/),
+you may need to run `murano link set` to connect the product and solution.
+But if you create a new product and application using MuranoCLI, they will
+automatically be connected.
 
-If this is an existing project, you want to run `murano syncdown -V` after
-running `murano init`.
+If you are connecting to an existing project, you may want to run
+`murano syncdown` to pull down your project files from Murano.
 
-Now do stuff, see what changed: `murano status` or `murano diff`.
-Then deploy with `murano syncup`
+Now do stuff, like add and edit files.
 
-### To start a brand new project the hard way.
-There are a few steps and pieces to getting a solution with a product up and
-running in Murano. Here is the list.
+To see what files have changed, run `murano status`.
 
-- Pick a business: `murano business list`
-  If this is the first time you've run `murano` it will ask for your Murano username
-  and password.
-- Set it: `murano config business.id ZZZZZZZZZ`
-- Create a product: `murano product create myawesomeproduct --save`
-- Add resource aliases to specs/resources.yaml
-- Sync the product definition up: `murano syncup -V --specs`
-- Create a solution: `murano solution create myawesomesolution --save`
-- Sync solution code up: `murano syncup -V`
-- Assign the product to the solution: `murano assign set`
+To see exactly what changed, try `murano diff`.
 
-Do stuff, see what changed: `murano status` or `murano diff`.
-Then deploy with `murano syncup`
+When you are ready to deploy, run `murano syncup`.
+
+### Start a new project manually, step-by-step
+
+If you would like to setup a project without using `murano init`,
+follow these steps.
+
+- Find your business ID. Run the command
+
+  `murano business list`
+
+  and copy its ID from the list.
+
+  - If this is the first time you've run `murano`, you will
+    need to enter your Murano username and password.
+
+    (To sign up for a free account, visit [exosite.com](https://exosite.com/signup/).)
+
+  - If you need to change change accounts, try
+
+    `murano logout`
+
+    `murano login`.
+
+    - To manually change you username and password, run
+
+      `murano config user.name <USERNAME>`
+
+      `murano password set <USERNAME>`.
+
+- Add the copied Business ID to your project config.
+
+  `murano config business.id <BUSINESS-ID>`
+
+- Create a new Application and save its ID to the project config.
+
+  `murano solution create myawesomesolution --save`
+
+  - Alternatively, choose an existing Application.
+
+    `murano config application.id <APPLICATION-ID>`
+
+- Create a new Product and save its ID to the project config.
+
+  `murano product create myawesomeproduct --save`
+
+  - Alternatively, choose an existing Product.
+
+    `murano config product.id <PRODUCT-ID>`
+
+- Link the Product to the Application.
+
+  `murano link set`
+
+- Build your project.
+
+  - Edit and create event handlers under `services/`.
+
+  - Create API endpoints under `routes/`.
+
+  - Add Lua modules under `modules/`.
+
+  - Add static files under `files/`.
+
+  - Add resource aliases to the file, `specs/resources.yaml`.
+
+- See what changed.
+
+  `murano status`
+
+  or
+
+  `murano diff`
+
+- Deploy your project. Sync up resources, code and files.
+
+  `murano syncup`
 
 ## Install
 
-### Gem Install (Linux and Macos)
+### Gem Install (Linux and macOS)
 
-When upgrading from a 1.\* version to a 2.0, you should uninstall the old versions
-first.
-```sh
-> gem uninstall MuranoCLI MrMurano
-```
-
-And then install:
+The easiest way to install MuranoCLI is using the Gem installer.
 
 ```sh
-> gem install MuranoCLI
-```
-Or
-```sh
-> gem update MuranoCLI
+gem install MuranoCLI
 ```
 
-You will likely need to be root for the above commands.  If you would rather not
-install as root, you can install gems in the user directory.
+- If you are upgrading from a `1.*` version, uninstall the old versions first.
 
 ```sh
-> gem install MuranoCLI --user-install
+gem uninstall MuranoCLI MrMurano
 ```
 
-Your `PATH` may need to be updated to find the installed `murano` command.  See the
-[Ruby Gem FAQ](http://guides.rubygems.org/faqs/#user-install).  In short, you need
-to add the output of `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
+- If you would like to install a specific version, such as the older,
+  pre-Murano CLI tool, you can specify the version to install.
+
+```sh
+gem install MuranoCLI -v 2.2.4
+```
+
+- To update to the latest gem (rather than installing a new gem side by
+  side with an older version of the same gem), update it.
+
+```sh
+gem update MuranoCLI
+```
+
+You will likely need to be root for the above commands. If you would rather
+not install as root, you can install gems in the user directory.
+
+```sh
+gem install MuranoCLI --user-install
+```
+
+Your `PATH` may need to be updated to find the installed `murano` command.
+See the [Ruby Gem FAQ](http://guides.rubygems.org/faqs/#user-install).
+
+- In short, you need to add the output of
+  `ruby -rubygems -e 'puts Gem.user_dir'` to your `PATH`.
+
+  E.g., you may want to add this to your `~/.bashrc` file:
+
+  `export PATH=$PATH:$(ruby -rubygems -e 'puts Gem.user_dir')`
+
+#### Working With Different Versions of MuranoCLI
+
+The `murano` command line tool is a Ruby gem and, as such, you can install
+different versions of MuranoCLI and choose which one to execute.
+
+The following example shows how you can reference a specific version of the
+`murano` gem:
+
+```sh
+$ gem list MuranoCLI --local
+
+*** LOCAL GEMS ***
+
+MuranoCLI (3.0.1, 2.2.4)
+
+$ murano --version
+murano 3.0.1
+
+$ murano _2.2.4_ --version
+murano 2.2.4
+```
+
+Note: Not all OSes support multiple versions and will only execute the
+latest Gem installed. In this case, you will need to uninstall newer
+versions of MuranoCLI in order to use older versions.
 
 ### Windows Install
 
-The MuranoCLI gem will install on Windows.  There is also a single Windows binary
-Setup installer available in [releases](https://github.com/exosite/MuranoCLI/releases)
+The MuranoCLI gem will install on Windows.
+
+There is also a single Windows binary Setup installer available in
+[releases](https://github.com/exosite/MuranoCLI/releases).
 
 If you do not already use Ruby on Windows, then you should use the binary
 installer.
 
-When upgrading, it is best to run the uninstaller for the old version before
-installing the new version.
-
+When upgrading, it is best to run the uninstaller for the old version
+before installing the new version.
 
 ## Features
 
-### Project File
-
 ### Logs
 
-You can monitor the log messages from your solution with the `murano logs --follow`.
-Or quickly get the last few with `murano logs`
+You can monitor the log messages from your Application by running
+`murano logs application --follow`.
 
-MuranoCLI does a few things to make your log output easier to follow.
-- Adds color to easily see where each log message starts.
-- Reformats the timestamps to be in local time.
-- Finds JSON blobs and pretty prints them.
+Or quickly get the last few logs with simply `murano logs application`.
 
-All of these can be toggled with command line options.
+MuranoCLI does a few things to make the log output easier to follow.
+
+- It adds color to easily see where each log message starts.
+
+- It reformats the timestamps to be in local time.
+
+- It finds JSON blobs and pretty prints them.
+
+Each of these options can be disabled with command line options.
 
 ### CORS
 
-If you are developing you UI on separate services and you need cross-origin
+If you are developing a UI on separate services and need cross-origin
 resource sharing, you will need to set the
 [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) options.
 
-The current CORS options can be fetched with `murano cors`
+The current CORS options can be fetched with `murano cors`.
 
-There are three options for setting, the first and preferred way is to put your CORS
-options into a file named `cors.yaml`.
+There are three different ways to configure CORS.
 
-Second and third are to put the CORS options in your project file.  In the `routes`
-section, add a `cors` sub-section with either the name of the file to read, or the
-CORS options inline.
+The first and preferred way is to add your CORS options to a file named
+`cors.yaml`.
 
-```yaml
-routes:
-  cors: my_cors_file.json
-```
-OR:
-```yaml
-routes:
-  cors: {"origin": true}
-```
+The second and third options are to put the CORS options in your project file.
+
+- In the `routes` section, add a `cors` sub-section with either the name of
+  the file to read, or the CORS options inline.
+
+  ```yaml
+  routes:
+    cors: my_cors_file.json
+  ```
+
+  OR:
+
+  ```yaml
+  routes:
+    cors: {"origin": true}
+  ```
 
 Then use `murano cors set` to push these options up to your solution.
 
-### Writing Routes (or endpoints)
+### Writing Routes (a.k.a. Endpoints)
 
-All of the routes that you create in your solution are identified by their method
-and path.  You set this with the following line:
+All of the routes that you create in your solution are identified by their
+method and path. You set this with the following line:
 
 ```lua
 --#ENDPOINT METHOD PATH
 ```
 
-Optionally, you can set what the expected content type is too. (If you don't set
-this, the value is `application/json`)
+Optionally, you can set what the expected content type is, too.
+(If you don't set this, it defaults to `application/json`.)
 
 ```lua
 --#ENDPOINT METHOD PATH CONTENT_TYPE
 ```
 
-An example of a route that puts CSV data:
+Here is an example of a route that puts CSV data:
+
 ```lua
 --#ENDPOINT PUT /api/upload text/csv
 ```
 
-After this header line, the script to handle the route follows.  Since many routes
-end up being a couple of lines or less, you can put multiple routes into a single
-file.
+After the magic header, add the script to handle the route.
 
-Which looks like this:
+Since many routes end up being a couple of lines or less,
+you can put multiple routes into a single file.
+
+A routes file might look like this:
+
 ```lua
 --#ENDPOINT GET /api/somedata
 return Tsdb.query(…)
@@ -177,18 +322,24 @@ return Tsdb.deleteAll()
 
 ### Writing Service Event Handlers
 
-All of the event handlers you add to your solution are identified by which service
-they are watching and which event in that service triggers the script.
+Each event handler in your project is identified by which service
+it watches and which event in that service triggers the script.
 
-This is set with the following line:
+This is set with the following magic header line:
+
 ```lua
 --#EVENT SERVICE EVENT
 ```
 
-For example, the event handler that processes all data coming from your devices
-could be:
+To make working with the Product ID easier, you can use the magic
+variable `{product.id}` instead of the actual Product ID.
+You can use this variable in both the filename and the magic header.
+
+For example, the event handler that processes all data coming from your
+devices might look like:
+
 ```lua
---#EVENT device datapoint
+--#EVENT {product.id} event
 local stamped = nil
 if data.api == "record" then
   stamped = tostring(data.value[1]) .. 's'
@@ -200,31 +351,40 @@ Tsdb.write{
 }
 ```
 
-### MURANO_CONFIGFILE environment and Dotenv
+### MURANO_CONFIGFILE Environment Variable and Dotenv
 
-The environment variable `MURANO_CONFIGFILE` is checked for an additional config to
-load.  This, in conjunction with [dotenv](https://github.com/bkeepers/dotenv) support,
-allows for easily switching between development, staging, and production setups.
+The environment variable `MURANO_CONFIGFILE` is checked for an additional config
+to load. This, in conjunction with [dotenv](https://github.com/bkeepers/dotenv)
+support, allows you to easily switch between development, staging, and production
+setups.
 
-To use this, write the three solution ids into `.murano.dev`, `.murano.stg`,
-and `.murano.prod`. Then write the `.env` file to point at the system you're
-currently working on.
+To use this, write the three Application IDs and three Product IDs for your three
+deployments into the three files, `.murano.dev`, `.murano.stg`, and `.murano.prod`.
+
+Then, write the `.env` file to point at the system you're currently working on.
 
 The files for this are then:
+
 ```sh
 cat >> .murano.dev <<EOF
-[solution]
+[application]
 id=AAAAAAAA
-EOF
-
-cat >> .murano.stg <<EOF
-[solution]
+[product]
 id=BBBBBBBB
 EOF
 
+cat >> .murano.stg <<EOF
+[application]
+id=JJJJJJJJ
+[product]
+id=KKKKKKKK
+EOF
+
 cat >> .murano.prod <<EOF
-[solution]
-id=CCCCCCCC
+[application]
+id=XXXXXXXX
+[product]
+id=YYYYYYYY
 EOF
 
 cat > .env <<EOF
@@ -232,23 +392,25 @@ MURANO_CONFIGFILE=.murano.dev
 EOF
 ```
 
-This also allows for keeping private things in a separate config file and having
-the shared things checked into source control.
+This also allows for keeping private things in a separate config file and
+having the shared things checked into source control.
 
 ### Direct Service Access
 
-To aid with debugging, MuranoCLI has direct access to some of the services in a
-solution.
+To aid with debugging, MuranoCLI has direct access to some of the services
+in a solution.
 
 Currently these are:
+
 - Keystore: `murano keystore`
+
 - TSDB: `murano tsdb`
 
 ### Output Format
 
-Many sub-commands respect the `outformat` setting.  This lets you switch the output
-between YAML, JSON, Ruby, CSV, and pretty tables.  Not all formats work with all
-commands.
+Many sub-commands respect the `outformat` setting. This lets you switch the
+output between YAML, JSON, Ruby, CSV, and pretty tables. (Not all formats
+work with all commands, however.)
 
 ```
 > murano tsdb product list
@@ -260,13 +422,14 @@ commands.
 
 ### Product Content Area
 
-MuranoCLI can manage the content area for a product.  This area is a place to store
-files for use by devices.  Typically holding firmware images for Over-The-Air
-updating.  Although any kind of fleet wide data that devices may need to download
-can be stored here.
+MuranoCLI can manage the content area for a product. This area is a place to
+store files for use by devices. Storing firmware images for over-the-air
+updates is one typical use, although any kind of fleet-wide data that devices
+may need to download can be stored here.
 
-Once the `product.id` is set, the content for that product can be accessed with the
-following commands:
+Once the `product.id` is set, the content for that product can be accessed
+with the following commands:
+
 ```
 > murano content list
 > murano content upload
@@ -275,7 +438,7 @@ following commands:
 > murano content download
 ```
 
-Call them with `--help` for details.
+Call `murano` with `--help` for more details.
 
 ## Developing
 
@@ -284,20 +447,30 @@ MuranoCLI uses [git flow](https://github.com/nvie/gitflow#getting-started) for
 
 MuranoCLI also uses [bundler](http://bundler.io).
 
-When submitting pull requests, please do them against the develop branch.
+When submitting pull requests, please do them against the `develop` branch.
 
-### Tests
+### Testing
+
 All test for MuranoCLI are done with rspec.
 
-The tests are internal (`--tag ~cmd`) or command (`--tag cmd`).  The internal tests
-are for the objects that build up the internals. The command tests run `murano` from
-the shell and are for testing the user facing components.  A subset of the command
-tests work with the live Murano servers (`--tag needs_password`).
+The tests are internal (`--tag ~cmd`) or command (`--tag cmd`).
+
+- The internal tests are for the objects that build up the internals.
+
+- The command tests run `murano` from the shell and are for testing
+  the user facing components.
+
+  A subset of the command tests work with the live Murano servers
+  (`--tag needs_password`).
 
 To use the live tests, the following environment variables need to be set:
-- `MURANO_CONFIGFILE` : A Config with the user.name, business.id, and net.host for
-  the integration tests.
-- `MURANO_PASSWORD` : Password for the user.name above.
 
-A free account on Murano is sufficient for these tests.
+- `MURANO_CONFIGFILE`:
+  A Config with the user.name, business.id, and net.host for the integration tests.
+
+- `MURANO_PASSWORD`:
+  Password for the user.name above.
+
+A free account on [Murano](https://exosite.com/signup/) is sufficient for
+these tests.
 

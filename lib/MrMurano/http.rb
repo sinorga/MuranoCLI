@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.24 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -84,7 +84,17 @@ module MrMurano
       if !defined?(@http) || @http.nil?
         @http = Net::HTTP.new(uri.host, uri.port)
         @http.use_ssl = true
-        @http.start
+        begin
+          @http.start
+        rescue SocketError => err
+          # E.g., "error: Failed to open TCP connection to true:443
+          #        (Hostname not known: true)."
+          error %(Net socket error: #{err.message})
+          exit 2
+        rescue StandardError => err
+          error %(Net request failed: #{err.message})
+          exit 2
+        end
       end
       @http
     end
