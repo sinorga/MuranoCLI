@@ -107,13 +107,13 @@ module MrMurano
         if elem.purchaseId.nil?
           available.push(elem)
           if !@ometa[:tier].nil? && elem.tiers.include?(@ometa[:tier][:id])
-            elem.status = :available
+            elem.statusable = :available
           else
-            elem.status = :upgrade
+            elem.statusable = :upgrade
           end
         else
           purchased.push(elem)
-          elem.status = :added
+          elem.statusable = :added
         end
         #@ometa[:status] = elem.status
       end

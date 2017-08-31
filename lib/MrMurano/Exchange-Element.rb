@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.29 /coding: utf-8
+# Last Modified: 2017.08.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -60,7 +60,7 @@ module MrMurano
     #  'url', 'type' (e.g., 'download), and 'primary' (bool).
 
     # MurCLI-only: Based on purchaseId and tiers, state of Element in Business.
-    attr_accessor :status
+    attr_accessor :statusable
 
     ELEM_KEY_TRANSLATE = {
       #type: :action_type,
@@ -80,6 +80,19 @@ module MrMurano
       super camel_cased
       @meta = hash.first
       #@meta = camel_cased
+    end
+
+    def status
+      case statusable
+      when :available
+        'available'
+      when :upgrade
+        'available*'
+      when :added
+        'added'
+      else
+        statusable.to_s
+      end
     end
   end
 end

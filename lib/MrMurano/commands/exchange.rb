@@ -39,11 +39,11 @@ Each Exchange Element is identified by an Element ID and a name.
 
 Element status:
 
-- "added": An Element that has been added to and enabled for your Business.
+- added       An Element that has been added to and enabled for your Business
 
-- "available": An Element that can be added to and enabled for your Business.
+- available   An Element that can be added to and enabled for your Business
 
-- "upgrade": An Element that you can use if you upgrade your Business tier.
+- available*  An Element that you can use if you upgrade your Business tier
 
   ).strip
   c.project_not_required = true
