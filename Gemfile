@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.28 /coding: utf-8
+# Last Modified: 2017.08.30 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -27,7 +27,7 @@ gem 'paint', '~> 2.0.0'
 #   It's included by json, so make sure it's the old one.
 gem 'public_suffix', '~> 2.0.5'
 gem 'rainbow', '~> 2.2.2'
-gem 'terminal-table', '~> 1.7.3'
+gem 'terminal-table', '~> 1.8.0'
 gem 'vine', '~> 0.4'
 gem 'whirly', '~> 0.2.4'
 

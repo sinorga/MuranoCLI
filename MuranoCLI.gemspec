@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.28 /coding: utf-8
+# Last Modified: 2017.08.30 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -68,7 +68,7 @@ explicitly specifying the version. For instance,
   #   It's included by json, so make sure it's the old one.
   s.add_runtime_dependency('public_suffix', '~> 2.0.5')
   s.add_runtime_dependency('rainbow', '~> 2.2.2')
-  s.add_runtime_dependency('terminal-table', '~> 1.7.3')
+  s.add_runtime_dependency('terminal-table', '~> 1.8.0')
   s.add_runtime_dependency('vine', '~> 0.4')
   s.add_runtime_dependency('whirly', '~> 0.2.4')
 
