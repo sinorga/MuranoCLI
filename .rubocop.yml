@@ -122,6 +122,8 @@ Style/FileName:
     - 'lib/MrMurano/Config-Migrate.rb'
     - 'lib/MrMurano/Config.rb'
     - 'lib/MrMurano/Content.rb'
+    - 'lib/MrMurano/Exchange.rb'
+    - 'lib/MrMurano/Exchange-Element.rb'
     - 'lib/MrMurano/Gateway.rb'
     - 'lib/MrMurano/Keystore.rb'
     - 'lib/MrMurano/Mock.rb'

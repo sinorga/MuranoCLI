@@ -23,6 +23,8 @@ require 'MrMurano/ProjectFile'
 
 require 'MrMurano/Account'
 require 'MrMurano/Business'
+require 'MrMurano/Exchange'
+require 'MrMurano/Exchange-Element'
 require 'MrMurano/Passwords'
 
 require 'MrMurano/Content'

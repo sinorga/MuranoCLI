@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.29 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -17,6 +17,7 @@ require 'MrMurano/commands/content'
 require 'MrMurano/commands/cors'
 require 'MrMurano/commands/devices'
 require 'MrMurano/commands/domain'
+require 'MrMurano/commands/exchange'
 require 'MrMurano/commands/globals'
 require 'MrMurano/commands/keystore'
 require 'MrMurano/commands/init'
