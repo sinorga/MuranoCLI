@@ -5,7 +5,7 @@
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
-require 'orderedhash'
+require 'MrMurano/orderedhash'
 
 class Hash
   # From:

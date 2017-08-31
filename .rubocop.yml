@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.08.31 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -244,4 +244,7 @@ AllCops:
     #
     # 2017-08-16: Ug.
     - 'lib/MrMurano/optparse.rb'
+    #
+    # 2017-08-30: Ug. Loading orderedhash spits out warning gobbled by rspec fails test.
+    - 'lib/MrMurano/orderedhash.rb'
 

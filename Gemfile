@@ -21,7 +21,7 @@ gem 'json', '~> 2.1.0'
 gem 'json-schema', '~> 2.7.0'
 gem 'mime-types', '~> 3.1'
 gem 'mime-types-data', '~> 3.2016.0521'
-gem 'orderedhash', '~> 0.0.6'
+#gem 'orderedhash', '~> 0.0.6'
 gem 'paint', '~> 2.0.0'
 # 2017-08-04: public_suffix 3.0.0 is for Ruby >= 2.1.
 #   It's included by json, so make sure it's the old one.
