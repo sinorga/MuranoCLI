@@ -1,9 +1,15 @@
+# Last Modified: 2017.08.29 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
 require 'pathname'
 require 'tmpdir'
 
-RSpec.shared_context "WORKSPACE" do
-
+RSpec.shared_context 'WORKSPACE' do
   around(:example) do |ex|
     @testdir = Pathname.new(Dir.pwd).realpath
     Dir.mktmpdir do |hdir|
@@ -16,7 +22,7 @@ RSpec.shared_context "WORKSPACE" do
         @project_dir = File.join(ENV['HOME'], 'work', 'project')
         FileUtils.mkpath(@project_dir)
         Dir.chdir(@project_dir) do
-            ex.run
+          ex.run
         end
       end
       ENV['HOME'] = saved_home
@@ -24,4 +30,3 @@ RSpec.shared_context "WORKSPACE" do
   end
 end
 
-#  vim: set ai et sw=2 ts=2 :
