@@ -28,6 +28,8 @@ Layout/TrailingBlankLines:
 Lint/ScriptPermission:
   Exclude:
     - 'bin/murano'
+    # Also the rspec shim-link:
+    - 'lib/MrMurano/spec_commander.rb'
 
 # "Assignment Branch Condition size for XXX is too high."
 # http://wiki.c2.com/?AbcMetric
@@ -241,6 +243,9 @@ AllCops:
     # 2017-08-16: Ug.
     - 'lib/MrMurano/optparse.rb'
     #
+    # 2017-08-29: A hack for rspec.
+    #- 'lib/Murano/spec_commander.rb'
+    #
     # 2017-08-30: Ug. Loading orderedhash spits out warning gobbled by rspec fails test.
     - 'lib/MrMurano/orderedhash.rb'
     #
@@ -286,6 +291,7 @@ AllCops:
     - 'spec/cmd_cors_spec.rb'
     - 'spec/cmd_device_spec.rb'
     - 'spec/cmd_domain_spec.rb'
+    #- 'spec/cmd_exchange_spec.rb'
     #- 'spec/cmd_help_spec.rb'
     - 'spec/cmd_init_spec.rb'
     - 'spec/cmd_keystore_spec.rb'

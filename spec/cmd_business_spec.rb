@@ -13,6 +13,12 @@ require 'cmd_common'
 RSpec.describe 'murano business', :cmd, :needs_password do
   include_context "CI_CMD"
 
+  context "without project" do
+    it "help" do
+      cmd_verify_help('business')
+    end
+  end
+
   context "list" do
     it "as table" do
       out, err, status = Open3.capture3(capcmd('murano', 'business', 'list'))
