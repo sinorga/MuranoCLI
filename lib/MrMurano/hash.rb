@@ -1,11 +1,11 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.08.30 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
-require 'orderedhash'
+require 'MrMurano/orderedhash'
 
 class Hash
   # From:
@@ -105,6 +105,19 @@ def ensure_array(item)
     [item]
   else
     item
+  end
+end
+
+module HashInit
+  def initialize(*hash)
+    return unless hash.length == 1 && hash.first.is_a?(Hash)
+    hash.first.each do |key, val|
+      if respond_to? key
+        send("#{key}=", val)
+      else
+        $stderr.puts %(HashInit: missing hash key "#{key}")
+      end
+    end
   end
 end
 

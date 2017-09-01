@@ -9,7 +9,7 @@ Do more from the command line with [Murano](https://exosite.com/platform/).
 
 MuranoCLI interacts with Murano and makes different tasks easier.
 
-MuranoCLI makes it easy to deploy code to a solution, import
+MuranoCLI makes it easy to deploy code to a project, import
 product definitions, set up endpoints and APIs, and more.
 
 MuranoCLI works around the idea of syncing, much like [`rsync`](https://rsync.samba.org/).
@@ -52,7 +52,7 @@ You can add a description, the list of authors, a version number, and more.
 
 If you are connecting to an existing project
 created with the [web interface](https://www.exosite.io/business/),
-you may need to run `murano link set` to connect the product and solution.
+you may need to run `murano link set` to connect the product and the application.
 But if you create a new product and application using MuranoCLI, they will
 automatically be connected.
 
@@ -101,7 +101,7 @@ follow these steps.
 
 - Create a new Application and save its ID to the project config.
 
-  `murano solution create myawesomesolution --save`
+  `murano application create myawesomeapplication --save`
 
   - Alternatively, choose an existing Application.
 
@@ -278,12 +278,12 @@ The second and third options are to put the CORS options in your project file.
     cors: {"origin": true}
   ```
 
-Then use `murano cors set` to push these options up to your solution.
+Then use `murano cors set` to push these options up to your application.
 
 ### Writing Routes (a.k.a. Endpoints)
 
-All of the routes that you create in your solution are identified by their
-method and path. You set this with the following line:
+All of the routes that you create in your application are identified
+by their method and path. You set this with the following line:
 
 ```lua
 --#ENDPOINT METHOD PATH
@@ -398,7 +398,7 @@ having the shared things checked into source control.
 ### Direct Service Access
 
 To aid with debugging, MuranoCLI has direct access to some of the services
-in a solution.
+in an application.
 
 Currently these are:
 

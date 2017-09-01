@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.08.29 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -26,12 +26,11 @@ module MrMurano
     include Http
     include Verbose
 
-    #attr_accessor :bid
-    #attr_accessor :name
-    attr_accessor :role
-    attr_reader :meta
     attr_writer :bid
     attr_writer :name
+    attr_accessor :role
+    attr_reader :meta
+    attr_reader :ometa
 
     def initialize(data=nil)
       @bid = nil
@@ -39,6 +38,7 @@ module MrMurano
       @valid = false
       @user_bizes = {}
       self.meta = data unless data.nil?
+      @ometa = nil
     end
 
     def valid?
@@ -155,7 +155,7 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
       whirly_stop
       @valid = !data.nil?
       @name = data[:name] if @valid
-      @valid
+      @ometa = data
     end
 
     # ---------------------------------------------------------------------

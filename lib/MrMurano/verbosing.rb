@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.08.28 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -104,7 +104,7 @@ module MrMurano
 
     ## Format and print the object
     # Handles many of the raw 'unpolished' formats.
-    def outf(obj, ios=nil, &_block)
+    def outf(obj, ios=nil)
       fmt = $cfg['tool.outformat']
       ios = $stdout if ios.nil?
       case fmt

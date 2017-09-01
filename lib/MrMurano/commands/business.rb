@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.08.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -12,8 +12,8 @@ require 'MrMurano/ReCommander'
 
 MSG_BUSINESSES_NONE_FOUND = 'No businesses found' unless defined? MSG_BUSINESSES_NONE_FOUND
 
-# *** Base business command help.
-# -------------------------------
+# *** Base business command help
+# ------------------------------
 
 command :business do |c|
   c.syntax = %(murano business)
@@ -31,16 +31,17 @@ Commands for working with businesses.
 end
 alias_command 'businesses', 'business'
 
-# *** Common business command options.
-# ------------------------------------
+# *** Common business command options
+# -----------------------------------
 
-def cmd_business_add_options(c)
+def cmd_table_output_add_options(c)
   # MAYBE/2017-08-15: Rename to --id-only.
   c.option '--idonly', 'Only return the IDs'
-  c.option '--[no-]brief', 'Show fewer fields: only Business ID and name'
+  c.option '--[no-]brief', 'Show fewer fields: show only IDs and names'
   # LATER/2017-08-17: Move -o to a file with --json, etc. (make
   #   easier to use --json/--yaml/--output any file, without
   #   having to use obscure `-c tool.outformat=json`).
+  # LATER/2017-08-28: Make -o a tool.outformat option.
   c.option '-o', '--output FILE', 'Download to file instead of STDOUT'
 end
 
@@ -83,8 +84,8 @@ def any_business_pickers?(options)
   num_ways > 0
 end
 
-# *** Business commands: list and find.
-# -------------------------------------
+# *** Business commands: list and find
+# ------------------------------------
 
 command 'business list' do |c|
   c.syntax = %(murano business list [--options])
@@ -94,7 +95,7 @@ List businesses.
   ).strip
   c.project_not_required = true
 
-  cmd_business_add_options(c)
+  cmd_table_output_add_options(c)
 
   c.action do |args, options|
     c.verify_arg_count!(args)
@@ -111,7 +112,7 @@ Find business by name or ID.
   ).strip
   c.project_not_required = true
 
-  cmd_business_add_options(c)
+  cmd_table_output_add_options(c)
 
   # Add --business/-id/-name options.
   cmd_option_business_pickers(c)
@@ -130,8 +131,8 @@ Find business by name or ID.
   end
 end
 
-# *** Business actions helpers.
-# -----------------------------
+# *** Business actions helpers
+# ----------------------------
 
 def business_find_or_ask!(acc, options)
   #any_business_pickers?(options)
@@ -263,9 +264,9 @@ def cmd_business_find_businesses(acc, args, options)
   bizz
 end
 
-def cmd_business_output_businesses(acc, bizz, options)
+def cmd_business_header_and_bizz(bizz, options)
   if options.idonly
-    headers = [:bizid]
+    headers = %i[bizid]
     bizz = bizz.map(&:bizid)
   elsif options.brief
     #headers = %i[bizid role name]
@@ -274,7 +275,7 @@ def cmd_business_output_businesses(acc, bizz, options)
     bizz = bizz.map { |biz| [biz.bizid, biz.name] }
   else
     # 2017-08-16: There are only 3 keys: bizid, role, and name.
-    headers = bizz[0].meta.keys
+    headers = (bizz[0] && bizz[0].meta.keys) || []
     headers.sort_by! do |hdr|
       case hdr
       when :bizid
@@ -289,7 +290,11 @@ def cmd_business_output_businesses(acc, bizz, options)
     end
     bizz = bizz.map { |biz| headers.map { |key| biz.meta[key] } }
   end
+  [headers, bizz]
+end
 
+def cmd_business_output_businesses(acc, bizz, options)
+  headers, bizz = cmd_business_header_and_bizz(bizz, options)
   io = File.open(options.output, 'w') if options.output
   acc.outf(bizz, io) do |dd, ios|
     if options.idonly

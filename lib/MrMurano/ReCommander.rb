@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.08.29 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -77,7 +77,7 @@ module Commander
     # We override -- monkey patch -- it to do other stuff.
     alias old_run_active_command run_active_command
     def run_active_command
-      exit @command_exit if @command_exit
+      exit @command_exit if defined?(@command_exit) && @command_exit
       section = active_command.name
       hooked = MrMurano::Hooked.new(section)
       hooked.check_run_pre_hook
@@ -227,9 +227,7 @@ module Commander
                 opt[:switches].map { |sw| MrMurano::Verbose.fancy_ticks(sw) }.join('|')
               end
               match = match.flatten
-              if match.length > 1
-                match[-1] = "and #{match[-1]}"
-              end
+              match[-1] = "and #{match[-1]}" if match.length > 1
               match = match.join(', ')
               MrMurano::Verbose.error("Ambiguous option: #{ambig} matches: #{match}")
               exit 2

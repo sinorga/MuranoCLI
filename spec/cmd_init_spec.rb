@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.08.29 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -134,17 +134,6 @@ RSpec.describe 'murano init', :cmd do
       "\n",
     ]
     expecting
-  end
-
-  def murano_solutions_expunge_yes
-    out, err, status = Open3.capture3(capcmd('murano', 'solutions', 'expunge', '-y'))
-    expect(out).to eq('').
-      or eq("No solutions found\n").
-      or eq("Deleted 1 solution\n").
-      or eq("Deleted 2 solutions\n")
-    expect(err).to eq('').
-      or eq("\e[31mNo solutions found\e[0m\n")
-    expect(status.exitstatus).to eq(0).or eq(1)
   end
 
   it "Won't init in HOME (gracefully)" do

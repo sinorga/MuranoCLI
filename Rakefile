@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.15 /coding: utf-8
+# Last Modified: 2017.08.29 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -46,6 +46,11 @@ task :echo do
   puts tag_name
   puts gem_name
   puts built_gem
+end
+
+desc 'Tail the CI build file and the curl file'
+task :tail do
+  sh %(tail -F .rake_build.out curldebug.out)
 end
 
 desc 'display remind of how to release'
