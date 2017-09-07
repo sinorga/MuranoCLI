@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.09.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -295,17 +295,26 @@ module MrMurano
     #
     # @param local [Pathname] Full path of where to download to
     # @param item [Item] The item to download
-    def download(local, item)
+    def download(local, item, options={})
       #if item[:bundled]
       #  warning "Not downloading into bundled item #{synckey(item)}"
       #  return
       #end
       id = item[@itemkey.to_sym]
-      if id.nil?
-        debug "!!! Missing '#{@itemkey}', using :id instead!"
-        debug ":id => #{item[:id]}"
-        id = item[:id]
-        raise "Both #{@itemkey} and id in item are nil!" if id.nil?
+      if id.to_s.empty?
+        # 2017-09-05: MRMUR-156: User seeing this.
+        if @itemkey.to_sym != :id
+          debug "!!! Missing '#{@itemkey}', trying :id instead"
+          id = item[:id]
+        end
+        if id.to_s.empty?
+          debug %(Remote item "#{item[:name]}" missing :id / local: #{local} / item: #{item})
+          return if options[:ignore_errors]
+          error %(Remote item missing :id => #{local})
+          print %(You can ignore this error using --ignore-errors)
+          exit 1
+        end
+        debug ":id => #{id}"
       end
 
       relpath = local.relative_path_from(Pathname.pwd).to_s
@@ -738,13 +747,13 @@ module MrMurano
       end
       toadd.each do |item|
         syncdown_item(item, into, options, :create, 'Adding') do |dest, aitem|
-          download(dest, aitem)
+          download(dest, aitem, options)
           num_synced += 1
         end
       end
       tomod.each do |item|
         syncdown_item(item, into, options, :update, 'Updating') do |dest, aitem|
-          download(dest, aitem)
+          download(dest, aitem, options)
           num_synced += 1
         end
       end
@@ -918,8 +927,8 @@ module MrMurano
         tested = false
         passed = false
         if @solntype == 'application.id'
-          # elevate_hash magically makes the hash return false rather than nil
-          # on unknown keys, so preface with a key? guard.
+          # elevate_hash makes the hash return false rather than
+          # nil on unknown keys, so preface with a key? guard.
           if options.key?(:application) && !options[:application].to_s.empty?
             if soln_name =~ /#{Regexp.escape(options[:application])}/i ||
                sid =~ /#{Regexp.escape(options[:application])}/i

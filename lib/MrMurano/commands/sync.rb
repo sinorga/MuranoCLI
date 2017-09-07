@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.09.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,6 +13,7 @@ def sync_add_options(c, locale)
   c.option '--[no-]delete', %(Don't delete things from #{locale})
   c.option '--[no-]create', %(Don't create things on #{locale})
   c.option '--[no-]update', %(Don't update things on #{locale})
+  c.option '--ignore-errors', %(Don't die on sync errors)
 end
 
 def syncdown_files(options, args=nil)

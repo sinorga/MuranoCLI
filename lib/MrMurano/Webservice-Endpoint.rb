@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.09.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -108,6 +108,7 @@ module MrMurano
       # @param modify [Boolean] True if item exists already and this is changing it
       def upload(local, remote, _modify)
         local = Pathname.new(local) unless local.is_a? Pathname
+        # MAYBE/2017-09-07: Honor options.ignore_errors here?
         raise 'no file' unless local.exist?
         # we assume these are small enough to slurp.
         if remote.script.nil?
