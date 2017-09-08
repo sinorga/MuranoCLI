@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.09.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -195,7 +195,7 @@ module MrMurano
         @here = locallist
       end
 
-      def download(_local, item)
+      def download(_local, item, _options=nil)
         # Not calling, e.g., `return unless download_item_allowed(item[@itemkey])`
         #   See instead: syncup_after and syncdown_after/resources_write
         @here = locallist if @here.nil?

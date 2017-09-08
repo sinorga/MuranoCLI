@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.09.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -56,7 +56,7 @@ module MrMurano
       post('/', remote)
     end
 
-    def download(local, item)
+    def download(local, item, _options=nil)
       # needs to append/merge with file
       # for now, we'll read, modify, write
       here = []
