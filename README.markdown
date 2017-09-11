@@ -375,9 +375,9 @@ EOF
 
 cat >> .murano.stg <<EOF
 [application]
-id=JJJJJJJJ
+id=LLLLLLLL
 [product]
-id=KKKKKKKK
+id=MMMMMMMM
 EOF
 
 cat >> .murano.prod <<EOF
