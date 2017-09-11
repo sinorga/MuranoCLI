@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -22,11 +22,11 @@ module MrMurano
 
       def initialize
         @solntype = 'application.id'
-        @uriparts_sidex = 1
-        init_sid!
+        @uriparts_apidex = 1
+        init_api_id!
         # FIXME/2017-06-05/MRMUR-XXXX: Update to new endpoint.
-        #@uriparts = [:service, @sid, :webservice]
-        @uriparts = [:solution, @sid]
+        #@uriparts = [:service, @api_id, :webservice]
+        @uriparts = [:solution, @api_id]
         @itemkey = :id
         #@locationbase = $cfg['location.base']
         @location = nil

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.02 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -37,6 +37,7 @@ RSpec.describe MrMurano::Business do
        pid: "ABC",
        modelId: "cde",
        label: "fts",
+       api_id: "XYZ",
        sid: "XYZ",
        name: "XYZ",},
       {bizid: "XYZxyz",
@@ -44,6 +45,7 @@ RSpec.describe MrMurano::Business do
        pid: "fgh",
        modelId: "ijk",
        label: "lua-test",
+       api_id: "XYZ",
        sid: "XYZ",
        name: "XYZ",},
     ]
@@ -106,14 +108,14 @@ RSpec.describe MrMurano::Business do
       {bizid: "XYZxyz",
        type: "application",
        domain: "XYZxyz.apps.exosite.io",
-       apiId: "ACBabc",
+       api_id: "ACBabc",
        sid: "ACBabc",
        name: "ijk",
       },
       {bizid: "XYZxyz",
        type: "application",
        domain: "XYZxyz.apps.exosite.io",
-       apiId: "DEFdef",
+       api_id: "DEFdef",
        sid: "DEFdef",
        name: "lmn",
       },
@@ -183,7 +185,7 @@ RSpec.describe MrMurano::Business do
       {bizid: "XYZxyz",
        type: "product",
        domain: "ABCabc.m2.exosite.io",
-       apiId: "ABCabc",
+       api_id: "ABCabc",
        sid: "ABCabc",
        name: "XXX",
       },
@@ -192,7 +194,7 @@ RSpec.describe MrMurano::Business do
       {bizid: "XYZxyz",
        type: "application",
        domain: "XYZxyz.apps.exosite.io",
-       apiId: "DEFdef",
+       api_id: "DEFdef",
        sid: "DEFdef",
        name: "XXX",
       },
@@ -222,7 +224,7 @@ RSpec.describe MrMurano::Business do
 
     sol = @biz.new_solution!("one", :product)
     expect(sol.valid?).to be true
-    expect(sol.sid).to eq("abc123def456ghi78")
+    expect(sol.api_id).to eq("abc123def456ghi78")
   end
 
 #  if false

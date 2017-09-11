@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -39,7 +39,10 @@ Show readable information about the current configuration.
     unless selected_application_id.to_s.empty?
       MrMurano::Verbose.whirly_start('Fetching Applications...')
       biz.applications.each do |sol|
-        selected_application = sol if sol.apiId == selected_application_id
+        next unless sol.api_id == selected_application_id
+        #next unless [sol.api_id, sol.sid].include?(selected_application_id)
+        selected_application = sol
+        break
       end
       MrMurano::Verbose.whirly_stop
     end
@@ -49,7 +52,10 @@ Show readable information about the current configuration.
     unless selected_product_id.to_s.empty?
       MrMurano::Verbose.whirly_start('Fetching Products...')
       biz.products.each do |sol|
-        selected_product = sol if sol.apiId == selected_product_id
+        next unless sol.api_id == selected_product_id
+        #next unless [sol.api_id, sol.sid].include?(selected_product_id)
+        selected_product = sol
+        break
       end
       MrMurano::Verbose.whirly_stop
     end
@@ -71,11 +77,11 @@ Show readable information about the current configuration.
 
     id_not_in_biz = false
 
-    # E.g., {:bizid=>"ABC", :type=>"application", :apiId=>"XXX", :sid=>"XXX",
+    # E.g., {:bizid=>"ABC", :type=>"application", :api_id=>"XXX", :sid=>"XXX",
     #        :name=>"ABC", :domain=>"ABC.apps.exosite.io" }
     if selected_application
       sol_info = %(application: https://#{selected_application.domain})
-      sol_info += %( <#{selected_application.sid}>) if options.ids
+      sol_info += %( <#{selected_application.api_id}>) if options.ids
       puts sol_info
     elsif selected_application_id
       #puts 'selected application not in business'
@@ -88,11 +94,11 @@ Show readable information about the current configuration.
       puts 'application ID not found in config'
     end
 
-    # E.g., {:bizid=>"ABC", :type=>"product", :apiId=>"XXX", :sid=>"XXX",
+    # E.g., {:bizid=>"ABC", :type=>"product", :api_id=>"XXX", :sid=>"XXX",
     #        :name=>"ABC", :domain=>"ABC.m2.exosite.io" }
     if selected_product
       sol_info = %(product: #{selected_product.name})
-      sol_info += %( <#{selected_product.sid}>) if options.ids
+      sol_info += %( <#{selected_product.api_id}>) if options.ids
       puts sol_info
     elsif selected_product_id
       #puts 'selected product not in business'

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -10,7 +10,7 @@ require 'MrMurano/Solution'
 module MrMurano
   # …/serviceconfig
   class ServiceConfig < SolutionBase
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       super
       @uriparts << :serviceconfig
       @scid = nil
@@ -58,7 +58,7 @@ module MrMurano
       post(
         '/',
         {
-          solution_id: @sid,
+          solution_id: @api_id,
           service: pid,
           # 2017-06-26: "name" seems to work, but "script_key" is what web UI uses.
           #   See yeti-ui/bridge/src/js/api/services.js::linkApplicationService
@@ -112,20 +112,20 @@ module MrMurano
   # A much better UI/UX happens with human intervention.
   # :nocov:
   class Services < SolutionBase
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       super
       @uriparts << :service
     end
 
-    def sid_for_name(name)
+    def api_id_for_name(name)
       name = name.to_s unless name.is_a? String
       scr = list.select { |i| i[:alias] == name }.first
       scr[:id]
     end
 
-    def sid
-      return @sid unless @sid.nil?
-      @sid = sid_for_name(@service_name)
+    def api_id
+      return @api_id unless @api_id.nil?
+      @api_id = api_id_for_name(@service_name)
     end
 
     def list
@@ -137,13 +137,13 @@ module MrMurano
       #   sort_by_name(ret[:items])
     end
 
-    def schema(id=sid)
+    def schema(id=api_id)
       # TODO: cache schema in user dir?
       get("/#{id}/schema")
     end
 
     ## Get list of call operations from a schema
-    def callable(id=sid, all=false)
+    def callable(id=api_id, all=false)
       scm = schema(id)
       calls = []
       scm[:paths].each do |path, methods|
@@ -174,14 +174,14 @@ module MrMurano
   # :nocov:
 
   class ServiceConfigApplication < ServiceConfig
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       @solntype = 'application.id'
       super
     end
   end
 
   class ServiceConfigProduct < ServiceConfig
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       @solntype = 'product.id'
       super
     end
