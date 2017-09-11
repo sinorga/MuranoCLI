@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -68,11 +68,11 @@ Create a new solution in the current business.
 
     if options.save
       section = options.type.to_s
-      $cfg.set("#{section}.id", sol.sid)
+      $cfg.set("#{section}.id", sol.api_id)
       $cfg.set("#{section}.name", sol.name)
     end
 
-    biz.outf(sol.sid)
+    biz.outf(sol.api_id)
   end
 end
 alias_command 'create application', 'solution create', '--type', 'application'
@@ -157,7 +157,9 @@ def cmd_solution_del_get_names_and_ids!(biz, args, options)
   end
   solz = must_fetch_solutions!(options, args, biz)
   solz.each do |sol|
-    nmorids += [[sol.sid, "#{MrMurano::Verbose.fancy_ticks(sol.name)} <#{sol.sid}>", sol]]
+    nmorids += [
+      [sol.api_id, "#{MrMurano::Verbose.fancy_ticks(sol.name)} <#{sol.api_id}>", sol],
+    ]
   end
   nmorids
 end
@@ -217,7 +219,9 @@ def solution_delete(name_or_id, use_sol: nil, type: :all, yes: false)
     #   would return true if, say, sol.meta[:any_key] equaled name_or_id.)
     unless name_or_id.empty?
       solz.select! do |sol|
-        sol.sid == name_or_id || sol.name == name_or_id || sol.domain =~ /#{Regexp.escape(name_or_id)}\./i
+        sol.api_id == name_or_id \
+          || sol.name == name_or_id \
+          || sol.domain =~ /#{Regexp.escape(name_or_id)}\./i
       end
     end
     MrMurano::Verbose.whirly_stop
@@ -255,7 +259,7 @@ def solution_delete(name_or_id, use_sol: nil, type: :all, yes: false)
         n_deleted += 1
         # Clear the ID from the config.
         MrMurano::Config::CFG_SOLUTION_ID_KEYS.each do |keyn|
-          $cfg.set(keyn, nil) if $cfg[keyn] == sol.sid
+          $cfg.set(keyn, nil) if $cfg[keyn] == sol.api_id
         end
       end
     end
@@ -386,30 +390,32 @@ end
 
 def cmd_solution_output_solutions(biz, solz, options)
   if options.idonly
-    headers = %i[apiId]
-    solz = solz.map { |row| [row.apiId] }
+    headers = %i[api_id]
+    solz = solz.map { |row| [row.api_id] }
   elsif options.brief
-    #headers = %i[apiId domain]
-    #solz = solz.map { |row| [row.apiId, row.domain] }
-    headers = %i[apiId domain name]
-    solz = solz.map { |row| [row.apiId, row.domain, row.name] }
+    #headers = %i[api_id domain]
+    #solz = solz.map { |row| [row.api_id, row.domain] }
+    headers = %i[api_id sid domain name]
+    solz = solz.map { |row| [row.api_id, row.sid, row.domain, row.name] }
   else
     headers = (solz.first && solz.first.meta || {}).keys
-    headers.delete(:sid) if headers.include?(:apiId) && headers.include?(:sid)
+    #headers.delete(:sid) if headers.include?(:api_id) && headers.include?(:sid)
     headers.sort_by! do |hdr|
       case hdr
       when :bizid
         0
       when :type
         1
-      when :apiId
+      when :api_id
         2
-      when :domain
+      when :sid
         3
-      when :name
+      when :domain
         4
-      else
+      when :name
         5
+      else
+        6
       end
     end
     solz = solz.map { |row| headers.map { |hdr| row.meta[hdr] } }

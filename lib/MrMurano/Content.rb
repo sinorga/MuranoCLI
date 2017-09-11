@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -29,9 +29,9 @@ module MrMurano
 
       def initialize
         @solntype = 'product.id'
-        @uriparts_sidex = 1
-        init_sid!
-        @uriparts = [:service, @sid, :content, :item]
+        @uriparts_apidex = 1
+        init_api_id!
+        @uriparts = [:service, @api_id, :content, :item]
         @itemkey = :id
         #@locationbase = $cfg['location.base']
         @location = nil

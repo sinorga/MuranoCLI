@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.16 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -41,7 +41,21 @@ Print the domain for this solution.
 
     solz.each do |sol|
       if !options.brief
-        say(sol.pretty_desc(add_type: true, raw_url: options.raw))
+        if $cfg['tool.outformat'] == 'best'
+          say(sol.pretty_desc(add_type: true, raw_url: options.raw))
+        else
+          dobj = {}
+          dobj[:type] = sol.type.to_s.capitalize
+          dobj[:name] = sol.name || ''
+          dobj[:api_id] = sol.api_id || ''
+          dobj[:sid] = sol.sid || ''
+          dobj[:domain] = ''
+          if sol.domain
+            dobj[:domain] += 'https://' unless options.raw
+            dobj[:domain] += sol.domain
+          end
+          sol.outf(dobj)
+        end
       elsif options.raw
         say(sol.domain)
       else

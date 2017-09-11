@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -21,7 +21,7 @@ module MrMurano
   ##
   # Things that servers do that is common.
   class ServiceBase < SolutionBase
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       super
     end
 
@@ -67,6 +67,7 @@ module MrMurano
       else
         # I.e., thereitem.phantom, an "undeletable" file that does not
         # exist locally but should not be deleted from server.
+        # MAYBE/2017-09-07: Honor options.ignore_errors here?
         raise 'no file' unless thereitem.script
         script = thereitem.script
       end
@@ -77,7 +78,7 @@ module MrMurano
       name = mkname(thereitem)
       pst = thereitem.to_h.merge(
         #solution_id: $cfg[@solntype],
-        solution_id: @sid,
+        solution_id: @api_id,
         script: script,
         alias: mkalias(thereitem),
         name: name,
@@ -174,7 +175,7 @@ module MrMurano
       [
         'cache',
         self.class.to_s.gsub(/\W+/, '_'),
-        @sid,
+        @api_id,
         'yaml',
       ].join('.')
     end
@@ -258,7 +259,7 @@ module MrMurano
       attr_accessor :solution_id
     end
 
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       @solntype = 'application.id'
       super
       @uriparts << :module
@@ -283,7 +284,7 @@ module MrMurano
     def mkalias(remote)
       raise "Missing parts! #{remote.to_h.to_json}" if remote.name.nil?
       #[$cfg[@solntype], remote[:name]].join('_')
-      [@sid, remote[:name]].join('_')
+      [@api_id, remote[:name]].join('_')
     end
 
     def mkname(remote)
@@ -349,7 +350,7 @@ module MrMurano
       attr_accessor :updated_at
       # @return [String] Timestamp when this was created.
       attr_accessor :created_at
-      # @return [String] The soln's product.id or application.id (Murano's apiId).
+      # @return [String] The soln's product.id or application.id (Murano's api_id).
       attr_accessor :solution_id
       # @return [String] Which service triggers this script.
       attr_accessor :service
@@ -366,7 +367,7 @@ module MrMurano
       attr_accessor :phantom
     end
 
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       super
       @uriparts << :eventhandler
       @itemkey = :alias
@@ -378,7 +379,7 @@ module MrMurano
     def mkalias(remote)
       raise "Missing parts! #{remote.to_h.to_json}" if remote.service.nil? || remote.event.nil?
       #[$cfg[@solntype], remote[:service], remote[:event]].join('_')
-      [@sid, remote[:service], remote[:event]].join('_')
+      [@api_id, remote[:service], remote[:event]].join('_')
     end
 
     def mkname(remote)
@@ -482,12 +483,12 @@ module MrMurano
       end
     end
 
-    def default_event_script(service_or_sid, &block)
+    def default_event_script(service_or_api_id, &block)
       post(
         '/',
         {
-          solution_id: @sid,
-          service: service_or_sid,
+          solution_id: @api_id,
+          service: service_or_api_id,
           event: 'event',
           script: 'print(event)',
         },
@@ -712,7 +713,7 @@ module MrMurano
   PRODUCT_SERVICES = %w[device2 interface].freeze
 
   class EventHandlerSolnPrd < EventHandler
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       @solntype = 'product.id'
       # FIXME/2017-06-20: Should we use separate directories for prod vs app?
       #   See also :services in PrfFile and elsewhere;
@@ -748,7 +749,7 @@ module MrMurano
   end
 
   class EventHandlerSolnApp < EventHandler
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       @solntype = 'application.id'
       # FIXME/2017-06-20: Should we use separate directories for prod vs app?
       @project_section = :services

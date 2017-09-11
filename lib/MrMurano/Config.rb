@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.08.31 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -280,23 +280,33 @@ module MrMurano
       true
     end
 
-    def validate_cmd
+    INVALID_PROJECT_HINT = %(
+      Please change to a project directory, or run `murano init` to create a new project.
+    ).strip
+
+    def validate_cmd(cmd=nil)
+      return unless validate_cmd_business_and_project(cmd)
+      migrate_old_config(@project_dir)
+      migrate_old_config(Pathname.new(Dir.home))
+    end
+
+    def validate_cmd_business_and_project(cmd)
       # Most commands should be run from within a Murano project (sub-)directory.
       # If user is running a project command not within a project directory,
       # we'll print a message now and exit the app from run_active_command later.
       unless @runner.nil?
-        the_cmd = @runner.active_command
-        unless the_cmd.name == 'help' || the_cmd.project_not_required || @project_exists
+        the_cmd = @runner.active_command if cmd.nil?
+        the_cmd = command(cmd) if the_cmd.nil?
+        the_cmd.project_not_required = false unless defined?(the_cmd.project_not_required)
+        if the_cmd.name != 'help' && !the_cmd.project_not_required && !@project_exists
           error %(The "#{the_cmd.name}" command only works in a Murano project.)
-          say %(Please change to a project directory, or run `murano init` to create a new project.)
+          say INVALID_PROJECT_HINT
           # Note that commnander-rb uses an at_exit hook, which we hack around.
           @runner.command_exit = 1
-          return
+          false
         end
       end
-
-      migrate_old_config(@project_dir)
-      migrate_old_config(Pathname.new(Dir.home))
+      true
     end
 
     def self.fix_modes(path)

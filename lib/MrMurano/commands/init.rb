@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -181,12 +181,12 @@ command :init do |c|
       verbose: true,
     }
     # Get/Create Application ID
-    sol_opts[:match_sid] = options.application_id
+    sol_opts[:match_api_id] = options.application_id
     sol_opts[:match_name] = options.application_name
     sol_opts[:match_fuzzy] = options.application
     appl = solution_find_or_create(biz: biz, type: :application, **sol_opts)
     # Get/Create Product ID
-    sol_opts[:match_sid] = options.product_id
+    sol_opts[:match_api_id] = options.product_id
     sol_opts[:match_name] = options.product_name
     sol_opts[:match_fuzzy] = options.product
     prod = solution_find_or_create(biz: biz, type: :product, **sol_opts)

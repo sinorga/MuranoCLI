@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.08.31 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -12,6 +12,12 @@ require 'cmd_common'
 
 RSpec.describe 'murano business', :cmd, :needs_password do
   include_context "CI_CMD"
+
+  context "without project" do
+    it "help" do
+      cmd_verify_help('business')
+    end
+  end
 
   context "list" do
     it "as table" do
@@ -28,7 +34,7 @@ RSpec.describe 'murano business', :cmd, :needs_password do
     it "as json" do
       out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '-c', 'outformat=json'))
       expect(err).to eq("")
-      expect{JSON.parse(out)}.to_not raise_error
+      expect{ JSON.parse(out) }.to_not raise_error
       expect(status.exitstatus).to eq(0)
     end
 

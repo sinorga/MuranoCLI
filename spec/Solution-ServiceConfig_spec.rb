@@ -18,7 +18,7 @@ RSpec.describe MrMurano::ServiceConfig do
     $cfg['product.id'] = 'XYZ'
     $cfg['application.id'] = 'XYZ'
 
-    # ServiceConfig needs an sid, else one could instantiate
+    # ServiceConfig needs an api_id, else one could instantiate
     # ServiceConfigApplication or ServiceConfigProduct.
     @srv = MrMurano::ServiceConfig.new('XYZ')
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")

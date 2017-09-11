@@ -1,11 +1,11 @@
-# Last Modified: 2017.08.20 /coding: utf-8
+# Last Modified: 2017.09.07 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
 
-require 'orderedhash'
+require 'MrMurano/orderedhash'
 
 class Hash
   # From:
@@ -73,9 +73,10 @@ def elevate_hash(hsh)
   end
   # build a hash where the default is 'false' instead of 'nil'
   Hash.new(false).merge(Hash.transform_keys_to_symbols(hsh))
-  # 2017-08-16: Weird: [lb] seeing the Hash behave differently
-  #   after feeding through this function. Unknown keys would
-  #   return nil before, but after, return false.
+  # 2017-09-07: Note that after elevate_hash, the Hash returns
+  #   false on unknown keys. This is because of the parameter to
+  #   new: Hash.new(false). Unknown keys would return nil before,
+  #   but after, they return false. E.g.,
   #
   #   (byeebug) options
   #   {:delete=>false, :create=>true, :update=>false}
@@ -89,8 +90,6 @@ def elevate_hash(hsh)
   #   false
   #   (byeebug) options
   #   {:delete=>false, :create=>true, :update=>false, :fff=>nil}
-  #
-  #   Work around is to test with hash.key?
 end
 
 ##
@@ -105,6 +104,19 @@ def ensure_array(item)
     [item]
   else
     item
+  end
+end
+
+module HashInit
+  def initialize(*hash)
+    return unless hash.length == 1 && hash.first.is_a?(Hash)
+    hash.first.each do |key, val|
+      if respond_to? key
+        send("#{key}=", val)
+      else
+        $stderr.puts %(HashInit: missing hash key "#{key}")
+      end
+    end
   end
 end
 

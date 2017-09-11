@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -29,10 +29,10 @@ module MrMurano
 
       def initialize
         @solntype = 'product.id'
-        @uriparts_sidex = 1
-        init_sid!
-        @uriparts = [:service, @sid, :device2]
-        @uriparts_sidex = 1
+        @uriparts_apidex = 1
+        init_api_id!
+        @uriparts = [:service, @api_id, :device2]
+        @uriparts_apidex = 1
         @itemkey = :id
       end
 
@@ -195,7 +195,7 @@ module MrMurano
         @here = locallist
       end
 
-      def download(_local, item)
+      def download(_local, item, _options=nil)
         # Not calling, e.g., `return unless download_item_allowed(item[@itemkey])`
         #   See instead: syncup_after and syncdown_after/resources_write
         @here = locallist if @here.nil?
@@ -463,7 +463,7 @@ module MrMurano
         raise "Gateway info not found for #{identifier}" if info.nil?
         fqdn = info[:fqdn]
         debug "Found FQDN: #{fqdn}"
-        fqdn = "#{@sid}.m2.exosite.io" if fqdn.nil?
+        fqdn = "#{@api_id}.m2.exosite.io" if fqdn.nil?
 
         uri = URI("https://#{fqdn}/provision/activate")
         http = Net::HTTP.new(uri.host, uri.port)
@@ -471,8 +471,8 @@ module MrMurano
         http.start
         request = Net::HTTP::Post.new(uri)
         request.form_data = {
-          vendor: @sid,
-          model: @sid,
+          vendor: @api_id,
+          model: @api_id,
           sn: identifier,
         }
         request['User-Agent'] = "MrMurano/#{MrMurano::VERSION}"
