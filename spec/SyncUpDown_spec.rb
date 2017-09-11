@@ -12,20 +12,20 @@ class TSUD
 
   def initialize
     # 2017-07-03: See MrMurano::SolutionBase.state for the list of attrs.
-    @sid = 'XYZ'
-    @valid_sid = true
+    @api_id = 'XYZ'
+    @valid_api_id = true
     @uriparts = []
     @solntype = 'application.id'
     @itemkey = :name
     @project_section = :routes
   end
 
-  def sid
-    @sid
+  def api_id
+    @api_id
   end
 
-  def sid?
-    @valid_sid
+  def api_id?
+    @valid_api_id
   end
 
   def fetch(id)

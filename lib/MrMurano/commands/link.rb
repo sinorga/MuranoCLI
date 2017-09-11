@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.23 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -48,20 +48,20 @@ List the solutions that are linked.
     biz = MrMurano::Business.new
     products = biz.products
     MrMurano::Verbose.whirly_stop
-    pids = products.map(&:apiId)
+    pids = products.map(&:api_id)
 
     sol_opts = { biz: biz, type: :application }
-    sol_opts[:match_sid] = $cfg['application.id'] unless options.all
+    sol_opts[:match_api_id] = $cfg['application.id'] unless options.all
     appl = solution_find_or_create(**sol_opts)
 
     if !appl.nil?
       MrMurano::Verbose.whirly_msg('Fetching application services...')
-      sercfg = MrMurano::ServiceConfig.new(appl.sid)
+      sercfg = MrMurano::ServiceConfig.new(appl.api_id)
       #scfgs = sercfg.list('?select=service,id,solution_id,script_key,alias')
       scfgs = sercfg.list
       MrMurano::Verbose.whirly_stop
     else
-      sercfg = MrMurano::ServiceConfig.new(MrMurano::SolutionId::INVALID_SID)
+      sercfg = MrMurano::ServiceConfig.new(MrMurano::SolutionId::INVALID_API_ID)
       scfgs = []
     end
 
@@ -150,7 +150,7 @@ def link_solutions(sol_a, sol_b, options)
   warn_on_conflict = options[:warn_on_conflict] || false
   verbose = options[:verbose] || false
 
-  if sol_a.nil? || sol_a.sid.to_s.empty? || sol_b.nil? || sol_b.sid.to_s.empty?
+  if sol_a.nil? || sol_a.api_id.to_s.empty? || sol_b.nil? || sol_b.api_id.to_s.empty?
     msg = 'Missing Solution(s) (Applications or Products): Nothing to link'
     if warn_on_conflict
       sercfg.warning msg
@@ -172,9 +172,9 @@ def link_solutions(sol_a, sol_b, options)
 
   # Get services for solution to which being linked (application),
   # and look for linkee (product) service.
-  sercfg = MrMurano::ServiceConfig.new(sol_a.sid)
+  sercfg = MrMurano::ServiceConfig.new(sol_a.api_id)
   MrMurano::Verbose.whirly_msg 'Fetching services...'
-  scfgs = sercfg.search(sol_b.sid)
+  scfgs = sercfg.search(sol_b.api_id)
   svc_cfg_exists = scfgs.any?
   MrMurano::Verbose.whirly_stop
 
@@ -182,7 +182,7 @@ def link_solutions(sol_a, sol_b, options)
   unless svc_cfg_exists
     MrMurano::Verbose.whirly_msg 'Linking solutions...'
     # Call Murano.
-    _ret = sercfg.create(sol_b.sid, sol_b.name) do |request, http|
+    _ret = sercfg.create(sol_b.api_id, sol_b.name) do |request, http|
       response = http.request(request)
       MrMurano::Verbose.whirly_stop
       if response.is_a?(Net::HTTPSuccess)
@@ -208,8 +208,8 @@ def link_solutions(sol_a, sol_b, options)
 
   # Get event handlers for application, and look for product event handler.
   MrMurano::Verbose.whirly_msg 'Fetching handlers...'
-  evthlr = MrMurano::EventHandlerSolnApp.new(sol_a.sid)
-  hdlrs = evthlr.search(sol_b.sid)
+  evthlr = MrMurano::EventHandlerSolnApp.new(sol_a.api_id)
+  hdlrs = evthlr.search(sol_b.api_id)
   evt_hlr_exists = hdlrs.any?
   MrMurano::Verbose.whirly_stop
 
@@ -218,7 +218,7 @@ def link_solutions(sol_a, sol_b, options)
   unless evt_hlr_exists
     MrMurano::Verbose.whirly_msg 'Setting default event handler...'
     # Call Murano.
-    evthlr.default_event_script(sol_b.sid) do |request, http|
+    evthlr.default_event_script(sol_b.api_id) do |request, http|
       response = http.request(request)
       MrMurano::Verbose.whirly_stop
       if response.is_a?(Net::HTTPSuccess)
@@ -244,10 +244,10 @@ def link_solutions(sol_a, sol_b, options)
 end
 
 def unlink_solutions(sol_a, sol_b)
-  sercfg = MrMurano::ServiceConfig.new(sol_a.sid)
+  sercfg = MrMurano::ServiceConfig.new(sol_a.api_id)
   MrMurano::Verbose.whirly_msg 'Fetching services...'
   #scfgs = sercfg.list('?select=service,id,solution_id,script_key,alias')
-  scfgs = sercfg.search(sol_b.sid)
+  scfgs = sercfg.search(sol_b.api_id)
   MrMurano::Verbose.whirly_stop
 
   if scfgs.length > 1
@@ -272,8 +272,8 @@ def unlink_solutions(sol_a, sol_b)
   end
 
   MrMurano::Verbose.whirly_msg 'Fetching handlers...'
-  evthlr = MrMurano::EventHandlerSolnApp.new(sol_a.sid)
-  hdlrs = evthlr.search(sol_b.sid)
+  evthlr = MrMurano::EventHandlerSolnApp.new(sol_a.api_id)
+  hdlrs = evthlr.search(sol_b.api_id)
   #evt_hlr_exists = hdlrs.any?
   MrMurano::Verbose.whirly_stop
 

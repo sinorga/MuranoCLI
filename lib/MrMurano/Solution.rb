@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.24 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -20,19 +20,19 @@ module MrMurano
     include SolutionId
 
     def initialize(from=nil)
-      @uriparts_sidex = 1
+      @uriparts_apidex = 1
       # Introspection. Feels hacky.
       if from.is_a? MrMurano::Solution
-        init_sid!(from.sid)
-        @valid_sid = from.valid_sid
+        init_api_id!(from.api_id)
+        @valid_api_id = from.valid_api_id
         # We shouldn't need to worry about other things...
         #@token = from.token
         #@http = from.http
         #@json_opts = from.json_opts
       else
-        init_sid!(from)
+        init_api_id!(from)
       end
-      @uriparts = [:solution, @sid]
+      @uriparts = [:solution, @api_id]
       @itemkey = :id
       @project_section = nil unless defined?(@project_section)
     end
@@ -44,7 +44,7 @@ module MrMurano
     protected
 
     def state
-      [@sid, @valid_sid, @uriparts, @solntype, @itemkey, @project_section]
+      [@api_id, @valid_api_id, @sid, @uriparts, @solntype, @itemkey, @project_section]
     end
 
     public
@@ -69,7 +69,7 @@ module MrMurano
       while remaining != 0
         ret = super
         if ret.nil? && !@suppress_error
-          warning "No solution with ID: #{@sid}"
+          warning "No solution with ID: #{@api_id}"
           whirly_interject { say 'Run `murano show` to see the business and list of solutions.' }
           MrMurano::SolutionBase.warn_configfile_env_maybe
           exit 1
@@ -146,11 +146,10 @@ module MrMurano
   end
 
   class Solution < SolutionBase
-    def initialize(sid=nil)
-      # Does it matter if we use :sid or :apiId?
-      meta = sid if sid.is_a?(Hash)
-      sid = sid[:sid] if sid.is_a?(Hash)
-      super(sid)
+    def initialize(api_id=nil)
+      meta = api_id if api_id.is_a?(Hash)
+      api_id = api_id[:api_id] || api_id[:apiId] if api_id.is_a?(Hash)
+      super(api_id)
       set_name
       @meta = {}
       @valid = false
@@ -189,10 +188,10 @@ module MrMurano
       resp = get
       if resp.is_a?(Hash) && !resp.key?(:error)
         self.meta = resp
-        @valid_sid = true
+        @valid_api_id = true
       else
         self.meta = {}
-        @valid_sid = false
+        @valid_api_id = false
       end
       @suppress_error = false
     end
@@ -230,24 +229,22 @@ module MrMurano
       @meta = data
       # Verify the solution ID.
       # NOTE: The Solution info fetched from business/<bizid>/solutions endpoint
-      #   includes the keys, :name, :sid, and :domain (see calls to solutions()).
-      #   The solution details fetched from a call to Solution.get() include the
-      #   keys, :name, :id, and :domain, among others.
+      #   includes the keys, :name, :api_id, :sid, and :domain (see calls to
+      #   solutions()). The solution details fetched from a call to Solution.get()
+      #   include the keys, :name, :id, and :domain, among others.
       #   Note that the info() response does not include :type.
-      #   Also, :apiId is indicated by solutions(), too.
-      sid = @meta[:sid] || @meta[:id] || nil
-      unless @meta[:apiId].to_s.empty?
-        if @meta[:apiId] != @meta[:sid]
-          warning "Unexpected: apiId != sid: #{@meta[:apiId]} != #{@meta[:sid]}"
-        end
-      end
-      unless @sid.to_s.empty? || sid.to_s.empty? || sid.to_s == @sid.to_s
+      api_id = @meta[:apiId] || @meta[:id]
+      unless @api_id.to_s.empty? || api_id.to_s.empty? || api_id.to_s == @api_id.to_s
         warning(
-          "#{type_name} ID mismatch. Server says #{fancy_ticks(sid)}, " \
-          "but config says #{fancy_ticks(@sid)}."
+          "#{type_name} ID mismatch. Server says #{fancy_ticks(api_id)}, " \
+          "but config says #{fancy_ticks(@api_id)}."
         )
       end
-      self.sid = sid
+      self.api_id = api_id
+      # NOTE: In Murano 1.0 (pre-ADC), api_id != sid; in Murano 1.1, they're ==.
+      #   The sid is used in business/<bid>/solution/<sid>
+      #   The apiId is used in solution/<apiId>
+      @sid = @meta[:sid]
       # Verify/set the name.
       unless @name.to_s.empty? || @meta[:name].to_s == @name.to_s
         warning(
@@ -256,21 +253,18 @@ module MrMurano
         )
       end
       if !@meta[:name].to_s.empty?
-        set_name(@meta[:name])
-        unless @valid_name || type == :solution
-          warning(
-            "Unexpected: Server returned invalid name: #{fancy_ticks(@meta[:name])}"
-          )
+        # NOTE: Pre-ADC (a/k/a migrated) applications are not named, at least
+        # when you query the business/<bid>/solution/ endpoint. But when you
+        # call info_safe, which GETs the solution details, the name is
+        # the domain and contains dots, which is considered an illegal name!
+        if @meta[:name] != @meta[:domain]
+          set_name(@meta[:name])
+          unless @valid_name || type == :solution
+            warning(
+              "Unexpected: Server returned invalid name: #{fancy_ticks(@meta[:name])}"
+            )
+          end
         end
-      elsif @meta[:domain]
-        # This could be a pre-ADC/pre-Murano business.
-        warning(
-          "Unexpected: Server returned no name for domain: #{fancy_ticks(@meta[:domain])}"
-        )
-      elsif @meta.any?
-        warning(
-          "Unexpected: Server returned no name for solution: #{fancy_ticks(@meta)}"
-        )
       end
     end
 
@@ -283,9 +277,9 @@ module MrMurano
       #   classes should not be formatting output), but this seems okay.
       desc = ''
       desc += "#{type.to_s.capitalize}: " if add_type
-      name = self.name || '~Unnamed~'
-      sid = self.sid || '~No-ID~'
-      desc += "#{Rainbow(name).underline} <#{sid}>"
+      name = !self.name.empty? && self.name || '~Unnamed~'
+      api_id = !self.api_id.empty? && self.api_id || '~No-ID~'
+      desc += "#{Rainbow(name).underline} <#{api_id}>"
       if domain
         desc += ' '
         desc += 'https://' unless raw_url
@@ -341,7 +335,7 @@ module MrMurano
     end
 
     def valid?
-      @valid_sid && @valid_name
+      @valid_api_id && @valid_name
     end
 
     def valid_name?
@@ -358,7 +352,7 @@ module MrMurano
   end
 
   class Application < Solution
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       @solntype = 'application.id'
       super
     end
@@ -391,7 +385,7 @@ The name must contain at least 1 character and no more than 63.
   end
 
   class Product < Solution
-    def initialize(sid=nil)
+    def initialize(api_id=nil)
       # Code path for `murano domain`.
       @solntype = 'product.id'
       super

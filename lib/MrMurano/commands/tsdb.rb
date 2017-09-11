@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,7 +13,7 @@ require 'MrMurano/SubCmdGroupContext'
 module MrMurano
   module ServiceConfigs
     class Tsdb < ServiceConfig
-      def initialize(sid=nil)
+      def initialize(api_id=nil)
         # FIXME/2017-07-03: What soln types have TSDBs?
         @solntype = 'application.id'
         super

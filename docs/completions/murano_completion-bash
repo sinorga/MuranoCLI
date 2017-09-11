@@ -10,6 +10,10 @@ __app_switches=(
     --configfile
     --curl
     --dry
+    --csv
+    --json
+    --yaml
+    --pp
     --exclude-scopes
     --no-page
     --no-plugins

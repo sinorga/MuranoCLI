@@ -47,6 +47,7 @@ Print the domain for this solution.
           dobj = {}
           dobj[:type] = sol.type.to_s.capitalize
           dobj[:name] = sol.name || ''
+          dobj[:api_id] = sol.api_id || ''
           dobj[:sid] = sol.sid || ''
           dobj[:domain] = ''
           if sol.domain

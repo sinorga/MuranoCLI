@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.24 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -99,18 +99,18 @@ def must_fetch_solutions!(options, args=[], biz=nil)
   if args.any?
     #raise 'Cannot use options.all and solution pickers' unless options.all.nil?
     flattened = args.map { |cell| cell.split(',') }.flatten
-    sid = []
+    api_id = []
     name = []
     fuzzy = []
     if options.id
-      sid = flattened
+      api_id = flattened
     elsif options.name
       name = flattened
     else
       fuzzy = flattened
     end
     solz += solution_get_solutions(
-      biz, options.type, sid: sid, name: name, fuzzy: fuzzy
+      biz, options.type, api_id: api_id, name: name, fuzzy: fuzzy
     )
   end
 
@@ -120,35 +120,35 @@ def must_fetch_solutions!(options, args=[], biz=nil)
     # MAYBE: DRY this code. Rather than copy-paste-find-replace block of code.
     #   See also: any_business_pickers?
     #
-    sid = []
+    api_id = []
     name = []
     fuzzy = []
     if options.application_id
-      sid = [options.application_id]
+      api_id = [options.application_id]
     elsif options.application_name
       name = [options.application_name]
     elsif options.application
       fuzzy = [options.application]
     end
-    if !sid.empty? || !name.empty? || !fuzzy.empty?
+    if !api_id.empty? || !name.empty? || !fuzzy.empty?
       solz += solution_get_solutions(
-        biz, :application, sid: sid, name: name, fuzzy: fuzzy
+        biz, :application, api_id: api_id, name: name, fuzzy: fuzzy
       )
     end
     #
-    sid = []
+    api_id = []
     name = []
     fuzzy = []
     if options.product_id
-      sid = [options.product_id]
+      api_id = [options.product_id]
     elsif options.product_name
       name = [options.product_name]
     elsif options.product
       fuzzy = [options.product]
     end
-    if !sid.empty? || !name.empty? || !fuzzy.empty?
+    if !api_id.empty? || !name.empty? || !fuzzy.empty?
       solz += solution_get_solutions(
-        biz, :product, sid: sid, name: name, fuzzy: fuzzy
+        biz, :product, api_id: api_id, name: name, fuzzy: fuzzy
       )
     end
     #
@@ -158,12 +158,12 @@ def must_fetch_solutions!(options, args=[], biz=nil)
     if !options.all
       if %i[all application].include?(options.type) && $cfg['application.id']
         solz += solution_get_solutions(
-          biz, :application, sid: $cfg['application.id']
+          biz, :application, api_id: $cfg['application.id']
         )
       end
       if %i[all product].include?(options.type) && $cfg['product.id']
         solz += solution_get_solutions(
-          biz, :product, sid: $cfg['product.id']
+          biz, :product, api_id: $cfg['product.id']
         )
       end
     else
@@ -173,10 +173,10 @@ def must_fetch_solutions!(options, args=[], biz=nil)
 
   culled = {}
   solz.select! do |sol|
-    if culled[sol.sid]
+    if culled[sol.api_id]
       false
     else
-      culled[sol.sid] = true
+      culled[sol.api_id] = true
       true
     end
   end
@@ -238,7 +238,7 @@ def any_product_pickers!(options)
   num_ways > 0
 end
 
-def solution_get_solutions(biz, type, sid: nil, name: nil, fuzzy: nil)
+def solution_get_solutions(biz, type, api_id: nil, name: nil, fuzzy: nil)
   if type == :all
     inflection = 'solutions'
   else
@@ -246,7 +246,7 @@ def solution_get_solutions(biz, type, sid: nil, name: nil, fuzzy: nil)
   end
   MrMurano::Verbose.whirly_start("Fetching #{inflection}...")
   solz = biz.solutions(
-    type: type, sid: sid, name: name, fuzzy: fuzzy, invalidate: false
+    type: type, api_id: api_id, name: name, fuzzy: fuzzy, invalidate: false
   )
   MrMurano::Verbose.whirly_stop
   solz
@@ -294,21 +294,21 @@ def get_two_solutions!(sol_a_id=nil, sol_b_id=nil, **options)
   app_srchs = []
   prd_srchs = []
 
-  #app_srchs += [[:application, :sid, sol_a_id]] unless sol_a_id.to_s.empty?
-  #prd_srchs += [[:product, :sid, sol_b_id]] unless sol_b_id.to_s.empty?
-  app_srchs += [[nil, :sid, sol_a_id]] unless sol_a_id.to_s.empty?
-  prd_srchs += [[nil, :sid, sol_b_id]] unless sol_b_id.to_s.empty?
+  #app_srchs += [[:application, :api_id, sol_a_id]] unless sol_a_id.to_s.empty?
+  #prd_srchs += [[:product, :api_id, sol_b_id]] unless sol_b_id.to_s.empty?
+  app_srchs += [[nil, :api_id, sol_a_id]] unless sol_a_id.to_s.empty?
+  prd_srchs += [[nil, :api_id, sol_b_id]] unless sol_b_id.to_s.empty?
 
   app_srchs += get_soln_searches(:application, options)
   prd_srchs += get_soln_searches(:product, options)
 
   if app_srchs.length.zero? && prd_srchs.length < 2
     # TEST/2017-08-16: Clear application.id and test.
-    app_srchs = [[:application, :sid, $cfg['application.id']]]
+    app_srchs = [[:application, :api_id, $cfg['application.id']]]
   end
   if prd_srchs.length.zero? && app_srchs.length < 2
     # TEST/2017-08-16: Clear product.id and test.
-    prd_srchs = [[:product, :sid, $cfg['product.id']]]
+    prd_srchs = [[:product, :api_id, $cfg['product.id']]]
   end
 
   sol_srchs = app_srchs + prd_srchs
@@ -323,8 +323,8 @@ def get_two_solutions!(sol_a_id=nil, sol_b_id=nil, **options)
   sol_srchs.each do |type, desc, value|
     sol_opts = {}
     case desc
-    when :sid
-      sol_opts[:match_sid] = value
+    when :api_id
+      sol_opts[:match_api_id] = value
     when :name
       sol_opts[:match_name] = value
     when :term
@@ -345,7 +345,7 @@ def get_soln_searches(sol_type, options)
   # E.g., :application_id
   if options["#{sol_type}_id".to_sym]
     app_ids = options["#{sol_type}_id".to_sym].split(',')
-    app_ids.each { |sid| sol_srchs += [[sol_type, :sid, sid]] }
+    app_ids.each { |api_id| sol_srchs += [[sol_type, :api_id, api_id]] }
   end
   # E.g., :application_name
   if options["#{sol_type}_name".to_sym]
@@ -379,7 +379,7 @@ module MrMurano
       ignore_cfg: false,
       verbose: false,
       match_enable: false,
-      match_sid: nil,
+      match_api_id: nil,
       match_name: nil,
       match_fuzzy: nil
     )
@@ -389,23 +389,23 @@ module MrMurano
       @ignore_cfg = ignore_cfg
       @verbose = verbose
       @match_enable = match_enable
-      @match_sid = match_sid
+      @match_api_id = match_api_id
       @match_name = match_name
       @match_fuzzy = match_fuzzy
-      @match_sid = nil if @match_sid.to_s.empty?
+      @match_api_id = nil if @match_api_id.to_s.empty?
       @match_name = nil if @match_name.to_s.empty?
       @match_fuzzy = nil if @match_fuzzy.to_s.empty?
-      @searching = @match_enable && (@match_sid || @match_name || @match_fuzzy)
+      @searching = @match_enable && (@match_api_id || @match_name || @match_fuzzy)
     end
 
     def find_or_create(model)
       # First, try to find the solution by solution ID.
-      sol = solution_find_by_sid(model)
+      sol = solution_find_by_api_id(model)
       # If not found, search existing solutions, and maybe ask user.
       if sol.nil?
         if @searching
           sol = solution_search_by_term(model)
-          sol = solution_create_new_solution(model) if sol.nil? && @create_ok && @match_sid.nil?
+          sol = solution_create_new_solution(model) if sol.nil? && @create_ok && @match_api_id.nil?
         else
           sol = solution_lookup_or_ask(model)
         end
@@ -413,26 +413,26 @@ module MrMurano
       # Finally, if asked, update the config.
       if @update_cfg && !sol.nil?
         # Update the config in memory and on disk/file.
-        $cfg.set(sol.cfg_key_id, sol.sid, :project)
+        $cfg.set(sol.cfg_key_id, sol.api_id, :project)
         $cfg.set(sol.cfg_key_name, sol.name, :project)
       end
       sol
     end
 
-    def solution_find_by_sid(sol)
+    def solution_find_by_api_id(sol)
       exists = false
       if @searching || @ignore_cfg
-        sol.sid = @match_sid || @match_fuzzy
+        sol.api_id = @match_api_id || @match_fuzzy
       else
         # Note that we verify the solution ID we find in the config,
         # since the user could've, e.g., deleted it via the web UI.
         # LATER: This only works so long as there's only one Product
         #  or one Application. Eventually we'll add support for more.
-        sol.sid = $cfg[sol.cfg_key_id].to_s
+        sol.api_id = $cfg[sol.cfg_key_id].to_s
         return sol if @skip_verify
       end
-      if sol.sid?
-        tried_sid = sol.sid
+      if sol.api_id?
+        tried_api_id = sol.api_id
         if @searching
           whirly_msg = "Searching #{sol.type_name} by ID..."
         else
@@ -440,12 +440,12 @@ module MrMurano
         end
         MrMurano::Verbose.whirly_start(whirly_msg)
         sol.info_safe
-        if sol.valid_sid
+        if sol.valid_api_id
           exists = true
           # Convert from Solution to proper subclass, perhaps.
           sol = solution_factory_reset(sol)
         else
-          sol.sid = nil
+          sol.api_id = nil
         end
         MrMurano::Verbose.whirly_stop
         # Spit out some messages, maybe.
@@ -454,8 +454,8 @@ module MrMurano
             say "Found #{sol.type_name} #{sol.pretty_desc}"
           elsif !@searching
             # The solution ID in the config was not found for this business.
-            tried_sid = MrMurano::Verbose.fancy_ticks(tried_sid)
-            say "The #{sol.type_name} ID #{tried_sid} from the config was not found"
+            tried_api_id = MrMurano::Verbose.fancy_ticks(tried_api_id)
+            say "The #{sol.type_name} ID #{tried_api_id} from the config was not found"
           end
           puts ''
         end
@@ -524,7 +524,7 @@ module MrMurano
 
     def solution_search_by_term(sol)
       solz = solution_get_solutions(
-        sol.biz, sol.type, sid: @match_sid, name: @match_name, fuzzy: @match_fuzzy
+        sol.biz, sol.type, api_id: @match_api_id, name: @match_name, fuzzy: @match_fuzzy
       )
       if solz.length > 1
         sol.error("More than one matching #{sol.type_name} found. Please be more specific")

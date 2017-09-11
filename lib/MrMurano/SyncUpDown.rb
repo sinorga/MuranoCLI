@@ -1,4 +1,4 @@
-# Last Modified: 2017.09.07 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -409,14 +409,14 @@ module MrMurano
     end
 
     def syncup_before
-      syncable_validate_sid
+      syncable_validate_api_id
     end
 
     def syncup_after
     end
 
     def syncdown_before
-      syncable_validate_sid
+      syncable_validate_api_id
     end
 
     def syncdown_after(_local)
@@ -917,9 +917,10 @@ module MrMurano
       # Get the solution name from the config.
       # Convert, e.g., application.id => application.name
       soln_name = $cfg[@solntype.gsub(/(.*)\.id/, '\1.name')]
-      # Skip this syncable if the sid is not set, or if user wants to skip by solution.
+      # Skip this syncable if the api_id is not set, or if user wants to skip
+      # by solution.
       skip_sol = false
-      if !sid? ||
+      if !api_id? ||
          (options[:type] == :application && @solntype != 'application.id') ||
          (options[:type] == :product && @solntype != 'product.id')
         skip_sol = true
@@ -931,13 +932,13 @@ module MrMurano
           # nil on unknown keys, so preface with a key? guard.
           if options.key?(:application) && !options[:application].to_s.empty?
             if soln_name =~ /#{Regexp.escape(options[:application])}/i ||
-               sid =~ /#{Regexp.escape(options[:application])}/i
+               api_id =~ /#{Regexp.escape(options[:application])}/i
               passed = true
             end
             tested = true
           end
           if options.key?(:application_id) && !options[:application_id].to_s.empty?
-            passed = true if options[:application_id] == sid
+            passed = true if options[:application_id] == api_id
             tested = true
           end
           if options.key?(:application_name) && !options[:application_name].to_s.empty?
@@ -947,13 +948,13 @@ module MrMurano
         elsif @solntype == 'product.id'
           if options.key?(:product) && !options[:product].to_s.empty?
             if soln_name =~ /#{Regexp.escape(options[:product])}/i ||
-               sid =~ /#{Regexp.escape(options[:product])}/i
+               api_id =~ /#{Regexp.escape(options[:product])}/i
               passed = true
             end
             tested = true
           end
           if options.key?(:product_id) && !options[:product_id].to_s.empty?
-            passed = true if options[:product_id] == sid
+            passed = true if options[:product_id] == api_id
             tested = true
           end
           if options.key?(:product_name) && !options[:product_name].to_s.empty?
@@ -969,13 +970,13 @@ module MrMurano
       ret
     end
 
-    def syncable_validate_sid
+    def syncable_validate_api_id
       # 2017-07-02: Now that there are multiple solution types, and because
       # SyncRoot.add is called on different classes that go with either or
       # both products and applications, if a user only created one solution,
-      # then some syncables will have their sid set to -1, because there's
+      # then some syncables will have their api_id set to -1, because there's
       # not a corresponding solution in Murano.
-      raise 'Syncable missing sid or not valid_sid??!' unless sid?
+      raise 'Syncable missing api_id or not valid_api_id??!' unless api_id?
     end
 
     def items_lists(options, selected)

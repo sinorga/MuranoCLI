@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.29 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -166,7 +166,7 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
     #ALLOWED_TYPES = [:domain, :onepApi, :dataApi, :application, :product,].freeze
     ALLOWED_TYPES = %i[application product].freeze
 
-    def solutions(type: :all, sid: nil, name: nil, fuzzy: nil, invalidate: false)
+    def solutions(type: :all, api_id: nil, name: nil, fuzzy: nil, invalidate: false)
       debug "Getting all solutions of type #{type}"
       must_business_id!
 
@@ -201,16 +201,17 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
 
       solz = @user_bizes[type].dup
 
-      match_sid = ensure_array(sid)
+      match_api_id = ensure_array(api_id)
       match_name = ensure_array(name)
       match_fuzzy = ensure_array(fuzzy)
-      if match_sid.any? || match_name.any? || match_fuzzy.any?
+      if match_api_id.any? || match_name.any? || match_fuzzy.any?
         solz.select! do |sol|
           (
-            match_sid.include?(sol[:apiId]) ||
+            match_api_id.include?(sol[:apiId]) ||
             match_name.include?(sol[:name]) ||
             match_fuzzy.any? do |term|
-              sol[:name] =~ /#{Regexp.escape(term)}/i || sol[:apiId] =~ /#{Regexp.escape(term)}/i
+              sol[:name] =~ /#{Regexp.escape(term)}/i || \
+                sol[:apiId] =~ /#{Regexp.escape(term)}/i
             end
           )
         end
@@ -224,7 +225,9 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
           MrMurano::Product.new(meta)
         else
           warning("Unexpected solution type: #{meta[:type]}")
-          warning('* Please enable Murano for this business') if meta[:type].to_sym == :dataApi
+          if meta[:type].to_sym == :dataApi
+            warning('* Please enable Murano for this business')
+          end
           MrMurano::Solution.new(meta)
         end
       end
@@ -241,14 +244,14 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
     def solution_from_type!(type)
       type = type.to_s.to_sym
       raise "Unknown type(#{type})" unless type.to_s.empty? || ALLOWED_TYPES.include?(type)
-      sid = MrMurano::Solution::INVALID_SID
+      api_id = MrMurano::Solution::INVALID_API_ID
       if type == :application
-        sol = MrMurano::Application.new(sid)
+        sol = MrMurano::Application.new(api_id)
       elsif type == :product
-        sol = MrMurano::Product.new(sid)
+        sol = MrMurano::Product.new(api_id)
       else
         #raise "Unexpected path: Unrecognized type #{fancy_ticks(type)}"
-        sol = MrMurano::Solution.new(sid)
+        sol = MrMurano::Solution.new(api_id)
       end
       sol.biz = self
       sol
@@ -312,7 +315,7 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
         error("Unexpected: Solution ID not returned: #{resp}")
         exit 1
       end
-      sol.sid = resp[:id]
+      sol.api_id = resp[:id]
       sol.affirm_valid
       # 2017-06-29: The code used to hunt for the solution ID, because
       #   POST business/<bizid>/solution/ used to not return anything,
@@ -333,11 +336,11 @@ or set it interactively using \`#{MrMurano::EXE_NAME} init\`
       #    exit 3
       #  end
       #  sol.meta = ret.first
-      #  if sol.sid.to_s.empty? then
+      #  if sol.api_id.to_s.empty? then
       #    error("New solution created for #{fancy_ticks(sol.name)} missing ID?: #{ret}")
       #    exit 3
       #  end
-      #  sol.sid = sid
+      #  sol.api_id = api_id
       #end
       sol
     end
