@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.31 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -38,10 +38,7 @@ def cmd_table_output_add_options(c)
   # MAYBE/2017-08-15: Rename to --id-only.
   c.option '--idonly', 'Only return the IDs'
   c.option '--[no-]brief', 'Show fewer fields: show only IDs and names'
-  # LATER/2017-08-17: Move -o to a file with --json, etc. (make
-  #   easier to use --json/--yaml/--output any file, without
-  #   having to use obscure `-c tool.outformat=json`).
-  # LATER/2017-08-28: Make -o a tool.outformat option.
+  # MAYBE/2017-08-17: Move -o option to globals.rb and apply to all commands.
   c.option '-o', '--output FILE', 'Download to file instead of STDOUT'
 end
 

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.09.11 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -38,6 +38,22 @@ global_option('-n', '--dry', %(Do not run actions that make changes)) do
   $cfg['tool.dry'] = true
   # Running dry implies verbose.
   $cfg['tool.verbose'] = true
+end
+
+global_option('--csv', %(Output as comma-separated values)) do
+  $cfg['tool.outformat'] = 'csv'
+end
+
+global_option('--json', %(Output as JSON)) do
+  $cfg['tool.outformat'] = 'json'
+end
+
+global_option('--yaml', %(Output as Yaml)) do
+  $cfg['tool.outformat'] = 'yaml'
+end
+
+global_option('--pp', %(Output using Ruby pretty-printer)) do
+  $cfg['tool.outformat'] = 'pp'
 end
 
 exclude_help = %(
