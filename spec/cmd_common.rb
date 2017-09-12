@@ -28,13 +28,13 @@ at_exit do
     STDERR.puts('¡!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
   end
 end
-alias original_at_exit at_exit
+alias original_at_exit at_exit unless defined?(original_at_exit)
 def at_exit(*args, &block)
   #original_at_exit *args, &block
   # pass!
 end
 
-require 'MrMurano/spec_commander.rb'
+require 'MrMurano/Commander-Entry'
 
 module Commander
   class Command
