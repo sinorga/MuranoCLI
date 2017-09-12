@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.31 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -8,6 +8,7 @@
 require 'highline'
 # Set HighLine's $terminal global.
 require 'highline/import'
+require 'os'
 require 'pathname'
 require 'shellwords'
 require 'timeout'
@@ -107,8 +108,10 @@ RSpec.shared_context 'CI_CMD' do
       # This happens on Windows...
       require 'rbconfig'
       # Check the platform, e.g., "linux-gnu", or other.
-      is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-      unless is_windows
+      #is_windows = (
+      #  RbConfig::CONFIG['host_os'] =~ /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+      #)
+      unless OS.windows?
         $stderr.puts(
           'Unexpected: ln_s failed on non-Windows machine / ' \
           "host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}"

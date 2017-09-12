@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.28 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -9,6 +9,7 @@ require 'csv'
 require 'highline'
 require 'inflecto'
 require 'json'
+require 'os'
 require 'paint'
 require 'pp'
 require 'terminal-table'
@@ -173,7 +174,7 @@ module MrMurano
     end
 
     def self.fancy_ticks(obj)
-      if $cfg.nil? || $cfg['tool.ascii']
+      if $cfg.nil? || $cfg['tool.ascii'] || OS.windows?
         "'#{obj}'"
       else
         "‘#{obj}’"

@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.22 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -7,6 +7,7 @@
 
 require 'highline'
 require 'inflecto'
+require 'os'
 require 'singleton'
 require 'whirly'
 
@@ -60,12 +61,20 @@ module MrMurano
     end
 
     def whirly_show
+      if $cfg['tool.ascii'] || OS.windows?
+        spinner = EXO_QUADRANTS_7
+        ansi_escape_mode = 'line'
+      else
+        spinner = EXO_QUADRANTS
+        ansi_escape_mode = 'restore'
+      end
       Whirly.start(
-        spinner: $cfg['tool.ascii'] && EXO_QUADRANTS_7 || EXO_QUADRANTS,
+        spinner: spinner,
         status: @whirly_msg,
         append_newline: false,
         #remove_after_stop: false,
         #stream: $stderr,
+        ansi_escape_mode: ansi_escape_mode,
       )
       @whirly_time = Time.now
       # The whitespace we add ends up getting picked up if you copy
