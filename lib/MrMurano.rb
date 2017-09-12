@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.29 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -49,4 +49,8 @@ require 'MrMurano/SyncUpDown'
 require 'MrMurano/SubCmdGroupContext'
 require 'MrMurano/ReCommander'
 require 'MrMurano/commands'
+
+# LATER/2017-09-12: See MRMUR-160 and MRMUR-161:
+#   Windows build fails unless `rake` is packaged.
+require 'rake'
 

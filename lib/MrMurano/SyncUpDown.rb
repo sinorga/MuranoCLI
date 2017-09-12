@@ -1,4 +1,4 @@
-# Last Modified: 2017.09.11 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -10,6 +10,7 @@
 
 require 'inflecto'
 require 'open3'
+require 'os'
 require 'pathname'
 #require 'shellwords'
 require 'tempfile'
@@ -352,8 +353,10 @@ module MrMurano
         # This happens on Windows...
         require 'rbconfig'
         # Check the platform, e.g., "linux-gnu", or other.
-        is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-        unless is_windows
+        #is_windows = (
+        #  RbConfig::CONFIG['host_os'] =~ /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+        #)
+        unless OS.windows?
           msg = 'Unexpected: touch failed on non-Windows machine'
           $stderr.puts("#{msg} / host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}")
         end

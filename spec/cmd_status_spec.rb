@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: probably not yet
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -8,6 +8,7 @@
 require 'fileutils'
 require 'json'
 require 'open3'
+require 'os'
 require 'pathname'
 require 'rbconfig'
 
@@ -173,8 +174,10 @@ RSpec.describe 'murano status', :cmd, :needs_password do
       # Check the platform, e.g., "linux-gnu", or other.
       # 2017-07-14 08:51: Is there a race condition here? [lb] saw
       # differences earlier, but then not after adding this...
-      #is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-      #if is_windows
+      #is_windows = (
+      #  RbConfig::CONFIG['host_os'] =~ /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+      #)
+      #if OS.windows?
       #  expect(olines[14]).to eq("Items that differ:\n")
       #  expect(olines[15..16]).to contain_exactly(
       #    a_string_matching(/ M \w  .*services\/timer_timer\.lua/),
@@ -238,8 +241,10 @@ RSpec.describe 'murano status', :cmd, :needs_password do
 
       # NOTE: On Windows, touch doesn't work, so items differ.
       # Check the platform, e.g., "linux-gnu", or other.
-      is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-      if is_windows
+      #is_windows = (
+      #  RbConfig::CONFIG['host_os'] =~ /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+      #)
+      if OS.windows?
         expect(olines[14]).to eq("Items that differ:\n")
         expect(olines[15..16]).to include(
           a_string_matching(/ M \w  .*services\/timer_timer\.lua/),
