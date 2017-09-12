@@ -1,9 +1,10 @@
-require 'MrMurano/version'
-require 'MrMurano/Solution-Services'
 require 'tempfile'
+require 'MrMurano/version'
+require 'MrMurano/ProjectFile'
+require 'MrMurano/Solution-Services'
 require '_workspace'
 
-RSpec.describe MrMurano::Library do
+RSpec.describe MrMurano::Module do
   include_context "WORKSPACE"
   before(:example) do
     $cfg = MrMurano::Config.new
@@ -11,15 +12,15 @@ RSpec.describe MrMurano::Library do
     $project = MrMurano::ProjectFile.new
     $project.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['solution.id'] = 'XYZ'
+    $cfg['application.id'] = 'XYZ'
 
-    @srv = MrMurano::Library.new
+    @srv = MrMurano::Module.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/")
+    uri = @srv.endpoint('/')
+    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/")
   end
 
   it "lists" do
@@ -30,12 +31,12 @@ RSpec.describe MrMurano::Library do
              :created_at=>"2016-07-07T19:16:19.479Z",
              :updated_at=>"2016-09-12T13:26:55.868Z"}],
             :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library").
+    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: body.to_json)
 
-    ret = @srv.list()
+    ret = @srv.list
     expect(ret).to eq(body[:items])
   end
 
@@ -53,7 +54,7 @@ RSpec.describe MrMurano::Library do
       end
       }
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
         to_return(body: body.to_json)
@@ -75,7 +76,7 @@ RSpec.describe MrMurano::Library do
       end
       }
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
         to_return(body: body.to_json)
@@ -93,7 +94,7 @@ RSpec.describe MrMurano::Library do
                :created_at=>"2016-07-07T19:16:19.479Z",
                :updated_at=>"2016-09-12T13:26:55.868Z",
       }
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
         to_return(body: body.to_json)
@@ -103,7 +104,7 @@ RSpec.describe MrMurano::Library do
     end
 
     it "Displays error if wrong result type" do
-      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+      stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/9K0").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
         to_return(body: "this isn't what we expected")
@@ -112,13 +113,15 @@ RSpec.describe MrMurano::Library do
       $stderr = StringIO.new
       ret = @srv.fetch('9K0')
       expect(ret).to eq('')
-      expect($stderr.string).to eq(%{\e[31mUnexpected result type, assuming empty instead: this isn't what we expected\e[0m\n})
+      expect($stderr.string).to start_with(
+        %{\e[31m#{MrMurano::SolutionId::UNEXPECTED_TYPE_OR_ERROR_MSG}}
+      )
       $stderr = saved
     end
   end
 
   it "removes" do
-    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/9K0").
+    stub_request(:delete, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/9K0").
       with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                       'Content-Type'=>'application/json'}).
       to_return(body: "")
@@ -129,7 +132,7 @@ RSpec.describe MrMurano::Library do
 
   context "uploads" do
     it "over old version" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -143,7 +146,7 @@ RSpec.describe MrMurano::Library do
         tio.close
 
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -154,11 +157,11 @@ RSpec.describe MrMurano::Library do
     end
 
     it "when nothing is there" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 404)
-      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/").
+      stub_request(:post, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -173,7 +176,7 @@ RSpec.describe MrMurano::Library do
 
         ret = @srv.upload(
           tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -184,7 +187,7 @@ RSpec.describe MrMurano::Library do
     end
 
     it "shows other errors" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(status: 418, body: %{{"teapot":true}})
@@ -199,7 +202,7 @@ RSpec.describe MrMurano::Library do
 
         expect(@srv).to receive(:error).and_return(nil)
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -210,7 +213,7 @@ RSpec.describe MrMurano::Library do
     end
 
     it "over old version; replacing cache miss" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -223,10 +226,10 @@ RSpec.describe MrMurano::Library do
         }
         tio.close
 
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -237,7 +240,7 @@ RSpec.describe MrMurano::Library do
     end
 
     it "over old version; replacing cache hit" do
-      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/library/XYZ_debug").
+      stub_request(:put, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/module/XYZ_debug").
         with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
                         'Content-Type'=>'application/json'}).
                         to_return(body: "")
@@ -250,14 +253,14 @@ RSpec.describe MrMurano::Library do
         }
         tio.close
 
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         cacheFile.open('w') do |cfio|
           cfio << {tio.path=>{:sha1=>"6",
                               :updated_at=>Time.now.getutc.to_datetime.iso8601(3)}
           }.to_yaml
         end
         ret = @srv.upload(tio.path,
-          MrMurano::Library::LibraryItem.new(
+          MrMurano::Module::ModuleItem.new(
             :id=>"9K0",
             :name=>"debug",
             :alias=>"XYZ_debug",
@@ -306,7 +309,7 @@ RSpec.describe MrMurano::Library do
       end
 
       it "cache miss" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         Tempfile.open('foo') do |tio|
           tio << "something"
@@ -324,7 +327,7 @@ RSpec.describe MrMurano::Library do
       end
 
       it "cache hit" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         Tempfile.open('foo') do |tio|
           tio << "something"
           tio.close
@@ -370,7 +373,7 @@ RSpec.describe MrMurano::Library do
       end
 
       it "cache miss" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         FileUtils.touch(cacheFile.to_path)
         Tempfile.open('foo') do |tio|
           tio << "something"
@@ -388,7 +391,7 @@ RSpec.describe MrMurano::Library do
       end
 
       it "cache hit" do
-        cacheFile = $cfg.file_at(@srv.cacheFileName)
+        cacheFile = $cfg.file_at(@srv.cache_file_name)
         Tempfile.open('foo') do |tio|
           tio << "something"
           tio.close
@@ -442,22 +445,29 @@ RSpec.describe MrMurano::Library do
 
     it "raises on alias without name" do
       expect {
-        @srv.mkname( MrMurano::Library::EventHandlerItem.new() )
+        @srv.mkname(MrMurano::Module::EventHandlerItem.new())
       }.to raise_error(NameError)
     end
 
     it "raises on name without name" do
       expect {
-        @srv.mkalias( MrMurano::Library::EventHandlerItem.new() )
+        @srv.mkalias(MrMurano::Module::EventHandlerItem.new())
       }.to raise_error(NameError)
     end
   end
 
-  context "toRemoteItem" do
+  context "to_remote_item" do
     it "reads one" do
-      path = Pathname.new(@projectDir) + 'test.lua'
-      ret = @srv.toRemoteItem(nil, path)
-      expect(ret).to eq({:name=>'test'})
+      root = Pathname.new(@project_dir)
+      path = Pathname.new(@project_dir) + 'test.lua'
+      ret = @srv.to_remote_item(root, path)
+      expect(ret).to eq(name: 'test')
+    end
+    it "reads sub folder one" do
+      root = Pathname.new(@project_dir)
+      path = Pathname.new(@project_dir) + 'src/test.lua'
+      ret = @srv.to_remote_item(root, path)
+      expect(ret).to eq(name: 'src.test')
     end
   end
 end

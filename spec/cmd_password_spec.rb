@@ -40,7 +40,7 @@ RSpec.describe 'murano password', :cmd do
       io << "  bob@bob.bob: badpassword\n"
       io << "  rich@er.u: notbetter\n"
     end
-    out, err, status = Open3.capture3(capcmd('murano', 'password', 'delete', 'rich@er.u', 'an.API.host.i'))
+    out, err, status = Open3.capture3(capcmd('murano', 'password', 'delete', 'rich@er.u', 'an.API.host.i', '-y'))
     expect(err).to eq('')
     expect(out).to eq('')
     expect(status.exitstatus).to eq(0)

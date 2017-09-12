@@ -1,9 +1,10 @@
+#require 'erb'
+require 'highline/import'
+#require 'tempfile'
 require 'MrMurano/version'
 require 'MrMurano/Config-Migrate'
-require 'highline/import'
+require 'MrMurano/ProjectFile'
 require '_workspace'
-#require 'tempfile'
-#require 'erb'
 
 RSpec.describe MrMurano::ConfigMigrate do
   include_context "WORKSPACE"
@@ -17,7 +18,10 @@ RSpec.describe MrMurano::ConfigMigrate do
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
 
-    @lry = Pathname.new(@projectDir) + '.Solutionfile.secret'
+    $project = MrMurano::ProjectFile.new
+    $project.load
+
+    @lry = Pathname.new(@project_dir) + '.Solutionfile.secret'
     FileUtils.copy(File.join(@testdir, 'spec/fixtures/SolutionFiles/secret.json'), @lry.to_path)
 
     @mrt = MrMurano::ConfigMigrate.new
@@ -35,7 +39,7 @@ RSpec.describe MrMurano::ConfigMigrate do
   it "imports all" do
     @mrt.import_secret
 
-    expect($cfg['solution.id']).to eq('ABCDEFG')
+    expect($cfg['application.id']).to eq('ABCDEFG')
     expect($cfg['product.id']).to eq('HIJKLMNOP')
     expect($cfg['user.name']).to eq('test@user.account')
     pff = $cfg.file_at('passwords', :user)
@@ -47,7 +51,7 @@ RSpec.describe MrMurano::ConfigMigrate do
   end
 
   it "imports over" do
-    $cfg['solution.id'] = '12'
+    $cfg['application.id'] = '12'
     $cfg['product.id'] = 'awdfvs'
     $cfg['user.name'] = '3qrarvsa'
     $cfg = MrMurano::Config.new
@@ -56,7 +60,7 @@ RSpec.describe MrMurano::ConfigMigrate do
 
     @mrt.import_secret
 
-    expect($cfg['solution.id']).to eq('ABCDEFG')
+    expect($cfg['application.id']).to eq('ABCDEFG')
     expect($cfg['product.id']).to eq('HIJKLMNOP')
     expect($cfg['user.name']).to eq('test@user.account')
     pff = $cfg.file_at('passwords', :user)
@@ -77,7 +81,7 @@ RSpec.describe MrMurano::ConfigMigrate do
 
     @mrt.import_secret
 
-    expect($cfg['solution.id']).to eq('ABCDEFG')
+    expect($cfg['application.id']).to eq('ABCDEFG')
     expect($cfg['product.id']).to eq('HIJKLMNOP')
     expect($cfg['user.name']).to eq('test@user.account')
     pff = $cfg.file_at('passwords', :user)

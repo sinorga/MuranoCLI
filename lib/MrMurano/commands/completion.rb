@@ -1,31 +1,50 @@
-require 'pp'
+# Last Modified: 2017.08.16 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'erb'
+require 'pp'
+require 'MrMurano/ReCommander'
+
+# USAGE: See: lib/MrMurano/commands.rb
 
 class CompletionContext < ::Commander::HelpFormatter::Context
 end
 
+# rubocop:disable Style/ClassAndModuleChildren
+#   "Use nested module/class definitions instead of compact style."
+#   except that nested style (class [::]Commander\nclass Runner)
+#   does not work.
 class ::Commander::Runner
-
   # Not so sure this should go in Runner, but where else?
+
+  # rubocop:disable Style/MethodName "Use snake_case for method names."
+
+  # The shells for which we have completion templates.
+  SHELL_TYPES = %i[bash zsh].freeze
 
   ##
   # Change the '--[no-]foo' switch into '--no-foo' and '--foo'
   def flatswitches(option)
     # if there is a --[no-]foo format, break that into two switches.
-    option[:switches].map{ |switch|
-      switch = switch.sub(/\s.*$/,'') # drop argument spec if exists.
-      if switch =~ /\[no-\]/ then
-        [switch.sub(/\[no-\]/, ''), switch.gsub(/[\[\]]/,'')]
+    switches = option[:switches].map do |switch|
+      switch = switch.sub(/\s.*$/, '') # drop argument spec if exists.
+      if switch =~ /\[no-\]/
+        [switch.sub(/\[no-\]/, ''), switch.gsub(/[\[\]]/, '')]
       else
         switch
       end
-    }.flatten
+    end
+    switches.flatten
   end
 
   ##
-  # If the switches take an argument, retun =
+  # If the switches take an argument, return =
   def takesArg(option, yes='=', no='')
-    if option[:switches].select { |switch| switch =~ /\s\S+$/ }.empty? then
+    if option[:switches].select { |switch| switch =~ /\s\S+$/ }.empty?
       no
     else
       yes
@@ -35,18 +54,18 @@ class ::Commander::Runner
   ##
   # truncate the description of an option
   def optionDesc(option)
-    option[:description].sub(/\n.*$/,'')
+    option[:description].sub(/\n.*$/, '')
   end
 
   ##
   # Get a tree of all commands and sub commands
   def cmdTree
-    tree={}
-    @commands.sort.each do |name,cmd|
+    tree = {}
+    @commands.sort.each do |name, cmd|
       levels = name.split
       pos = tree
       levels.each do |step|
-        pos[step] = {} unless pos.has_key? step
+        pos[step] = {} unless pos.key? step
         pos = pos[step]
       end
       pos["\0cmd"] = cmd
@@ -57,8 +76,8 @@ class ::Commander::Runner
   ##
   # Get maximum depth of sub-commands.
   def cmdMaxDepth
-    depth=0
-    @commands.sort.each do |name,cmd|
+    depth = 0
+    @commands.sort.each do |name, _cmd|
       levels = name.split
       depth = levels.count if levels.count > depth
     end
@@ -68,17 +87,17 @@ class ::Commander::Runner
   ##
   # Alternate tree of sub-commands.
   def cmdTreeB
-    tree={}
-    @commands.sort.each do |name,cmd|
+    tree = {}
+    @commands.sort.each do |name, cmd|
       levels = name.split
-      tree[levels.join(' ')] = {:cmd=>cmd}
+      tree[levels.join(' ')] = { cmd: cmd }
 
       # load parent.
       left = levels[0..-2]
       right = levels[-1]
       key = left.join(' ')
-      tree[key] = {} unless tree.has_key? key
-      if tree[key].has_key?(:subs) then
+      tree[key] = {} unless tree.key? key
+      if tree[key].key?(:subs)
         tree[key][:subs] << right
       else
         tree[key][:subs] = [right]
@@ -86,31 +105,44 @@ class ::Commander::Runner
     end
     tree
   end
-
 end
 
 command :completion do |c|
-  c.syntax = %{murano completion}
-  c.summary = %{Generate a completion file}
-  c.description = %{For starts, this is zsh only. Because that is what I use.
+  c.syntax = %(murano completion)
+  c.summary = %(Generate a completion file)
+  c.description = %(
+Create a Tab completion file for either the Bash or Z shell.
 
-eval "$(murano completion)"
+E.g.,
+
+  eval "$(murano completion)"
+
 or
-murano completion > _murano
-source _murano
-}
+
+  murano completion > _murano
+  source _murano
+  ).strip
+  c.project_not_required = true
+
   c.option '--subs', 'List sub commands'
   #c.option '--opts CMD', 'List options for subcommand'
   #c.option '--gopts', 'List global options'
+  c.option(
+    '--shell TYPE',
+    Commander::Runner::SHELL_TYPES,
+    %(Shell flavor of output (default: Bash))
+  )
 
   # Changing direction.
   # Will poop out the file to be included as the completion script.
 
   c.action do |args, options|
+    c.verify_arg_count!(args)
+    options.default shell: :bash
 
     runner = ::Commander::Runner.instance
 
-    if options.gopts then
+    if options.gopts
       opts = runner.instance_variable_get(:@options)
       pp opts.first
       pp runner.takesArg(opts.first)
@@ -118,14 +150,14 @@ source _murano
 #        puts runner.optionLine o, 'GlobalOption'
 #      end
 
-    elsif options.subs then
-      runner.instance_variable_get(:@commands).sort.each do |name,cmd|
-        #desc = cmd.instance_variable_get(:@summary) #.lines[0]
+    elsif options.subs
+      runner.instance_variable_get(:@commands).sort.each do |name, _cmd|
+        #desc = _cmd.instance_variable_get(:@summary) #.lines[0]
         #say "#{name}:'#{desc}'"
-        say "#{name}"
+        say name.to_s
       end
 
-    elsif options.opts then
+    elsif options.opts
       cmds = runner.instance_variable_get(:@commands)
       cmd = cmds[options.opts]
       pp cmd.syntax
@@ -138,15 +170,20 @@ source _murano
       end
 
     else
-
-      tmpl=ERB.new(File.read(File.join(File.dirname(__FILE__), "zshcomplete.erb")), nil, '-<>')
+      case options.shell
+      when :bash
+        cmpltn_tmplt = 'completion-bash.erb'
+      when :zsh
+        cmpltn_tmplt = 'completion-zsh.erb'
+      else
+        MrMurano::Verbose.error "Impossible shell option specified: #{options.shell}"
+        exit 2
+      end
+      tmpl = ERB.new(File.read(File.join(File.dirname(__FILE__), cmpltn_tmplt)), nil, '-<>')
 
       pc = CompletionContext.new(runner)
       puts tmpl.result(pc.get_binding)
     end
-
-
   end
 end
 
-#  vim: set ai et sw=2 ts=2 :

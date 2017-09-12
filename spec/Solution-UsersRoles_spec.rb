@@ -1,23 +1,25 @@
+require 'tempfile'
+require 'MrMurano/hash'
 require 'MrMurano/version'
 require 'MrMurano/Solution-Users'
-require 'MrMurano/hash'
-require 'tempfile'
+require 'MrMurano/SyncRoot'
 require '_workspace'
 
 RSpec.describe MrMurano::Role do
   include_context "WORKSPACE"
   before(:example) do
+    MrMurano::SyncRoot.instance.reset
     $cfg = MrMurano::Config.new
     $cfg.load
     $cfg['net.host'] = 'bizapi.hosted.exosite.io'
-    $cfg['solution.id'] = 'XYZ'
+    $cfg['application.id'] = 'XYZ'
 
     @srv = MrMurano::Role.new
     allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
   end
 
   it "initializes" do
-    uri = @srv.endPoint('/')
+    uri = @srv.endpoint('/')
     expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/role/")
   end
 
@@ -110,7 +112,7 @@ RSpec.describe MrMurano::Role do
 
   context "downloads" do
     before(:example) do
-      @lry = Pathname.new(@projectDir) + 'roles.yaml'
+      @lry = Pathname.new(@project_dir) + 'roles.yaml'
       @grl = {:role_id=>"guest", :parameter=>[{:name=>"could"}]}
     end
 
@@ -133,7 +135,7 @@ RSpec.describe MrMurano::Role do
 
   context "removing local roles" do
     before(:example) do
-      @lry = Pathname.new(@projectDir) + 'roles.yaml'
+      @lry = Pathname.new(@project_dir) + 'roles.yaml'
       @grl = {:role_id=>"guest", :parameter=>[{:name=>"could"}]}
     end
 
@@ -166,14 +168,14 @@ RSpec.describe MrMurano::Role do
   end
 
   it "tolocalpath is into" do
-    lry = Pathname.new(@projectDir) + 'roles.yaml'
+    lry = Pathname.new(@project_dir) + 'roles.yaml'
     ret = @srv.tolocalpath(lry, {:role_id=>"guest", :parameter=>[{:name=>"could"}]})
     expect(ret).to eq(lry)
   end
 
   context "list local items" do
     before(:example) do
-      @lry = Pathname.new(@projectDir) + 'roles.yaml'
+      @lry = Pathname.new(@project_dir) + 'roles.yaml'
     end
 
     it "when missing" do

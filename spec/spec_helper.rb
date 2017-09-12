@@ -17,24 +17,24 @@
 #
 require 'simplecov'
 SimpleCov.start do
-  add_group "Specs", "spec/.*"
-  add_group "Solution", "lib/MrMurano/Solution.*"
-  add_group "Product", "lib/MrMurano/Product.*"
+  if ENV['CI_MR_EXE'].nil?
+    coverage_dir "coverage/cov-#{RUBY_VERSION.tr('.', '_')}"
+  else
+    coverage_dir "coverage/cov-#{RUBY_VERSION.tr('.', '_')}-exe"
+  end
+  add_group 'Specs', 'spec/.*'
+  add_group 'Solution', 'lib/MrMurano/Solution.*'
+  add_group 'Product', 'lib/MrMurano/Product.*'
 
-  track_files "lib/MrMurano/*.rb"
+  track_files 'lib/MrMurano/*.rb'
 end
 
 require 'webmock/rspec'
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
-
-  if ENV['MURANO_PASSWORD'].nil? then
-    config.filter_run_excluding :needs_password
-  end
-  if Gem.win_platform? then
-    config.filter_run_excluding :broken_on_windows
-  end
+  config.filter_run_excluding :needs_password if ENV['MURANO_PASSWORD'].nil?
+  config.filter_run_excluding :broken_on_windows if Gem.win_platform?
 
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
@@ -79,7 +79,7 @@ RSpec.configure do |config|
   # Allows RSpec to persist some state between runs in order to support
   # the `--only-failures` and `--next-failure` CLI options. We recommend
   # you configure your source control system to ignore this file.
-  config.example_status_persistence_file_path = ".rspec_examples.txt"
+  config.example_status_persistence_file_path = '.rspec_examples.txt'
 
   # Limits the available syntax to the non-monkey patched syntax that is
   # recommended. For more details, see:
@@ -118,5 +118,5 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
-
 end
+

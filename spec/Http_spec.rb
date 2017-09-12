@@ -7,10 +7,12 @@ require '_workspace'
 class Tst
   include MrMurano::Verbose
   include MrMurano::Http
+
   def initialize
     @token = nil
   end
 end
+
 RSpec.describe MrMurano::Http do
   include_context "WORKSPACE"
 
@@ -23,7 +25,8 @@ RSpec.describe MrMurano::Http do
   context "gets a token" do
     before(:example) do
       @acc = instance_double("MrMurano::Account")
-      allow(MrMurano::Account).to receive(:new).and_return(@acc)
+      #allow(MrMurano::Account).to receive(:new).and_return(@acc)
+      allow(MrMurano::Account).to receive(:instance).and_return(@acc)
     end
 
     it "already has one" do
@@ -33,17 +36,21 @@ RSpec.describe MrMurano::Http do
     end
 
     it "gets one" do
+      #expect(@acc).to receive(:adc_compat_check)
       expect(@acc).to receive(:token).and_return("ABCDEFG")
       ret = @tst.token
       expect(ret).to eq("ABCDEFG")
     end
 
-    it "raises when no logged in" do
+    it "raises when not logged in" do
       expect(@acc).to receive(:token).and_return(nil)
+      # 2017-07-13: The token command used to raise an error, but [lb]
+      # doesn't like seeing the "use --trace" message that Ruby spits
+      # out. So write to stderr and exit instead. Here, use check that
+      # the function exits by expecting it to raise SystemExit.
       expect {
         @tst.token
-      }.to raise_error "Not logged in!"
-
+      }.to raise_error(SystemExit).and output("\e[31mNot logged in!\e[0m\n").to_stderr
     end
   end
 
@@ -62,25 +69,28 @@ RSpec.describe MrMurano::Http do
 
     it "puts something" do
       $cfg['tool.curldebug'] = true
+      $cfg.curlfile_f = nil
       $stdout = StringIO.new
       @tst.curldebug(@req)
-      expect($stdout.string).to eq(%{curl -s  -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test'\n})
+      expect($stdout.string).to eq(%{curl -s -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test'\n})
     end
 
     it "puts something with Auth" do
       $cfg['tool.curldebug'] = true
+      $cfg.curlfile_f = nil
       $stdout = StringIO.new
       @req['Authorization'] = 'LetMeIn'
       @tst.curldebug(@req)
-      expect($stdout.string).to eq(%{curl -s  -H 'Authorization: LetMeIn' -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test'\n})
+      expect($stdout.string).to eq(%{curl -s -H 'Authorization: LetMeIn' -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test'\n})
     end
 
     it "puts something with Body" do
       $cfg['tool.curldebug'] = true
+      $cfg.curlfile_f = nil
       $stdout = StringIO.new
       @req.body = "builder"
       @tst.curldebug(@req)
-      expect($stdout.string).to eq(%{curl -s  -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test' -d 'builder'\n})
+      expect($stdout.string).to eq(%{curl -s -H 'User-Agent: test' -H 'Content-Type: application/json' -X GET 'https://test.host/this/is/a/test' -d 'builder'\n})
     end
   end
 
@@ -191,7 +201,7 @@ RSpec.describe MrMurano::Http do
       idhttp = instance_double('Net::HTTP')
       expect(idhttp).to receive(:request).once.and_return(@rsp)
       expect(@tst).to receive(:http).once.and_return(idhttp)
-      expect(@rsp).to receive(:body).exactly(3).times.and_return(%{{"statusCode": 123, "message": "gone"}})
+      expect(@rsp).to receive(:body).and_return(%{{"statusCode": 123, "message": "gone"}})
 
       @tst.workit(@req)
       expect($stdout.string).to eq('')

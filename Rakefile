@@ -1,200 +1,249 @@
-require "bundler/gem_tasks"
+# Last Modified: 2017.08.29 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
+require 'bundler/gem_tasks'
 require 'shellwords'
 
-task :default => [:test]
+task default: %i[test]
 
-tagName = "v#{Bundler::GemHelper.gemspec.version}"
-gemName = "MuranoCLI-#{Bundler::GemHelper.gemspec.version}.gem"
-builtGem = "pkg/#{gemName}"
+tag_name = "v#{Bundler::GemHelper.gemspec.version}"
+gem_name = "MuranoCLI-#{Bundler::GemHelper.gemspec.version}.gem"
+built_gem = "pkg/#{gem_name}"
 
-desc "Install gem in user dir"
+# NOTE: If you're looking for the :build task, look in the bundler code, e.g.,
+#   /usr/lib/ruby/vendor_ruby/bundler/gem_helper.rb::build_gem
+
+desc 'Install gem in user dir'
 task :bob do
-    sh %{gem install --user-install #{builtGem}}
+  sh %(gem install --user-install #{built_gem})
 end
 
-desc "Uninstall from user dir"
+desc 'Uninstall from user dir'
 task :unbob do
-    sh %{gem uninstall --user-install #{builtGem}}
+  sh %(gem uninstall --user-install #{built_gem})
+end
+
+desc 'Build and install into user gems directory (useful for rvm and chruby)'
+task :'install:user' do
+  sh %(rake build)
+  # Bundler::GemHelper.gemspec.base_dir is the base of the project,
+  # and not the base of the gem directory.
+  sh %(gem install -i #{Gem.dir} #{built_gem})
+end
+
+desc 'Uninstall gem from user gems directory'
+task :'uninstall:user' do
+  # HINT: Replace #{built_gem} with any version to uninstall a specific version.
+  # MAYBE/2017-08-04: A task to uninstall all installed versions?
+  sh %(gem uninstall --version #{built_gem})
 end
 
 task :echo do
-    puts tagName
-    puts gemName
-    puts builtGem
+  puts tag_name
+  puts gem_name
+  puts built_gem
 end
 
-desc "display remind of how to release"
+desc 'Tail the CI build file and the curl file'
+task :tail do
+  sh %(tail -F .rake_build.out curldebug.out)
+end
+
+desc 'display remind of how to release'
 task :release_reminder do
-    puts <<EOR
-git flow release start <newversion>
-gvim lib/MrMurano/version.rb
-git commit -a -m 'version bump'
-git flow release finish <newversion>
-# When editing message for tag, add release notes.
-#rake git:all
-# Wait for all tests to complete.
-# if all passed: rake gemit
-EOR
+  reminder = %(
+    git flow release start <newversion>
+    gvim lib/MrMurano/version.rb
+    git commit -a -m 'version bump'
+    git flow release finish <newversion>
+    # When editing message for tag, add release notes.
+    #rake git:all
+    # Wait for all tests to complete.
+    # if all passed: rake gemit
+  ).lines.map(&:strip).join("\n")
+  puts reminder
 end
 
-desc "Prints a cmd to test this in another directory"
+desc 'Prints a cmd to test this in another directory'
 task :testwith do
-    pwd=Dir.pwd.sub(Dir.home, '~')
-    puts "ruby -I#{pwd}/lib #{pwd}/bin/murano "
+  pwd = Dir.pwd.sub(Dir.home, '~')
+  puts "ruby -I#{pwd}/lib #{pwd}/bin/murano "
 end
 
 desc 'Run RSpec'
 task :rspec do
-    Dir.mkdir("report") unless File.directory?("report")
-    rv=RUBY_VERSION.gsub(/\./,'_')
-    sh %{rspec --format html --out report/index-#{rv}.html --format documentation}
+  Dir.mkdir('report') unless File.directory?('report')
+  rv = RUBY_VERSION.tr('.', '_')
+  sh %(rspec --format html --out report/index-#{rv}.html --format documentation)
 end
-task :test => [:test_clean_up, :rspec]
+task test: %i[test_clean_up rspec]
 
-desc "Clean out junk from prior hot tests"
+desc 'Run Rubocop linter'
+task :rubocop do
+  sh %(rubocop -D -c .rubocop.yml)
+end
+
+desc 'Clean out junk from prior hot tests'
 task :test_clean_up do
-    if not ENV['MURANO_CONFIGFILE'].nil? then
-
-        ids = `ruby -Ilib bin/murano product list --idonly`.chomp
-        puts "Found prodcuts #{ids}; deleteing"
-        ids.split.each do |id|
-            sh %{ruby -Ilib bin/murano product delete #{id}}
-        end
-
-        ids = `ruby -Ilib bin/murano solution list --idonly`.chomp
-        puts "Found solutions #{ids}; deleteing"
-        ids.split.each do |id|
-            sh %{ruby -Ilib bin/murano solution delete #{id}}
-        end
-    end
+  unless ENV['MURANO_CONFIGFILE'].nil?
+    #ids = `ruby -Ilib bin/murano solution list --idonly`.chomp
+    #unless ids.empty?
+    #  puts "Found solutions #{ids}; deleting"
+    #  ids.split.each do |id|
+    #    sh %(ruby -Ilib bin/murano solution delete #{id})
+    #  end
+    #end
+    # rubocop:disable Style/BlockDelimiters
+    #   "Prefer {...} over do...end for single-line blocks."
+    # Substituting braces for the do/end causes another problem:
+    #   "syntax error, unexpected '{', expecting keyword_end"
+    sh %(ruby -Ilib bin/murano solutions expunge -y) do |_ok, _res| end
+  end
 end
 
 ###
 # When new tags are pushed to upstream, the CI will kick-in and build the release
 #namespace :git do
-#    desc "Push only develop, master, and tags to origin"
+#    desc 'Push only develop, master, and tags to origin'
 #    task :origin do
-#        sh %{git push origin develop}
-#        sh %{git push origin master}
-#        sh %{git push origin --tags}
+#        sh %(git push origin develop)
+#        sh %(git push origin master)
+#        sh %(git push origin --tags)
 #    end
 #
-#    desc "Push only develop, master, and tags to upstream"
+#    desc 'Push only develop, master, and tags to upstream'
 #    task :upstream do
-#        sh %{git push upstream develop}
-#        sh %{git push upstream master}
-#        sh %{git push upstream --tags}
+#        sh %(git push upstream develop)
+#        sh %(git push upstream master)
+#        sh %(git push upstream --tags)
 #    end
 #
-#    desc "Push to origin and upstream"
-#    task :all => [:origin, :upstream]
+#    desc 'Push to origin and upstream'
+#    task all: %i[origin upstream]
 #end
 
-desc "Build, install locally, and push gem"
+desc 'Build, install locally, and push gem'
 task :gemit do
-    mrt=Bundler::GemHelper.gemspec.version
-    sh %{git checkout v#{mrt}}
-    Rake::Task[:build].invoke
-    Rake::Task[:bob].invoke
-    Rake::Task['push:gem'].invoke
-    sh %{git checkout develop}
+  mrt = Bundler::GemHelper.gemspec.version
+  sh %(git checkout v#{mrt})
+  Rake::Task[:build].invoke
+  Rake::Task[:bob].invoke
+  Rake::Task['push:gem'].invoke
+  sh %(git checkout develop)
 end
 
 ###########################################
 # Tasks below are largly used by CI systems
 namespace :push do
-    desc 'Push gem up to RubyGems'
-    task :gem do
-        sh %{gem push #{builtGem}}
+  desc 'Push gem up to RubyGems'
+  task :gem do
+    sh %(gem push #{built_gem})
+  end
+
+  namespace :github do
+    desc 'Verify that the computed tag exists'
+    task :verifyTag do
+      r = `git tag -l #{tag_name}`
+      raise "Tag doesn't exist (#{tag_name})" if r.empty?
     end
 
+    desc 'Make a release in Github'
+    task :makeRelease do
+      # ENV['GITHUB_TOKEN'] set by CI.
+      # ENV['GITHUB_USER'] set by CI.
+      # ENV['GITHUB_REPO'] set by CI
+      # Create Release
+      sh %(github-release info --tag #{tag_name}) do |ok, _res|
+        unless ok
+          # if version contains more than #.#.#, mark it as pre-release
+          if /v\d+\.\d+\.\d+(.*)/.match(tag_name)[1].nil?
+            sh %(github-release release --tag #{tag_name})
+          else
+            sh %(github-release release --tag #{tag_name} -p)
+          end
+        end
+      end
+    end
+
+    desc 'Push gem up to Github Releases'
+    task gem: %i[makeRelease build] do
+      # ENV['GITHUB_TOKEN'] set by CI.
+      # ENV['GITHUB_USER'] set by CI.
+      # ENV['GITHUB_REPO'] set by CI
+      # upload gem
+      sh %(github-release upload --tag #{tag_name} --name #{gem_name} --file #{built_gem})
+    end
+
+    desc 'Copy tag commit message into Release Notes'
+    task :copyReleaseNotes do
+      tag_msg = `git tag -l -n999 #{tag_name}`.lines
+      tag_msg.shift
+      msg = tag_msg.join.shellescape
+      sh %(github-release edit --tag #{tag_name} --description #{msg})
+    end
+  end
+end
+
+file 'ReadMe.txt' => ['README.markdown'] do |t|
+  File.open(t.prerequisites.first) do |rio|
+    File.open(t.name, 'w') do |wio|
+      wio << rio.read.gsub(/\n/, "\r\n")
+    end
+  end
+end
+
+if Gem.win_platform?
+  desc 'Build as a single windows exe'
+  file 'murano.exe' => Dir['lib/**/*.{rb,erb,yaml}'] do
+    # Need to find all dlls, because ocra isn't finding them for some reason.
+    # NOTE: $: same as $LOAD_PATH
+    shadlls = Dir[*$LOAD_PATH.map { |i| File.join(i, 'digest/sha2.{so,dll}') }]
+    gemdir = `gem env gemdir`.chomp
+    gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
+    data_files = Dir['lib/**/*.{erb,yaml}']
+    others = gemdlls + data_files + shadlls
+    ENV['RUBYLIB'] = 'lib'
+    sh %(ocra bin/murano #{others.join(' ')})
+  end
+  task wexe: ['murano.exe']
+
+  desc 'Run rspec on cmd tests using murano.exe'
+  task murano_exe_test: ['murano.exe'] do
+    Dir.mkdir('report') unless File.directory?('report')
+    rv = RUBY_VERSION.tr('.', '_')
+    ENV['CI_MR_EXE'] = '1'
+    sh %(rspec --format html --out report/murano_exe-#{rv}.html --format documentation --tag cmd)
+  end
+  task test: %i[murano_exe_test]
+
+  installer_name = "Output/MuranoCLI-#{Bundler::GemHelper.gemspec.version}-Setup.exe"
+
+  desc 'Build a Windows installer for MuranoCLI'
+  task inno: [installer_name]
+
+  file 'Output/MuranoCLISetup.exe' => ['murano.exe', 'ReadMe.txt'] do
+    ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version.to_s
+    sh %("C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MuranoCLI.iss)
+  end
+  file installer_name => ['Output/MuranoCLISetup.exe'] do |t|
+    FileUtils.move t.prerequisites.first, t.name, verbose: true
+  end
+
+  namespace :push do
     namespace :github do
-        desc "Make a release in Github"
-        task :makeRelease do
-            # ENV['GITHUB_TOKEN'] set by CI.
-            # ENV['GITHUB_USER'] set by CI.
-            # ENV['GITHUB_REPO'] set by CI
-            # Create Release
-            sh %{github-release info --tag #{tagName}} do |ok, res|
-                if not ok then
-                    sh %{github-release release --tag #{tagName}}
-                end
-            end
-        end
-
-        desc 'Push gem up to Github Releases'
-        task :gem => [:makeRelease, :build] do
-            # ENV['GITHUB_TOKEN'] set by CI.
-            # ENV['GITHUB_USER'] set by CI.
-            # ENV['GITHUB_REPO'] set by CI
-            # upload gem
-            sh %{github-release upload --tag #{tagName} --name #{gemName} --file #{builtGem}}
-        end
-
-        desc "Copy tag commit message into Release Notes"
-        task :copyReleaseNotes do
-            tagMsg = `git tag -l -n999 #{tagName}`.lines
-            tagMsg.shift
-            msg = tagMsg.join().shellescape
-            sh %{github-release edit --tag #{tagName} --description #{msg}}
-        end
+      desc 'Push Windows installer to Github Releases'
+      task inno: [:makeRelease, installer_name] do
+        # ENV['GITHUB_TOKEN'] set by CI.
+        # ENV['GITHUB_USER'] set by CI.
+        # ENV['GITHUB_REPO'] set by CI
+        iname = File.basename(installer_name)
+        sh %(github-release upload --tag #{tag_name} --name #{iname} --file #{installer_name})
+      end
     end
+  end
 end
-
-file "ReadMe.txt" => ['README.markdown'] do |t|
-    File.open(t.prerequisites.first) do |rio|
-        File.open(t.name, 'w') do |wio|
-            wio << rio.read.gsub(/\n/,"\r\n")
-        end
-    end
-end
-
-if Gem.win_platform? then
-    file 'murano.exe' => Dir['lib/**/*.{rb,erb,yaml}'] do
-        # Need to find all dlls, because ocra isn't finding them for some reason.
-        gemdir = `gem env gemdir`.chomp
-        gemdlls = Dir[File.join(gemdir, 'extensions', '*')]
-        dataFiles = Dir['lib/**/*.{erb,yaml}']
-        others = gemdlls + dataFiles
-        ENV['RUBYLIB'] = 'lib'
-        sh %{ocra bin/murano #{others.join(' ')}}
-    end
-    task :wexe => ['murano.exe']
-
-    desc 'Run rspec on cmd tests using murano.exe'
-    task :murano_exe_test => ['murano.exe'] do
-        Dir.mkdir("report") unless File.directory?("report")
-        ENV['CI_MR_EXE'] = '1'
-        sh %{rspec --format html --out report/murano_exe.html --format documentation --tag cmd}
-    end
-    task :test => [:murano_exe_test]
-
-    installerName = "Output/MuranoCLI-#{Bundler::GemHelper.gemspec.version.to_s}-Setup.exe"
-
-    desc "Build a Windows installer for MuranoCLI"
-    task :inno => [installerName]
-
-    file "Output/MuranoCLISetup.exe" => ['murano.exe', 'ReadMe.txt'] do
-        ENV['MRVERSION'] = Bundler::GemHelper.gemspec.version.to_s
-        sh %{"C:\\Program Files (x86)\\Inno Setup 5\\iscc.exe" MuranoCLI.iss}
-    end
-    file installerName => ['Output/MuranoCLISetup.exe'] do |t|
-        FileUtils.move t.prerequisites.first, t.name, :verbose=>true
-    end
-
-    namespace :push do
-        namespace :github do
-            desc "Push Windows installer to Github Releases"
-            task :inno => [:makeRelease, installerName] do
-                # ENV['GITHUB_TOKEN'] set by CI.
-                # ENV['GITHUB_USER'] set by CI.
-                # ENV['GITHUB_REPO'] set by CI
-                iname = File.basename(installerName)
-                sh %{github-release upload --tag #{tagName} --name #{iname} --file #{installerName}}
-            end
-        end
-    end
-end
-
-#  vim: set sw=4 ts=4 :
 

@@ -1,0 +1,307 @@
+# Last Modified: 2017.08.31 /coding: utf-8
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
+# USAGE:
+#
+#   cd /exo/clients/exosite/MuranoCLI
+#   rubocop -D -c .rubocop.yml
+
+# "Incorrect indentation detected (column X instead of Y)."
+Layout/CommentIndentation:
+  Enabled: false
+
+# "Missing space after #."
+Layout/LeadingCommentSpace:
+  Enabled: false
+
+# "Surrounding space missing in default value assignment."
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: no_space
+
+# "1 trailing blank lines detected."
+Layout/TrailingBlankLines:
+  Enabled: false
+
+# "Script file murano doesn't have execute permission."
+Lint/ScriptPermission:
+  Exclude:
+    - 'bin/murano'
+    # Also the rspec shim-link:
+    - 'lib/MrMurano/spec_commander.rb'
+
+# "Assignment Branch Condition size for XXX is too high."
+# http://wiki.c2.com/?AbcMetric
+Metrics/AbcSize:
+  Enabled: false
+
+# Configuration parameters: CountComments, ExcludedMethods.
+Metrics/BlockLength:
+  Enabled: false
+  #Max: 500
+
+# "Avoid more than 3 levels of block nesting."
+Metrics/BlockNesting:
+  Enabled: false
+
+# "Class has too many lines."
+Metrics/ClassLength:
+  Enabled: false
+
+# "Cyclomatic complexity for XXX is too high."
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+# "Module has too many lines."
+Metrics/ModuleLength:
+  Enabled: false
+
+# "Avoid parameter lists longer than 5 parameters."
+Metrics/ParameterLists:
+  Enabled: false
+
+# Perceived complexity for XXXX is too high."
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+# Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
+# URISchemes: http, https
+Metrics/LineLength:
+  Enabled: false
+
+# "Security/YAMLLoad: Prefer using YAML.safe_load over YAML.load."
+# Rubocop suggests using safe_load.
+#   https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-load
+#   https://ruby-doc.org/stdlib-2.1.0/libdoc/psych/rdoc/Psych.html#method-c-safe_load
+# I think Psych.safe_load was added in Ruby 2.1, so we shouldn't use it. [lb]
+Security/YAMLLoad:
+  Enabled: false
+
+# "Use only ascii symbols in comments."
+Style/AsciiComments:
+  Enabled: false
+
+# "Missing top-level class documentation comment."
+Style/Documentation:
+  Enabled: false
+
+# "Use the return of the conditional for variable assignment and comparison."
+#  http://www.rubydoc.info/github/bbatsov/RuboCop/RuboCop/Cop/Style/ConditionalAssignment
+Style/ConditionalAssignment:
+  EnforcedStyle: assign_inside_condition
+
+# "Use each_with_object instead of inject."
+Style/EachWithObject:
+  Exclude:
+    # Methods copy-pasted from a blog.
+    - 'lib/MrMurano/hash.rb'
+
+# "Put empty method definitions on a single line."
+# You can do, e.g.,
+#     def my_method(some_var) end
+# except you cannot do
+#     def my_method end
+# but instead have to do
+#     def my_method() end
+# which then breaks another rule, Style/DefWithParentheses!
+Style/EmptyMethod:
+  Enabled: false
+
+# "The name of this source file (Xxxxxxx.rb) should use snake_case."
+Style/FileName:
+  Exclude:
+    - 'Gemfile'
+    - 'MuranoCLI.gemspec'
+    - 'Rakefile'
+    - 'lib/MrMurano.rb'
+    - 'lib/MrMurano/makePretty.rb'
+    - 'lib/MrMurano/Account.rb'
+    - 'lib/MrMurano/Business.rb'
+    - 'lib/MrMurano/Config-Migrate.rb'
+    - 'lib/MrMurano/Config.rb'
+    - 'lib/MrMurano/Content.rb'
+    - 'lib/MrMurano/Exchange.rb'
+    - 'lib/MrMurano/Exchange-Element.rb'
+    - 'lib/MrMurano/Gateway.rb'
+    - 'lib/MrMurano/Keystore.rb'
+    - 'lib/MrMurano/Mock.rb'
+    - 'lib/MrMurano/Passwords.rb'
+    - 'lib/MrMurano/ProjectFile.rb'
+    - 'lib/MrMurano/ReCommander.rb'
+    - 'lib/MrMurano/Setting.rb'
+    - 'lib/MrMurano/Solution-ServiceConfig.rb'
+    - 'lib/MrMurano/Solution-Services.rb'
+    - 'lib/MrMurano/Solution-Users.rb'
+    - 'lib/MrMurano/Solution.rb'
+    - 'lib/MrMurano/SolutionId.rb'
+    - 'lib/MrMurano/SubCmdGroupContext.rb'
+    - 'lib/MrMurano/SyncAllowed.rb'
+    - 'lib/MrMurano/SyncRoot.rb'
+    - 'lib/MrMurano/SyncUpDown.rb'
+    - 'lib/MrMurano/Webservice-Cors.rb'
+    - 'lib/MrMurano/Webservice-Endpoint.rb'
+    - 'lib/MrMurano/Webservice-File.rb'
+    - 'lib/MrMurano/Webservice.rb'
+
+# FIXME/2017-06-30: We should fix this one... put $cfg in MrMurano class.
+# "Do not introduce global variables."
+Style/GlobalVars:
+  Enabled: false
+
+# "Use remaining.positive? instead of remaining > 0."
+# However, Numeric.positive? does not exist in Ruby 2 or 2.2.
+Style/NumericPredicate:
+  Enabled: false
+
+# "Don't use parentheses around the condition of an elsif."
+# This is a matter of taste. Rubocop would have you do, e.g.,
+#   if something
+#      ...
+#   elsif another_thing ||
+#         something_else
+#     ...
+# But if you don't like lining up the condition like that, you
+# might want to try, e.g.,
+#   elsif (
+#     another_thing ||
+#     something_else
+#   )
+#     ...
+Style/ParenthesesAroundCondition:
+  Enabled: false
+
+# "Provide an exception class and message as arguments to raise."
+Style/RaiseArgs:
+  EnforcedStyle: compact
+
+# "Don't use parentheses around a literal."
+# How else do you split long lines, eh? E.g.,
+#   unbelievably_long_variable_name = (
+#     "Some very long sentence about being a very long sentence."
+#   )
+Style/RedundantParentheses:
+  Enabled: false
+
+# "Use // around regular expression."
+# "Use %r around regular expression."
+#Style/RegexpLiteral:
+#  # If "slashes" or "mixed":
+#  #   snake_case = /^[\dA-Z_]+$/
+#  # If "percent_r":
+#  #   snake_case = %r{^[\dA-Z_]+$}
+#  #EnforcedStyle: percent_r
+#  EnforcedStyle: slashes
+
+# "Use safe navigation (&.) instead of checking if an object exists before
+#  calling the method."
+#
+# - "The Safe Navigation Operator (&.) in Ruby"
+#    http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/
+#
+# The safe nav op was only added in Ruby 2.3.0, and we support 2.0.
+Style/SafeNavigation:
+  Enabled: false
+
+# "Do not use semicolons to terminate expressions."
+Style/Semicolon:
+  Exclude:
+    # Methods copy-pasted from a blog.
+    - 'lib/MrMurano/hash.rb'
+
+# "Avoid comma after the last parameter of a method call."
+# FIXME/2017-06-30: Is this okay?
+Style/TrailingCommaInArguments:
+  Enabled: false
+
+# "Avoid comma after the last item of a hash."
+Style/TrailingCommaInLiteral:
+  # Rather than disable, tweak for multiline lists, so Rubocop will
+  # still tell you not to use trailing comma in single-line list.
+  EnforcedStyleForMultiline: "consistent_comma"
+
+AllCops:
+  Include:
+    - 'bin/murano'
+    # These are included by default:
+    #- '**/Gemfile'
+    - '**/Rakefile'
+    #- 'MuranoCLI.gemspec'
+  # FIXME/2017-07-25: Finishing linting all the files!
+  #   These files have not been linted since Rubocop was adopted.
+  Exclude:
+    # HINT: You can use regexp in this list.
+    #- !ruby/regexp /old_and_unused\.rb$/
+    #
+    # Not sure if the templates are included by default or not, but ignore.
+    - 'lib/MrMurano/commands/completion-bash.erb'
+    - 'lib/MrMurano/commands/completion-zsh.erb'
+    #
+    # 2017-08-16: Ug.
+    - 'lib/MrMurano/optparse.rb'
+    #
+    # 2017-08-29: A hack for rspec.
+    #- 'lib/Murano/spec_commander.rb'
+    #
+    # 2017-08-30: Ug. Loading orderedhash spits out warning gobbled by rspec fails test.
+    - 'lib/MrMurano/orderedhash.rb'
+    #
+    # The spec_helper is a generated file; don't care.
+    - 'spec/spec_helper.rb'
+    #
+    # 2017-07-25: It's probably not worth our time to lint the spec tests.
+    # 2017-07-31: 7735 offenses in the Spec tests -- not worth it to fix!!
+    #- 'spec/**/*'
+    - 'spec/Account-Passwords_spec.rb'
+    - 'spec/Account_spec.rb'
+    - 'spec/Business_spec.rb'
+    - 'spec/ConfigFile_spec.rb'
+    - 'spec/ConfigMigrate_spec.rb'
+    - 'spec/Config_spec.rb'
+    - 'spec/Content_spec.rb'
+    - 'spec/GatewayBase_spec.rb'
+    - 'spec/GatewayDevice_spec.rb'
+    - 'spec/GatewayResource_spec.rb'
+    - 'spec/GatewaySettings_spec.rb'
+    - 'spec/Http_spec.rb'
+    - 'spec/MakePretties_spec.rb'
+    - 'spec/Mock_spec.rb'
+    - 'spec/ProjectFile_spec.rb'
+    - 'spec/Setting_spec.rb'
+    - 'spec/Solution-ServiceConfig_spec.rb'
+    - 'spec/Solution-ServiceEventHandler_spec.rb'
+    - 'spec/Solution-ServiceModules_spec.rb'
+    - 'spec/Solution-UsersRoles_spec.rb'
+    - 'spec/Solution_spec.rb'
+    - 'spec/SyncRoot_spec.rb'
+    - 'spec/SyncUpDown_spec.rb'
+    - 'spec/Verbosing_spec.rb'
+    - 'spec/Webservice-Cors_spec.rb'
+    - 'spec/Webservice-Endpoint_spec.rb'
+    - 'spec/Webservice-File_spec.rb'
+    - 'spec/Webservice-Setting_spec.rb'
+    #- 'spec/_workspace.rb'
+    - 'spec/cmd_business_spec.rb'
+    #- 'spec/cmd_common.rb'
+    - 'spec/cmd_config_spec.rb'
+    - 'spec/cmd_content_spec.rb'
+    - 'spec/cmd_cors_spec.rb'
+    - 'spec/cmd_device_spec.rb'
+    - 'spec/cmd_domain_spec.rb'
+    #- 'spec/cmd_exchange_spec.rb'
+    #- 'spec/cmd_help_spec.rb'
+    - 'spec/cmd_init_spec.rb'
+    - 'spec/cmd_keystore_spec.rb'
+    - 'spec/cmd_link_spec.rb'
+    - 'spec/cmd_password_spec.rb'
+    - 'spec/cmd_setting_application_spec.rb'
+    - 'spec/cmd_setting_product_spec.rb'
+    - 'spec/cmd_status_spec.rb'
+    - 'spec/cmd_syncdown_spec.rb'
+    - 'spec/cmd_syncup_spec.rb'
+    - 'spec/cmd_usage_spec.rb'
+    #- 'spec/cmd_version_spec.rb'
+
