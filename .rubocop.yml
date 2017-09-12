@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.31 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -28,8 +28,6 @@ Layout/TrailingBlankLines:
 Lint/ScriptPermission:
   Exclude:
     - 'bin/murano'
-    # Also the rspec shim-link:
-    - 'lib/MrMurano/spec_commander.rb'
 
 # "Assignment Branch Condition size for XXX is too high."
 # http://wiki.c2.com/?AbcMetric
@@ -121,6 +119,7 @@ Style/FileName:
     - 'lib/MrMurano/makePretty.rb'
     - 'lib/MrMurano/Account.rb'
     - 'lib/MrMurano/Business.rb'
+    - 'lib/MrMurano/Commander-Entry.rb'
     - 'lib/MrMurano/Config-Migrate.rb'
     - 'lib/MrMurano/Config.rb'
     - 'lib/MrMurano/Content.rb'
@@ -242,9 +241,6 @@ AllCops:
     #
     # 2017-08-16: Ug.
     - 'lib/MrMurano/optparse.rb'
-    #
-    # 2017-08-29: A hack for rspec.
-    #- 'lib/Murano/spec_commander.rb'
     #
     # 2017-08-30: Ug. Loading orderedhash spits out warning gobbled by rspec fails test.
     - 'lib/MrMurano/orderedhash.rb'
