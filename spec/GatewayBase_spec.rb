@@ -1,4 +1,4 @@
-# Last Modified: 2017.09.12 /coding: utf-8
+# Last Modified: 2017.09.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -53,7 +53,7 @@ RSpec.describe MrMurano::Gateway::GweBase do
     stub_request(
       :get, 'https://bizapi.hosted.exosite.io/api:1/service/XYZ/device2'
     ).with(
-      headers: { 'Authorization': 'token TTTTTTTTTT', 'Content-Type': 'application/json' }
+      headers: { 'Authorization' => 'token TTTTTTTTTT', 'Content-Type' => 'application/json' }
     ).to_return(status: 200, body: body.to_json, headers: {})
     ret = @gw.info
     expect(ret).to eq(body)

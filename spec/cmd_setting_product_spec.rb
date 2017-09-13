@@ -1,4 +1,4 @@
-# Last Modified: 2017.09.12 /coding: utf-8
+# Last Modified: 2017.09.13 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -159,7 +159,7 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
 #      expect(out).to eq('')
 #      expect(status.exitstatus).to eq(0)
 #
-#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options', '--json', '{'casing': 'lower', 'length': 0}'))
+#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options', '--json', "{'casing': 'lower', 'length': 0}"))
 #      expect(err).to eq('')
 #      expect(out).to eq('')
 #      expect(status.exitstatus).to eq(0)
