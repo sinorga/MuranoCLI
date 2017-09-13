@@ -1,5 +1,5 @@
-# Last Modified: 2017.08.30 /coding: utf-8
-# frozen_string_literal: probably not yet
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -13,19 +13,19 @@ require 'cmd_common'
 require 'MrMurano/Config'
 
 RSpec.describe 'murano link', :cmd, :needs_password do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
-  context "without project" do
-    it "help" do
+  context 'without project' do
+    it 'help' do
       cmd_verify_help('link')
     end
 
     # 2017-08-30: The next two tests show the difference between using a
     # subshell to run murano commands versus running them directly. The
     # latter method lets us get coverage of the command modules.
-    context "subshell vs inline" do
-      context "using subshell" do
-        it "will not list" do
+    context 'subshell vs inline' do
+      context 'using subshell' do
+        it 'will not list' do
           out, err, status = Open3.capture3(capcmd('murano', 'link', 'list'))
           expect(strip_color(out)).to eq(MrMurano::Config::INVALID_PROJECT_HINT + "\n")
           expecting = %(The "link list" command only works in a Murano project.\n)
@@ -34,8 +34,8 @@ RSpec.describe 'murano link', :cmd, :needs_password do
         end
       end
 
-      context "using commander" do
-        it "will not list" do
+      context 'using commander' do
+        it 'will not list' do
           stdout, stderr = murano_command_run('link list')
           expect(stdout).to eq(MrMurano::Config::INVALID_PROJECT_HINT + "\n")
           expect(stderr).to eq(

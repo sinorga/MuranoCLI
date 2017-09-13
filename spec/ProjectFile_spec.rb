@@ -1,3 +1,10 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 #require 'erb'
 require 'fileutils'
 #require 'tempfile'
@@ -7,9 +14,8 @@ require 'MrMurano/ProjectFile'
 require '_workspace'
 
 RSpec.describe MrMurano::ProjectFile do
-
-  context "Basics " do
-    include_context "WORKSPACE"
+  context 'Basics ' do
+    include_context 'WORKSPACE'
     before(:example) do
       $cfg = MrMurano::Config.new
       $cfg.load
@@ -17,13 +23,13 @@ RSpec.describe MrMurano::ProjectFile do
       $project = nil
     end
 
-    context "No files to load" do
-      context "Defaults" do
+    context 'No files to load' do
+      context 'Defaults' do
         before(:example) do
           @pjf = MrMurano::ProjectFile.new
           #@pjf.load
         end
-        it "Info" do
+        it 'Info' do
           expect(@pjf.get('info.name')).to eq('project')
           expect(@pjf.get('info.summary')).to eq('One line summary of project')
           expect(@pjf.get('info.description')).to eq("In depth description of project\n\nWith lots of details.")
@@ -31,7 +37,7 @@ RSpec.describe MrMurano::ProjectFile do
           expect(@pjf.get('info.version')).to eq('1.0.0')
         end
 
-        it "Assets" do
+        it 'Assets' do
           # Because defaults before load() are all nil, the default_value_for method
           # is called.
           expect(@pjf).to receive(:default_value_for).with('assets.location').and_return('here')
@@ -47,7 +53,7 @@ RSpec.describe MrMurano::ProjectFile do
           expect(@pjf.get('assets.default_page')).to eq('here')
         end
 
-        it "Modules" do
+        it 'Modules' do
           # Because defaults before load() are all nil, the default_value_for method
           # is called.
           expect(@pjf).to receive(:default_value_for).with('modules.location').and_return('here')
@@ -60,7 +66,7 @@ RSpec.describe MrMurano::ProjectFile do
           expect(@pjf.get('modules.exclude')).to eq(['here'])
         end
 
-        it "Routes" do
+        it 'Routes' do
           # Because defaults before load() are all nil, the default_value_for method
           # is called.
           expect(@pjf).to receive(:default_value_for).with('routes.location').and_return('here')
@@ -73,7 +79,7 @@ RSpec.describe MrMurano::ProjectFile do
           expect(@pjf.get('routes.exclude')).to eq(['here'])
         end
 
-        it "Services" do
+        it 'Services' do
           # Because defaults before load() are all nil, the default_value_for method
           # is called.
           expect(@pjf).to receive(:default_value_for).with('services.location').and_return('here')
@@ -87,99 +93,99 @@ RSpec.describe MrMurano::ProjectFile do
         end
       end
 
-      context "Bad Keys" do
+      context 'Bad Keys' do
         before(:example) do
           @pjf = MrMurano::ProjectFile.new
         end
-        it "Empty" do
-          expect{@pjf.get('')}.to raise_error("Empty key")
+        it 'Empty' do
+          expect { @pjf.get('') }.to raise_error('Empty key')
         end
-        it "No dot" do
-          expect{@pjf.get('info')}.to raise_error("Missing dot")
+        it 'No dot' do
+          expect { @pjf.get('info') }.to raise_error('Missing dot')
         end
-        it "Undefined key" do
-          expect{@pjf.get('info.bob')}.to raise_error("no member 'bob' in struct")
+        it 'Undefined key' do
+          expect { @pjf.get('info.bob') }.to raise_error("no member 'bob' in struct")
         end
-        it "Undefined section" do
-          expect{@pjf.get('sob.include')}.to raise_error(NameError)
+        it 'Undefined section' do
+          expect { @pjf.get('sob.include') }.to raise_error(NameError)
         end
-        it "Missing key" do
-          expect{@pjf.get('info.')}.to raise_error("Missing key")
+        it 'Missing key' do
+          expect { @pjf.get('info.') }.to raise_error('Missing key')
         end
-        it "Missing section" do
-          expect{@pjf.get('.include')}.to raise_error("no member '' in struct")
+        it 'Missing section' do
+          expect { @pjf.get('.include') }.to raise_error("no member '' in struct")
         end
       end
 
-      context "default_value_for mapping" do
+      context 'default_value_for mapping' do
         before(:example) do
           @pjf = MrMurano::ProjectFile.new
         end
 
-        it "returns nil for unmapped key." do
+        it 'returns nil for unmapped key.' do
           expect(@pjf.default_value_for('foooood')).to be_nil
         end
 
-        it "hits $cfg if mapped key" do
+        it 'hits $cfg if mapped key' do
           expect($cfg).to receive(:get).with('location.endpoints').and_return('beef')
           expect(@pjf.default_value_for('routes.location')).to eq('beef')
         end
 
-        it "returns array for split values" do
+        it 'returns array for split values' do
           expect($cfg).to receive(:get).with('endpoints.searchFor').and_return('beef')
           expect(@pjf.default_value_for('routes.include')).to eq(['beef'])
 
           expect($cfg).to receive(:get).with('endpoints.searchFor').and_return('beef and potatoes')
-          expect(@pjf.default_value_for('routes.include')).to eq(['beef','and','potatoes'])
+          expect(@pjf.default_value_for('routes.include')).to eq(%w[beef and potatoes])
         end
       end
     end
 
-    context "Calling load" do
+    context 'Calling load' do
       before(:example) do
         @pjf = MrMurano::ProjectFile.new
       end
 
-      context "load just meta" do
+      context 'load just meta' do
         before(:example) do
           src = File.join(@testdir, 'spec/fixtures/ProjectFiles/only_meta.yaml')
           dst = File.join(@project_dir, 'meta.murano')
           FileUtils.copy(src, dst)
           @pjf.load
         end
-        it "has the name" do
+        it 'has the name' do
           expect(@pjf.get('info.name')).to eq('tested')
         end
-        it "has version" do
+        it 'has version' do
           expect(@pjf.get('info.version')).to eq('1.56.12')
         end
 
-        it "fails back to $cfg" do
+        it 'fails back to $cfg' do
           expect(@pjf).to receive(:default_value_for).with('routes.include').and_return(['here'])
           expect(@pjf.get('routes.include')).to eq(['here'])
         end
       end
 
-      context "load custom routes" do
+      context 'load custom routes' do
         before(:example) do
           src = File.join(@testdir, 'spec/fixtures/ProjectFiles/with_routes.yaml')
           dst = File.join(@project_dir, 'meta.murano')
           FileUtils.copy(src, dst)
           @pjf.load
         end
-        it "has the name" do
+        it 'has the name' do
           expect(@pjf.get('info.name')).to eq('tested')
         end
-        it "has version" do
+        it 'has version' do
           expect(@pjf.get('info.version')).to eq('1.56.12')
         end
-        it "does not fail back to $cfg" do
+        it 'does not fail back to $cfg' do
           expect(@pjf).to_not receive(:default_value_for)
           expect(@pjf.get('routes.include')).to eq(['custom_api.lua'])
         end
       end
 
-      it "reports validation errors" do
+      it 'reports validation errors' do
         src = File.join(@testdir, 'spec/fixtures/ProjectFiles/invalid.yaml')
         dst = File.join(@project_dir, 'meta.murano')
         FileUtils.copy(src, dst)
@@ -187,15 +193,16 @@ RSpec.describe MrMurano::ProjectFile do
         saved = $stderr
         $stderr = StringIO.new
         expect(@pjf.load).to eq(-5)
-        expect($stderr.string).to match(%r{The property '#/info' did not contain a required property of 'description'})
+        expect($stderr.string).to match(
+          %r{The property '#/info' did not contain a required property of 'description'}
+        )
         $stderr = saved
       end
-
     end
   end
 
-  context "Solutionfile 0.2.0" do
-    include_context "WORKSPACE"
+  context 'Solutionfile 0.2.0' do
+    include_context 'WORKSPACE'
     before(:example) do
       $cfg = MrMurano::Config.new
       $cfg.load
@@ -204,61 +211,66 @@ RSpec.describe MrMurano::ProjectFile do
       @pjf = MrMurano::ProjectFile.new
     end
 
-    it "Reports validation errors" do
-        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0_invalid.json')
-        dst = File.join(@project_dir, 'Solutionfile.json')
-        FileUtils.copy(src, dst)
-        saved = $stderr
-        $stderr = StringIO.new
-        @pjf.load
-        expect($stderr.string).to match(%r{The property '#/' did not contain a required property of 'custom_api'})
-        $stderr = saved
+    it 'Reports validation errors' do
+      src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0_invalid.json')
+      dst = File.join(@project_dir, 'Solutionfile.json')
+      FileUtils.copy(src, dst)
+      saved = $stderr
+      $stderr = StringIO.new
+      @pjf.load
+      expect($stderr.string).to match(
+        %r{The property '#/' did not contain a required property of 'custom_api'}
+      )
+      $stderr = saved
     end
 
-    it "loads with truncated version" do
-        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.json')
-        dst = File.join(@project_dir, 'Solutionfile.json')
-        FileUtils.copy(src, dst)
-        saved = $stderr
-        $stderr = StringIO.new
-        @pjf.load
-        expect($stderr.string).to eq('')
-        $stderr = saved
+    it 'loads with truncated version' do
+      src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.json')
+      dst = File.join(@project_dir, 'Solutionfile.json')
+      FileUtils.copy(src, dst)
+      saved = $stderr
+      $stderr = StringIO.new
+      @pjf.load
+      expect($stderr.string).to eq('')
+      $stderr = saved
     end
 
-    context "loads" do
+    context 'loads' do
       before(:example) do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.2.0.json')
         dst = File.join(@project_dir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
         @pjf.load
       end
-      it "defines assets" do
+      it 'defines assets' do
         expect(@pjf.get('assets.default_page')).to eq('index.html')
         expect(@pjf.get('assets.location')).to eq('public')
         expect(@pjf.get('assets.include')).to eq(['**/*'])
       end
 
-      it "defines routes" do
-        expect(@pjf['routes.location']).to eq ('.')
+      it 'defines routes' do
+        expect(@pjf['routes.location']).to eq('.')
         expect(@pjf.get('routes.include')).to eq(['sample_api.lua'])
       end
 
-      it "defines modules" do
-        expect(@pjf['modules.location']).to eq ('.')
-        expect(@pjf['modules.include']).to match_array(["modules/debug.lua", "modules/listen.lua", "modules/util.lua"])
+      it 'defines modules' do
+        expect(@pjf['modules.location']).to eq('.')
+        expect(@pjf['modules.include']).to match_array(
+          ['modules/debug.lua', 'modules/listen.lua', 'modules/util.lua']
+        )
       end
 
-      it "defines services" do
-        expect(@pjf['services.location']).to eq ('.')
-        expect(@pjf['services.include']).to match_array(["event_handler/product.lua", "event_handler/timer.lua"])
+      it 'defines services' do
+        expect(@pjf['services.location']).to eq('.')
+        expect(@pjf['services.include']).to match_array(
+          ['event_handler/product.lua', 'event_handler/timer.lua']
+        )
       end
-
     end
   end
 
-  context "Solutionfile 0.3.0" do
-    include_context "WORKSPACE"
+  context 'Solutionfile 0.3.0' do
+    include_context 'WORKSPACE'
     before(:example) do
       $cfg = MrMurano::Config.new
       $cfg.load
@@ -267,69 +279,69 @@ RSpec.describe MrMurano::ProjectFile do
       @pjf = MrMurano::ProjectFile.new
     end
 
-    it "Reports validation errors" do
-        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.0_invalid.json')
-        dst = File.join(@project_dir, 'Solutionfile.json')
-        FileUtils.copy(src, dst)
-        saved = $stderr
-        $stderr = StringIO.new
-        @pjf.load
-        expect($stderr.string).to match(%r{The property '#/' did not contain a required property of 'routes'})
-        $stderr = saved
+    it 'Reports validation errors' do
+      src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.0_invalid.json')
+      dst = File.join(@project_dir, 'Solutionfile.json')
+      FileUtils.copy(src, dst)
+      saved = $stderr
+      $stderr = StringIO.new
+      @pjf.load
+      expect($stderr.string).to match(
+        %r{The property '#/' did not contain a required property of 'routes'}
+      )
+      $stderr = saved
     end
 
-    it "loads with truncated version" do
-        src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.json')
-        dst = File.join(@project_dir, 'Solutionfile.json')
-        FileUtils.copy(src, dst)
-        saved = $stderr
-        $stderr = StringIO.new
-        @pjf.load
-        expect($stderr.string).to eq('')
-        $stderr = saved
+    it 'loads with truncated version' do
+      src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.json')
+      dst = File.join(@project_dir, 'Solutionfile.json')
+      FileUtils.copy(src, dst)
+      saved = $stderr
+      $stderr = StringIO.new
+      @pjf.load
+      expect($stderr.string).to eq('')
+      $stderr = saved
     end
 
-    context "loads" do
+    context 'loads' do
       before(:example) do
         src = File.join(@testdir, 'spec/fixtures/SolutionFiles/0.3.0.json')
         dst = File.join(@project_dir, 'Solutionfile.json')
         FileUtils.copy(src, dst)
         @pjf.load
       end
-      it "defines assets" do
+      it 'defines assets' do
         expect(@pjf.get('assets.default_page')).to eq('index.html')
         expect(@pjf.get('assets.location')).to eq('public')
         expect(@pjf.get('assets.include')).to eq(['**/*'])
       end
 
-      it "defines routes" do
-        expect(@pjf['routes.location']).to eq ('.')
+      it 'defines routes' do
+        expect(@pjf['routes.location']).to eq('.')
         expect(@pjf.get('routes.include')).to eq(['sample_api.lua'])
       end
 
-      it "defines modules" do
-        expect(@pjf['modules.location']).to eq ('.')
+      it 'defines modules' do
+        expect(@pjf['modules.location']).to eq('.')
         expect(@pjf['modules.include']).to match_array(
           [
-            "modules/debug.lua",
-            "modules/listen.lua",
-            "modules/util.lua",
+            'modules/debug.lua',
+            'modules/listen.lua',
+            'modules/util.lua',
           ]
         )
       end
 
-      it "defines services" do
-        expect(@pjf['services.location']).to eq ('.')
+      it 'defines services' do
+        expect(@pjf['services.location']).to eq('.')
         expect(@pjf['services.include']).to match_array(
           [
-            "event_handler/product.lua",
-            "event_handler/timer.lua",
+            'event_handler/product.lua',
+            'event_handler/timer.lua',
           ]
         )
       end
-
     end
   end
 end
 
-#  vim: set ai et sw=2 ts=2 :

@@ -1,3 +1,10 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'erb'
 require 'tempfile'
 require 'MrMurano/version'
@@ -5,10 +12,9 @@ require 'MrMurano/Config'
 require '_workspace'
 
 RSpec.describe MrMurano::Config do
-
-  context "Basics " do
-    include_context "WORKSPACE"
-    it "Sets defaults" do
+  context 'Basics ' do
+    include_context 'WORKSPACE'
+    it 'Sets defaults' do
       cfg = MrMurano::Config.new
       cfg.load
       # Don't check for all of them, just a few.
@@ -18,7 +24,7 @@ RSpec.describe MrMurano::Config do
       expect(cfg.get('tool.debug', :defaults)).to eq(false)
     end
 
-    it "Sets internal values" do
+    it 'Sets internal values' do
       cfg = MrMurano::Config.new
       cfg.load
 
@@ -28,7 +34,7 @@ RSpec.describe MrMurano::Config do
       expect(cfg.get('bob.test', :internal)).to eq('twelve')
     end
 
-    it "Sets tool values" do
+    it 'Sets tool values' do
       cfg = MrMurano::Config.new
       cfg.load
 
@@ -38,7 +44,7 @@ RSpec.describe MrMurano::Config do
       expect(cfg.get('tool.test', :internal)).to eq('twelve')
     end
 
-    it "Sets project values" do # This should write
+    it 'Sets project values' do # This should write
       cfg = MrMurano::Config.new
       cfg.load
 
@@ -55,7 +61,7 @@ RSpec.describe MrMurano::Config do
       expect(cfg.get('bob.test', :project)).to eq('twelve')
     end
 
-    it "Sets a user value" do
+    it 'Sets a user value' do
       cfg = MrMurano::Config.new
       cfg.load
 
@@ -72,11 +78,11 @@ RSpec.describe MrMurano::Config do
       expect(cfg.get('bob.test', :user)).to eq('twelve')
     end
 
-    it "loads from a specific file" do
+    it 'loads from a specific file' do
       File.open(@project_dir + '/foo.cfg', 'w') do |io|
-        io << %{[test]
+        io << %([test]
             bob = test
-        }.gsub(/^\s\+/,'')
+        ).gsub(/^\s\+/, '')
       end
 
       cfg = MrMurano::Config.new
@@ -86,8 +92,8 @@ RSpec.describe MrMurano::Config do
       expect(cfg['test.bob']).to eq('test')
     end
 
-    context "returns a path to a file in" do
-      it "project mrmurano dir" do
+    context 'returns a path to a file in' do
+      it 'project mrmurano dir' do
         cfg = MrMurano::Config.new
         cfg.load
         path = cfg.file_at('testfile').realdirpath
@@ -96,7 +102,7 @@ RSpec.describe MrMurano::Config do
         expect(path).to eq(want)
       end
 
-      it "user mrmurano dir" do
+      it 'user mrmurano dir' do
         cfg = MrMurano::Config.new
         cfg.load
         path = cfg.file_at('testfile', :user).realdirpath
@@ -105,7 +111,7 @@ RSpec.describe MrMurano::Config do
         expect(path).to eq(want)
       end
 
-      it "internal" do
+      it 'internal' do
         cfg = MrMurano::Config.new
         cfg.load
         path = cfg.file_at('testfile', :internal)
@@ -113,7 +119,7 @@ RSpec.describe MrMurano::Config do
         expect(path).to eq(nil)
       end
 
-      it "specified" do
+      it 'specified' do
         cfg = MrMurano::Config.new
         cfg.load
         path = cfg.file_at('testfile', :specified)
@@ -121,7 +127,7 @@ RSpec.describe MrMurano::Config do
         expect(path).to eq(nil)
       end
 
-      it "defaults" do
+      it 'defaults' do
         cfg = MrMurano::Config.new
         cfg.load
         path = cfg.file_at('testfile', :defaults)
@@ -139,12 +145,12 @@ RSpec.describe MrMurano::Config do
         ENV['MR_CONFIGFILE'] = nil
       end
 
-      it "loads file in env" do
+      it 'loads file in env' do
         ENV['MURANO_CONFIGFILE'] = @tmpdir + '/home/test.config'
         File.open(@tmpdir + '/home/test.config', 'w') do |io|
-          io << %{[test]
+          io << %([test]
             bob = test
-          }.gsub(/^\s\+/,'')
+          ).gsub(/^\s\+/, '')
         end
 
         cfg = MrMurano::Config.new
@@ -152,7 +158,7 @@ RSpec.describe MrMurano::Config do
         expect(cfg['test.bob']).to eq('test')
       end
 
-      it "will create file at env" do
+      it 'will create file at env' do
         ENV['MURANO_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
         cfg = MrMurano::Config.new
         cfg.load
@@ -167,14 +173,14 @@ RSpec.describe MrMurano::Config do
         expect(cfg.get('coffee.hot', :env)).to eq('yes')
       end
 
-      it "warns about migrating old ENV name" do
+      it 'warns about migrating old ENV name' do
         ENV['MURANO_CONFIGFILE'] = nil
         ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
         expect_any_instance_of(MrMurano::Config).to receive(:warning).once
         MrMurano::Config.new
       end
 
-      it "errors if both are defined" do
+      it 'errors if both are defined' do
         ENV['MURANO_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
         ENV['MR_CONFIGFILE'] = @tmpdir + '/home/testcreate.config'
         # 2 warnings:
@@ -187,7 +193,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "dumps" do
+    it 'dumps' do
       @saved_cfg = ENV['MURANO_CONFIGFILE']
       ENV['MURANO_CONFIGFILE'] = nil
       cfg = MrMurano::Config.new
@@ -203,36 +209,34 @@ RSpec.describe MrMurano::Config do
       ENV['MURANO_CONFIGFILE'] = @saved_cfg
     end
 
-    context "fixing permissions" do
-      it "fixes a directory" do
+    context 'fixing permissions' do
+      it 'fixes a directory' do
         Dir.mkdir('test')
         cfg = MrMurano::Config.new
         cfg.fix_modes(Pathname.new('test'))
-        if Gem.win_platform? then
-          expect(FileTest.world_readable? 'test').to eq(493)
-          expect(FileTest.world_writable? 'test').to be_nil
+        if Gem.win_platform?
+          expect(FileTest.world_readable?('test')).to eq(493)
         else
-          expect(FileTest.world_readable? 'test').to be_nil
-          expect(FileTest.world_writable? 'test').to be_nil
+          expect(FileTest.world_readable?('test')).to be_nil
         end
+        expect(FileTest.world_writable?('test')).to be_nil
       end
 
-      it "fixes a file" do
+      it 'fixes a file' do
         FileUtils.touch('test')
         cfg = MrMurano::Config.new
         cfg.fix_modes(Pathname.new('test'))
-        if Gem.win_platform? then
-          expect(FileTest.world_readable? 'test').to eq(420)
-          expect(FileTest.world_writable? 'test').to be_nil
+        if Gem.win_platform?
+          expect(FileTest.world_readable?('test')).to eq(420)
         else
-          expect(FileTest.world_readable? 'test').to be_nil
-          expect(FileTest.world_writable? 'test').to be_nil
+          expect(FileTest.world_readable?('test')).to be_nil
         end
+        expect(FileTest.world_writable?('test')).to be_nil
       end
     end
   end
 
-  context "Can find the project directory by .murano/config" do
+  context 'Can find the project directory by .murano/config' do
     before(:example) do
       @tmpdir = Dir.tmpdir
       path = '/home/work/project/some/where'
@@ -249,7 +253,7 @@ RSpec.describe MrMurano::Config do
       FileUtils.remove_dir(@tmpdir + '/home', true) if FileTest.exist? @tmpdir
     end
 
-    it "when in project directory" do
+    it 'when in project directory' do
       Dir.chdir(@project_dir) do
         cfg = MrMurano::Config.new
         cfg.load
@@ -260,7 +264,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "when in sub directory" do
+    it 'when in sub directory' do
       Dir.chdir(@project_dir + '/some/where') do
         cfg = MrMurano::Config.new
         cfg.load
@@ -271,7 +275,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "when .murano is in both PWD and parent dir" do
+    it 'when .murano is in both PWD and parent dir' do
       Dir.chdir(@project_dir + '/some') do
         FileUtils.mkpath('.murano')
         FileUtils.touch('.murano/config')
@@ -285,7 +289,7 @@ RSpec.describe MrMurano::Config do
     end
   end
 
-  context "Can find the project directory by .murano/" do
+  context 'Can find the project directory by .murano/' do
     before(:example) do
       @tmpdir = Dir.tmpdir
       path = '/home/work/project/some/where'
@@ -301,7 +305,7 @@ RSpec.describe MrMurano::Config do
       FileUtils.remove_dir(@tmpdir + '/home', true) if FileTest.exist? @tmpdir
     end
 
-    it "when in project directory" do
+    it 'when in project directory' do
       Dir.chdir(@project_dir) do
         cfg = MrMurano::Config.new
         cfg.load
@@ -312,7 +316,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "when in sub directory" do
+    it 'when in sub directory' do
       Dir.chdir(@project_dir + '/some/where') do
         cfg = MrMurano::Config.new
         cfg.load
@@ -323,7 +327,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "when .murano is in both PWD and parent dir" do
+    it 'when .murano is in both PWD and parent dir' do
       Dir.chdir(@project_dir + '/some') do
         FileUtils.mkpath('.murano')
         cfg = MrMurano::Config.new
@@ -336,7 +340,7 @@ RSpec.describe MrMurano::Config do
     end
   end
 
-  context "When pwd is $HOME:" do
+  context 'When pwd is $HOME:' do
     before(:example) do
       @tmpdir = Dir.tmpdir
       @project_dir = @tmpdir + '/home/work/project'
@@ -349,7 +353,7 @@ RSpec.describe MrMurano::Config do
       FileUtils.remove_dir(@tmpdir + '/home', true) if FileTest.exist? @tmpdir
     end
 
-    it "Sets a user value" do
+    it 'Sets a user value' do
       Dir.chdir(ENV['HOME']) do
         cfg = MrMurano::Config.new
         cfg.load
@@ -368,7 +372,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "Sets project values" do # This should write
+    it 'Sets project values' do # This should write
       Dir.chdir(ENV['HOME']) do
         cfg = MrMurano::Config.new
         cfg.load
@@ -387,7 +391,7 @@ RSpec.describe MrMurano::Config do
       end
     end
 
-    it "write a project value and reads it as a user value" do
+    it 'write a project value and reads it as a user value' do
       Dir.chdir(ENV['HOME']) do
         cfg = MrMurano::Config.new
         cfg.load
@@ -408,17 +412,17 @@ RSpec.describe MrMurano::Config do
     end
   end
 
-  context "Warns about migrating old" do
-    include_context "WORKSPACE"
+  context 'Warns about migrating old' do
+    include_context 'WORKSPACE'
 
-    it "config file name" do
+    it 'config file name' do
       FileUtils.touch(@project_dir + '/.mrmuranorc')
       expect_any_instance_of(MrMurano::Config).to receive(:warning).once
       cfg = MrMurano::Config.new
       cfg.validate_cmd
     end
 
-    it "config directory name" do
+    it 'config directory name' do
       FileUtils.mkpath(@project_dir + '/.mrmurano')
       expect_any_instance_of(MrMurano::Config).to receive(:warning).once
       cfg = MrMurano::Config.new
@@ -427,4 +431,3 @@ RSpec.describe MrMurano::Config do
   end
 end
 
-#  vim: set ai et sw=2 ts=2 :

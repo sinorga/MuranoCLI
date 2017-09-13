@@ -1,12 +1,19 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
+require 'json'
 require 'open3'
 require 'pathname'
-require 'json'
 require 'vine'
 require 'cmd_common'
 
 RSpec.describe 'murano setting', :cmd, :needs_password do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
   before(:example) do
     @product_name = rname('settingtest')
@@ -22,16 +29,16 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  context "Writes (using Device2.identity_format)" do
+  context 'Writes (using Device2.identity_format)' do
     before(:example) do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Device2.identity_format', '-c', 'outformat=json'))
       expect { @json_before = JSON.parse(out) }.to_not raise_error
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
     end
-    # {"prefix"=>"", "type"=>"opaque", "options"=>{"casing"=>"mixed", "length"=>0}}
+    # {'prefix'=>'', 'type'=>'opaque', 'options'=>{'casing'=>'mixed', 'length'=>0}}
 
-    it "a string value" do
+    it 'a string value' do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'prefix', 'fidget'))
       expect(err).to eq('')
       expect(out).to eq('')
@@ -46,7 +53,7 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       expect(json_after).to match(@json_before)
     end
 
-    it "a forced string value" do
+    it 'a forced string value' do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'prefix', '--string', 'fidget'))
       expect(err).to eq('')
       expect(out).to eq('')
@@ -61,8 +68,8 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       expect(json_after).to match(@json_before)
     end
 
-    it "a forced string value on STDIN" do
-      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'prefix', '--string'), :stdin_data=>'fidget')
+    it 'a forced string value on STDIN' do
+      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'prefix', '--string'), stdin_data: 'fidget')
       expect(err).to eq('')
       expect(out).to eq('')
       expect(status.exitstatus).to eq(0)
@@ -77,7 +84,7 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
     end
 
 # This may not be testable in integration. (since it does things that get filtered out)
-    it "all intermediate keys" #do
+    it 'all intermediate keys' #do
 #      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'one.two.three', 'fidget'))
 #      expect(err).to eq('')
 #      expect(out).to eq('')
@@ -92,8 +99,8 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
 #      expect(json_after).to match(@json_before)
 #    end
 
-    context "a number value" do
-      it "integer 12" do
+    context 'a number value' do
+      it 'integer 12' do
         out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options.length', '--num', '12'))
         expect(err).to eq('')
         expect(out).to eq('')
@@ -108,7 +115,7 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
         expect(json_after).to match(@json_before)
       end
 
-      it "float 12.67" do
+      it 'float 12.67' do
         out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options.length', '--num', '12.67'))
         expect(err).to eq('')
         expect(out).to eq('')
@@ -123,15 +130,15 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
         expect(json_after).to match(@json_before)
       end
 
-      it "fiftyHalf" do
+      it 'fiftyHalf' do
         out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options.length', '--num', 'fiftyHalf'))
         expect(err).to eq("\e[31mValue \"fiftyHalf\" is not a number\e[0m\n")
         expect(out).to eq('')
         expect(status.exitstatus).to eq(2)
       end
 
-      it "on STDIN" do
-        out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options.length', '--num'), :stdin_data=>'12')
+      it 'on STDIN' do
+        out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options.length', '--num'), stdin_data: '12')
         expect(err).to eq('')
         expect(out).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -146,13 +153,13 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
       end
     end
 
-    it "a json object blob" #do
+    it 'a json object blob' #do
 #      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'type', 'base16'))
 #      expect(err).to eq('')
 #      expect(out).to eq('')
 #      expect(status.exitstatus).to eq(0)
 #
-#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options', '--json', '{"casing": "lower", "length": 0}'))
+#      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options', '--json', '{'casing': 'lower', 'length': 0}'))
 #      expect(err).to eq('')
 #      expect(out).to eq('')
 #      expect(status.exitstatus).to eq(0)
@@ -167,10 +174,10 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
 #      expect(json_after).to match(@json_before)
 #    end
 
-    it "a json object blob with stdin"
+    it 'a json object blob with stdin'
 
 # This may not be testable in integration.
-    it "a dictionary" #do
+    it 'a dictionary' #do
 #      out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', 'options', '--dict', 'casing', 'lower'))
 #      expect(err).to eq('')
 #      expect(out).to eq('')
@@ -185,7 +192,7 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
 #      expect(json_after).to match(@json_before)
 #    end
 
-    it "merges into a dictionary" do
+    it 'merges into a dictionary' do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'write', 'Device2.identity_format', '.', '--dict', '--merge', 'prefix', 'tix', 'type', 'base10'))
       expect(err).to eq('')
       expect(out).to eq('')
@@ -202,19 +209,17 @@ RSpec.describe 'murano setting', :cmd, :needs_password do
     end
   end
 
-  context "Writes (using Webservice.cors)" do
+  context 'Writes (using Webservice.cors)' do
     before(:example) do
       out, err, status = Open3.capture3(capcmd('murano', 'setting', 'read', 'Webservice.cors', '-c', 'outformat=json'))
       expect { @json_before = JSON.parse(out) }.to_not raise_error
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
     end
-    # {"origin"=>true,
-    # "methods"=>["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    # "headers"=>["Content-Type", "Cookie", "Authorization"],
-    # "credentials"=>true}
+    # {'origin'=>true,
+    # 'methods'=>['HEAD', 'GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    # 'headers'=>['Content-Type', 'Cookie', 'Authorization'],
+    # 'credentials'=>true}
   end
-
 end
 
-#  vim: set ai et sw=2 ts=2 :

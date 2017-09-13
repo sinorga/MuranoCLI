@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.29 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -11,9 +11,9 @@ require 'pathname'
 require 'cmd_common'
 
 RSpec.describe 'murano init', :cmd do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
-  def expectedResponseWhenIdsFoundInConfig(
+  def expected_response_when_ids_found_in_config(
     t,
     expect_rebasing: false,
     has_one_each_soln: false,
@@ -74,9 +74,9 @@ RSpec.describe 'murano init', :cmd do
       ]
     end
     expecting += [
-      t.a_string_matching(%r{Linked ‘\w+’ to ‘\w+’\n}),
+      t.a_string_matching(/Linked '\w+' to '\w+'\n/),
       "\n",
-      t.a_string_matching(%r{Created default event handler\n}),
+      t.a_string_matching(/Created default event handler\n/),
       "\n",
     ]
     if expect_proj_file_write
@@ -128,26 +128,26 @@ RSpec.describe 'murano init', :cmd do
     expecting += [
       "Success!\n",
       "\n",
-      t.a_string_matching(%r{\s+Business ID: \w+\n}),
-      t.a_string_matching(%r{(\s+Application ID: \w+\n)?}),
-      t.a_string_matching(%r{(\s+Product ID: \w+\n)?}),
+      t.a_string_matching(/\s+Business ID: \w+\n/),
+      t.a_string_matching(/(\s+Application ID: \w+\n)?/),
+      t.a_string_matching(/(\s+Product ID: \w+\n)?/),
       "\n",
     ]
     expecting
   end
 
-  it "Won't init in HOME (gracefully)" do
+  it %(Won't init in HOME (gracefully)) do
     # this is in the project dir. Want to be in HOME
     Dir.chdir(ENV['HOME']) do
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expect(out).to eq("")
+      expect(out).to eq('')
       expect(err).to eq("\e[31mCannot init a project in your HOME directory.\e[0m\n")
       expect(status.exitstatus).to eq(2)
     end
   end
 
-  context "in empty directory", :needs_password do
-    context "with" do
+  context 'in empty directory', :needs_password do
+    context 'with' do
       # Setup a product and application to use.
       # Doing this in a context with before&after so that after runs even when test
       # fails.
@@ -181,11 +181,11 @@ RSpec.describe 'murano init', :cmd do
         expect(status.exitstatus).to eq(0)
       end
 
-      it "existing project" do
+      it 'existing project' do
         # The test account will have one business, one product, and one application.
         # So it won't ask any questions.
         out, err, status = Open3.capture3(capcmd('murano', 'init'))
-        expecting = expectedResponseWhenIdsFoundInConfig(
+        expecting = expected_response_when_ids_found_in_config(
           self,
           has_one_each_soln: true,
         )
@@ -194,17 +194,17 @@ RSpec.describe 'murano init', :cmd do
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
 
-        expect(File.directory?(".murano")).to be true
-        expect(File.exist?(".murano/config")).to be true
-        expect(File.directory?("routes")).to be true
-        expect(File.directory?("services")).to be true
-        expect(File.directory?("files")).to be true
-        expect(File.directory?("modules")).to be true
-        expect(File.directory?("specs")).to be true
+        expect(File.directory?('.murano')).to be true
+        expect(File.exist?('.murano/config')).to be true
+        expect(File.directory?('routes')).to be true
+        expect(File.directory?('services')).to be true
+        expect(File.directory?('files')).to be true
+        expect(File.directory?('modules')).to be true
+        expect(File.directory?('specs')).to be true
       end
     end
 
-    context "without", :needs_password do
+    context 'without', :needs_password do
       before(:example) do
         murano_solutions_expunge_yes
         @applctn_name = rname('initCreatingApp')
@@ -222,7 +222,7 @@ RSpec.describe 'murano init', :cmd do
         expect(status.exitstatus).to eq(0)
       end
 
-      it "existing project" do
+      it 'existing project' do
         # The test account will have one business.
         # It will ask to create an application and product.
         # MAGIC_NUMBER: !!!! the 8 is hardcoded indention here !!!!
@@ -233,7 +233,7 @@ RSpec.describe 'murano init', :cmd do
         EOT
         # 2017-07-05: [lb] added line numbers to use debugger to help maintain this test.
         out, err, status = Open3.capture3(capcmd('murano', 'init'), stdin_data: data)
-        expecting = expectedResponseWhenIdsFoundInConfig(
+        expecting = expected_response_when_ids_found_in_config(
           self,
           has_no_solutions: true,
           expect_proj_file_write: true,
@@ -273,21 +273,21 @@ RSpec.describe 'murano init', :cmd do
         #  a_string_starting_with('          Product ID: '), # 29
         #  "\n", # 30
         #])
-        expect(err).to eq("")
+        expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
 
-        expect(File.directory?(".murano")).to be true
-        expect(File.exist?(".murano/config")).to be true
-        expect(File.directory?("routes")).to be true
-        expect(File.directory?("services")).to be true
-        expect(File.directory?("files")).to be true
-        expect(File.directory?("modules")).to be true
-        expect(File.directory?("specs")).to be true
+        expect(File.directory?('.murano')).to be true
+        expect(File.exist?('.murano/config')).to be true
+        expect(File.directory?('routes')).to be true
+        expect(File.directory?('services')).to be true
+        expect(File.directory?('files')).to be true
+        expect(File.directory?('modules')).to be true
+        expect(File.directory?('specs')).to be true
       end
     end
   end
 
-  context "in existing project directory", :needs_password do
+  context 'in existing project directory', :needs_password do
     before(:example) do
       murano_solutions_expunge_yes
 
@@ -324,11 +324,11 @@ RSpec.describe 'murano init', :cmd do
       end
     end
 
-    it "without ProjectFile" do
+    it 'without ProjectFile' do
       # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      the_expected = expectedResponseWhenIdsFoundInConfig(
+      the_expected = expected_response_when_ids_found_in_config(
         self,
         expect_rebasing: true,
         creates_some_default_directories: true,
@@ -338,24 +338,24 @@ RSpec.describe 'murano init', :cmd do
       )
       out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
       expect(out_lines).to match_array(the_expected)
-      expect(err).to eq("")
+      expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
-      expect(File.directory?(".murano")).to be true
-      expect(File.exist?(".murano/config")).to be true
-      expect(File.directory?("routes")).to be true
-      expect(File.directory?("services")).to be true
-      expect(File.directory?("files")).to be true
-      expect(File.directory?("modules")).to be true
-      expect(File.directory?("specs")).to be true
+      expect(File.directory?('.murano')).to be true
+      expect(File.exist?('.murano/config')).to be true
+      expect(File.directory?('routes')).to be true
+      expect(File.directory?('services')).to be true
+      expect(File.directory?('files')).to be true
+      expect(File.directory?('modules')).to be true
+      expect(File.directory?('specs')).to be true
     end
 
-    it "with ProjectFile" do
+    it 'with ProjectFile' do
       FileUtils.copy(File.join(@testdir, 'spec/fixtures/ProjectFiles/only_meta.yaml'), 'test.murano')
       # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expected = expectedResponseWhenIdsFoundInConfig(
+      expected = expected_response_when_ids_found_in_config(
         self,
         expect_rebasing: true,
         expect_proj_file_write: false,
@@ -366,38 +366,38 @@ RSpec.describe 'murano init', :cmd do
       )
       out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
       expect(out_lines).to match_array(expected)
-      expect(err).to eq("")
+      expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
-      expect(File.directory?(".murano")).to be true
-      expect(File.exist?(".murano/config")).to be true
-      expect(File.directory?("routes")).to be true
-      expect(File.directory?("services")).to be true
-      expect(File.directory?("files")).to be true
-      expect(File.directory?("modules")).to be true
-      expect(File.directory?("specs")).to be true
+      expect(File.directory?('.murano')).to be true
+      expect(File.exist?('.murano/config')).to be true
+      expect(File.directory?('routes')).to be true
+      expect(File.directory?('services')).to be true
+      expect(File.directory?('files')).to be true
+      expect(File.directory?('modules')).to be true
+      expect(File.directory?('specs')).to be true
     end
 
-    it "with SolutionFile 0.2.0" do
+    it 'with SolutionFile 0.2.0' do
       File.open('Solutionfile.json', 'wb') do |io|
         io << {
-          :default_page => 'index.html',
-          :file_dir => 'files',
-          :custom_api => 'routes/manyRoutes.lua',
-          :modules => {
-            :table_util => 'modules/table_util.lua'
+          default_page: 'index.html',
+          file_dir: 'files',
+          custom_api: 'routes/manyRoutes.lua',
+          modules: {
+            table_util: 'modules/table_util.lua',
           },
-          :event_handler => {
-            :device => {
-              :datapoint => 'services/devdata.lua'
-            }
-          }
+          event_handler: {
+            device: {
+              datapoint: 'services/devdata.lua',
+            },
+          },
         }.to_json
       end
       # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expected = expectedResponseWhenIdsFoundInConfig(
+      expected = expected_response_when_ids_found_in_config(
         self,
         expect_rebasing: true,
         creates_some_default_directories: true,
@@ -408,39 +408,39 @@ RSpec.describe 'murano init', :cmd do
       )
       out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
       expect(out_lines).to match_array(expected)
-      expect(err).to eq("")
+      expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
-      expect(File.directory?(".murano")).to be true
-      expect(File.exist?(".murano/config")).to be true
-      expect(File.directory?("routes")).to be true
-      expect(File.directory?("services")).to be true
-      expect(File.directory?("files")).to be true
-      expect(File.directory?("modules")).to be true
-      expect(File.directory?("specs")).to be true
+      expect(File.directory?('.murano')).to be true
+      expect(File.exist?('.murano/config')).to be true
+      expect(File.directory?('routes')).to be true
+      expect(File.directory?('services')).to be true
+      expect(File.directory?('files')).to be true
+      expect(File.directory?('modules')).to be true
+      expect(File.directory?('specs')).to be true
     end
 
-    it "with SolutionFile 0.3.0" do
+    it 'with SolutionFile 0.3.0' do
       File.open('Solutionfile.json', 'wb') do |io|
         io << {
-          :default_page => 'index.html',
-          :assets => 'files',
-          :routes => 'routes/manyRoutes.lua',
-          :modules => {
-            :table_util => 'modules/table_util.lua'
+          default_page: 'index.html',
+          assets: 'files',
+          routes: 'routes/manyRoutes.lua',
+          modules: {
+            table_util: 'modules/table_util.lua',
           },
-          :services => {
-            :device => {
-              :datapoint => 'services/devdata.lua'
-            }
+          services: {
+            device: {
+              datapoint: 'services/devdata.lua',
+            },
           },
-          :version => '0.3.0',
+          version: '0.3.0',
         }.to_json
       end
       # The test account will have one business, one product, and one application.
       # So it won't ask any questions.
       out, err, status = Open3.capture3(capcmd('murano', 'init'))
-      expected = expectedResponseWhenIdsFoundInConfig(
+      expected = expected_response_when_ids_found_in_config(
         self,
         expect_rebasing: true,
         creates_some_default_directories: true,
@@ -451,18 +451,17 @@ RSpec.describe 'murano init', :cmd do
       )
       out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
       expect(out_lines).to match_array(expected)
-      expect(err).to eq("")
+      expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
 
-      expect(File.directory?(".murano")).to be true
-      expect(File.exist?(".murano/config")).to be true
-      expect(File.directory?("routes")).to be true
-      expect(File.directory?("services")).to be true
-      expect(File.directory?("files")).to be true
-      expect(File.directory?("modules")).to be true
-      expect(File.directory?("specs")).to be true
+      expect(File.directory?('.murano')).to be true
+      expect(File.exist?('.murano/config')).to be true
+      expect(File.directory?('routes')).to be true
+      expect(File.directory?('services')).to be true
+      expect(File.directory?('files')).to be true
+      expect(File.directory?('modules')).to be true
+      expect(File.directory?('specs')).to be true
     end
   end
-
 end
 

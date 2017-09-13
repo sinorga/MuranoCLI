@@ -1,3 +1,10 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 #require 'erb'
 require 'highline/import'
 #require 'tempfile'
@@ -7,7 +14,7 @@ require 'MrMurano/ProjectFile'
 require '_workspace'
 
 RSpec.describe MrMurano::ConfigMigrate do
-  include_context "WORKSPACE"
+  include_context 'WORKSPACE'
   before(:example) do
     @saved_pwd = ENV['MURANO_PASSWORD']
     ENV['MURANO_PASSWORD'] = nil
@@ -22,12 +29,15 @@ RSpec.describe MrMurano::ConfigMigrate do
     $project.load
 
     @lry = Pathname.new(@project_dir) + '.Solutionfile.secret'
-    FileUtils.copy(File.join(@testdir, 'spec/fixtures/SolutionFiles/secret.json'), @lry.to_path)
+    FileUtils.copy(
+      File.join(@testdir, 'spec/fixtures/SolutionFiles/secret.json'), @lry.to_path
+    )
 
     @mrt = MrMurano::ConfigMigrate.new
 
     @stdsaved = [$stdout, $stderr]
-    $stdout, $stderr = [StringIO.new, StringIO.new]
+    $stdout = StringIO.new
+    $stderr = StringIO.new
   end
 
   after(:example) do
@@ -36,7 +46,7 @@ RSpec.describe MrMurano::ConfigMigrate do
     ENV['MURANO_CONFIGFILE'] = @saved_cfg
   end
 
-  it "imports all" do
+  it 'imports all' do
     @mrt.import_secret
 
     expect($cfg['application.id']).to eq('ABCDEFG')
@@ -45,12 +55,12 @@ RSpec.describe MrMurano::ConfigMigrate do
     pff = $cfg.file_at('passwords', :user)
     pwd = MrMurano::Passwords.new(pff)
     pwd.load
-    expect(pwd.get$cfg['net.host'], $cfg['user.name']).to eq('gibblygook')
+    expect(pwd.get($cfg['net.host'], $cfg['user.name'])).to eq('gibblygook')
     expect($stdout.string).to eq('')
     expect($stderr.string).to eq('')
   end
 
-  it "imports over" do
+  it 'imports over' do
     $cfg['application.id'] = '12'
     $cfg['product.id'] = 'awdfvs'
     $cfg['user.name'] = '3qrarvsa'
@@ -66,18 +76,20 @@ RSpec.describe MrMurano::ConfigMigrate do
     pff = $cfg.file_at('passwords', :user)
     pwd = MrMurano::Passwords.new(pff)
     pwd.load
-    expect(pwd.get$cfg['net.host'], $cfg['user.name']).to eq('gibblygook')
+    expect(pwd.get($cfg['net.host'], $cfg['user.name'])).to eq('gibblygook')
     expect($stdout.string).to eq('')
     expect($stderr.string).to eq('')
   end
 
-  it "Asks about password differences" do
+  it 'Asks about password differences' do
     pff = $cfg.file_at('passwords', :user)
     pwd = MrMurano::Passwords.new(pff)
     pwd.set($cfg['net.host'], 'test@user.account', 'bob')
     pwd.save
 
-    expect($terminal).to receive(:ask).with('A different password for this account already exists. Overwrite? N/y').and_return('y')
+    expect($terminal).to receive(:ask).with(
+      'A different password for this account already exists. Overwrite? N/y'
+    ).and_return('y')
 
     @mrt.import_secret
 
@@ -87,10 +99,9 @@ RSpec.describe MrMurano::ConfigMigrate do
     pff = $cfg.file_at('passwords', :user)
     pwd = MrMurano::Passwords.new(pff)
     pwd.load
-    expect(pwd.get$cfg['net.host'], $cfg['user.name']).to eq('gibblygook')
+    expect(pwd.get($cfg['net.host'], $cfg['user.name'])).to eq('gibblygook')
     expect($stdout.string).to eq('')
     expect($stderr.string).to eq('')
   end
-
 end
-#  vim: set ai et sw=2 ts=2 :
+

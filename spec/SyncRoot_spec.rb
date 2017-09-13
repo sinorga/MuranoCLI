@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.17 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -13,7 +13,7 @@ require 'MrMurano/SyncUpDown'
 require '_workspace'
 
 RSpec.describe MrMurano::SyncRoot do
-  include_context "WORKSPACE"
+  include_context 'WORKSPACE'
 
   after(:example) do
     MrMurano::SyncRoot.instance.reset
@@ -27,7 +27,7 @@ RSpec.describe MrMurano::SyncRoot do
     #       warning: method redefined; discarding old description
     #   /exo/clients/exosite/MuranoCLIs/MuranoCLI+landonb/spec/SyncRoot_spec.rb:30:
     #       warning: previous definition of description was here
-    if !defined?(User)
+    unless defined?(User)
       class User
         def self.description
           %(describe user)
@@ -35,7 +35,7 @@ RSpec.describe MrMurano::SyncRoot do
       end
     end
     MrMurano::SyncRoot.instance.add('user', User, 'U', true)
-    if !defined?(Role)
+    unless defined?(Role)
       class Role
         def self.description
           %(describe role)
@@ -52,58 +52,60 @@ RSpec.describe MrMurano::SyncRoot do
 
     @options = {}
     @options.define_singleton_method(:method_missing) do |mid, *args|
-      if mid.to_s.match(/^(.+)=$/) then
-        self[$1.to_sym] = args.first
+      if mid.to_s =~ /^(.+)=$/
+        self[Regexp.last_match(1).to_sym] = args.first
       else
         self[mid]
       end
     end
   end
 
-  it "has defaults" do
+  it 'has defaults' do
     ret = MrMurano::SyncRoot.instance.bydefault
     expect(ret).to eq(['user'])
   end
 
-  it "iterates on each" do
-    ret=[]
+  it 'iterates on each' do
+    ret = []
     MrMurano::SyncRoot.instance.each { |a, _b, _c, _d| ret << a }
-    expect(ret).to eq(["user", "role"])
+    expect(ret).to eq(%w[user role])
   end
 
-  it "iterates only on selected" do
+  it 'iterates only on selected' do
     @options.role = true
-    ret=[]
+    ret = []
     MrMurano::SyncRoot.instance.each_filtered(@options) { |a, _b, _c, _d| ret << a }
-    expect(ret).to eq(["role"])
+    expect(ret).to eq(['role'])
   end
 
-  it "selects all" do
+  it 'selects all' do
     @options.all = true
     MrMurano::SyncRoot.instance.check_same(@options)
-    expect(@options).to eq({:all=>true, :user=>true, :role=>true})
+    expect(@options).to eq(all: true, user: true, role: true)
   end
 
-  it "selects defaults when none" do
+  it 'selects defaults when none' do
     MrMurano::SyncRoot.instance.check_same(@options)
-    expect(@options).to eq({:user=>true})
+    expect(@options).to eq(user: true)
   end
 
-  it "selects custom defaults when none" do
+  it 'selects custom defaults when none' do
     $cfg['sync.bydefault'] = 'role'
     MrMurano::SyncRoot.instance.check_same(@options)
-    expect(@options).to eq({role: true})
+    expect(@options).to eq(role: true)
   end
 
-  it "builds option params" do
+  it 'builds option params' do
     ret = []
     MrMurano::SyncRoot.instance.each_option do |s, l, d|
       ret << [s, l, d]
     end
-    expect(ret).to eq([
-      ["-U", "--[no-]user", "describe user"],
-      ["-G", "--[no-]role", "describe role"],
-    ])
+    expect(ret).to eq(
+      [
+        ['-U', '--[no-]user', 'describe user'],
+        ['-G', '--[no-]role', 'describe role'],
+      ]
+    )
   end
 end
 
