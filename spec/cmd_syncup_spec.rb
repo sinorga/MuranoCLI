@@ -79,7 +79,11 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       #expect(outl[3]).to eq("Adding item humidity\n")
       (0..3).each { |ln| expect(outl[ln]).to start_with('Adding item ') }
       expect(outl[4]).to eq("Updating product resources\n")
-      expect(outl[5]).to eq("Adding item table_util\n")
+      # Windows is insane:
+      #   "Adding item ........................Administrator.AppData.Local.Temp.2.d20170913-3860-pgji6g.project.modules.table_util\n"
+      #expect(outl[5]).to eq("Adding item table_util\n")
+      expect(outl[5]).to start_with("Adding item ")
+      expect(outl[5]).to end_with("table_util\n")
       #expect(outl[6]).to eq("Updating item c3juj9vnmec000000_event\n")
       # The order isn't always consistent, so just do start_with.
       #expect(outl[7]).to eq("Updating item timer_timer\n")
