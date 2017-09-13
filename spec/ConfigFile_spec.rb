@@ -1,16 +1,23 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'MrMurano/version'
 require 'MrMurano/Config'
 require 'tempfile'
 
 RSpec.describe MrMurano::Config::ConfigFile do
-  it "Creates a file" do
+  it 'Creates a file' do
     tmpfile = Dir.tmpdir + '/cfgtest' # This way because Tempfile.new creates.
     begin
       cf = MrMurano::Config::ConfigFile.new(:user, tmpfile)
       cf.write
 
       expect(FileTest.exist?(tmpfile))
-      unless Gem.win_platform? then
+      unless Gem.win_platform?
         expect(FileTest.world_readable?(tmpfile)).to be(nil)
         expect(FileTest.world_writable?(tmpfile)).to be(nil)
       end
@@ -19,7 +26,7 @@ RSpec.describe MrMurano::Config::ConfigFile do
     end
   end
 
-  it ":internal does not write a file" do
+  it ':internal does not write a file' do
     tmpfile = Dir.tmpdir + '/cfgtest' # This way because Tempfile.new creates.
     begin
       MrMurano::Config::ConfigFile.new(:internal, tmpfile)
@@ -28,7 +35,7 @@ RSpec.describe MrMurano::Config::ConfigFile do
       File.unlink(tmpfile) if FileTest.exist?(tmpfile)
     end
   end
-  it ":defaults does not write a file" do
+  it ':defaults does not write a file' do
     tmpfile = Dir.tmpdir + '/cfgtest' # This way because Tempfile.new creates.
     begin
       MrMurano::Config::ConfigFile.new(:defaults, tmpfile)
@@ -38,14 +45,11 @@ RSpec.describe MrMurano::Config::ConfigFile do
     end
   end
 
-  it "loads a file" do
-      cf = MrMurano::Config::ConfigFile.new(:project, 'spec/fixtures/configfile')
-      cf.load
+  it 'loads a file' do
+    cf = MrMurano::Config::ConfigFile.new(:project, 'spec/fixtures/configfile')
+    cf.load
 
-      expect(cf[:data]['solution']['id']).to eq('XXXXXXXXXX')
+    expect(cf[:data]['solution']['id']).to eq('XXXXXXXXXX')
   end
-
 end
-
-#  vim: set ai et sw=2 ts=2 :
 
