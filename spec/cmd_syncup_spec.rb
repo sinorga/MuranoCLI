@@ -30,7 +30,7 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
     out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
     #expect(out).to a_string_starting_with("Linked product #{@product_name}")
     olines = out.lines
-    expect(olines[0].encode!('UTF-8', 'UTF-8')).to eq("Linked ‘#{@product_name}’ to ‘#{@applctn_name}’\n")
+    expect(strip_fancy(olines[0])).to eq("Linked '#{@product_name}' to '#{@applctn_name}'\n")
     expect(olines[1]).to eq("Created default event handler\n")
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
@@ -65,7 +65,7 @@ RSpec.describe 'murano syncup', :cmd, :needs_password do
       #   Skipping missing location ‘/tmp/d20170809-7670-z315jn/project/services’ (Interfaces)
       expect(elines).to(satisfy { |_v| elines.length == 2 })
       elines.each do |line|
-        expect(line.encode!('UTF-8', 'UTF-8')).to start_with("\e[33mSkipping missing location ‘")
+        expect(strip_fancy(line)).to start_with("\e[33mSkipping missing location '")
       end
     end
 

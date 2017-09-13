@@ -189,7 +189,7 @@ RSpec.describe 'murano init', :cmd do
           self,
           has_one_each_soln: true,
         )
-        out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
+        out_lines = out.lines.map { |line| strip_fancy(line) }
         expect(out_lines).to match_array(expecting)
         expect(err).to eq('')
         expect(status.exitstatus).to eq(0)
@@ -238,7 +238,7 @@ RSpec.describe 'murano init', :cmd do
           has_no_solutions: true,
           expect_proj_file_write: true,
         )
-        out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
+        out_lines = out.lines.map { |line| strip_fancy(line) }
         expect(out_lines).to match_array(expecting)
         #expect(out.lines).to match_array([
         #  "\n", # 0
@@ -258,7 +258,7 @@ RSpec.describe 'murano init', :cmd do
         #  "Please enter the Product name: \n", # 14
         #  a_string_starting_with('Created new Product: '), # 15
         #  "\n", # 16
-        #  a_string_starting_with('Linked ‘'), # 17
+        #  a_string_starting_with("Linked '"), # 17
         #  "\n", # 18
         #  "Created default event handler\n", # 19
         #  "\n", # 20
@@ -336,7 +336,7 @@ RSpec.describe 'murano init', :cmd do
         # murano init *will* download all the event handlers.
         #local_files_found: true,
       )
-      out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
+      out_lines = out.lines.map { |line| strip_fancy(line) }
       expect(out_lines).to match_array(the_expected)
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
@@ -364,7 +364,7 @@ RSpec.describe 'murano init', :cmd do
         # murano init *will* download all the event handlers.
         #local_files_found: true,
       )
-      out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
+      out_lines = out.lines.map { |line| strip_fancy(line) }
       expect(out_lines).to match_array(expected)
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
@@ -406,7 +406,7 @@ RSpec.describe 'murano init', :cmd do
         ##local_files_found_application: true,
         #local_files_found_product: true,
       )
-      out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
+      out_lines = out.lines.map { |line| strip_fancy(line) }
       expect(out_lines).to match_array(expected)
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
@@ -449,7 +449,7 @@ RSpec.describe 'murano init', :cmd do
         ##local_files_found_application: true,
         #local_files_found_product: true,
       )
-      out_lines = out.lines.map { |line| line.encode!('UTF-8', 'UTF-8') }
+      out_lines = out.lines.map { |line| strip_fancy(line) }
       expect(out_lines).to match_array(expected)
       expect(err).to eq('')
       expect(status.exitstatus).to eq(0)
