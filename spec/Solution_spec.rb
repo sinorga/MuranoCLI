@@ -1,3 +1,10 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'tempfile'
 require 'yaml'
 require 'MrMurano/version'
@@ -7,7 +14,7 @@ require 'MrMurano/SyncRoot'
 require '_workspace'
 
 RSpec.describe MrMurano::Solution do
-  include_context "WORKSPACE"
+  include_context 'WORKSPACE'
   before(:example) do
     MrMurano::SyncRoot.instance.reset
     $cfg = MrMurano::Config.new
@@ -23,79 +30,100 @@ RSpec.describe MrMurano::Solution do
     @srv = MrMurano::Product.new
     #@srv = MrMurano::Application.new
 
-    allow(@srv).to receive(:token).and_return("TTTTTTTTTT")
+    allow(@srv).to receive(:token).and_return('TTTTTTTTTT')
   end
 
-  it "initializes" do
+  it 'initializes' do
     uri = @srv.endpoint('/')
-    expect(uri.to_s).to eq("https://bizapi.hosted.exosite.io/api:1/solution/XYZ/")
+    expect(uri.to_s).to eq(
+      'https://bizapi.hosted.exosite.io/api:1/solution/XYZ/'
+    )
   end
 
-  it "gets info" do
+  it 'gets info' do
     body = {
-      :id=>"XYZ",
-      :label=>nil,
-      :domain=>"ugdemo.apps.exosite.io",
-      :biz_id=>"ABCDEFG",
-      :cors=> "{\"origin\":true,\"methods\":[\"HEAD\",\"GET\",\"POST\",\"PUT\",\"DELETE\",\"OPTIONS\",\"PATCH\"],\"headers\":[\"Content-Type\",\"Cookie\",\"Authorization\"],\"credentials\":true}"
+      id: 'XYZ',
+      label: nil,
+      domain: 'ugdemo.apps.exosite.io',
+      biz_id: 'ABCDEFG',
+      cors: '{"origin":true,"methods":["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],"headers":["Content-Type","Cookie","Authorization"],"credentials":true}',
     }
 
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
+    stub_request(
+      :get, 'https://bizapi.hosted.exosite.io/api:1/solution/XYZ'
+    ).with(
+      headers: {
+        'Authorization' => 'token TTTTTTTTTT',
+        'Content-Type' => 'application/json',
+      }
+    ).to_return(body: body.to_json)
 
-    ret = @srv.info()
+    ret = @srv.info
     expect(ret).to eq(body)
   end
 
-  it "lists" do
+  it 'lists' do
     body = {
-      :id=>"XYZ",
-      :label=>nil,
-      :domain=>"ugdemo.apps.exosite.io",
-      :biz_id=>"ABCDEFG",
-      :cors=> "{\"origin\":true,\"methods\":[\"HEAD\",\"GET\",\"POST\",\"PUT\",\"DELETE\",\"OPTIONS\",\"PATCH\"],\"headers\":[\"Content-Type\",\"Cookie\",\"Authorization\"],\"credentials\":true}"
+      id: 'XYZ',
+      label: nil,
+      domain: 'ugdemo.apps.exosite.io',
+      biz_id: 'ABCDEFG',
+      cors: '{"origin":true,"methods":["HEAD","GET","POST","PUT","DELETE","OPTIONS","PATCH"],"headers":["Content-Type","Cookie","Authorization"],"credentials":true}',
     }
 
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
+    stub_request(
+      :get, 'https://bizapi.hosted.exosite.io/api:1/solution/XYZ/'
+    ).with(
+      headers: {
+        'Authorization' => 'token TTTTTTTTTT',
+        'Content-Type' => 'application/json',
+      }
+    ).to_return(body: body.to_json)
 
     ret = @srv.list
     expect(ret).to eq(body)
   end
 
-  it "Gets version" do
-    body = {:min_cli_version=>"0.10"}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/version").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
+  it 'Gets version' do
+    body = { min_cli_version: '0.10' }
+    stub_request(
+      :get, 'https://bizapi.hosted.exosite.io/api:1/solution/XYZ/version'
+    ).with(
+      headers: {
+        'Authorization' => 'token TTTTTTTTTT',
+        'Content-Type' => 'application/json',
+      }
+    ).to_return(body: body.to_json)
 
-    ret = @srv.version()
+    ret = @srv.version
     expect(ret).to eq(body)
   end
 
-  it "Gets logs" do
-    body = {:p=>[
-      {:type=>"error",
-       :timestamp=>1481746755,
-       :subject=>"service call failed",
-       :data=>{:service_alias=>"user", :function_call=>"assignUser"}
-      }, ],
-      :total=>1}
-    stub_request(:get, "https://bizapi.hosted.exosite.io/api:1/solution/XYZ/logs").
-      with(:headers=>{'Authorization'=>'token TTTTTTTTTT',
-                      'Content-Type'=>'application/json'}).
-      to_return(body: body.to_json)
+  it 'Gets logs' do
+    body = {
+      p: [
+        {
+          type: 'error',
+          timestamp: 1_481_746_755,
+          subject: 'service call failed',
+          data: {
+            service_alias: 'user', function_call: 'assignUser',
+          },
+        },
+      ],
+      total: 1,
+    }
+    stub_request(
+      :get, 'https://bizapi.hosted.exosite.io/api:1/solution/XYZ/logs'
+    ).with(
+      headers: {
+        'Authorization' => 'token TTTTTTTTTT',
+        'Content-Type' => 'application/json',
+      }
+    ).to_return(body: body.to_json)
 
-    ret = @srv.log()
+    ret = @srv.log
     expect(ret).to eq(body)
   end
-
 end
-
-#  vim: set ai et sw=2 ts=2 :
 

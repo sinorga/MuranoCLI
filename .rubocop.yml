@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.31 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
 #  vim:tw=0:ts=2:sw=2:et:ai
@@ -28,8 +28,6 @@ Layout/TrailingBlankLines:
 Lint/ScriptPermission:
   Exclude:
     - 'bin/murano'
-    # Also the rspec shim-link:
-    - 'lib/MrMurano/spec_commander.rb'
 
 # "Assignment Branch Condition size for XXX is too high."
 # http://wiki.c2.com/?AbcMetric
@@ -121,6 +119,7 @@ Style/FileName:
     - 'lib/MrMurano/makePretty.rb'
     - 'lib/MrMurano/Account.rb'
     - 'lib/MrMurano/Business.rb'
+    - 'lib/MrMurano/Commander-Entry.rb'
     - 'lib/MrMurano/Config-Migrate.rb'
     - 'lib/MrMurano/Config.rb'
     - 'lib/MrMurano/Content.rb'
@@ -146,6 +145,34 @@ Style/FileName:
     - 'lib/MrMurano/Webservice-Endpoint.rb'
     - 'lib/MrMurano/Webservice-File.rb'
     - 'lib/MrMurano/Webservice.rb'
+    - 'spec/Account-Passwords_spec.rb'
+    - 'spec/Account_spec.rb'
+    - 'spec/Business_spec.rb'
+    - 'spec/ConfigFile_spec.rb'
+    - 'spec/ConfigMigrate_spec.rb'
+    - 'spec/Config_spec.rb'
+    - 'spec/Content_spec.rb'
+    - 'spec/GatewayBase_spec.rb'
+    - 'spec/GatewayDevice_spec.rb'
+    - 'spec/GatewayResource_spec.rb'
+    - 'spec/GatewaySettings_spec.rb'
+    - 'spec/Http_spec.rb'
+    - 'spec/MakePretties_spec.rb'
+    - 'spec/Mock_spec.rb'
+    - 'spec/ProjectFile_spec.rb'
+    - 'spec/Setting_spec.rb'
+    - 'spec/Solution-ServiceConfig_spec.rb'
+    - 'spec/Solution-ServiceEventHandler_spec.rb'
+    - 'spec/Solution-ServiceModules_spec.rb'
+    - 'spec/Solution-UsersRoles_spec.rb'
+    - 'spec/Solution_spec.rb'
+    - 'spec/SyncRoot_spec.rb'
+    - 'spec/SyncUpDown_spec.rb'
+    - 'spec/Verbosing_spec.rb'
+    - 'spec/Webservice-Cors_spec.rb'
+    - 'spec/Webservice-Endpoint_spec.rb'
+    - 'spec/Webservice-File_spec.rb'
+    - 'spec/Webservice-Setting_spec.rb'
 
 # FIXME/2017-06-30: We should fix this one... put $cfg in MrMurano class.
 # "Do not introduce global variables."
@@ -243,65 +270,9 @@ AllCops:
     # 2017-08-16: Ug.
     - 'lib/MrMurano/optparse.rb'
     #
-    # 2017-08-29: A hack for rspec.
-    #- 'lib/Murano/spec_commander.rb'
-    #
     # 2017-08-30: Ug. Loading orderedhash spits out warning gobbled by rspec fails test.
     - 'lib/MrMurano/orderedhash.rb'
     #
     # The spec_helper is a generated file; don't care.
     - 'spec/spec_helper.rb'
-    #
-    # 2017-07-25: It's probably not worth our time to lint the spec tests.
-    # 2017-07-31: 7735 offenses in the Spec tests -- not worth it to fix!!
-    #- 'spec/**/*'
-    - 'spec/Account-Passwords_spec.rb'
-    - 'spec/Account_spec.rb'
-    - 'spec/Business_spec.rb'
-    - 'spec/ConfigFile_spec.rb'
-    - 'spec/ConfigMigrate_spec.rb'
-    - 'spec/Config_spec.rb'
-    - 'spec/Content_spec.rb'
-    - 'spec/GatewayBase_spec.rb'
-    - 'spec/GatewayDevice_spec.rb'
-    - 'spec/GatewayResource_spec.rb'
-    - 'spec/GatewaySettings_spec.rb'
-    - 'spec/Http_spec.rb'
-    - 'spec/MakePretties_spec.rb'
-    - 'spec/Mock_spec.rb'
-    - 'spec/ProjectFile_spec.rb'
-    - 'spec/Setting_spec.rb'
-    - 'spec/Solution-ServiceConfig_spec.rb'
-    - 'spec/Solution-ServiceEventHandler_spec.rb'
-    - 'spec/Solution-ServiceModules_spec.rb'
-    - 'spec/Solution-UsersRoles_spec.rb'
-    - 'spec/Solution_spec.rb'
-    - 'spec/SyncRoot_spec.rb'
-    - 'spec/SyncUpDown_spec.rb'
-    - 'spec/Verbosing_spec.rb'
-    - 'spec/Webservice-Cors_spec.rb'
-    - 'spec/Webservice-Endpoint_spec.rb'
-    - 'spec/Webservice-File_spec.rb'
-    - 'spec/Webservice-Setting_spec.rb'
-    #- 'spec/_workspace.rb'
-    - 'spec/cmd_business_spec.rb'
-    #- 'spec/cmd_common.rb'
-    - 'spec/cmd_config_spec.rb'
-    - 'spec/cmd_content_spec.rb'
-    - 'spec/cmd_cors_spec.rb'
-    - 'spec/cmd_device_spec.rb'
-    - 'spec/cmd_domain_spec.rb'
-    #- 'spec/cmd_exchange_spec.rb'
-    #- 'spec/cmd_help_spec.rb'
-    - 'spec/cmd_init_spec.rb'
-    - 'spec/cmd_keystore_spec.rb'
-    - 'spec/cmd_link_spec.rb'
-    - 'spec/cmd_password_spec.rb'
-    - 'spec/cmd_setting_application_spec.rb'
-    - 'spec/cmd_setting_product_spec.rb'
-    - 'spec/cmd_status_spec.rb'
-    - 'spec/cmd_syncdown_spec.rb'
-    - 'spec/cmd_syncup_spec.rb'
-    - 'spec/cmd_usage_spec.rb'
-    #- 'spec/cmd_version_spec.rb'
 

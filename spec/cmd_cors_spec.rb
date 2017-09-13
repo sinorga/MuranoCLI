@@ -1,3 +1,10 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
 require 'open3'
 require 'pathname'
@@ -5,7 +12,7 @@ require 'json'
 require 'cmd_common'
 
 RSpec.describe 'murano cors', :cmd, :needs_password do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
   before(:example) do
     @product_name = rname('corstest')
@@ -21,16 +28,16 @@ RSpec.describe 'murano cors', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "show CORS" do
+  it 'show CORS' do
     out, err, status = Open3.capture3(capcmd('murano', 'cors', '-c', 'outformat=json'))
     expect { JSON.parse(out) }.to_not raise_error
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
 
-  it "sets CORS" do
+  it 'sets CORS' do
     File.open('cors.yaml', 'wb') do |io|
-      io << {:origin=>['http://localhost:*']}.to_json
+      io << { origin: ['http://localhost:*'] }.to_json
     end
 
     out, err, status = Open3.capture3(capcmd('murano', 'cors', 'set', 'cors.yaml'))
@@ -44,7 +51,6 @@ RSpec.describe 'murano cors', :cmd, :needs_password do
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
-
 end
 
 #  vim: set ai et sw=2 ts=2 :

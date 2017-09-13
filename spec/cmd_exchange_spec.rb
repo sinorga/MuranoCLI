@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.31 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -107,8 +107,8 @@ RSpec.describe 'murano exchange', :cmd, :needs_password do
           element_id = stdout.strip
           stdout, stderr = murano_command_exits('exchange purchase', element_id)
           expect(stdout).to eq('')
-          expect(stderr).to eq(
-            "The specified element has already been purchased: ‘#{element_name}’ (#{element_id})\n"
+          expect(strip_fancy(stderr)).to eq(
+            "The specified element has already been purchased: '#{element_name}' (#{element_id})\n"
           )
         end
       end

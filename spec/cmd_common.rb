@@ -1,4 +1,4 @@
-# Last Modified: 2017.08.31 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -8,6 +8,7 @@
 require 'highline'
 # Set HighLine's $terminal global.
 require 'highline/import'
+require 'os'
 require 'pathname'
 require 'shellwords'
 require 'timeout'
@@ -27,13 +28,13 @@ at_exit do
     STDERR.puts('¡!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
   end
 end
-alias original_at_exit at_exit
+alias original_at_exit at_exit unless defined?(original_at_exit)
 def at_exit(*args, &block)
   #original_at_exit *args, &block
   # pass!
 end
 
-require 'MrMurano/spec_commander.rb'
+require 'MrMurano/Commander-Entry'
 
 module Commander
   class Command
@@ -107,8 +108,10 @@ RSpec.shared_context 'CI_CMD' do
       # This happens on Windows...
       require 'rbconfig'
       # Check the platform, e.g., "linux-gnu", or other.
-      is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-      unless is_windows
+      #is_windows = (
+      #  RbConfig::CONFIG['host_os'] =~ /mswin|msys|mingw|cygwin|bccwin|wince|emc/
+      #)
+      unless OS.windows?
         $stderr.puts(
           'Unexpected: ln_s failed on non-Windows machine / ' \
           "host_os: #{RbConfig::CONFIG['host_os']} / err: #{err}"
@@ -164,8 +167,8 @@ RSpec.shared_context 'CI_CMD' do
     out, err, status = Open3.capture3(capcmd('murano', 'assign', 'set'))
     #expect(out).to a_string_starting_with("Linked product #{@proj_name_prod}")
     olines = out.lines
-    expect(olines[0].encode!('UTF-8', 'UTF-8')).to eq(
-      "Linked ‘#{@proj_name_prod}’ to ‘#{@proj_name_appy}’\n"
+    expect(strip_fancy(olines[0])).to eq(
+      "Linked '#{@proj_name_prod}' to '#{@proj_name_appy}'\n"
     )
     expect(olines[1]).to eq("Created default event handler\n")
     expect(err).to eq('')
@@ -206,6 +209,23 @@ RSpec.shared_context 'CI_CMD' do
 
   def strip_color(str)
     str.gsub(/\e\[(\d+)m/, '')
+  end
+
+  def strip_fancy(str)
+    # Windows has a complaint about the fancy quotes if you don't encode!, which is
+    #
+    #   expected: "Linked \u2018syncdowntestprd1e8b4034\u2019
+    #               to \u2018syncdowntestapp23d5135b\u2019\n"
+    #        got: "Linked \xE2\x80\x98syncdowntestprd1e8b4034\xE2\x80\x99
+    #               to \xE2\x80\x98syncdowntestapp23d5135b\xE2\x80\x99\n"
+    #
+    # or, to put it another way,
+    #
+    #     -Linked ?syncdowntestprd1e8b4034? to ?syncdowntestapp23d5135b?
+    #     +Linked Î“Ã‡Ã¿syncdowntestprd1e8b4034Î“Ã‡Ã– to Î“Ã‡Ã¿syncdowntestapp23d5135bÎ“Ã‡Ã–
+    #
+    # which we can solve with an encode call. (Or but using norm quotes.)
+    str.encode!('UTF-8', 'UTF-8').tr(%(‘), %(')).tr(%(’), %('))
   end
 
   # *** rb-commander goodies

@@ -1,4 +1,4 @@
-# Last Modified: 2017.09.11 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -252,20 +252,17 @@ module MrMurano
           "but config says #{fancy_ticks(@name)}."
         )
       end
-      if !@meta[:name].to_s.empty?
-        # NOTE: Pre-ADC (a/k/a migrated) applications are not named, at least
-        # when you query the business/<bid>/solution/ endpoint. But when you
-        # call info_safe, which GETs the solution details, the name is
-        # the domain and contains dots, which is considered an illegal name!
-        if @meta[:name] != @meta[:domain]
-          set_name(@meta[:name])
-          unless @valid_name || type == :solution
-            warning(
-              "Unexpected: Server returned invalid name: #{fancy_ticks(@meta[:name])}"
-            )
-          end
-        end
-      end
+      return if @meta[:name].to_s.empty?
+      # NOTE: Pre-ADC (a/k/a migrated) applications are not named, at least
+      # when you query the business/<bid>/solution/ endpoint. But when you
+      # call info_safe, which GETs the solution details, the name is
+      # the domain and contains dots, which is considered an illegal name!
+      return if @meta[:name] == @meta[:domain]
+      set_name(@meta[:name])
+      return if @valid_name || type == :solution
+      warning(
+        "Unexpected: Server returned invalid name: #{fancy_ticks(@meta[:name])}"
+      )
     end
 
     def domain
