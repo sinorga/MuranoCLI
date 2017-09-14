@@ -1,10 +1,17 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
 require 'open3'
 require 'pathname'
 require 'cmd_common'
 
 RSpec.describe 'murano usage', :cmd, :needs_password do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
   before(:example) do
     # NOTE: The usage command works on one or more solutions of any type.
@@ -28,11 +35,11 @@ RSpec.describe 'murano usage', :cmd, :needs_password do
   end
 
   def confirm_usage_table(olines, ix)
-    expect(olines[ix+0]).to match(/^(Product|Application): usage[tT]est[a-z0-9]+ <[a-z0-9]+> https:\/\/[.a-z0-9]+$/)
-    expect(olines[ix+1]).to match(/^(\+-+){5}\+$/)
-    expect(olines[ix+2]).to match(/^\|\s+\| Quota\s+\| Daily\s+\| Monthly\s+\| Total\s+\|$/)
+    expect(olines[ix + 0]).to match(%r{^(Product|Application): usage[tT]est[a-z0-9]+ <[a-z0-9]+> https://[.a-z0-9]+$})
+    expect(olines[ix + 1]).to match(/^(\+-+){5}\+$/)
+    expect(olines[ix + 2]).to match(/^\|\s+\| Quota\s+\| Daily\s+\| Monthly\s+\| Total\s+\|$/)
     # Beneath the header row is a splitter line.
-    expect(olines[ix+3]).to match(/^(\+-+){5}\+$/)
+    expect(olines[ix + 3]).to match(/^(\+-+){5}\+$/)
     ix += 4
     # Beneath the splitter line are 1 or more rows, one for each service.
     loop do
@@ -47,17 +54,14 @@ RSpec.describe 'murano usage', :cmd, :needs_password do
     ix += 1
   end
 
-  it "show usage" do
+  it 'show usage' do
     out, err, status = Open3.capture3(capcmd('murano', 'usage'))
     expect(err).to eq('')
     olines = out.lines
     ix = 0
     ix = confirm_usage_table(olines, ix)
-    ix = confirm_usage_table(olines, ix)
+    _ix = confirm_usage_table(olines, ix)
     expect(status.exitstatus).to eq(0)
   end
-
 end
-
-#  vim: set ai et sw=2 ts=2 :
 

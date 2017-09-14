@@ -1,4 +1,4 @@
-# Last Modified: 2017.09.11 /coding: utf-8
+# Last Modified: 2017.09.12 /coding: utf-8
 # frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
@@ -62,10 +62,6 @@ module MrMurano
 
     def valid_api_id?
       @valid_api_id
-    end
-
-    def api_id
-      @api_id
     end
 
     def endpoint(_path='')

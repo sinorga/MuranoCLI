@@ -1,5 +1,5 @@
-# Last Modified: 2017.08.31 /coding: utf-8
-# frozen_string_literal: probably not yet
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -11,18 +11,18 @@ require 'pathname'
 require 'cmd_common'
 
 RSpec.describe 'murano business', :cmd, :needs_password do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
-  context "without project" do
-    it "help" do
+  context 'without project' do
+    it 'help' do
       cmd_verify_help('business')
     end
   end
 
-  context "list" do
-    it "as table" do
+  context 'list' do
+    it 'as table' do
       out, err, status = Open3.capture3(capcmd('murano', 'business', 'list'))
-      expect(err).to eq("")
+      expect(err).to eq('')
       olines = out.lines
       expect(olines[0]).to match(/^(\+-+){3}\+$/)
       expect(olines[1]).to match(/^\| bizid\s+\| role\s+\| name\s+\|$/)
@@ -31,23 +31,23 @@ RSpec.describe 'murano business', :cmd, :needs_password do
       expect(status.exitstatus).to eq(0)
     end
 
-    it "as json" do
+    it 'as json' do
       out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '-c', 'outformat=json'))
-      expect(err).to eq("")
-      expect{ JSON.parse(out) }.to_not raise_error
+      expect(err).to eq('')
+      expect { JSON.parse(out) }.to_not raise_error
       expect(status.exitstatus).to eq(0)
     end
 
-    it "only ids" do
+    it 'only ids' do
       out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--idonly'))
-      expect(err).to eq("")
+      expect(err).to eq('')
       expect(out).to match(/^(\S+\s)*\S+$/)
       expect(status.exitstatus).to eq(0)
     end
 
-    it "output to file" do
+    it 'output to file' do
       out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--idonly', '-o', 'bob'))
-      expect(err).to eq("")
+      expect(err).to eq('')
       expect(out).to eq('')
       expect(status.exitstatus).to eq(0)
       expect(File.exist?('bob')).to be true
@@ -55,9 +55,9 @@ RSpec.describe 'murano business', :cmd, :needs_password do
       expect(data).to match(/^(\S+\s)*\S+$/)
     end
 
-    it "fewer fields" do
+    it 'fewer fields' do
       out, err, status = Open3.capture3(capcmd('murano', 'business', 'list', '--brief'))
-      expect(err).to eq("")
+      expect(err).to eq('')
       olines = out.lines
       expect(olines[0]).to match(/^(\+-+)+\+$/)
       expect(olines[1]).to match(/^(\| \S+\s+)+\|$/)

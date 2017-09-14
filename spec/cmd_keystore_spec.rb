@@ -1,3 +1,10 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
 require 'open3'
 require 'pathname'
@@ -5,7 +12,7 @@ require 'json'
 require 'cmd_common'
 
 RSpec.describe 'murano keystore', :cmd, :needs_password do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
   before(:example) do
     @product_name = rname('keystoreTest')
@@ -26,32 +33,32 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "gets" do
+  it 'gets' do
     out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'get', 'bob'))
     expect(out.chomp).to eq('built')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
 
-  it "lists" do
+  it 'lists' do
     out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'list'))
     expect(out.chomp).to eq('bob')
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
 
-  it "infos" do
+  it 'infos' do
     out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'info', '-c', 'outformat=json'))
-    expect{out = JSON.parse(out)}.to_not raise_error
+    expect { out = JSON.parse(out) }.to_not raise_error
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
     expect(out).to match(
-      'quota'=>{'keys' => a_kind_of(Integer)},
-      'usage'=>{'keys' => 1, 'size' => a_kind_of(Integer)},
+      'quota' => { 'keys' => a_kind_of(Integer) },
+      'usage' => { 'keys' => 1, 'size' => a_kind_of(Integer) },
     )
   end
 
-  it "deletes" do
+  it 'deletes' do
     out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'delete', 'bob'))
     expect(out.chomp).to eq('')
     expect(err).to eq('')
@@ -63,7 +70,7 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "clearAll" do
+  it 'clearAll' do
     out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'set', 'another', 'value'))
     expect(out.chomp).to eq('')
     expect(err).to eq('')
@@ -80,7 +87,7 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "can call other commands" do
+  it 'can call other commands' do
     out, err, status = Open3.capture3(capcmd('murano', 'keystore', 'command', 'lpush', 'another', 'value'))
     expect(out.chomp).to eq('1')
     expect(err).to eq('')
@@ -91,7 +98,5 @@ RSpec.describe 'murano keystore', :cmd, :needs_password do
     expect(err).to eq('')
     expect(status.exitstatus).to eq(0)
   end
-
 end
 
-#  vim: set ai et sw=2 ts=2 :

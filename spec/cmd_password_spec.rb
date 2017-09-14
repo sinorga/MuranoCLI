@@ -1,12 +1,19 @@
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
+
+# Copyright © 2016-2017 Exosite LLC.
+# License: MIT. See LICENSE.txt.
+#  vim:tw=0:ts=2:sw=2:et:ai
+
 require 'fileutils'
 require 'open3'
 require 'pathname'
 require 'cmd_common'
 
 RSpec.describe 'murano password', :cmd do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
-  it "Lists when no file" do
+  it 'Lists when no file' do
     out, err, status = Open3.capture3(capcmd('murano', 'password', 'list'))
     expect(err).to eq('')
     olines = out.lines
@@ -16,7 +23,7 @@ RSpec.describe 'murano password', :cmd do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "sets a password" do
+  it 'sets a password' do
     out, err, status = Open3.capture3(capcmd('murano', 'password', 'set', 'bob@bob.bob', 'an.API.host.i', '--password', 'bad'))
     expect(err).to eq('')
     expect(out).to eq('')
@@ -33,7 +40,7 @@ RSpec.describe 'murano password', :cmd do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "deletes a password" do
+  it 'deletes a password' do
     File.open(File.join(ENV['HOME'], '.murano', 'passwords'), 'w') do |io|
       io << "---\n"
       io << "an.API.host.i:\n"
@@ -45,7 +52,6 @@ RSpec.describe 'murano password', :cmd do
     expect(out).to eq('')
     expect(status.exitstatus).to eq(0)
 
-
     out, err, status = Open3.capture3(capcmd('murano', 'password', 'list'))
     expect(err).to eq('')
     olines = out.lines
@@ -56,7 +62,5 @@ RSpec.describe 'murano password', :cmd do
     expect(olines[4]).to match(/^(\+-+){2}\+$/)
     expect(status.exitstatus).to eq(0)
   end
-
 end
 
-#  vim: set ai et sw=2 ts=2 :

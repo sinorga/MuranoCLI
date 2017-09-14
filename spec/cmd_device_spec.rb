@@ -1,5 +1,5 @@
-# Last Modified: 2017.08.16 /coding: utf-8
-# frozen_string_literal: probably not yet
+# Last Modified: 2017.09.12 /coding: utf-8
+# frozen_string_literal: true
 
 # Copyright © 2016-2017 Exosite LLC.
 # License: MIT. See LICENSE.txt.
@@ -11,7 +11,7 @@ require 'pathname'
 require 'cmd_common'
 
 RSpec.describe 'murano device', :cmd, :needs_password do
-  include_context "CI_CMD"
+  include_context 'CI_CMD'
 
   before(:example) do
     @product_name = rname('deviceTest')
@@ -27,7 +27,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "enables and lists" do
+  it 'enables and lists' do
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'enable', '12345'))
     expect(out).to eq('')
     expect(err).to eq('')
@@ -44,7 +44,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "enables a batch" do
+  it 'enables a batch' do
     File.open('ids.csv', 'w') do |io|
       io << "ID\n"
       io << "1234\n"
@@ -70,7 +70,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "activates" do
+  it 'activates' do
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'enable', '12345'))
     expect(out).to eq('')
     expect(err).to eq('')
@@ -85,7 +85,7 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     expect(status.exitstatus).to eq(0)
   end
 
-  it "writes and reads" do
+  it 'writes and reads' do
     FileUtils.mkpath('specs')
     FileUtils.copy(
       File.join(@testdir, 'spec/fixtures/product_spec_files/lightbulb.yaml'),
@@ -128,13 +128,15 @@ RSpec.describe 'murano device', :cmd, :needs_password do
     out, err, status = Open3.capture3(capcmd('murano', 'product', 'device', 'read', '12345', 'state'))
     #expect(out.strip).to eq('42')
     expect(err).to eq('')
-    expect(out.lines).to match_array([
-      /^(\+-+){4}\+$/,
-      /^\| Alias\s+\| Reported\s+\| Set\s+\| Timestamp\s+\|$/,
-      /^(\+-+){4}\+$/,
-      /^\| state\s+\| \s+\| 42\s+\| \d+\s+\|$/,
-      /^(\+-+){4}\+$/,
-    ])
+    expect(out.lines).to match_array(
+      [
+        /^(\+-+){4}\+$/,
+        /^\| Alias\s+\| Reported\s+\| Set\s+\| Timestamp\s+\|$/,
+        /^(\+-+){4}\+$/,
+        /^\| state\s+\| \s+\| 42\s+\| \d+\s+\|$/,
+        /^(\+-+){4}\+$/,
+      ]
+    )
     expect(status.exitstatus).to eq(0)
   end
 end
