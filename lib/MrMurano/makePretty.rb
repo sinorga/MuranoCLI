@@ -18,7 +18,7 @@ module MrMurano
       cs[:json] = [:magenta]
     end
     HighLine.color_scheme = PRETTIES_COLORSCHEME
-
+    SEVERITYS = %w[emergency alert critical error warning notice info debug].freeze
     # rubocop:disable Style/MethodName: "Use snake_case for method names."
     def self.makeJsonPretty(data, options)
       if options.pretty
@@ -35,15 +35,15 @@ module MrMurano
       # 2017-07-02: Changing shovel operator << to +=
       # to support Ruby 3.0 frozen string literals.
       out = ''
-      out += HighLine.color("#{line[:type] || '--'} ".upcase, :subject)
-      out += HighLine.color("[#{line[:subject] || ''}]", :subject)
+      out += HighLine.color("#{SEVERITYS[line[:severity]] || '--'} ".upcase, :subject)
+      out += HighLine.color("[#{line[:service] || ''}:#{line[:event] || ''}]", :subject)
       out += ' '
       if line.key?(:timestamp)
         if line[:timestamp].is_a? Numeric
           if options.localtime
-            curtime = Time.at(line[:timestamp]).localtime.to_datetime.iso8601(3)
+            curtime = Time.at(line[:timestamp] / 1000.0).localtime.to_datetime.iso8601(3)
           else
-            curtime = Time.at(line[:timestamp]).gmtime.to_datetime.iso8601(3)
+            curtime = Time.at(line[:timestamp] / 1000.0).gmtime.to_datetime.iso8601(3)
           end
         else
           curtime = line[:timestamp]
@@ -53,8 +53,8 @@ module MrMurano
       end
       out += HighLine.color(curtime, :timestamp)
       out += ":\n"
-      if line.key?(:data)
-        data = line[:data]
+      if line.key?(:message)
+        data = line[:message]
 
         if data.is_a?(Hash)
           if data.key?(:request) && data.key?(:response)
@@ -80,4 +80,3 @@ module MrMurano
     end
   end
 end
-
